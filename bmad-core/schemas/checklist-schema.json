@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Structured Checklist Schema",
+  "type": "object",
+  "required": ["id", "name", "categories", "result"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the checklist"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the checklist"
+    },
+    "categories": {
+      "type": "array",
+      "description": "Categories of checklist items",
+      "items": {
+        "type": "object",
+        "required": ["name", "items"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "items": {
+            "type": "array",
+            "description": "Checklist items in this category",
+            "items": {
+              "type": "object",
+              "required": ["description"],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "What to check"
+                },
+                "checked": {
+                  "type": "boolean",
+                  "description": "Whether this item is checked",
+                  "default": false
+                }
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes or guidance for this category"
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pending", "pass", "partial", "fail"],
+          "description": "Overall status of the checklist"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes about the result"
+        }
+      }
+    }
+  }
+}

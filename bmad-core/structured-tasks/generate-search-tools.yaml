@@ -1,0 +1,45 @@
+id: generate-search-tools
+name: Generate Search Tools
+purpose: >-
+  Extract keywords from PRD and generate search tool queries for comprehensive research.
+  This task parses the Product Requirements Document to identify key technical terms
+  and creates targeted search queries for various platforms and repositories.
+inputs:
+  prdPath:
+    type: string
+    description: "Path to the PRD file (monolithic or sharded)"
+    default: "docs/prd.md"
+  mappingsPath:
+    type: string
+    description: "Path to tool mappings file"
+    default: "bmad-core/data/tool-mappings.yaml"
+outputs:
+  searchToolsFile:
+    type: string
+    description: "Path to output search tools file"
+    default: "search-tools.yaml"
+steps:
+  - id: parse-prd
+    name: Parse PRD and Extract Keywords
+    description: "Run the keyword extraction script to generate search tools from PRD content"
+    actions:
+      - description: "Execute generate-search-tools.js script with provided inputs"
+        action: "node scripts/generate-search-tools.js --prd {{inputs.prdPath}} --mappings {{inputs.mappingsPath}} --output {{outputs.searchToolsFile}}"
+        elicit: false
+  - id: validate-output
+    name: Validate Generated Search Tools
+    description: "Ensure the generated search tools file is valid YAML and contains expected structure"
+    actions:
+      - description: "Run validation script to verify file exists and has correct structure"
+        action: "node scripts/validate-search-tools.js --file {{outputs.searchToolsFile}}"
+        elicit: false
+metadata:
+  agent: sm
+  priority: high
+  estimated_hours: 0.5
+  depends_on:
+    - prd.md
+  tags:
+    - search
+    - prd
+    - extraction

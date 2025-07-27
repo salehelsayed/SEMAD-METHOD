@@ -1,0 +1,12 @@
+id: execute-checklist
+name: Checklist Validation Task
+purpose: ""
+steps: []
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Available Checklists
+    - Instructions
+    - Checklist Execution Methodology
+  preservedContent: []

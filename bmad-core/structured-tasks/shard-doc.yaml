@@ -1,0 +1,216 @@
+id: shard-doc
+name: Document Sharding Task
+purpose: |-
+  - Split a large document into multiple smaller documents based on level 2 sections
+  - Create a folder structure to organize the sharded documents
+  - Maintain all content integrity including code blocks, diagrams, and markdown formatting
+steps:
+  - id: step0
+    name: Initialize Memory Context
+    description: "Setup working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for sharding task"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Record document being sharded in memory for future reference"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Create Individual Files
+    description: |-
+      For each extracted section:
+      1. **Generate filename**: Convert the section heading to lowercase-dash-case
+      2. **Adjust heading levels**:
+         ```txt
+           - ### → ##
+           - #### → ###
+           - ##### → ####
+           - etc.
+         ```
+      3. **Write content**: Save the adjusted content to the new file
+    actions:
+      - description: Remove special characters
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Replace spaces with dashes
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "Example: \"## Tech Stack\" → `tech-stack.md`"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "The level 2 heading becomes level 1 (# instead of ##) in the sharded new document"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "All subsection levels decrease by 1:"
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step2
+    name: Create Index File
+    description: |-
+      Create an `index.md` file in the sharded folder that:
+      1. Contains the original level 1 heading and any content before the first level 2 section
+      2. Lists all the sharded files with links:
+      ```markdown
+      # Original Document Title
+
+      [Original introduction content if any]
+
+      ## Sections
+
+      - [Section Name 1](./section-name-1.md)
+      - [Section Name 2](./section-name-2.md)
+      - [Section Name 3](./section-name-3.md)
+        ...
+      ```
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step3
+    name: Preserve Special Content
+    description: |-
+      1. **Code blocks**: Must capture complete blocks including:
+         ```language
+         content
+         ```
+      2. **Mermaid diagrams**: Preserve complete syntax:
+         ```mermaid
+         graph TD
+         ...
+         ```
+      3. **Tables**: Maintain proper markdown table formatting
+      4. **Lists**: Preserve indentation and nesting
+      5. **Inline code**: Preserve backticks
+      6. **Links and references**: Keep all markdown links intact
+      7. **Template markup**: If documents contain {{placeholders}} ,preserve exactly
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "5"
+  - id: step4
+    name: Validation
+    description: |-
+      After sharding:
+      1. Verify all sections were extracted
+      2. Check that no content was lost
+      3. Ensure heading levels were properly adjusted
+      4. Confirm all files were created successfully
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "6"
+  - id: step5
+    name: Update Memory with Results
+    description: "Record sharding results in memory"
+    actions:
+      - description: "Update working memory with sharded document structure"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Store document relationships for future reference"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step6
+    name: Report Results
+    description: |-
+      Provide a summary:
+      ```text
+      Document sharded successfully:
+      - Source: [original document path]
+      - Destination: docs/[folder-name]/
+      - Files created: [count]
+      - Sections:
+        - section-name-1.md: "Section Title 1"
+        - section-name-2.md: "Section Title 2"
+        ...
+      ```
+    actions:
+      - description: Never modify the actual content, only adjust heading levels
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Preserve ALL formatting, including whitespace where significant
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Handle edge cases like sections with code blocks containing ## symbols"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Ensure the sharding is reversible (could reconstruct the original from shards)
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "7"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - "Primary Method: Automatic with markdown-tree"
+    - Manual Method (if @kayvan/markdown-tree-parser is not available or user indicated manual method)
+    - Important Notes
+  preservedContent:
+    - type: special-note
+      content: >-
+        [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the
+        command: `md-tree explode {input file} {output path}`.
+      lineNumber: 11
+    - type: special-note
+      content: "**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**\""
+      lineNumber: 20
+    - type: code-block
+      content: |2-
+           ```bash
+           npm install -g @kayvan/markdown-tree-parser
+           ```
+      lineNumber: 35
+    - type: code-block
+      content: |2-
+           ```bash
+           # For PRD
+           md-tree explode docs/prd.md docs/prd
+
+           # For Architecture
+           md-tree explode docs/architecture.md docs/architecture
+
+           # For any document
+           md-tree explode [source-document] [destination-folder]
+           ```
+      lineNumber: 41
+    - type: special-note
+      content: "CRITICAL AEGNT SHARDING RULES:"
+      lineNumber: 74
+    - type: special-note
+      content: >-
+        CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section
+        header.]]
+      lineNumber: 87
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2
+notes: >
+  [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the
+  command: `md-tree explode {input file} {output path}`.
+
+  **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
+
+  CRITICAL AEGNT SHARDING RULES:
+
+  CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]

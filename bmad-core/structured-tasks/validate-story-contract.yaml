@@ -1,0 +1,63 @@
+id: validate-story-contract
+name: Validate StoryContract
+description: "Validates a StoryContract against the JSON schema and halts workflow on failure"
+inputs:
+  - name: storyFilePath
+    type: string
+    description: "Path to the story file containing the StoryContract"
+    required: true
+outputs:
+  - name: validationResult
+    type: boolean
+    description: "True if validation passes, false otherwise"
+  - name: validationErrors
+    type: array
+    description: "List of validation errors if any"
+steps:
+  - id: load-story
+    name: Load story file
+    description: "Read the story file from the specified path"
+    action: file:read
+    inputs:
+      path: "{{storyFilePath}}"
+    outputs:
+      content: storyContent
+  
+  - id: extract-contract
+    name: Extract StoryContract
+    description: "Extract the YAML StoryContract block from the story file"
+    action: yaml:extract-frontmatter
+    inputs:
+      content: "{{storyContent}}"
+      key: "StoryContract"
+    outputs:
+      contractData: storyContract
+  
+  - id: validate-contract
+    name: Validate against schema
+    description: "Run AJV validation using the validation script"
+    action: script:execute
+    inputs:
+      script: "scripts/validate-story-contract.js"
+      args: ["{{storyFilePath}}"]
+    outputs:
+      exitCode: validationExitCode
+      stdout: validationOutput
+      stderr: validationErrors
+  
+  - id: check-result
+    name: Check validation result
+    description: "Determine if validation passed or failed"
+    action: logic:evaluate
+    inputs:
+      expression: "{{validationExitCode}} === 0"
+    outputs:
+      result: validationResult
+  
+  - id: halt-on-failure
+    name: Halt on validation failure
+    description: "Stop workflow execution if validation failed"
+    action: workflow:conditional-halt
+    inputs:
+      condition: "!{{validationResult}}"
+      errorMessage: "StoryContract validation failed: {{validationErrors}}"

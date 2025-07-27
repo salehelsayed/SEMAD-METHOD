@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bmad-method.com/schemas/story-contract.json",
+  "title": "StoryContract Schema",
+  "description": "Comprehensive JSON Schema for validating BMad StoryContract blocks",
+  "type": "object",
+  "required": ["version", "story_id", "epic_id", "apiEndpoints", "filesToModify", "acceptanceCriteriaLinks"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Version of the StoryContract format"
+    },
+    "story_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the story"
+    },
+    "epic_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the parent epic"
+    },
+    "apiEndpoints": {
+      "type": "array",
+      "description": "List of API endpoints to be implemented",
+      "items": {
+        "type": "object",
+        "required": ["method", "path"],
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
+            "description": "HTTP method"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/",
+            "description": "API endpoint path"
+          },
+          "requestBody": {
+            "type": "object",
+            "description": "Schema for the request body"
+          },
+          "requestBodySchema": {
+            "type": "object",
+            "description": "JSON Schema for request body validation"
+          },
+          "successResponse": {
+            "type": "object",
+            "description": "Schema for the success response"
+          },
+          "responseSchema": {
+            "type": "object",
+            "description": "JSON Schema for response validation"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the endpoint's purpose"
+          }
+        }
+      }
+    },
+    "filesToModify": {
+      "type": "array",
+      "description": "List of files to be created or modified",
+      "items": {
+        "type": "object",
+        "required": ["path", "reason"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "File path relative to project root"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Explanation of why this file needs to be modified"
+          }
+        }
+      }
+    },
+    "acceptanceCriteriaLinks": {
+      "type": "array",
+      "description": "Links to external acceptance criteria or test cases",
+      "items": {
+        "type": "string",
+        "format": "uri-reference"
+      }
+    },
+    "dataModels": {
+      "type": "object",
+      "description": "Data models/schemas to be implemented",
+      "additionalProperties": {
+        "type": "object",
+        "description": "JSON Schema for each data model"
+      }
+    }
+  },
+  "additionalProperties": false
+}

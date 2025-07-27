@@ -1,0 +1,574 @@
+id: create-deep-research-prompt
+name: Create Deep Research Prompt Task
+purpose: |-
+  Generate well-structured research prompts that:
+
+  - Define clear research objectives and scope
+  - Specify appropriate research methodologies
+  - Outline expected deliverables and formats
+  - Guide systematic investigation of complex topics
+  - Ensure actionable insights are captured
+steps:
+  - id: step1
+    name: Research Focus Options
+    description: |-
+      Present these numbered options to the user:
+      1. **Product Validation Research**
+      2. **Market Opportunity Research**
+      3. **User & Customer Research**
+      4. **Competitive Intelligence Research**
+      5. **Technology & Innovation Research**
+      6. **Industry & Ecosystem Research**
+      7. **Strategic Options Research**
+      8. **Risk & Feasibility Research**
+      9. **Custom Research Focus**
+    actions:
+      - description: Validate product hypotheses and market fit
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Test assumptions about user needs and solutions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess technical and business feasibility
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify risks and mitigation strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze market size and growth potential
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify market segments and dynamics
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess market entry strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate timing and market readiness
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Deep dive into user personas and behaviors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Understand jobs-to-be-done and pain points
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Map customer journeys and touchpoints
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze willingness to pay and value perception
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Detailed competitor analysis and positioning
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Feature and capability comparisons
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Business model and strategy analysis
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify competitive advantages and gaps
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess technology trends and possibilities
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate technical approaches and architectures
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify emerging technologies and disruptions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze build vs. buy vs. partner options
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Map industry value chains and dynamics
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify key players and relationships
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze regulatory and compliance factors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Understand partnership opportunities
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate different strategic directions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess business model alternatives
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze go-to-market strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Consider expansion and scaling paths
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify and assess various risk factors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate implementation challenges
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze resource requirements
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Consider regulatory and legal implications
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: User-defined research objectives
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Specialized domain investigation
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Cross-functional research needs
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Input Processing
+    description: |-
+      **If Project Brief provided:**
+      **If Brainstorming Results provided:**
+      **If Market Research provided:**
+      **If Starting Fresh:**
+    actions:
+      - description: Extract key product concepts and goals
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify target users and use cases
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Note technical constraints and preferences
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Highlight uncertainties and assumptions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Synthesize main ideas and themes
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify areas needing validation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Extract hypotheses to test
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Note creative directions to explore
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Build on identified opportunities
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Deepen specific market insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Validate initial findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Explore adjacent possibilities
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Gather essential context through questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Define the problem space
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Clarify research objectives
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Establish success criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      - Note technical constraints and preferences
+      - Note creative directions to explore
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Research Prompt Structure
+    description: |-
+      CRITICAL: collaboratively develop a comprehensive research prompt with these components.
+      #### A. Research Objectives
+      CRITICAL: collaborate with the user to articulate clear, specific objectives for the research.
+      #### B. Research Questions
+      CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
+      **Core Questions:**
+      **Supporting Questions:**
+      #### C. Research Methodology
+      **Data Collection Methods:**
+      **Analysis Frameworks:**
+      #### D. Output Requirements
+      **Format Specifications:**
+      **Key Deliverables:**
+    actions:
+      - description: Primary research goal and purpose
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Key decisions the research will inform
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Success criteria for the research
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Constraints and boundaries
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Central questions that must be answered
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Priority ranking of questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Dependencies between questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Additional context-building questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Nice-to-have insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Future-looking considerations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Secondary research sources
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Primary research approaches (if applicable)
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Data quality requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Source credibility criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Specific frameworks to apply
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Comparison criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Evaluation methodologies
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Synthesis approaches
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Executive summary requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Detailed findings structure
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Visual/tabular presentations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Supporting documentation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Must-have sections and insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Decision-support elements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Action-oriented recommendations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Risk and uncertainty documentation
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      CRITICAL: collaboratively develop a comprehensive research prompt with these components.
+      CRITICAL: collaborate with the user to articulate clear, specific objectives for the research.
+      CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Prompt Generation
+    description: |-
+      **Research Prompt Template:**
+      ```markdown
+      ## Research Objective
+
+      [Clear statement of what this research aims to achieve]
+
+      ## Background Context
+
+      [Relevant information from project brief, brainstorming, or other inputs]
+
+      ## Research Questions
+
+      ### Primary Questions (Must Answer)
+
+      1. [Specific, actionable question]
+      2. [Specific, actionable question]
+         ...
+
+      ### Secondary Questions (Nice to Have)
+
+      1. [Supporting question]
+      2. [Supporting question]
+         ...
+
+      ## Research Methodology
+
+      ### Information Sources
+
+      - [Specific source types and priorities]
+
+      ### Analysis Frameworks
+
+      - [Specific frameworks to apply]
+
+      ### Data Requirements
+
+      - [Quality, recency, credibility needs]
+
+      ## Expected Deliverables
+
+      ### Executive Summary
+
+      - Key findings and insights
+      - Critical implications
+      - Recommended actions
+
+      ### Detailed Analysis
+
+      [Specific sections needed based on research type]
+
+      ### Supporting Materials
+
+      - Data tables
+      - Comparison matrices
+      - Source documentation
+
+      ## Success Criteria
+
+      [How to evaluate if research achieved its objectives]
+
+      ## Timeline and Priority
+
+      [If applicable, any time constraints or phasing]
+      ```
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step5
+    name: Review and Refinement
+    description: |-
+      1. **Present Complete Prompt**
+      2. **Gather Feedback**
+      3. **Refine as Needed**
+    actions:
+      - description: Show the full research prompt
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Explain key elements and rationale
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Highlight any assumptions made
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Are the objectives clear and correct?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Do the questions address all concerns?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Is the scope appropriate?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Are output requirements sufficient?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Incorporate user feedback
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Adjust scope or focus
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Add missing elements
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Clarify ambiguities
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "5"
+  - id: step6
+    name: Next Steps Guidance
+    description: |-
+      **Execution Options:**
+      1. **Use with AI Research Assistant**: Provide this prompt to an AI model with research capabilities
+      2. **Guide Human Research**: Use as a framework for manual research efforts
+      3. **Hybrid Approach**: Combine AI and human research using this structure
+      **Integration Points:**
+    actions:
+      - description: How findings will feed into next phases
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Which team members should review results
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: How to validate findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: When to revisit or expand research
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: The quality of the research prompt directly impacts the quality of insights gathered
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Be specific rather than general in research questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Consider both current state and future implications
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Balance comprehensiveness with focus
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Document assumptions and limitations clearly
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Plan for iterative refinement based on initial findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "6"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Research Type Selection
+    - Process
+    - Important Notes
+  preservedContent:
+    - type: special-note
+      content: >-
+        CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input
+        documents they've provided.
+      lineNumber: 17
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2
+notes: >
+  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents
+  they've provided.

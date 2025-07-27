@@ -1,0 +1,290 @@
+id: brownfield-create-epic
+name: Create Brownfield Epic Task
+purpose: >-
+  Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture
+  documentation process. This task is for isolated features or modifications that can be completed within a focused
+  scope.
+steps:
+  - id: step0
+    name: Initialize Memory Context
+    description: "Set up working memory and retrieve project context"
+    actions:
+      - description: "Initialize working memory for epic creation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve relevant project context from memory"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Project Analysis (Required)
+    description: |-
+      Before creating the epic, gather essential information about the existing project:
+      **Existing Project Context:**
+      **Enhancement Scope:**
+    actions:
+      - description: "[ ] Project purpose and current functionality understood"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing technology stack identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Current architecture patterns noted"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration points with existing system identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Enhancement clearly defined and scoped"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Impact on existing functionality assessed"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Required integration points identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Success criteria established"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Epic Creation
+    description: |-
+      Create a focused epic following this structure:
+      #### Epic Title
+      {{Enhancement Name}} - Brownfield Enhancement
+      #### Epic Goal
+      {{1-2 sentences describing what the epic will accomplish and why it adds value}}
+      #### Epic Description
+      **Existing System Context:**
+      **Enhancement Details:**
+      #### Stories
+      List 1-3 focused stories that complete the epic:
+      1. **Story 1:** {{Story title and brief description}}
+      2. **Story 2:** {{Story title and brief description}}
+      3. **Story 3:** {{Story title and brief description}}
+      #### Compatibility Requirements
+      #### Risk Mitigation
+      #### Definition of Done
+    actions:
+      - description: "Current relevant functionality: {{brief description}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Technology stack: {{relevant existing technologies}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Integration points: {{where new work connects to existing system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "What's being added/changed: {{clear description}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "How it integrates: {{integration approach}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Success criteria: {{measurable outcomes}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing APIs remain unchanged"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Database schema changes are backward compatible"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] UI changes follow existing patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Performance impact is minimal"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Primary Risk:** {{main risk to existing system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Mitigation:** {{how risk will be addressed}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Rollback Plan:** {{how to undo changes if needed}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] All stories completed with acceptance criteria met"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing functionality verified through testing"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration points working correctly"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Documentation updated appropriately"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] No regression in existing features"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Validation Checklist
+    description: |-
+      Before finalizing the epic, ensure:
+      **Scope Validation:**
+      **Risk Assessment:**
+      **Completeness Check:**
+    actions:
+      - description: "[ ] Epic can be completed in 1-3 stories maximum"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] No architectural documentation is required"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Enhancement follows existing patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration complexity is manageable"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Risk to existing system is low"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Rollback plan is feasible"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Testing approach covers existing functionality"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Team has sufficient knowledge of integration points"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Epic goal is clear and achievable"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Stories are properly scoped"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Success criteria are measurable"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Dependencies are identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Handoff to Story Manager
+    description: |-
+      Once the epic is validated, provide this handoff to the Story Manager:
+      ---
+      **Story Manager Handoff:**
+      "Please develop detailed user stories for this brownfield epic. Key considerations:
+      The epic should maintain system integrity while delivering {{epic goal}}."
+      ---
+      
+      Update working memory with epic details for future reference
+      The epic creation is successful when:
+      1. Enhancement scope is clearly defined and appropriately sized
+      2. Integration approach respects existing system architecture
+      3. Risk to existing functionality is minimized
+      4. Stories are logically sequenced for safe implementation
+      5. Compatibility requirements are clearly specified
+      6. Rollback plan is feasible and documented
+    actions:
+      - description: This is an enhancement to an existing system running {{technology stack}}
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Integration points: {{list key integration points}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Existing patterns to follow: {{relevant existing patterns}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Critical compatibility requirements: {{key requirements}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Each story must include verification that existing functionality remains intact
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: This task is specifically for SMALL brownfield enhancements
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: If the scope grows beyond 3 stories, consider the full brownfield PRD process
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Always prioritize existing system integrity over new functionality
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: When in doubt about scope or complexity, escalate to full brownfield planning
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: "- Critical compatibility requirements: {{key requirements}}"
+    metadata:
+      level: 3
+      originalNumber: "4"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - When to Use This Task
+    - Instructions
+    - Success Criteria
+    - Important Notes
+  preservedContent:
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2

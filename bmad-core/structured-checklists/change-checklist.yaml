@@ -1,0 +1,339 @@
+id: change-checklist
+name: Change Navigation Checklist
+categories:
+  - name: Understand the Trigger & Context
+    items:
+      - description: "**Identify Triggering Story:** Clearly identify the story (or stories) that revealed the issue."
+        checked: false
+      - description: "**Define the Issue:** Articulate the core problem precisely."
+        checked: false
+      - description: Is it a technical limitation/dead-end?
+        checked: false
+      - description: Is it a newly discovered requirement?
+        checked: false
+      - description: Is it a fundamental misunderstanding of existing requirements?
+        checked: false
+      - description: Is it a necessary pivot based on feedback or new information?
+        checked: false
+      - description: Is it a failed/abandoned story needing a new approach?
+        checked: false
+      - description: >-
+          **Assess Initial Impact:** Describe the immediate observed consequences (e.g., blocked progress, incorrect
+          functionality, non-viable tech).
+        checked: false
+      - description: >-
+          **Gather Evidence:** Note any specific logs, error messages, user feedback, or analysis that supports the
+          issue definition.
+        checked: false
+    notes: |-
+      Start by fully understanding what went wrong and why. Don't jump to solutions yet. Ask probing questions:
+
+      - What exactly happened that triggered this review?
+      - Is this a one-time issue or symptomatic of a larger problem?
+      - Could this have been anticipated earlier?
+      - What assumptions were incorrect?
+
+      Be specific and factual, not blame-oriented.
+      Changes ripple through the project structure. Systematically evaluate:
+
+      1. Can we salvage the current epic with modifications?
+      2. Do future epics still make sense given this change?
+      3. Are we creating or eliminating dependencies?
+      4. Does the epic sequence need reordering?
+
+      Think about both immediate and downstream effects.
+    metadata:
+      originalName: 1. Understand the Trigger & Context
+  - name: Artifact Conflict & Impact Analysis
+    items:
+      - description: "**Review PRD:**"
+        checked: false
+      - description: Does the issue conflict with the core goals or requirements stated in the PRD?
+        checked: false
+      - description: Does the PRD need clarification or updates based on the new understanding?
+        checked: false
+      - description: "**Review Architecture Document:**"
+        checked: false
+      - description: Does the issue conflict with the documented architecture (components, patterns, tech choices)?
+        checked: false
+      - description: Are specific components/diagrams/sections impacted?
+        checked: false
+      - description: Does the technology list need updating?
+        checked: false
+      - description: Do data models or schemas need revision?
+        checked: false
+      - description: Are external API integrations affected?
+        checked: false
+      - description: "**Review Frontend Spec (if applicable):**"
+        checked: false
+      - description: Does the issue conflict with the FE architecture, component library choice, or UI/UX design?
+        checked: false
+      - description: Are specific FE components or user flows impacted?
+        checked: false
+      - description: "**Review Other Artifacts (if applicable):**"
+        checked: false
+      - description: Consider impact on deployment scripts, IaC, monitoring setup, etc.
+        checked: false
+      - description: "**Summarize Artifact Impact:** List all artifacts requiring updates and the nature of the changes needed."
+        checked: false
+    notes: |-
+      Documentation drives development in BMad. Check each artifact:
+
+      1. Does this change invalidate documented decisions?
+      2. Are architectural assumptions still valid?
+      3. Do user flows need rethinking?
+      4. Are technical constraints different than documented?
+
+      Be thorough - missed conflicts cause future problems.
+    metadata:
+      originalName: 3. Artifact Conflict & Impact Analysis
+  - name: Path Forward Evaluation
+    items:
+      - description: "**Option 1: Direct Adjustment / Integration:**"
+        checked: false
+      - description: Can the issue be addressed by modifying/adding future stories within the existing plan?
+        checked: false
+      - description: Define the scope and nature of these adjustments.
+        checked: false
+      - description: Assess feasibility, effort, and risks of this path.
+        checked: false
+      - description: "**Option 2: Potential Rollback:**"
+        checked: false
+      - description: Would reverting completed stories significantly simplify addressing the issue?
+        checked: false
+      - description: Identify specific stories/commits to consider for rollback.
+        checked: false
+      - description: Assess the effort required for rollback.
+        checked: false
+      - description: Assess the impact of rollback (lost work, data implications).
+        checked: false
+      - description: Compare the net benefit/cost vs. Direct Adjustment.
+        checked: false
+      - description: "**Option 3: PRD MVP Review & Potential Re-scoping:**"
+        checked: false
+      - description: Is the original PRD MVP still achievable given the issue and constraints?
+        checked: false
+      - description: Does the MVP scope need reduction (removing features/epics)?
+        checked: false
+      - description: Do the core MVP goals need modification?
+        checked: false
+      - description: Are alternative approaches needed to meet the original MVP intent?
+        checked: false
+      - description: >-
+          **Extreme Case:** Does the issue necessitate a fundamental replan or potentially a new PRD V2 (to be handled
+          by PM)?
+        checked: false
+      - description: "**Select Recommended Path:** Based on the evaluation, agree on the most viable path forward."
+        checked: false
+    notes: |-
+      Present options clearly with pros/cons. For each path:
+
+      1. What's the effort required?
+      2. What work gets thrown away?
+      3. What risks are we taking?
+      4. How does this affect timeline?
+      5. Is this sustainable long-term?
+
+      Be honest about trade-offs. There's rarely a perfect solution.
+    metadata:
+      originalName: 4. Path Forward Evaluation
+  - name: Sprint Change Proposal Components
+    items:
+      - description: "**Identified Issue Summary:** Clear, concise problem statement."
+        checked: false
+      - description: "**Epic Impact Summary:** How epics are affected."
+        checked: false
+      - description: "**Artifact Adjustment Needs:** List of documents to change."
+        checked: false
+      - description: "**Recommended Path Forward:** Chosen solution with rationale."
+        checked: false
+      - description: "**PRD MVP Impact:** Changes to scope/goals (if any)."
+        checked: false
+      - description: "**High-Level Action Plan:** Next steps for stories/updates."
+        checked: false
+      - description: "**Agent Handoff Plan:** Identify roles needed (PM, Arch, Design Arch, PO)."
+        checked: false
+    notes: |-
+      The proposal must be actionable and clear. Ensure:
+
+      1. The issue is explained in plain language
+      2. Impacts are quantified where possible
+      3. The recommended path has clear rationale
+      4. Next steps are specific and assigned
+      5. Success criteria for the change are defined
+
+      This proposal guides all subsequent work.
+    metadata:
+      originalName: 5. Sprint Change Proposal Components
+  - name: Final Review & Handoff
+    items:
+      - description: "**Review Checklist:** Confirm all relevant items were discussed."
+        checked: false
+      - description: "**Review Sprint Change Proposal:** Ensure it accurately reflects the discussion and decisions."
+        checked: false
+      - description: "**User Approval:** Obtain explicit user approval for the proposal."
+        checked: false
+      - description: "**Confirm Next Steps:** Reiterate the handoff plan and the next actions to be taken by specific agents."
+        checked: false
+    notes: |-
+      Changes require coordination. Before concluding:
+
+      1. Is the user fully aligned with the plan?
+      2. Do all stakeholders understand the impacts?
+      3. Are handoffs to other agents clear?
+      4. Is there a rollback plan if the change fails?
+      5. How will we validate the change worked?
+
+      Get explicit approval - implicit agreement causes problems.
+
+      FINAL REPORT:
+      After completing the checklist, provide a concise summary:
+
+      - What changed and why
+      - What we're doing about it
+      - Who needs to do what
+      - When we'll know if it worked
+
+      Keep it action-oriented and forward-looking.
+    metadata:
+      originalName: 6. Final Review & Handoff
+result:
+  status: pending
+  notes: |-
+    - [ ] **Analyze Current Epic:**
+      - [ ] Can the current epic containing the trigger story still be completed?
+      - [ ] Does the current epic need modification (story changes, additions, removals)?
+      - [ ] Should the current epic be abandoned or fundamentally redefined?
+    - [ ] **Analyze Future Epics:**
+      - [ ] Review all remaining planned epics.
+      - [ ] Does the issue require changes to planned stories in future epics?
+      - [ ] Does the issue invalidate any future epics?
+      - [ ] Does the issue necessitate the creation of entirely new epics?
+      - [ ] Should the order/priority of future epics be changed?
+    - [ ] **Summarize Epic Impact:** Briefly document the overall effect on the project's epic structure and flow.
+metadata:
+  preservedContent:
+    - type: special-note
+      content: >-
+        [[LLM: INITIALIZATION INSTRUCTIONS - CHANGE NAVIGATION
+
+
+        Changes during development are inevitable, but how we handle them determines project success or failure.
+
+
+        Before proceeding, understand:
+
+
+        1. This checklist is for SIGNIFICANT changes that affect the project direction
+
+        2. Minor adjustments within a story don't require this process
+
+        3. The goal is to minimize wasted work while adapting to new realities
+
+        4. User buy-in is critical - they must understand and approve changes
+
+
+        Required context:
+
+
+        - The triggering story or issue
+
+        - Current project state (completed stories, current epic)
+
+        - Access to PRD, architecture, and other key documents
+
+        - Understanding of remaining work planned
+
+
+        APPROACH:
+
+        This is an interactive process with the user. Work through each section together, discussing implications and
+        options. The user makes final decisions, but provide expert guidance on technical feasibility and impact.
+
+
+        REMEMBER: Changes are opportunities to improve, not failures. Handle them professionally and constructively.]]
+      lineNumber: 7
+    - type: special-note
+      content: |-
+        [[LLM: Start by fully understanding what went wrong and why. Don't jump to solutions yet. Ask probing questions:
+
+        - What exactly happened that triggered this review?
+        - Is this a one-time issue or symptomatic of a larger problem?
+        - Could this have been anticipated earlier?
+        - What assumptions were incorrect?
+
+        Be specific and factual, not blame-oriented.]]
+      lineNumber: 34
+    - type: special-note
+      content: >-
+        - [ ] **Gather Evidence:** Note any specific logs, error messages, user feedback, or analysis that supports the
+        issue definition.
+      lineNumber: 51
+    - type: special-note
+      content: |-
+        [[LLM: Changes ripple through the project structure. Systematically evaluate:
+
+        1. Can we salvage the current epic with modifications?
+        2. Do future epics still make sense given this change?
+        3. Are we creating or eliminating dependencies?
+        4. Does the epic sequence need reordering?
+
+        Think about both immediate and downstream effects.]]
+      lineNumber: 55
+    - type: special-note
+      content: |-
+        [[LLM: Documentation drives development in BMad. Check each artifact:
+
+        1. Does this change invalidate documented decisions?
+        2. Are architectural assumptions still valid?
+        3. Do user flows need rethinking?
+        4. Are technical constraints different than documented?
+
+        Be thorough - missed conflicts cause future problems.]]
+      lineNumber: 78
+    - type: special-note
+      content: |-
+        [[LLM: Present options clearly with pros/cons. For each path:
+
+        1. What's the effort required?
+        2. What work gets thrown away?
+        3. What risks are we taking?
+        4. How does this affect timeline?
+        5. Is this sustainable long-term?
+
+        Be honest about trade-offs. There's rarely a perfect solution.]]
+      lineNumber: 105
+    - type: special-note
+      content: |-
+        [[LLM: The proposal must be actionable and clear. Ensure:
+
+        1. The issue is explained in plain language
+        2. Impacts are quantified where possible
+        3. The recommended path has clear rationale
+        4. Next steps are specific and assigned
+        5. Success criteria for the change are defined
+
+        This proposal guides all subsequent work.]]
+      lineNumber: 135
+    - type: special-note
+      content: |-
+        [[LLM: Changes require coordination. Before concluding:
+
+        1. Is the user fully aligned with the plan?
+        2. Do all stakeholders understand the impacts?
+        3. Are handoffs to other agents clear?
+        4. Is there a rollback plan if the change fails?
+        5. How will we validate the change worked?
+
+        Get explicit approval - implicit agreement causes problems.
+
+        FINAL REPORT:
+        After completing the checklist, provide a concise summary:
+
+        - What changed and why
+        - What we're doing about it
+        - Who needs to do what
+        - When we'll know if it worked
+
+        Keep it action-oriented and forward-looking.]]
+      lineNumber: 157

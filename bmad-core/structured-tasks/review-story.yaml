@@ -1,0 +1,100 @@
+id: review-story
+name: review-story
+purpose: "Review and validate story implementation with QA perspective, maintaining context through working memory"
+steps:
+  - id: step1
+    name: Initialize Working Memory
+    description: "Initialize working memory for QA review session"
+    actions:
+      - description: Execute task `update-working-memory` with agentName='qa' and taskId='review-story'
+        elicit: false
+      - description: Execute task `retrieve-context` with query='story implementation review patterns' to load relevant QA memories
+        elicit: false
+  - id: step2
+    name: Record Review Observations
+    description: "Record key findings and patterns for future reviews"
+    actions:
+      - description: After completing review, execute `recordObservation` to capture review patterns and common issues found
+        elicit: false
+      - description: Store review summary in Qdrant including story type, issues found, and refactoring patterns applied
+        elicit: false
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Prerequisites
+    - Review Process
+    - Update Story File - QA Results Section ONLY
+    - Key Principles
+    - Blocking Conditions
+    - Completion
+  preservedContent:
+    - type: special-note
+      content: "   - Note any completion notes from the developer"
+      lineNumber: 16
+    - type: special-note
+      content: "   - Add missing tests if critical coverage is lacking"
+      lineNumber: 64
+    - type: special-note
+      content: >-
+        **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any
+        other sections.
+      lineNumber: 76
+    - type: code-block
+      content: |-
+        ```markdown
+        ## QA Results
+
+        ### Review Date: [Date]
+        ### Reviewed By: Quinn (Senior Developer QA)
+
+        ### Code Quality Assessment
+        [Overall assessment of implementation quality]
+
+        ### Refactoring Performed
+        [List any refactoring you performed with explanations]
+        - **File**: [filename]
+          - **Change**: [what was changed]
+          - **Why**: [reason for change]
+          - **How**: [how it improves the code]
+
+        ### Compliance Check
+        - Coding Standards: [✓/✗] [notes if any]
+        - Project Structure: [✓/✗] [notes if any]
+        - Testing Strategy: [✓/✗] [notes if any]
+        - All ACs Met: [✓/✗] [notes if any]
+
+        ### Improvements Checklist
+        [Check off items you handled yourself, leave unchecked for dev to address]
+
+        - [x] Refactored user service for better error handling (services/user.service.ts)
+        - [x] Added missing edge case tests (services/user.service.test.ts)
+        - [ ] Consider extracting validation logic to separate validator class
+        - [ ] Add integration test for error scenarios
+        - [ ] Update API documentation for new error codes
+
+        ### Security Review
+        [Any security concerns found and whether addressed]
+
+        ### Performance Considerations
+        [Any performance issues found and whether addressed]
+
+        ### Final Status
+        [✓ Approved - Ready for Done] / [✗ Changes Required - See unchecked items above]
+        ```
+      lineNumber: 80
+    - type: special-note
+      content: "- Story file is incomplete or missing critical sections"
+      lineNumber: 133
+    - type: special-note
+      content: "- Critical architectural issues that require discussion"
+      lineNumber: 137
+notes: >2
+     - Note any completion notes from the developer
+     - Add missing tests if critical coverage is lacking
+  **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other
+  sections.
+
+  - Story file is incomplete or missing critical sections
+
+  - Critical architectural issues that require discussion

@@ -1,0 +1,529 @@
+id: create-brownfield-story
+name: "Story: {{Title}}"
+purpose: >-
+  Create detailed, implementation-ready stories for brownfield projects where traditional sharded PRD/architecture
+  documents may not exist. This task bridges the gap between various documentation formats (document-project output,
+  brownfield PRDs, epics, or user documentation) and executable stories for the Dev agent.
+steps:
+  - id: step1
+    name: Documentation Context
+    description: |-
+      Check for available documentation in this order:
+      1. **Sharded PRD/Architecture** (docs/prd/, docs/architecture/)
+      2. **Brownfield Architecture Document** (docs/brownfield-architecture.md or similar)
+      3. **Brownfield PRD** (docs/prd.md)
+      4. **Epic Files** (docs/epics/ or similar)
+      5. **User-Provided Documentation**
+    actions:
+      - description: If found, recommend using create-next-story task instead
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Created by document-project task
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Contains actual system state, technical debt, workarounds
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: May contain embedded technical details
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Created by brownfield-create-epic task
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Ask user to specify location and format
+        elicit: true
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "0"
+  - id: step2
+    name: Story Identification and Context Gathering
+    description: ""
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step3
+    name: Identify Story Source
+    description: "Based on available documentation:"
+    actions:
+      - description: "**From Brownfield PRD**: Extract stories from epic sections"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**From Epic Files**: Read epic definition and story list"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**From User Direction**: Ask user which specific enhancement to implement"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**No Clear Source**: Work with user to define the story scope"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 4
+      originalNumber: "1.1"
+  - id: step4
+    name: Gather Essential Context
+    description: >-
+      CRITICAL: For brownfield stories, you MUST gather enough context for safe implementation. Be prepared to ask the
+      user for missing information.
+
+      **Required Information Checklist:**
+
+      If any required information is missing, list the missing information and ask the user to provide it.
+    actions:
+      - description: "[ ] What existing functionality might be affected?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] What are the integration points with current code?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] What patterns should be followed (with examples)?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] What technical constraints exist?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Are there any \"gotchas\" or workarounds to know about?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: >-
+      CRITICAL: For brownfield stories, you MUST gather enough context for safe implementation. Be prepared to ask the
+      user for missing information.
+    metadata:
+      level: 4
+      originalNumber: "1.2"
+  - id: step5
+    name: Extract Technical Context from Available Sources
+    description: ""
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step6
+    name: From Document-Project Output
+    description: "If using brownfield-architecture.md from document-project:"
+    actions:
+      - description: "**Technical Debt Section**: Note any workarounds affecting this story"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Key Files Section**: Identify files that will need modification"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Integration Points**: Find existing integration patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Known Issues**: Check if story touches problematic areas"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Actual Tech Stack**: Verify versions and constraints"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: "- **Technical Debt Section**: Note any workarounds affecting this story"
+    metadata:
+      level: 4
+      originalNumber: "2.1"
+  - id: step7
+    name: From Brownfield PRD
+    description: "If using brownfield PRD:"
+    actions:
+      - description: "**Technical Constraints Section**: Extract all relevant constraints"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Integration Requirements**: Note compatibility requirements"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Code Organization**: Follow specified patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Risk Assessment**: Understand potential impacts"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: "- **Integration Requirements**: Note compatibility requirements"
+    metadata:
+      level: 4
+      originalNumber: "2.2"
+  - id: step8
+    name: From User Documentation
+    description: "Ask the user to help identify:"
+    actions:
+      - description: Relevant technical specifications
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Existing code examples to follow
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Integration requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Testing approaches used in the project
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 4
+      originalNumber: "2.3"
+  - id: step9
+    name: Story Creation with Progressive Detail Gathering
+    description: ""
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step10
+    name: Create Initial Story Structure
+    description: |-
+      Start with the story template, filling in what's known:
+      ```markdown
+      # Story {{Enhancement Title}}
+
+      ## Status: Draft
+
+      ## Story
+
+      As a {{user_type}},
+      I want {{enhancement_capability}},
+      so that {{value_delivered}}.
+
+      ## Context Source
+
+      - Source Document: {{document name/type}}
+      - Enhancement Type: {{single feature/bug fix/integration/etc}}
+      - Existing System Impact: {{brief assessment}}
+      ```
+    actions: []
+    metadata:
+      level: 4
+      originalNumber: "3.1"
+  - id: step11
+    name: Develop Acceptance Criteria
+    description: |-
+      Critical: For brownfield, ALWAYS include criteria about maintaining existing functionality
+      Standard structure:
+      1. New functionality works as specified
+      2. Existing {{affected feature}} continues to work unchanged  
+      3. Integration with {{existing system}} maintains current behavior
+      4. No regression in {{related area}}
+      5. Performance remains within acceptable bounds
+    actions: []
+    notes: "Critical: For brownfield, ALWAYS include criteria about maintaining existing functionality"
+    metadata:
+      level: 4
+      originalNumber: "3.2"
+  - id: step12
+    name: Gather Technical Guidance
+    description: >-
+      Critical: This is where you'll need to be interactive with the user if information is missing
+
+      Create Dev Technical Guidance section with available information:
+
+      ```markdown
+
+      ## Dev Technical Guidance
+
+
+      ### Existing System Context
+
+      [Extract from available documentation]
+
+
+      ### Integration Approach
+
+      [Based on patterns found or ask user]
+
+
+      ### Technical Constraints
+
+      [From documentation or user input]
+
+
+      ### Missing Information
+
+
+      Critical: List anything you couldn't find that dev will need and ask for the missing information
+
+
+      ### 4. Task Generation with Safety Checks
+
+
+      #### 4.1 Generate Implementation Tasks
+
+
+      Based on gathered context, create tasks that:
+
+
+      - Include exploration tasks if system understanding is incomplete
+
+      - Add verification tasks for existing functionality
+
+      - Include rollback considerations
+
+      - Reference specific files/patterns when known
+
+
+      Example task structure for brownfield:
+
+
+      ```markdown
+
+      ```
+
+
+      ### 5. Risk Assessment and Mitigation
+
+
+      CRITICAL: for brownfield - always include risk assessment
+
+
+      Add section for brownfield-specific risks:
+
+
+      ```markdown
+
+      ### Implementation Risks
+
+      ### Rollback Plan
+
+      ### Safety Checks
+
+      ```
+
+
+      ### 6. Final Story Validation
+
+
+      Before finalizing:
+
+
+      1. **Completeness Check**:
+         - [ ] Story has clear scope and acceptance criteria
+         - [ ] Technical context is sufficient for implementation
+         - [ ] Integration approach is defined
+         - [ ] Risks are identified with mitigation
+
+      2. **Safety Check**:
+         - [ ] Existing functionality protection included
+         - [ ] Rollback plan is feasible
+         - [ ] Testing covers both new and existing features
+
+      3. **Information Gaps**:
+         - [ ] All critical missing information gathered from user
+         - [ ] Remaining unknowns documented for dev agent
+         - [ ] Exploration tasks added where needed
+
+      ### 7. Story Output Format
+
+
+      Save the story with appropriate naming:
+
+
+      - If from epic: `docs/stories/epic-{n}-story-{m}.md`
+
+      - If standalone: `docs/stories/brownfield-{feature-name}.md`
+
+      - If sequential: Follow existing story numbering
+
+
+      Include header noting documentation context:
+
+
+      ```markdown
+
+      <!-- Source: {{documentation type used}} -->
+
+      <!-- Context: Brownfield enhancement to {{existing system}} -->
+
+      [Rest of story content...]
+
+      ```
+
+
+      ### 8. Handoff Communication
+
+
+      Provide clear handoff to the user:
+
+
+      ```text
+
+      Brownfield story created: {{story title}}
+
+      Source Documentation: {{what was used}}
+
+      Story Location: {{file path}}
+
+      Key Integration Points Identified:
+
+      Risks Noted:
+
+      {{If missing info}}: 
+
+      Note: Some technical details were unclear. The story includes exploration tasks to gather needed information
+      during implementation.
+
+      Next Steps:
+
+      1. Review story for accuracy
+
+      2. Verify integration approach aligns with your system
+
+      3. Approve story or request adjustments
+
+      4. Dev agent can then implement with safety checks
+    actions:
+      - description: "[ ] Task 1: Analyze existing {{component/feature}} implementation"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Review {{specific files}} for current patterns"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Document integration points"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Identify potential impacts"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Task 2: Implement {{new functionality}}"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Follow pattern from {{example file}}"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Integrate with {{existing component}}"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Maintain compatibility with {{constraint}}"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Task 3: Verify existing functionality"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Test {{existing feature 1}} still works"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Verify {{integration point}} behavior unchanged"
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Check performance impact"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Task 4: Add tests"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Unit tests following {{project test pattern}}"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Integration test for {{integration point}}"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "[ ] Update existing tests if needed"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Primary Risk**: {{main risk to existing system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Mitigation**: {{how to address}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Verification**: {{how to confirm safety}}"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "{{Simple steps to undo changes if needed}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing {{feature}} tested before changes"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Changes can be feature-flagged or isolated"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Rollback procedure documented"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "{{integration point 1}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "{{integration point 2}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "{{primary risk}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: >-
+      Critical: This is where you'll need to be interactive with the user if information is missing
+
+      Note: Some technical details were unclear. The story includes exploration tasks to gather needed information
+      during implementation.
+    metadata:
+      level: 4
+      originalNumber: "3.3"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - When to Use This Task
+    - Task Execution Instructions
+    - Tasks / Subtasks
+    - Risk Assessment
+    - "Status: Draft"
+  preservedContent:
+    - type: section-header
+      content: Task Execution Instructions
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2

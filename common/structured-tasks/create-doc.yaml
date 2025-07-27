@@ -1,0 +1,43 @@
+id: create-doc
+name: Create Document from Template (YAML Driven)
+purpose: ""
+steps: []
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+    - "Critical: Template Discovery"
+    - "CRITICAL: Mandatory Elicitation Format"
+    - Processing Flow
+    - Detailed Rationale Requirements
+    - Elicitation Results Flow
+    - Agent Permissions
+    - YOLO Mode
+    - CRITICAL REMINDERS
+  preservedContent:
+    - type: section-header
+      content: ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+      level: 2
+    - type: section-header
+      content: "Critical: Template Discovery"
+      level: 2
+    - type: section-header
+      content: "CRITICAL: Mandatory Elicitation Format"
+      level: 2
+    - type: special-note
+      content: "   - Check agent permissions (owner/editors) - note if section is restricted to specific agents"
+      lineNumber: 44
+    - type: special-note
+      content: "- **owner**: Note which agent role initially creates/populates the section"
+      lineNumber: 75
+    - type: special-note
+      content: "- Include a note in the generated document indicating the responsible agent"
+      lineNumber: 81
+    - type: section-header
+      content: CRITICAL REMINDERS
+      level: 2
+notes: |2
+     - Check agent permissions (owner/editors) - note if section is restricted to specific agents
+  - **owner**: Note which agent role initially creates/populates the section
+  - Include a note in the generated document indicating the responsible agent

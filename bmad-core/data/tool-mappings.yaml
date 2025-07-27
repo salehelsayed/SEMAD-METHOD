@@ -1,0 +1,184 @@
+# Tool Mappings for Search Query Generation
+# Maps domain keywords to search connectors with query templates
+
+version: 1.0
+
+keywordMappings:
+  authentication:
+    - name: github
+      queryTemplate: "{{keyword}} express middleware"
+    - name: npmjs
+      queryTemplate: "{{keyword}}"
+    - name: github
+      queryTemplate: "{{keyword}} nodejs example"
+      
+  authorization:
+    - name: github
+      queryTemplate: "{{keyword}} rbac implementation"
+    - name: npmjs
+      queryTemplate: "{{keyword}} middleware"
+      
+  payment:
+    - name: stripe-api-docs
+      queryTemplate: "{{keyword}}"
+    - name: github
+      queryTemplate: "stripe {{keyword}} integration"
+    - name: npmjs
+      queryTemplate: "stripe {{keyword}}"
+      
+  database:
+    - name: github
+      queryTemplate: "{{keyword}} schema design"
+    - name: npmjs
+      queryTemplate: "{{keyword}} orm"
+      
+  messaging:
+    - name: github
+      queryTemplate: "{{keyword}} queue implementation"
+    - name: npmjs
+      queryTemplate: "{{keyword}} broker"
+      
+  cache:
+    - name: github
+      queryTemplate: "redis {{keyword}} pattern"
+    - name: npmjs
+      queryTemplate: "{{keyword}} client"
+      
+  api:
+    - name: github
+      queryTemplate: "rest {{keyword}} best practices"
+    - name: npmjs
+      queryTemplate: "{{keyword}} framework"
+      
+  graphql:
+    - name: github
+      queryTemplate: "{{keyword}} schema examples"
+    - name: npmjs
+      queryTemplate: "{{keyword}} server"
+      
+  websocket:
+    - name: github
+      queryTemplate: "{{keyword}} real-time example"
+    - name: npmjs
+      queryTemplate: "socket.io {{keyword}}"
+      
+  oauth:
+    - name: github
+      queryTemplate: "{{keyword}} flow implementation"
+    - name: npmjs
+      queryTemplate: "{{keyword}} strategy"
+      
+  jwt:
+    - name: github
+      queryTemplate: "{{keyword}} authentication example"
+    - name: npmjs
+      queryTemplate: "jsonwebtoken {{keyword}}"
+      
+  microservice:
+    - name: github
+      queryTemplate: "{{keyword}} architecture pattern"
+    - name: npmjs
+      queryTemplate: "{{keyword}} framework"
+      
+  kubernetes:
+    - name: github
+      queryTemplate: "{{keyword}} deployment yaml"
+    - name: kubernetes-docs
+      queryTemplate: "{{keyword}}"
+      
+  docker:
+    - name: github
+      queryTemplate: "{{keyword}} compose example"
+    - name: dockerhub
+      queryTemplate: "{{keyword}}"
+      
+  redis:
+    - name: github
+      queryTemplate: "{{keyword}} caching pattern"
+    - name: npmjs
+      queryTemplate: "{{keyword}} client"
+      
+  postgresql:
+    - name: github
+      queryTemplate: "{{keyword}} schema example"
+    - name: npmjs
+      queryTemplate: "pg {{keyword}}"
+      
+  mongodb:
+    - name: github
+      queryTemplate: "{{keyword}} schema design"
+    - name: npmjs
+      queryTemplate: "mongoose {{keyword}}"
+      
+  elasticsearch:
+    - name: github
+      queryTemplate: "{{keyword}} mapping example"
+    - name: npmjs
+      queryTemplate: "{{keyword}} client"
+      
+  rabbitmq:
+    - name: github
+      queryTemplate: "{{keyword}} messaging pattern"
+    - name: npmjs
+      queryTemplate: "amqplib {{keyword}}"
+      
+  kafka:
+    - name: github
+      queryTemplate: "{{keyword}} producer consumer"
+    - name: npmjs
+      queryTemplate: "{{keyword}} client"
+      
+  stripe:
+    - name: stripe-api-docs
+      queryTemplate: "{{keyword}}"
+    - name: github
+      queryTemplate: "{{keyword}} integration example"
+    - name: npmjs
+      queryTemplate: "{{keyword}} sdk"
+      
+  aws:
+    - name: github
+      queryTemplate: "{{keyword}} sdk example"
+    - name: aws-docs
+      queryTemplate: "{{keyword}}"
+    - name: npmjs
+      queryTemplate: "aws-sdk {{keyword}}"
+      
+  react:
+    - name: github
+      queryTemplate: "{{keyword}} component example"
+    - name: npmjs
+      queryTemplate: "{{keyword}} hooks"
+      
+  vue:
+    - name: github
+      queryTemplate: "{{keyword}} composition api"
+    - name: npmjs
+      queryTemplate: "{{keyword}} plugin"
+      
+  nextjs:
+    - name: github
+      queryTemplate: "{{keyword}} app router example"
+    - name: npmjs
+      queryTemplate: "next {{keyword}}"
+      
+  express:
+    - name: github
+      queryTemplate: "{{keyword}} middleware example"
+    - name: npmjs
+      queryTemplate: "{{keyword}} middleware"
+      
+  typescript:
+    - name: github
+      queryTemplate: "{{keyword}} type definitions"
+    - name: npmjs
+      queryTemplate: "@types/{{keyword}}"
+
+# Default mappings for keywords without specific mappings
+defaultMappings:
+  - name: github
+    queryTemplate: "{{keyword}} implementation"
+  - name: npmjs
+    queryTemplate: "{{keyword}}"
+  - name: stackoverflow
+    queryTemplate: "{{keyword}} best practices"

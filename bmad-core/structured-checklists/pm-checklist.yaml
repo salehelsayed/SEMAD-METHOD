@@ -1,0 +1,554 @@
+id: pm-checklist
+name: Product Manager (PM) Requirements Checklist
+categories:
+  - name: PROBLEM DEFINITION & CONTEXT
+    items:
+      - description: Clear articulation of the problem being solved
+        checked: false
+      - description: Identification of who experiences the problem
+        checked: false
+      - description: Explanation of why solving this problem matters
+        checked: false
+      - description: Quantification of problem impact (if possible)
+        checked: false
+      - description: Differentiation from existing solutions
+        checked: false
+      - description: Specific, measurable business objectives defined
+        checked: false
+      - description: Clear success metrics and KPIs established
+        checked: false
+      - description: Metrics are tied to user and business value
+        checked: false
+      - description: Baseline measurements identified (if applicable)
+        checked: false
+      - description: Timeframe for achieving goals specified
+        checked: false
+      - description: Target user personas clearly defined
+        checked: false
+      - description: User needs and pain points documented
+        checked: false
+      - description: User research findings summarized (if available)
+        checked: false
+      - description: Competitive analysis included
+        checked: false
+      - description: Market context provided
+        checked: false
+    notes: |-
+      The foundation of any product is a clear problem statement. As you review this section:
+
+      1. Verify the problem is real and worth solving
+      2. Check that the target audience is specific, not "everyone"
+      3. Ensure success metrics are measurable, not vague aspirations
+      4. Look for evidence of user research, not just assumptions
+      5. Confirm the problem-solution fit is logical
+    metadata:
+      originalName: 1. PROBLEM DEFINITION & CONTEXT
+  - name: MVP SCOPE DEFINITION
+    items:
+      - description: Essential features clearly distinguished from nice-to-haves
+        checked: false
+      - description: Features directly address defined problem statement
+        checked: false
+      - description: Each Epic ties back to specific user needs
+        checked: false
+      - description: Features and Stories are described from user perspective
+        checked: false
+      - description: Minimum requirements for success defined
+        checked: false
+      - description: Clear articulation of what is OUT of scope
+        checked: false
+      - description: Future enhancements section included
+        checked: false
+      - description: Rationale for scope decisions documented
+        checked: false
+      - description: MVP minimizes functionality while maximizing learning
+        checked: false
+      - description: Scope has been reviewed and refined multiple times
+        checked: false
+      - description: Method for testing MVP success defined
+        checked: false
+      - description: Initial user feedback mechanisms planned
+        checked: false
+      - description: Criteria for moving beyond MVP specified
+        checked: false
+      - description: Learning goals for MVP articulated
+        checked: false
+      - description: Timeline expectations set
+        checked: false
+    notes: |-
+      MVP scope is critical - too much and you waste resources, too little and you can't validate. Check:
+
+      1. Is this truly minimal? Challenge every feature
+      2. Does each feature directly address the core problem?
+      3. Are "nice-to-haves" clearly separated from "must-haves"?
+      4. Is the rationale for inclusion/exclusion documented?
+      5. Can you ship this in the target timeframe?
+    metadata:
+      originalName: 2. MVP SCOPE DEFINITION
+  - name: USER EXPERIENCE REQUIREMENTS
+    items:
+      - description: Primary user flows documented
+        checked: false
+      - description: Entry and exit points for each flow identified
+        checked: false
+      - description: Decision points and branches mapped
+        checked: false
+      - description: Critical path highlighted
+        checked: false
+      - description: Edge cases considered
+        checked: false
+      - description: Accessibility considerations documented
+        checked: false
+      - description: Platform/device compatibility specified
+        checked: false
+      - description: Performance expectations from user perspective defined
+        checked: false
+      - description: Error handling and recovery approaches outlined
+        checked: false
+      - description: User feedback mechanisms identified
+        checked: false
+      - description: Information architecture outlined
+        checked: false
+      - description: Critical UI components identified
+        checked: false
+      - description: Visual design guidelines referenced (if applicable)
+        checked: false
+      - description: Content requirements specified
+        checked: false
+      - description: High-level navigation structure defined
+        checked: false
+    notes: |-
+      UX requirements bridge user needs and technical implementation. Validate:
+
+      1. User flows cover the primary use cases completely
+      2. Edge cases are identified (even if deferred)
+      3. Accessibility isn't an afterthought
+      4. Performance expectations are realistic
+      5. Error states and recovery are planned
+    metadata:
+      originalName: 3. USER EXPERIENCE REQUIREMENTS
+  - name: FUNCTIONAL REQUIREMENTS
+    items:
+      - description: All required features for MVP documented
+        checked: false
+      - description: Features have clear, user-focused descriptions
+        checked: false
+      - description: Feature priority/criticality indicated
+        checked: false
+      - description: Requirements are testable and verifiable
+        checked: false
+      - description: Dependencies between features identified
+        checked: false
+      - description: Requirements are specific and unambiguous
+        checked: false
+      - description: Requirements focus on WHAT not HOW
+        checked: false
+      - description: Requirements use consistent terminology
+        checked: false
+      - description: Complex requirements broken into simpler parts
+        checked: false
+      - description: Technical jargon minimized or explained
+        checked: false
+      - description: Stories follow consistent format
+        checked: false
+      - description: Acceptance criteria are testable
+        checked: false
+      - description: Stories are sized appropriately (not too large)
+        checked: false
+      - description: Stories are independent where possible
+        checked: false
+      - description: Stories include necessary context
+        checked: false
+      - description: Local testability requirements (e.g., via CLI) defined in ACs for relevant backend/data stories
+        checked: false
+    notes: |-
+      Functional requirements must be clear enough for implementation. Check:
+
+      1. Requirements focus on WHAT not HOW (no implementation details)
+      2. Each requirement is testable (how would QA verify it?)
+      3. Dependencies are explicit (what needs to be built first?)
+      4. Requirements use consistent terminology
+      5. Complex features are broken into manageable pieces
+    metadata:
+      originalName: 4. FUNCTIONAL REQUIREMENTS
+  - name: NON-FUNCTIONAL REQUIREMENTS
+    items:
+      - description: Response time expectations defined
+        checked: false
+      - description: Throughput/capacity requirements specified
+        checked: false
+      - description: Scalability needs documented
+        checked: false
+      - description: Resource utilization constraints identified
+        checked: false
+      - description: Load handling expectations set
+        checked: false
+      - description: Data protection requirements specified
+        checked: false
+      - description: Authentication/authorization needs defined
+        checked: false
+      - description: Compliance requirements documented
+        checked: false
+      - description: Security testing requirements outlined
+        checked: false
+      - description: Privacy considerations addressed
+        checked: false
+      - description: Availability requirements defined
+        checked: false
+      - description: Backup and recovery needs documented
+        checked: false
+      - description: Fault tolerance expectations set
+        checked: false
+      - description: Error handling requirements specified
+        checked: false
+      - description: Maintenance and support considerations included
+        checked: false
+      - description: Platform/technology constraints documented
+        checked: false
+      - description: Integration requirements outlined
+        checked: false
+      - description: Third-party service dependencies identified
+        checked: false
+      - description: Infrastructure requirements specified
+        checked: false
+      - description: Development environment needs identified
+        checked: false
+    metadata:
+      originalName: 5. NON-FUNCTIONAL REQUIREMENTS
+  - name: EPIC & STORY STRUCTURE
+    items:
+      - description: Epics represent cohesive units of functionality
+        checked: false
+      - description: Epics focus on user/business value delivery
+        checked: false
+      - description: Epic goals clearly articulated
+        checked: false
+      - description: Epics are sized appropriately for incremental delivery
+        checked: false
+      - description: Epic sequence and dependencies identified
+        checked: false
+      - description: Stories are broken down to appropriate size
+        checked: false
+      - description: Stories have clear, independent value
+        checked: false
+      - description: Stories include appropriate acceptance criteria
+        checked: false
+      - description: Story dependencies and sequence documented
+        checked: false
+      - description: Stories aligned with epic goals
+        checked: false
+      - description: First epic includes all necessary setup steps
+        checked: false
+      - description: Project scaffolding and initialization addressed
+        checked: false
+      - description: Core infrastructure setup included
+        checked: false
+      - description: Development environment setup addressed
+        checked: false
+      - description: Local testability established early
+        checked: false
+    metadata:
+      originalName: 6. EPIC & STORY STRUCTURE
+  - name: TECHNICAL GUIDANCE
+    items:
+      - description: Initial architecture direction provided
+        checked: false
+      - description: Technical constraints clearly communicated
+        checked: false
+      - description: Integration points identified
+        checked: false
+      - description: Performance considerations highlighted
+        checked: false
+      - description: Security requirements articulated
+        checked: false
+      - description: Known areas of high complexity or technical risk flagged for architectural deep-dive
+        checked: false
+      - description: Decision criteria for technical choices provided
+        checked: false
+      - description: Trade-offs articulated for key decisions
+        checked: false
+      - description: >-
+          Rationale for selecting primary approach over considered alternatives documented (for key design/feature
+          choices)
+        checked: false
+      - description: Non-negotiable technical requirements highlighted
+        checked: false
+      - description: Areas requiring technical investigation identified
+        checked: false
+      - description: Guidance on technical debt approach provided
+        checked: false
+      - description: Development approach guidance provided
+        checked: false
+      - description: Testing requirements articulated
+        checked: false
+      - description: Deployment expectations set
+        checked: false
+      - description: Monitoring needs identified
+        checked: false
+      - description: Documentation requirements specified
+        checked: false
+    metadata:
+      originalName: 7. TECHNICAL GUIDANCE
+  - name: CROSS-FUNCTIONAL REQUIREMENTS
+    items:
+      - description: Data entities and relationships identified
+        checked: false
+      - description: Data storage requirements specified
+        checked: false
+      - description: Data quality requirements defined
+        checked: false
+      - description: Data retention policies identified
+        checked: false
+      - description: Data migration needs addressed (if applicable)
+        checked: false
+      - description: Schema changes planned iteratively, tied to stories requiring them
+        checked: false
+      - description: External system integrations identified
+        checked: false
+      - description: API requirements documented
+        checked: false
+      - description: Authentication for integrations specified
+        checked: false
+      - description: Data exchange formats defined
+        checked: false
+      - description: Integration testing requirements outlined
+        checked: false
+      - description: Deployment frequency expectations set
+        checked: false
+      - description: Environment requirements defined
+        checked: false
+      - description: Monitoring and alerting needs identified
+        checked: false
+      - description: Support requirements documented
+        checked: false
+      - description: Performance monitoring approach specified
+        checked: false
+    metadata:
+      originalName: 8. CROSS-FUNCTIONAL REQUIREMENTS
+  - name: CLARITY & COMMUNICATION
+    items:
+      - description: Documents use clear, consistent language
+        checked: false
+      - description: Documents are well-structured and organized
+        checked: false
+      - description: Technical terms are defined where necessary
+        checked: false
+      - description: Diagrams/visuals included where helpful
+        checked: false
+      - description: Documentation is versioned appropriately
+        checked: false
+      - description: Key stakeholders identified
+        checked: false
+      - description: Stakeholder input incorporated
+        checked: false
+      - description: Potential areas of disagreement addressed
+        checked: false
+      - description: Communication plan for updates established
+        checked: false
+      - description: Approval process defined
+        checked: false
+    metadata:
+      originalName: 9. CLARITY & COMMUNICATION
+  - name: PRD & EPIC VALIDATION SUMMARY
+    items: []
+    notes: |-
+      FINAL PM CHECKLIST REPORT GENERATION
+
+      Create a comprehensive validation report that includes:
+
+      1. Executive Summary
+
+         - Overall PRD completeness (percentage)
+         - MVP scope appropriateness (Too Large/Just Right/Too Small)
+         - Readiness for architecture phase (Ready/Nearly Ready/Not Ready)
+         - Most critical gaps or concerns
+
+      2. Category Analysis Table
+         Fill in the actual table with:
+
+         - Status: PASS (90%+ complete), PARTIAL (60-89%), FAIL (<60%)
+         - Critical Issues: Specific problems that block progress
+
+      3. Top Issues by Priority
+
+         - BLOCKERS: Must fix before architect can proceed
+         - HIGH: Should fix for quality
+         - MEDIUM: Would improve clarity
+         - LOW: Nice to have
+
+      4. MVP Scope Assessment
+
+         - Features that might be cut for true MVP
+         - Missing features that are essential
+         - Complexity concerns
+         - Timeline realism
+
+      5. Technical Readiness
+
+         - Clarity of technical constraints
+         - Identified technical risks
+         - Areas needing architect investigation
+
+      6. Recommendations
+         - Specific actions to address each blocker
+         - Suggested improvements
+         - Next steps
+
+      After presenting the report, ask if the user wants:
+
+      - Detailed analysis of any failed sections
+      - Suggestions for improving specific areas
+      - Help with refining MVP scope
+    metadata:
+      originalName: PRD & EPIC VALIDATION SUMMARY
+result:
+  status: pending
+  notes: ""
+metadata:
+  preservedContent:
+    - type: special-note
+      content: >-
+        [[LLM: INITIALIZATION INSTRUCTIONS - PM CHECKLIST
+
+
+        Before proceeding with this checklist, ensure you have access to:
+
+
+        1. prd.md - The Product Requirements Document (check docs/prd.md)
+
+        2. Any user research, market analysis, or competitive analysis documents
+
+        3. Business goals and strategy documents
+
+        4. Any existing epic definitions or user stories
+
+
+        IMPORTANT: If the PRD is missing, immediately ask the user for its location or content before proceeding.
+
+
+        VALIDATION APPROACH:
+
+
+        1. User-Centric - Every requirement should tie back to user value
+
+        2. MVP Focus - Ensure scope is truly minimal while viable
+
+        3. Clarity - Requirements should be unambiguous and testable
+
+        4. Completeness - All aspects of the product vision are covered
+
+        5. Feasibility - Requirements are technically achievable
+
+
+        EXECUTION MODE:
+
+        Ask the user if they want to work through the checklist:
+
+
+        - Section by section (interactive mode) - Review each section, present findings, get confirmation before
+        proceeding
+
+        - All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end]]
+      lineNumber: 5
+    - type: special-note
+      content: |-
+        [[LLM: The foundation of any product is a clear problem statement. As you review this section:
+
+        1. Verify the problem is real and worth solving
+        2. Check that the target audience is specific, not "everyone"
+        3. Ensure success metrics are measurable, not vague aspirations
+        4. Look for evidence of user research, not just assumptions
+        5. Confirm the problem-solution fit is logical]]
+      lineNumber: 32
+    - type: special-note
+      content: |-
+        [[LLM: MVP scope is critical - too much and you waste resources, too little and you can't validate. Check:
+
+        1. Is this truly minimal? Challenge every feature
+        2. Does each feature directly address the core problem?
+        3. Are "nice-to-haves" clearly separated from "must-haves"?
+        4. Is the rationale for inclusion/exclusion documented?
+        5. Can you ship this in the target timeframe?]]
+      lineNumber: 66
+    - type: special-note
+      content: |-
+        [[LLM: UX requirements bridge user needs and technical implementation. Validate:
+
+        1. User flows cover the primary use cases completely
+        2. Edge cases are identified (even if deferred)
+        3. Accessibility isn't an afterthought
+        4. Performance expectations are realistic
+        5. Error states and recovery are planned]]
+      lineNumber: 100
+    - type: special-note
+      content: "- [ ] Critical path highlighted"
+      lineNumber: 113
+    - type: special-note
+      content: "- [ ] Critical UI components identified"
+      lineNumber: 127
+    - type: special-note
+      content: |-
+        [[LLM: Functional requirements must be clear enough for implementation. Check:
+
+        1. Requirements focus on WHAT not HOW (no implementation details)
+        2. Each requirement is testable (how would QA verify it?)
+        3. Dependencies are explicit (what needs to be built first?)
+        4. Requirements use consistent terminology
+        5. Complex features are broken into manageable pieces]]
+      lineNumber: 134
+    - type: special-note
+      content: |-
+        [[LLM: FINAL PM CHECKLIST REPORT GENERATION
+
+        Create a comprehensive validation report that includes:
+
+        1. Executive Summary
+
+           - Overall PRD completeness (percentage)
+           - MVP scope appropriateness (Too Large/Just Right/Too Small)
+           - Readiness for architecture phase (Ready/Nearly Ready/Not Ready)
+           - Most critical gaps or concerns
+
+        2. Category Analysis Table
+           Fill in the actual table with:
+
+           - Status: PASS (90%+ complete), PARTIAL (60-89%), FAIL (<60%)
+           - Critical Issues: Specific problems that block progress
+
+        3. Top Issues by Priority
+
+           - BLOCKERS: Must fix before architect can proceed
+           - HIGH: Should fix for quality
+           - MEDIUM: Would improve clarity
+           - LOW: Nice to have
+
+        4. MVP Scope Assessment
+
+           - Features that might be cut for true MVP
+           - Missing features that are essential
+           - Complexity concerns
+           - Timeline realism
+
+        5. Technical Readiness
+
+           - Clarity of technical constraints
+           - Identified technical risks
+           - Areas needing architect investigation
+
+        6. Recommendations
+           - Specific actions to address each blocker
+           - Suggested improvements
+           - Next steps
+
+        After presenting the report, ask if the user wants:
+
+        - Detailed analysis of any failed sections
+        - Suggestions for improving specific areas
+        - Help with refining MVP scope]]
+      lineNumber: 302
+    - type: special-note
+      content: "| Category                         | Status | Critical Issues |"
+      lineNumber: 352
+    - type: special-note
+      content: "### Critical Deficiencies"
+      lineNumber: 364

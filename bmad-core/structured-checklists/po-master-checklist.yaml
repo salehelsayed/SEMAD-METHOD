@@ -1,0 +1,623 @@
+id: po-master-checklist
+name: Product Owner (PO) Master Validation Checklist
+categories:
+  - name: PROJECT SETUP & INITIALIZATION
+    items:
+      - description: Epic 1 includes explicit steps for project creation/initialization
+        checked: false
+      - description: If using a starter template, steps for cloning/setup are included
+        checked: false
+      - description: If building from scratch, all necessary scaffolding steps are defined
+        checked: false
+      - description: Initial README or documentation setup is included
+        checked: false
+      - description: Repository setup and initial commit processes are defined
+        checked: false
+      - description: Existing project analysis has been completed and documented
+        checked: false
+      - description: Integration points with current system are identified
+        checked: false
+      - description: Development environment preserves existing functionality
+        checked: false
+      - description: Local testing approach validated for existing features
+        checked: false
+      - description: Rollback procedures defined for each integration point
+        checked: false
+      - description: Local development environment setup is clearly defined
+        checked: false
+      - description: Required tools and versions are specified
+        checked: false
+      - description: Steps for installing dependencies are included
+        checked: false
+      - description: Configuration files are addressed appropriately
+        checked: false
+      - description: Development server setup is included
+        checked: false
+      - description: All critical packages/libraries are installed early
+        checked: false
+      - description: Package management is properly addressed
+        checked: false
+      - description: Version specifications are appropriately defined
+        checked: false
+      - description: Dependency conflicts or special requirements are noted
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Version compatibility with existing stack verified"
+        checked: false
+    notes: >-
+      Project setup is the foundation. For greenfield, ensure clean start. For brownfield, ensure safe integration with
+      existing system. Verify setup matches project type.
+    metadata:
+      originalName: 1. PROJECT SETUP & INITIALIZATION
+  - name: INFRASTRUCTURE & DEPLOYMENT
+    items:
+      - description: Database selection/setup occurs before any operations
+        checked: false
+      - description: Schema definitions are created before data operations
+        checked: false
+      - description: Migration strategies are defined if applicable
+        checked: false
+      - description: Seed data or initial data setup is included if needed
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Database migration risks identified and mitigated"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Backward compatibility ensured"
+        checked: false
+      - description: API frameworks are set up before implementing endpoints
+        checked: false
+      - description: Service architecture is established before implementing services
+        checked: false
+      - description: Authentication framework is set up before protected routes
+        checked: false
+      - description: Middleware and common utilities are created before use
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] API compatibility with existing system maintained"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration with existing authentication preserved"
+        checked: false
+      - description: CI/CD pipeline is established before deployment actions
+        checked: false
+      - description: Infrastructure as Code (IaC) is set up before use
+        checked: false
+      - description: Environment configurations are defined early
+        checked: false
+      - description: Deployment strategies are defined before implementation
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Deployment minimizes downtime"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Blue-green or canary deployment implemented"
+        checked: false
+      - description: Testing frameworks are installed before writing tests
+        checked: false
+      - description: Test environment setup precedes test implementation
+        checked: false
+      - description: Mock services or data are defined before testing
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Regression testing covers existing functionality"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration testing validates new-to-existing connections"
+        checked: false
+    notes: >-
+      Infrastructure must exist before use. For brownfield, must integrate with existing infrastructure without breaking
+      it.
+    metadata:
+      originalName: 2. INFRASTRUCTURE & DEPLOYMENT
+  - name: EXTERNAL DEPENDENCIES & INTEGRATIONS
+    items:
+      - description: Account creation steps are identified for required services
+        checked: false
+      - description: API key acquisition processes are defined
+        checked: false
+      - description: Steps for securely storing credentials are included
+        checked: false
+      - description: Fallback or offline development options are considered
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Compatibility with existing services verified"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Impact on existing integrations assessed"
+        checked: false
+      - description: Integration points with external APIs are clearly identified
+        checked: false
+      - description: Authentication with external services is properly sequenced
+        checked: false
+      - description: API limits or constraints are acknowledged
+        checked: false
+      - description: Backup strategies for API failures are considered
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing API dependencies maintained"
+        checked: false
+      - description: Cloud resource provisioning is properly sequenced
+        checked: false
+      - description: DNS or domain registration needs are identified
+        checked: false
+      - description: Email or messaging service setup is included if needed
+        checked: false
+      - description: CDN or static asset hosting setup precedes their use
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing infrastructure services preserved"
+        checked: false
+    notes: >-
+      External dependencies often block progress. For brownfield, ensure new dependencies don't conflict with existing
+      ones.
+    metadata:
+      originalName: 3. EXTERNAL DEPENDENCIES & INTEGRATIONS
+  - name: UI/UX CONSIDERATIONS [[UI/UX ONLY]]
+    items:
+      - description: UI framework and libraries are selected and installed early
+        checked: false
+      - description: Design system or component library is established
+        checked: false
+      - description: Styling approach (CSS modules, styled-components, etc.) is defined
+        checked: false
+      - description: Responsive design strategy is established
+        checked: false
+      - description: Accessibility requirements are defined upfront
+        checked: false
+      - description: Frontend build pipeline is configured before development
+        checked: false
+      - description: Asset optimization strategy is defined
+        checked: false
+      - description: Frontend testing framework is set up
+        checked: false
+      - description: Component development workflow is established
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] UI consistency with existing system maintained"
+        checked: false
+      - description: User journeys are mapped before implementation
+        checked: false
+      - description: Navigation patterns are defined early
+        checked: false
+      - description: Error states and loading states are planned
+        checked: false
+      - description: Form validation patterns are established
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing user workflows preserved or migrated"
+        checked: false
+    notes: >-
+      Only evaluate this section if the project includes user interface components. Skip entirely for backend-only
+      projects.
+    metadata:
+      originalName: 4. UI/UX CONSIDERATIONS [[UI/UX ONLY]]
+  - name: USER/AGENT RESPONSIBILITY
+    items:
+      - description: User responsibilities limited to human-only tasks
+        checked: false
+      - description: Account creation on external services assigned to users
+        checked: false
+      - description: Purchasing or payment actions assigned to users
+        checked: false
+      - description: Credential provision appropriately assigned to users
+        checked: false
+      - description: All code-related tasks assigned to developer agents
+        checked: false
+      - description: Automated processes identified as agent responsibilities
+        checked: false
+      - description: Configuration management properly assigned
+        checked: false
+      - description: Testing and validation assigned to appropriate agents
+        checked: false
+    notes: Clear ownership prevents confusion. Ensure tasks are assigned appropriately based on what only humans can do.
+    metadata:
+      originalName: 5. USER/AGENT RESPONSIBILITY
+  - name: FEATURE SEQUENCING & DEPENDENCIES
+    items:
+      - description: Features depending on others are sequenced correctly
+        checked: false
+      - description: Shared components are built before their use
+        checked: false
+      - description: User flows follow logical progression
+        checked: false
+      - description: Authentication features precede protected features
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing functionality preserved throughout"
+        checked: false
+      - description: Lower-level services built before higher-level ones
+        checked: false
+      - description: Libraries and utilities created before their use
+        checked: false
+      - description: Data models defined before operations on them
+        checked: false
+      - description: API endpoints defined before client consumption
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration points tested at each step"
+        checked: false
+      - description: Later epics build upon earlier epic functionality
+        checked: false
+      - description: No epic requires functionality from later epics
+        checked: false
+      - description: Infrastructure from early epics utilized consistently
+        checked: false
+      - description: Incremental value delivery maintained
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Each epic maintains system integrity"
+        checked: false
+    notes: Dependencies create the critical path. For brownfield, ensure new features don't break existing ones.
+    metadata:
+      originalName: 6. FEATURE SEQUENCING & DEPENDENCIES
+  - name: RISK MANAGEMENT [[BROWNFIELD ONLY]]
+    items:
+      - description: Risk of breaking existing functionality assessed
+        checked: false
+      - description: Database migration risks identified and mitigated
+        checked: false
+      - description: API breaking change risks evaluated
+        checked: false
+      - description: Performance degradation risks identified
+        checked: false
+      - description: Security vulnerability risks evaluated
+        checked: false
+      - description: Rollback procedures clearly defined per story
+        checked: false
+      - description: Feature flag strategy implemented
+        checked: false
+      - description: Backup and recovery procedures updated
+        checked: false
+      - description: Monitoring enhanced for new components
+        checked: false
+      - description: Rollback triggers and thresholds defined
+        checked: false
+      - description: Existing user workflows analyzed for impact
+        checked: false
+      - description: User communication plan developed
+        checked: false
+      - description: Training materials updated
+        checked: false
+      - description: Support documentation comprehensive
+        checked: false
+      - description: Migration path for user data validated
+        checked: false
+    notes: This section is CRITICAL for brownfield projects. Think pessimistically about what could break.
+    metadata:
+      originalName: 7. RISK MANAGEMENT [[BROWNFIELD ONLY]]
+  - name: MVP SCOPE ALIGNMENT
+    items:
+      - description: All core goals from PRD are addressed
+        checked: false
+      - description: Features directly support MVP goals
+        checked: false
+      - description: No extraneous features beyond MVP scope
+        checked: false
+      - description: Critical features prioritized appropriately
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Enhancement complexity justified"
+        checked: false
+      - description: All critical user journeys fully implemented
+        checked: false
+      - description: Edge cases and error scenarios addressed
+        checked: false
+      - description: User experience considerations included
+        checked: false
+      - description: "[[UI/UX ONLY]] Accessibility requirements incorporated"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing workflows preserved or improved"
+        checked: false
+      - description: All technical constraints from PRD addressed
+        checked: false
+      - description: Non-functional requirements incorporated
+        checked: false
+      - description: Architecture decisions align with constraints
+        checked: false
+      - description: Performance considerations addressed
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Compatibility requirements met"
+        checked: false
+    notes: MVP means MINIMUM viable product. For brownfield, ensure enhancements are truly necessary.
+    metadata:
+      originalName: 8. MVP SCOPE ALIGNMENT
+  - name: DOCUMENTATION & HANDOFF
+    items:
+      - description: API documentation created alongside implementation
+        checked: false
+      - description: Setup instructions are comprehensive
+        checked: false
+      - description: Architecture decisions documented
+        checked: false
+      - description: Patterns and conventions documented
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration points documented in detail"
+        checked: false
+      - description: User guides or help documentation included if required
+        checked: false
+      - description: Error messages and user feedback considered
+        checked: false
+      - description: Onboarding flows fully specified
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Changes to existing features documented"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing system knowledge captured"
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration knowledge documented"
+        checked: false
+      - description: Code review knowledge sharing planned
+        checked: false
+      - description: Deployment knowledge transferred to operations
+        checked: false
+      - description: Historical context preserved
+        checked: false
+    notes: Good documentation enables smooth development. For brownfield, documentation of integration points is critical.
+    metadata:
+      originalName: 9. DOCUMENTATION & HANDOFF
+  - name: POST-MVP CONSIDERATIONS
+    items:
+      - description: Clear separation between MVP and future features
+        checked: false
+      - description: Architecture supports planned enhancements
+        checked: false
+      - description: Technical debt considerations documented
+        checked: false
+      - description: Extensibility points identified
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Integration patterns reusable"
+        checked: false
+      - description: Analytics or usage tracking included if required
+        checked: false
+      - description: User feedback collection considered
+        checked: false
+      - description: Monitoring and alerting addressed
+        checked: false
+      - description: Performance measurement incorporated
+        checked: false
+      - description: "[[BROWNFIELD ONLY]] Existing monitoring preserved/enhanced"
+        checked: false
+    notes: Planning for success prevents technical debt. For brownfield, ensure enhancements don't limit future growth.
+    metadata:
+      originalName: 10. POST-MVP CONSIDERATIONS
+  - name: VALIDATION SUMMARY
+    items: []
+    notes: |-
+      FINAL PO VALIDATION REPORT GENERATION
+
+      Generate a comprehensive validation report that adapts to project type:
+
+      1. Executive Summary
+
+         - Project type: [Greenfield/Brownfield] with [UI/No UI]
+         - Overall readiness (percentage)
+         - Go/No-Go recommendation
+         - Critical blocking issues count
+         - Sections skipped due to project type
+
+      2. Project-Specific Analysis
+
+         FOR GREENFIELD:
+
+         - Setup completeness
+         - Dependency sequencing
+         - MVP scope appropriateness
+         - Development timeline feasibility
+
+         FOR BROWNFIELD:
+
+         - Integration risk level (High/Medium/Low)
+         - Existing system impact assessment
+         - Rollback readiness
+         - User disruption potential
+
+      3. Risk Assessment
+
+         - Top 5 risks by severity
+         - Mitigation recommendations
+         - Timeline impact of addressing issues
+         - [BROWNFIELD] Specific integration risks
+
+      4. MVP Completeness
+
+         - Core features coverage
+         - Missing essential functionality
+         - Scope creep identified
+         - True MVP vs over-engineering
+
+      5. Implementation Readiness
+
+         - Developer clarity score (1-10)
+         - Ambiguous requirements count
+         - Missing technical details
+         - [BROWNFIELD] Integration point clarity
+
+      6. Recommendations
+
+         - Must-fix before development
+         - Should-fix for quality
+         - Consider for improvement
+         - Post-MVP deferrals
+
+      7. [BROWNFIELD ONLY] Integration Confidence
+         - Confidence in preserving existing functionality
+         - Rollback procedure completeness
+         - Monitoring coverage for integration points
+         - Support team readiness
+
+      After presenting the report, ask if the user wants:
+
+      - Detailed analysis of any failed sections
+      - Specific story reordering suggestions
+      - Risk mitigation strategies
+      - [BROWNFIELD] Integration risk deep-dive
+    metadata:
+      originalName: VALIDATION SUMMARY
+result:
+  status: pending
+  notes: ""
+metadata:
+  preservedContent:
+    - type: special-note
+      content: |-
+        [[LLM: INITIALIZATION INSTRUCTIONS - PO MASTER CHECKLIST
+
+        PROJECT TYPE DETECTION:
+        First, determine the project type by checking:
+
+        1. Is this a GREENFIELD project (new from scratch)?
+
+           - Look for: New project initialization, no existing codebase references
+           - Check for: prd.md, architecture.md, new project setup stories
+
+        2. Is this a BROWNFIELD project (enhancing existing system)?
+
+           - Look for: References to existing codebase, enhancement/modification language
+           - Check for: brownfield-prd.md, brownfield-architecture.md, existing system analysis
+
+        3. Does the project include UI/UX components?
+           - Check for: frontend-architecture.md, UI/UX specifications, design files
+           - Look for: Frontend stories, component specifications, user interface mentions
+
+        DOCUMENT REQUIREMENTS:
+        Based on project type, ensure you have access to:
+
+        For GREENFIELD projects:
+
+        - prd.md - The Product Requirements Document
+        - architecture.md - The system architecture
+        - frontend-architecture.md - If UI/UX is involved
+        - All epic and story definitions
+
+        For BROWNFIELD projects:
+
+        - brownfield-prd.md - The brownfield enhancement requirements
+        - brownfield-architecture.md - The enhancement architecture
+        - Existing project codebase access (CRITICAL - cannot proceed without this)
+        - Current deployment configuration and infrastructure details
+        - Database schemas, API documentation, monitoring setup
+
+        SKIP INSTRUCTIONS:
+
+        - Skip sections marked [[BROWNFIELD ONLY]] for greenfield projects
+      lineNumber: 5
+    - type: special-note
+      content: "- Note all skipped sections in your final report"
+      lineNumber: 47
+    - type: special-note
+      content: 3. Critical Thinking - Question assumptions and identify gaps
+      lineNumber: 53
+    - type: special-note
+      content: >-
+        [[LLM: Project setup is the foundation. For greenfield, ensure clean start. For brownfield, ensure safe
+        integration with existing system. Verify setup matches project type.]]
+      lineNumber: 64
+    - type: special-note
+      content: "- [ ] All critical packages/libraries are installed early"
+      lineNumber: 92
+    - type: special-note
+      content: >-
+        [[LLM: Infrastructure must exist before use. For brownfield, must integrate with existing infrastructure without
+        breaking it.]]
+      lineNumber: 100
+    - type: special-note
+      content: >-
+        [[LLM: External dependencies often block progress. For brownfield, ensure new dependencies don't conflict with
+        existing ones.]]
+      lineNumber: 139
+    - type: special-note
+      content: >-
+        [[LLM: Only evaluate this section if the project includes user interface components. Skip entirely for
+        backend-only projects.]]
+      lineNumber: 168
+    - type: special-note
+      content: >-
+        [[LLM: Clear ownership prevents confusion. Ensure tasks are assigned appropriately based on what only humans can
+        do.]]
+      lineNumber: 196
+    - type: special-note
+      content: "[[LLM: Dependencies create the critical path. For brownfield, ensure new features don't break existing ones.]]"
+      lineNumber: 214
+    - type: special-note
+      content: "[[LLM: This section is CRITICAL for brownfield projects. Think pessimistically about what could break.]]"
+      lineNumber: 242
+    - type: special-note
+      content: "[[LLM: MVP means MINIMUM viable product. For brownfield, ensure enhancements are truly necessary.]]"
+      lineNumber: 270
+    - type: special-note
+      content: "- [ ] Critical features prioritized appropriately"
+      lineNumber: 277
+    - type: special-note
+      content: "- [ ] All critical user journeys fully implemented"
+      lineNumber: 282
+    - type: special-note
+      content: >-
+        [[LLM: Good documentation enables smooth development. For brownfield, documentation of integration points is
+        critical.]]
+      lineNumber: 298
+    - type: special-note
+      content: >-
+        [[LLM: Planning for success prevents technical debt. For brownfield, ensure enhancements don't limit future
+        growth.]]
+      lineNumber: 325
+    - type: special-note
+      content: |-
+        [[LLM: FINAL PO VALIDATION REPORT GENERATION
+
+        Generate a comprehensive validation report that adapts to project type:
+
+        1. Executive Summary
+
+           - Project type: [Greenfield/Brownfield] with [UI/No UI]
+           - Overall readiness (percentage)
+           - Go/No-Go recommendation
+           - Critical blocking issues count
+           - Sections skipped due to project type
+
+        2. Project-Specific Analysis
+
+           FOR GREENFIELD:
+
+           - Setup completeness
+           - Dependency sequencing
+           - MVP scope appropriateness
+           - Development timeline feasibility
+
+           FOR BROWNFIELD:
+
+           - Integration risk level (High/Medium/Low)
+           - Existing system impact assessment
+           - Rollback readiness
+           - User disruption potential
+
+        3. Risk Assessment
+
+           - Top 5 risks by severity
+           - Mitigation recommendations
+           - Timeline impact of addressing issues
+           - [BROWNFIELD] Specific integration risks
+
+        4. MVP Completeness
+
+           - Core features coverage
+           - Missing essential functionality
+           - Scope creep identified
+           - True MVP vs over-engineering
+
+        5. Implementation Readiness
+
+           - Developer clarity score (1-10)
+           - Ambiguous requirements count
+           - Missing technical details
+           - [BROWNFIELD] Integration point clarity
+
+        6. Recommendations
+
+           - Must-fix before development
+           - Should-fix for quality
+           - Consider for improvement
+           - Post-MVP deferrals
+
+        7. [BROWNFIELD ONLY] Integration Confidence
+           - Confidence in preserving existing functionality
+           - Rollback procedure completeness
+           - Monitoring coverage for integration points
+           - Support team readiness
+
+        After presenting the report, ask if the user wants:
+
+        - Detailed analysis of any failed sections
+        - Specific story reordering suggestions
+        - Risk mitigation strategies
+        - [BROWNFIELD] Integration risk deep-dive]]
+      lineNumber: 345
+    - type: special-note
+      content: "| Category                                | Status | Critical Issues |"
+      lineNumber: 416
+    - type: special-note
+      content: "### Critical Deficiencies"
+      lineNumber: 429
+    - type: special-note
+      content: "- **REJECTED**: The plan requires significant revision to address critical deficiencies."
+      lineNumber: 441

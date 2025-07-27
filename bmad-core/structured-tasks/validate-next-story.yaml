@@ -1,0 +1,412 @@
+id: validate-next-story
+name: Validate Next Story Task
+purpose: >-
+  To comprehensively validate a story draft before implementation begins, ensuring it is complete, accurate, and
+  provides sufficient context for successful development. This task identifies issues and gaps that need to be
+  addressed, preventing hallucinations and ensuring implementation readiness.
+steps:
+  - id: step1
+    name: Load Core Configuration and Inputs
+    description: ""
+    actions:
+      - description: Load `.bmad-core/core-config.yaml`
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: >-
+          If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for
+          story validation."
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Identify and load the following inputs:"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Story file**: The drafted story to validate (provided by user or discovered in `devStoryLocation`)"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Parent epic**: The epic containing this story's requirements"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Architecture documents**: Based on configuration (sharded or monolithic)"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Story template**: `bmad-core/templates/story-tmpl.md` for completeness validation"
+        elicit: false
+        metadata:
+          originalIndent: 2
+    metadata:
+      level: 3
+      originalNumber: "0"
+  - id: step2
+    name: Template Completeness Validation
+    description: ""
+    actions:
+      - description: Load `bmad-core/templates/story-tmpl.md` and extract all section headings from the template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: >-
+          **Missing sections check**: Compare story sections against template sections to verify all required sections
+          are present
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: >-
+          **Placeholder validation**: Ensure no template placeholders remain unfilled (e.g., `{{EpicNum}}`, `{{role}}`,
+          `_TBD_`)
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Agent section verification**: Confirm all sections from template exist for future agent use"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Structure compliance**: Verify story follows template structure and formatting"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step3
+    name: File Structure and Source Tree Validation
+    description: ""
+    actions:
+      - description: "**File paths clarity**: Are new/existing files to be created/modified clearly specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Source tree relevance**: Is relevant project structure included in Dev Notes?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Directory structure**: Are new directories/components properly located according to project structure?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**File creation sequence**: Do tasks specify where files should be created in logical order?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Path accuracy**: Are file paths consistent with project structure from architecture docs?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step4
+    name: UI/Frontend Completeness Validation (if applicable)
+    description: ""
+    actions:
+      - description: "**Component specifications**: Are UI components sufficiently detailed for implementation?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Styling/design guidance**: Is visual implementation guidance clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**User interaction flows**: Are UX patterns and behaviors specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Responsive/accessibility**: Are these considerations addressed if required?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Integration points**: Are frontend-backend integration points clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step5
+    name: Acceptance Criteria Satisfaction Assessment
+    description: ""
+    actions:
+      - description: "**AC coverage**: Will all acceptance criteria be satisfied by the listed tasks?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**AC testability**: Are acceptance criteria measurable and verifiable?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Missing scenarios**: Are edge cases or error conditions covered?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Success definition**: Is \"done\" clearly defined for each AC?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Task-AC mapping**: Are tasks properly linked to specific acceptance criteria?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step6
+    name: Validation and Testing Instructions Review
+    description: ""
+    actions:
+      - description: "**Test approach clarity**: Are testing methods clearly specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Test scenarios**: Are key test cases identified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Validation steps**: Are acceptance criteria validation steps clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Testing tools/frameworks**: Are required testing tools specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Test data requirements**: Are test data needs identified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "5"
+  - id: step7
+    name: Security Considerations Assessment (if applicable)
+    description: ""
+    actions:
+      - description: "**Security requirements**: Are security needs identified and addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Authentication/authorization**: Are access controls specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Data protection**: Are sensitive data handling requirements clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Vulnerability prevention**: Are common security issues addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Compliance requirements**: Are regulatory/compliance needs addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "6"
+  - id: step8
+    name: Tasks/Subtasks Sequence Validation
+    description: ""
+    actions:
+      - description: "**Logical order**: Do tasks follow proper implementation sequence?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Dependencies**: Are task dependencies clear and correct?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Granularity**: Are tasks appropriately sized and actionable?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Completeness**: Do tasks cover all requirements and acceptance criteria?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Blocking issues**: Are there any tasks that would block others?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "7"
+  - id: step9
+    name: Anti-Hallucination Verification
+    description: ""
+    actions:
+      - description: "**Source verification**: Every technical claim must be traceable to source documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Architecture alignment**: Dev Notes content matches architecture specifications"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**No invented details**: Flag any technical decisions not supported by source documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Reference accuracy**: Verify all source references are correct and accessible"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Fact checking**: Cross-reference claims against epic and architecture documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "8"
+  - id: step10
+    name: Dev Agent Implementation Readiness
+    description: ""
+    actions:
+      - description: "**Self-contained context**: Can the story be implemented without reading external docs?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Clear instructions**: Are implementation steps unambiguous?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Complete technical context**: Are all required technical details present in Dev Notes?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Missing information**: Identify any critical information gaps"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Actionability**: Are all tasks actionable by a development agent?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: "- **Missing information**: Identify any critical information gaps"
+    metadata:
+      level: 3
+      originalNumber: "9"
+  - id: step11
+    name: Generate Validation Report
+    description: |-
+      Provide a structured validation report including:
+      #### Template Compliance Issues
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+      #### Nice-to-Have Improvements (Optional Enhancements)
+      #### Anti-Hallucination Findings
+      #### Final Assessment
+    actions:
+      - description: Missing sections from story template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unfilled placeholders or template variables
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Structural formatting issues
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing essential information for implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inaccurate or unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Incomplete acceptance criteria coverage
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing required sections
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unclear implementation guidance
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing security considerations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Task sequencing problems
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Incomplete testing instructions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Additional context that would help implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Clarifications that would improve efficiency
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Documentation improvements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing source references
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inconsistencies with architecture documents
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Invented libraries, patterns, or standards
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**GO**: Story is ready for implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**NO-GO**: Story requires fixes before implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Implementation Readiness Score**: 1-10 scale"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Confidence Level**: High/Medium/Low for successful implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+    metadata:
+      level: 3
+      originalNumber: "10"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+  preservedContent:
+    - type: section-header
+      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+      level: 2
+  executionMode: SEQUENTIAL

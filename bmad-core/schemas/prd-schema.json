@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bmad-method.com/schemas/prd.json",
+  "title": "PRD Schema",
+  "description": "JSON Schema for Product Requirements Document structure",
+  "type": "object",
+  "required": ["version", "sections"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Version of the PRD format"
+    },
+    "sections": {
+      "type": "object",
+      "description": "Main sections of the PRD",
+      "properties": {
+        "problemStatement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Clear description of the problem being solved"
+        },
+        "objectives": {
+          "type": "array",
+          "description": "List of objectives",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "userStories": {
+          "type": "array",
+          "description": "User stories",
+          "items": {
+            "type": "object",
+            "required": ["role", "action", "benefit"],
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "As a..."
+              },
+              "action": {
+                "type": "string",
+                "description": "I want to..."
+              },
+              "benefit": {
+                "type": "string",
+                "description": "So that..."
+              }
+            }
+          }
+        },
+        "functionalRequirements": {
+          "type": "array",
+          "description": "List of functional requirements",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "nonFunctionalRequirements": {
+          "type": "array",
+          "description": "List of non-functional requirements",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

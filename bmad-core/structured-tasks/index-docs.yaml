@@ -1,0 +1,107 @@
+id: index-docs
+name: Index Documentation Task
+purpose: >-
+  This task maintains the integrity and completeness of the `docs/index.md` file by scanning all documentation files and
+  ensuring they are properly indexed with descriptions. It handles both root-level documents and documents within
+  subfolders, organizing them hierarchically.
+steps:
+  - id: step0
+    name: Initialize Memory
+    description: "Setup working memory for indexing session"
+    actions:
+      - description: "Initialize working memory for documentation indexing"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Update memory with indexed documentation structure"
+        elicit: false
+        metadata:
+          originalIndent: 0
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Task Instructions
+    - Required Input
+  preservedContent:
+    - type: special-note
+      content: "   - Note the folder structure for hierarchical organization"
+      lineNumber: 18
+    - type: special-note
+      content: "   - Note existing file references and descriptions"
+      lineNumber: 23
+    - type: special-note
+      content: "   - Note which folder it belongs to (if in a subfolder)"
+      lineNumber: 34
+    - type: code-block
+      content: |-
+        ```markdown
+        # Documentation Index
+
+        ## Root Documents
+
+        ### [Document Title](./document.md)
+
+        Brief description of the document's purpose and contents.
+
+        ### [Another Document](./another.md)
+
+        Description here.
+
+        ## Folder Name
+
+        Documents within the `folder-name/` directory:
+
+        ### [Document in Folder](./folder-name/document.md)
+
+        Description of this document.
+
+        ### [Another in Folder](./folder-name/another.md)
+
+        Description here.
+
+        ## Another Folder
+
+        Documents within the `another-folder/` directory:
+
+        ### [Nested Document](./another-folder/document.md)
+
+        Description of nested document.
+
+        ```
+      lineNumber: 59
+    - type: code-block
+      content: |-
+        ```markdown
+        ### [Document Title](relative/path/to/file.md)
+
+        Brief description of the document's purpose and contents.
+        ```
+      lineNumber: 98
+    - type: code-block
+      content: |2-
+           ```markdown
+           Missing file detected:
+           Title: [Document Title]
+           Path: relative/path/to/file.md
+           Description: Existing description
+           Section: [Root Documents | Folder Name]
+
+           Options:
+
+           1. Remove this entry
+           2. Update the file path
+           3. Keep entry (mark as temporarily unavailable)
+
+           Please choose an option (1/2/3):
+           ```
+      lineNumber: 138
+    - type: special-note
+      content: "   - Note in the description that this is a multi-part document"
+      lineNumber: 163
+notes: |2
+     - Note the folder structure for hierarchical organization
+     - Note existing file references and descriptions
+     - Note which folder it belongs to (if in a subfolder)
+     - Note in the description that this is a multi-part document

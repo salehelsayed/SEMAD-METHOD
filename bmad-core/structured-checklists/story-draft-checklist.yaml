@@ -1,0 +1,277 @@
+id: story-draft-checklist
+name: Story Draft Checklist
+categories:
+  - name: GOAL & CONTEXT CLARITY
+    items:
+      - description: Story goal/purpose is clearly stated
+        checked: false
+      - description: Relationship to epic goals is evident
+        checked: false
+      - description: How the story fits into overall system flow is explained
+        checked: false
+      - description: Dependencies on previous stories are identified (if applicable)
+        checked: false
+      - description: Business context and value are clear
+        checked: false
+    notes: |-
+      Without clear goals, developers build the wrong thing. Verify:
+
+      1. The story states WHAT functionality to implement
+      2. The business value or user benefit is clear
+      3. How this fits into the larger epic/product is explained
+      4. Dependencies are explicit ("requires Story X to be complete")
+      5. Success looks like something specific, not vague
+    metadata:
+      originalName: 1. GOAL & CONTEXT CLARITY
+  - name: TECHNICAL IMPLEMENTATION GUIDANCE
+    items:
+      - description: Key files to create/modify are identified (not necessarily exhaustive)
+        checked: false
+      - description: Technologies specifically needed for this story are mentioned
+        checked: false
+      - description: Critical APIs or interfaces are sufficiently described
+        checked: false
+      - description: Necessary data models or structures are referenced
+        checked: false
+      - description: Required environment variables are listed (if applicable)
+        checked: false
+      - description: Any exceptions to standard coding patterns are noted
+        checked: false
+    notes: |-
+      Developers need enough technical context to start coding. Check:
+
+      1. Key files/components to create or modify are mentioned
+      2. Technology choices are specified where non-obvious
+      3. Integration points with existing code are identified
+      4. Data models or API contracts are defined or referenced
+      5. Non-standard patterns or exceptions are called out
+
+      Note: We don't need every file listed - just the important ones.
+    metadata:
+      originalName: 2. TECHNICAL IMPLEMENTATION GUIDANCE
+  - name: REFERENCE EFFECTIVENESS
+    items:
+      - description: References to external documents point to specific relevant sections
+        checked: false
+      - description: Critical information from previous stories is summarized (not just referenced)
+        checked: false
+      - description: Context is provided for why references are relevant
+        checked: false
+      - description: References use consistent format (e.g., `docs/filename.md#section`)
+        checked: false
+    notes: |-
+      References should help, not create a treasure hunt. Ensure:
+
+      1. References point to specific sections, not whole documents
+      2. The relevance of each reference is explained
+      3. Critical information is summarized in the story
+      4. References are accessible (not broken links)
+      5. Previous story context is summarized if needed
+      Stories should be mostly self-contained to avoid context switching. Verify:
+
+      1. Core requirements are in the story, not just in references
+      2. Domain terms are explained or obvious from context
+      3. Assumptions are stated explicitly
+      4. Edge cases are mentioned (even if deferred)
+      5. The story could be understood without reading 10 other documents
+    metadata:
+      originalName: 3. REFERENCE EFFECTIVENESS
+  - name: TESTING GUIDANCE
+    items:
+      - description: Required testing approach is outlined
+        checked: false
+      - description: Key test scenarios are identified
+        checked: false
+      - description: Success criteria are defined
+        checked: false
+      - description: Special testing considerations are noted (if applicable)
+        checked: false
+    notes: >-
+      Testing ensures the implementation actually works. Check:
+
+
+      1. Test approach is specified (unit, integration, e2e)
+
+      2. Key test scenarios are listed
+
+      3. Success criteria are measurable
+
+      4. Special test considerations are noted
+
+      5. Acceptance criteria in the story are testable
+
+      FINAL STORY VALIDATION REPORT
+
+
+      Generate a concise validation report:
+
+
+      1. Quick Summary
+
+         - Story readiness: READY / NEEDS REVISION / BLOCKED
+         - Clarity score (1-10)
+         - Major gaps identified
+
+      2. Fill in the validation table with:
+
+         - PASS: Requirements clearly met
+         - PARTIAL: Some gaps but workable
+         - FAIL: Critical information missing
+
+      3. Specific Issues (if any)
+
+         - List concrete problems to fix
+         - Suggest specific improvements
+         - Identify any blocking dependencies
+
+      4. Developer Perspective
+         - Could YOU implement this story as written?
+         - What questions would you have?
+         - What might cause delays or rework?
+
+      Be pragmatic - perfect documentation doesn't exist, but it must be enough to provide the extreme context a dev
+      agent needs to get the work down and not create a mess.
+    metadata:
+      originalName: 5. TESTING GUIDANCE
+result:
+  status: pending
+  notes: |-
+    - [ ] Core information needed is included (not overly reliant on external docs)
+    - [ ] Implicit assumptions are made explicit
+    - [ ] Domain-specific terms or concepts are explained
+    - [ ] Edge cases or error scenarios are addressed
+    | Category                             | Status | Issues |
+    | ------------------------------------ | ------ | ------ |
+    | 1. Goal & Context Clarity            | _TBD_  |        |
+    | 2. Technical Implementation Guidance | _TBD_  |        |
+    | 3. Reference Effectiveness           | _TBD_  |        |
+    | 4. Self-Containment Assessment       | _TBD_  |        |
+    | 5. Testing Guidance                  | _TBD_  |        |
+    **Final Assessment:**
+    - READY: The story provides sufficient context for implementation
+    - NEEDS REVISION: The story requires updates (see issues)
+    - BLOCKED: External information required (specify what information)
+metadata:
+  preservedContent:
+    - type: special-note
+      content: |-
+        [[LLM: INITIALIZATION INSTRUCTIONS - STORY DRAFT VALIDATION
+
+        Before proceeding with this checklist, ensure you have access to:
+
+        1. The story document being validated (usually in docs/stories/ or provided directly)
+        2. The parent epic context
+        3. Any referenced architecture or design documents
+        4. Previous related stories if this builds on prior work
+
+        IMPORTANT: This checklist validates individual stories BEFORE implementation begins.
+
+        VALIDATION PRINCIPLES:
+
+        1. Clarity - A developer should understand WHAT to build
+        2. Context - WHY this is being built and how it fits
+        3. Guidance - Key technical decisions and patterns to follow
+        4. Testability - How to verify the implementation works
+        5. Self-Contained - Most info needed is in the story itself
+
+        REMEMBER: We assume competent developer agents who can:
+
+        - Research documentation and codebases
+        - Make reasonable technical decisions
+        - Follow established patterns
+        - Ask for clarification when truly stuck
+
+        We're checking for SUFFICIENT guidance, not exhaustive detail.]]
+      lineNumber: 5
+    - type: special-note
+      content: |-
+        [[LLM: Without clear goals, developers build the wrong thing. Verify:
+
+        1. The story states WHAT functionality to implement
+        2. The business value or user benefit is clear
+        3. How this fits into the larger epic/product is explained
+        4. Dependencies are explicit ("requires Story X to be complete")
+        5. Success looks like something specific, not vague]]
+      lineNumber: 35
+    - type: special-note
+      content: |-
+        [[LLM: Developers need enough technical context to start coding. Check:
+
+        1. Key files/components to create or modify are mentioned
+        2. Technology choices are specified where non-obvious
+        3. Integration points with existing code are identified
+        4. Data models or API contracts are defined or referenced
+        5. Non-standard patterns or exceptions are called out
+
+        Note: We don't need every file listed - just the important ones.]]
+      lineNumber: 51
+    - type: special-note
+      content: "- [ ] Critical APIs or interfaces are sufficiently described"
+      lineNumber: 63
+    - type: special-note
+      content: |-
+        [[LLM: References should help, not create a treasure hunt. Ensure:
+
+        1. References point to specific sections, not whole documents
+        2. The relevance of each reference is explained
+        3. Critical information is summarized in the story
+        4. References are accessible (not broken links)
+        5. Previous story context is summarized if needed]]
+      lineNumber: 70
+    - type: special-note
+      content: "- [ ] Critical information from previous stories is summarized (not just referenced)"
+      lineNumber: 79
+    - type: special-note
+      content: |-
+        [[LLM: Stories should be mostly self-contained to avoid context switching. Verify:
+
+        1. Core requirements are in the story, not just in references
+        2. Domain terms are explained or obvious from context
+        3. Assumptions are stated explicitly
+        4. Edge cases are mentioned (even if deferred)
+        5. The story could be understood without reading 10 other documents]]
+      lineNumber: 85
+    - type: special-note
+      content: |-
+        [[LLM: Testing ensures the implementation actually works. Check:
+
+        1. Test approach is specified (unit, integration, e2e)
+        2. Key test scenarios are listed
+        3. Success criteria are measurable
+        4. Special test considerations are noted
+        5. Acceptance criteria in the story are testable]]
+      lineNumber: 100
+    - type: special-note
+      content: >-
+        [[LLM: FINAL STORY VALIDATION REPORT
+
+
+        Generate a concise validation report:
+
+
+        1. Quick Summary
+
+           - Story readiness: READY / NEEDS REVISION / BLOCKED
+           - Clarity score (1-10)
+           - Major gaps identified
+
+        2. Fill in the validation table with:
+
+           - PASS: Requirements clearly met
+           - PARTIAL: Some gaps but workable
+           - FAIL: Critical information missing
+
+        3. Specific Issues (if any)
+
+           - List concrete problems to fix
+           - Suggest specific improvements
+           - Identify any blocking dependencies
+
+        4. Developer Perspective
+           - Could YOU implement this story as written?
+           - What questions would you have?
+           - What might cause delays or rework?
+
+        Be pragmatic - perfect documentation doesn't exist, but it must be enough to provide the extreme context a dev
+        agent needs to get the work down and not create a mess.]]
+      lineNumber: 115

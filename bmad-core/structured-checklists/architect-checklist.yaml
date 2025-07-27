@@ -1,0 +1,707 @@
+id: architect-checklist
+name: Architect Solution Validation Checklist
+categories:
+  - name: REQUIREMENTS ALIGNMENT
+    items:
+      - description: Architecture supports all functional requirements in the PRD
+        checked: false
+      - description: Technical approaches for all epics and stories are addressed
+        checked: false
+      - description: Edge cases and performance scenarios are considered
+        checked: false
+      - description: All required integrations are accounted for
+        checked: false
+      - description: User journeys are supported by the technical architecture
+        checked: false
+      - description: Performance requirements are addressed with specific solutions
+        checked: false
+      - description: Scalability considerations are documented with approach
+        checked: false
+      - description: Security requirements have corresponding technical controls
+        checked: false
+      - description: Reliability and resilience approaches are defined
+        checked: false
+      - description: Compliance requirements have technical implementations
+        checked: false
+      - description: All technical constraints from PRD are satisfied
+        checked: false
+      - description: Platform/language requirements are followed
+        checked: false
+      - description: Infrastructure constraints are accommodated
+        checked: false
+      - description: Third-party service constraints are addressed
+        checked: false
+      - description: Organizational technical standards are followed
+        checked: false
+    notes: >-
+      Before evaluating this section, take a moment to fully understand the product's purpose and goals from the PRD.
+      What is the core problem being solved? Who are the users? What are the critical success factors? Keep these in
+      mind as you validate alignment. For each item, don't just check if it's mentioned - verify that the architecture
+      provides a concrete technical solution.
+    metadata:
+      originalName: 1. REQUIREMENTS ALIGNMENT
+  - name: ARCHITECTURE FUNDAMENTALS
+    items:
+      - description: Architecture is documented with clear diagrams
+        checked: false
+      - description: Major components and their responsibilities are defined
+        checked: false
+      - description: Component interactions and dependencies are mapped
+        checked: false
+      - description: Data flows are clearly illustrated
+        checked: false
+      - description: Technology choices for each component are specified
+        checked: false
+      - description: Clear boundaries between UI, business logic, and data layers
+        checked: false
+      - description: Responsibilities are cleanly divided between components
+        checked: false
+      - description: Interfaces between components are well-defined
+        checked: false
+      - description: Components adhere to single responsibility principle
+        checked: false
+      - description: Cross-cutting concerns (logging, auth, etc.) are properly addressed
+        checked: false
+      - description: Appropriate design patterns are employed
+        checked: false
+      - description: Industry best practices are followed
+        checked: false
+      - description: Anti-patterns are avoided
+        checked: false
+      - description: Consistent architectural style throughout
+        checked: false
+      - description: Pattern usage is documented and explained
+        checked: false
+      - description: System is divided into cohesive, loosely-coupled modules
+        checked: false
+      - description: Components can be developed and tested independently
+        checked: false
+      - description: Changes can be localized to specific components
+        checked: false
+      - description: Code organization promotes discoverability
+        checked: false
+      - description: Architecture specifically designed for AI agent implementation
+        checked: false
+    notes: >-
+      Architecture clarity is crucial for successful implementation. As you review this section, visualize the system as
+      if you were explaining it to a new developer. Are there any ambiguities that could lead to misinterpretation?
+      Would an AI agent be able to implement this architecture without confusion? Look for specific diagrams, component
+      definitions, and clear interaction patterns.
+    metadata:
+      originalName: 2. ARCHITECTURE FUNDAMENTALS
+  - name: TECHNICAL STACK & DECISIONS
+    items:
+      - description: Selected technologies meet all requirements
+        checked: false
+      - description: Technology versions are specifically defined (not ranges)
+        checked: false
+      - description: Technology choices are justified with clear rationale
+        checked: false
+      - description: Alternatives considered are documented with pros/cons
+        checked: false
+      - description: Selected stack components work well together
+        checked: false
+      - description: UI framework and libraries are specifically selected
+        checked: false
+      - description: State management approach is defined
+        checked: false
+      - description: Component structure and organization is specified
+        checked: false
+      - description: Responsive/adaptive design approach is outlined
+        checked: false
+      - description: Build and bundling strategy is determined
+        checked: false
+      - description: API design and standards are defined
+        checked: false
+      - description: Service organization and boundaries are clear
+        checked: false
+      - description: Authentication and authorization approach is specified
+        checked: false
+      - description: Error handling strategy is outlined
+        checked: false
+      - description: Backend scaling approach is defined
+        checked: false
+      - description: Data models are fully defined
+        checked: false
+      - description: Database technologies are selected with justification
+        checked: false
+      - description: Data access patterns are documented
+        checked: false
+      - description: Data migration/seeding approach is specified
+        checked: false
+      - description: Data backup and recovery strategies are outlined
+        checked: false
+    notes: >-
+      Technology choices have long-term implications. For each technology decision, consider: Is this the simplest
+      solution that could work? Are we over-engineering? Will this scale? What are the maintenance implications? Are
+      there security vulnerabilities in the chosen versions? Verify that specific versions are defined, not ranges.
+
+      Skip this entire section if this is a backend-only or service-only project. Only evaluate if the project includes
+      a user interface.
+    metadata:
+      originalName: 3. TECHNICAL STACK & DECISIONS
+  - name: FRONTEND DESIGN & IMPLEMENTATION [[FRONTEND ONLY]]
+    items:
+      - description: Framework & Core Libraries align with main architecture document
+        checked: false
+      - description: Component Architecture (e.g., Atomic Design) is clearly described
+        checked: false
+      - description: State Management Strategy is appropriate for application complexity
+        checked: false
+      - description: Data Flow patterns are consistent and clear
+        checked: false
+      - description: Styling Approach is defined and tooling specified
+        checked: false
+      - description: Directory structure is clearly documented with ASCII diagram
+        checked: false
+      - description: Component organization follows stated patterns
+        checked: false
+      - description: File naming conventions are explicit
+        checked: false
+      - description: Structure supports chosen framework's best practices
+        checked: false
+      - description: Clear guidance on where new components should be placed
+        checked: false
+      - description: Component template/specification format is defined
+        checked: false
+      - description: Component props, state, and events are well-documented
+        checked: false
+      - description: Shared/foundational components are identified
+        checked: false
+      - description: Component reusability patterns are established
+        checked: false
+      - description: Accessibility requirements are built into component design
+        checked: false
+      - description: API interaction layer is clearly defined
+        checked: false
+      - description: HTTP client setup and configuration documented
+        checked: false
+      - description: Error handling for API calls is comprehensive
+        checked: false
+      - description: Service definitions follow consistent patterns
+        checked: false
+      - description: Authentication integration with backend is clear
+        checked: false
+      - description: Routing strategy and library are specified
+        checked: false
+      - description: Route definitions table is comprehensive
+        checked: false
+      - description: Route protection mechanisms are defined
+        checked: false
+      - description: Deep linking considerations addressed
+        checked: false
+      - description: Navigation patterns are consistent
+        checked: false
+      - description: Image optimization strategies defined
+        checked: false
+      - description: Code splitting approach documented
+        checked: false
+      - description: Lazy loading patterns established
+        checked: false
+      - description: Re-render optimization techniques specified
+        checked: false
+      - description: Performance monitoring approach defined
+        checked: false
+    notes: >-
+      This entire section should be skipped for backend-only projects. Only evaluate if the project includes a user
+      interface. When evaluating, ensure alignment between the main architecture document and the frontend-specific
+      architecture document.
+    metadata:
+      originalName: 4. FRONTEND DESIGN & IMPLEMENTATION [[FRONTEND ONLY]]
+  - name: RESILIENCE & OPERATIONAL READINESS
+    items:
+      - description: Error handling strategy is comprehensive
+        checked: false
+      - description: Retry policies are defined where appropriate
+        checked: false
+      - description: Circuit breakers or fallbacks are specified for critical services
+        checked: false
+      - description: Graceful degradation approaches are defined
+        checked: false
+      - description: System can recover from partial failures
+        checked: false
+      - description: Logging strategy is defined
+        checked: false
+      - description: Monitoring approach is specified
+        checked: false
+      - description: Key metrics for system health are identified
+        checked: false
+      - description: Alerting thresholds and strategies are outlined
+        checked: false
+      - description: Debugging and troubleshooting capabilities are built in
+        checked: false
+      - description: Performance bottlenecks are identified and addressed
+        checked: false
+      - description: Caching strategy is defined where appropriate
+        checked: false
+      - description: Load balancing approach is specified
+        checked: false
+      - description: Horizontal and vertical scaling strategies are outlined
+        checked: false
+      - description: Resource sizing recommendations are provided
+        checked: false
+      - description: Deployment strategy is defined
+        checked: false
+      - description: CI/CD pipeline approach is outlined
+        checked: false
+      - description: Environment strategy (dev, staging, prod) is specified
+        checked: false
+      - description: Infrastructure as Code approach is defined
+        checked: false
+      - description: Rollback and recovery procedures are outlined
+        checked: false
+    notes: >-
+      Production systems fail in unexpected ways. As you review this section, think about Murphy's Law - what could go
+      wrong? Consider real-world scenarios: What happens during peak load? How does the system behave when a critical
+      service is down? Can the operations team diagnose issues at 3 AM? Look for specific resilience patterns, not just
+      mentions of "error handling".
+    metadata:
+      originalName: 5. RESILIENCE & OPERATIONAL READINESS
+  - name: SECURITY & COMPLIANCE
+    items:
+      - description: Authentication mechanism is clearly defined
+        checked: false
+      - description: Authorization model is specified
+        checked: false
+      - description: Role-based access control is outlined if required
+        checked: false
+      - description: Session management approach is defined
+        checked: false
+      - description: Credential management is addressed
+        checked: false
+      - description: Data encryption approach (at rest and in transit) is specified
+        checked: false
+      - description: Sensitive data handling procedures are defined
+        checked: false
+      - description: Data retention and purging policies are outlined
+        checked: false
+      - description: Backup encryption is addressed if required
+        checked: false
+      - description: Data access audit trails are specified if required
+        checked: false
+      - description: API security controls are defined
+        checked: false
+      - description: Rate limiting and throttling approaches are specified
+        checked: false
+      - description: Input validation strategy is outlined
+        checked: false
+      - description: CSRF/XSS prevention measures are addressed
+        checked: false
+      - description: Secure communication protocols are specified
+        checked: false
+      - description: Network security design is outlined
+        checked: false
+      - description: Firewall and security group configurations are specified
+        checked: false
+      - description: Service isolation approach is defined
+        checked: false
+      - description: Least privilege principle is applied
+        checked: false
+      - description: Security monitoring strategy is outlined
+        checked: false
+    notes: >-
+      Security is not optional. Review this section with a hacker's mindset - how could someone exploit this system?
+      Also consider compliance: Are there industry-specific regulations that apply? GDPR? HIPAA? PCI? Ensure the
+      architecture addresses these proactively. Look for specific security controls, not just general statements.
+    metadata:
+      originalName: 6. SECURITY & COMPLIANCE
+  - name: IMPLEMENTATION GUIDANCE
+    items:
+      - description: Coding standards are defined
+        checked: false
+      - description: Documentation requirements are specified
+        checked: false
+      - description: Testing expectations are outlined
+        checked: false
+      - description: Code organization principles are defined
+        checked: false
+      - description: Naming conventions are specified
+        checked: false
+      - description: Unit testing approach is defined
+        checked: false
+      - description: Integration testing strategy is outlined
+        checked: false
+      - description: E2E testing approach is specified
+        checked: false
+      - description: Performance testing requirements are outlined
+        checked: false
+      - description: Security testing approach is defined
+        checked: false
+      - description: Component testing scope and tools defined
+        checked: false
+      - description: UI integration testing approach specified
+        checked: false
+      - description: Visual regression testing considered
+        checked: false
+      - description: Accessibility testing tools identified
+        checked: false
+      - description: Frontend-specific test data management addressed
+        checked: false
+      - description: Local development environment setup is documented
+        checked: false
+      - description: Required tools and configurations are specified
+        checked: false
+      - description: Development workflows are outlined
+        checked: false
+      - description: Source control practices are defined
+        checked: false
+      - description: Dependency management approach is specified
+        checked: false
+      - description: API documentation standards are defined
+        checked: false
+      - description: Architecture documentation requirements are specified
+        checked: false
+      - description: Code documentation expectations are outlined
+        checked: false
+      - description: System diagrams and visualizations are included
+        checked: false
+      - description: Decision records for key choices are included
+        checked: false
+    notes: >-
+      Clear implementation guidance prevents costly mistakes. As you review this section, imagine you're a developer
+      starting on day one. Do they have everything they need to be productive? Are coding standards clear enough to
+      maintain consistency across the team? Look for specific examples and patterns.
+
+      Skip this subsection for backend-only projects.
+    metadata:
+      originalName: 7. IMPLEMENTATION GUIDANCE
+  - name: DEPENDENCY & INTEGRATION MANAGEMENT
+    items:
+      - description: All external dependencies are identified
+        checked: false
+      - description: Versioning strategy for dependencies is defined
+        checked: false
+      - description: Fallback approaches for critical dependencies are specified
+        checked: false
+      - description: Licensing implications are addressed
+        checked: false
+      - description: Update and patching strategy is outlined
+        checked: false
+      - description: Component dependencies are clearly mapped
+        checked: false
+      - description: Build order dependencies are addressed
+        checked: false
+      - description: Shared services and utilities are identified
+        checked: false
+      - description: Circular dependencies are eliminated
+        checked: false
+      - description: Versioning strategy for internal components is defined
+        checked: false
+      - description: All third-party integrations are identified
+        checked: false
+      - description: Integration approaches are defined
+        checked: false
+      - description: Authentication with third parties is addressed
+        checked: false
+      - description: Error handling for integration failures is specified
+        checked: false
+      - description: Rate limits and quotas are considered
+        checked: false
+    notes: >-
+      Dependencies are often the source of production issues. For each dependency, consider: What happens if it's
+      unavailable? Is there a newer version with security patches? Are we locked into a vendor? What's our contingency
+      plan? Verify specific versions and fallback strategies.
+    metadata:
+      originalName: 8. DEPENDENCY & INTEGRATION MANAGEMENT
+  - name: AI AGENT IMPLEMENTATION SUITABILITY
+    items:
+      - description: Components are sized appropriately for AI agent implementation
+        checked: false
+      - description: Dependencies between components are minimized
+        checked: false
+      - description: Clear interfaces between components are defined
+        checked: false
+      - description: Components have singular, well-defined responsibilities
+        checked: false
+      - description: File and code organization optimized for AI agent understanding
+        checked: false
+      - description: Patterns are consistent and predictable
+        checked: false
+      - description: Complex logic is broken down into simpler steps
+        checked: false
+      - description: Architecture avoids overly clever or obscure approaches
+        checked: false
+      - description: Examples are provided for unfamiliar patterns
+        checked: false
+      - description: Component responsibilities are explicit and clear
+        checked: false
+      - description: Detailed implementation guidance is provided
+        checked: false
+      - description: Code structure templates are defined
+        checked: false
+      - description: Specific implementation patterns are documented
+        checked: false
+      - description: Common pitfalls are identified with solutions
+        checked: false
+      - description: References to similar implementations are provided when helpful
+        checked: false
+      - description: Design reduces opportunities for implementation errors
+        checked: false
+      - description: Validation and error checking approaches are defined
+        checked: false
+      - description: Self-healing mechanisms are incorporated where possible
+        checked: false
+      - description: Testing patterns are clearly defined
+        checked: false
+      - description: Debugging guidance is provided
+        checked: false
+    notes: >-
+      This architecture may be implemented by AI agents. Review with extreme clarity in mind. Are patterns consistent?
+      Is complexity minimized? Would an AI agent make incorrect assumptions? Remember: explicit is better than implicit.
+      Look for clear file structures, naming conventions, and implementation patterns.
+    metadata:
+      originalName: 9. AI AGENT IMPLEMENTATION SUITABILITY
+  - name: ACCESSIBILITY IMPLEMENTATION [[FRONTEND ONLY]]
+    items:
+      - description: Semantic HTML usage is emphasized
+        checked: false
+      - description: ARIA implementation guidelines provided
+        checked: false
+      - description: Keyboard navigation requirements defined
+        checked: false
+      - description: Focus management approach specified
+        checked: false
+      - description: Screen reader compatibility addressed
+        checked: false
+      - description: Accessibility testing tools identified
+        checked: false
+      - description: Testing process integrated into workflow
+        checked: false
+      - description: Compliance targets (WCAG level) specified
+        checked: false
+      - description: Manual testing procedures defined
+        checked: false
+      - description: Automated testing approach outlined
+        checked: false
+    notes: >-
+      Skip this section for backend-only projects. Accessibility is a core requirement for any user interface.
+
+      FINAL VALIDATION REPORT GENERATION
+
+
+      Now that you've completed the checklist, generate a comprehensive validation report that includes:
+
+
+      1. Executive Summary
+
+         - Overall architecture readiness (High/Medium/Low)
+         - Critical risks identified
+         - Key strengths of the architecture
+         - Project type (Full-stack/Frontend/Backend) and sections evaluated
+
+      2. Section Analysis
+
+         - Pass rate for each major section (percentage of items passed)
+         - Most concerning failures or gaps
+         - Sections requiring immediate attention
+         - Note any sections skipped due to project type
+
+      3. Risk Assessment
+
+         - Top 5 risks by severity
+         - Mitigation recommendations for each
+         - Timeline impact of addressing issues
+
+      4. Recommendations
+
+         - Must-fix items before development
+         - Should-fix items for better quality
+         - Nice-to-have improvements
+
+      5. AI Implementation Readiness
+
+         - Specific concerns for AI agent implementation
+         - Areas needing additional clarification
+         - Complexity hotspots to address
+
+      6. Frontend-Specific Assessment (if applicable)
+         - Frontend architecture completeness
+         - Alignment between main and frontend architecture docs
+         - UI/UX specification coverage
+         - Component design clarity
+
+      After presenting the report, ask the user if they would like detailed analysis of any specific section, especially
+      those with warnings or failures.
+    metadata:
+      originalName: 10. ACCESSIBILITY IMPLEMENTATION [[FRONTEND ONLY]]
+result:
+  status: pending
+  notes: ""
+metadata:
+  preservedContent:
+    - type: special-note
+      content: >-
+        [[LLM: INITIALIZATION INSTRUCTIONS - REQUIRED ARTIFACTS
+
+
+        Before proceeding with this checklist, ensure you have access to:
+
+
+        1. architecture.md - The primary architecture document (check docs/architecture.md)
+
+        2. prd.md - Product Requirements Document for requirements alignment (check docs/prd.md)
+
+        3. frontend-architecture.md or fe-architecture.md - If this is a UI project (check
+        docs/frontend-architecture.md)
+
+        4. Any system diagrams referenced in the architecture
+
+        5. API documentation if available
+
+        6. Technology stack details and version specifications
+
+
+        IMPORTANT: If any required documents are missing or inaccessible, immediately ask the user for their location or
+        content before proceeding.
+
+
+        PROJECT TYPE DETECTION:
+
+        First, determine the project type by checking:
+
+
+        - Does the architecture include a frontend/UI component?
+
+        - Is there a frontend-architecture.md document?
+
+        - Does the PRD mention user interfaces or frontend requirements?
+
+
+        If this is a backend-only or service-only project:
+
+
+        - Skip sections marked with [[FRONTEND ONLY]]
+      lineNumber: 5
+    - type: special-note
+      content: "- Note in your final report that frontend sections were skipped due to project type"
+      lineNumber: 29
+    - type: special-note
+      content: 3. Critical Thinking - Question assumptions and identify gaps, not just confirm what's present
+      lineNumber: 36
+    - type: special-note
+      content: >-
+        [[LLM: Before evaluating this section, take a moment to fully understand the product's purpose and goals from
+        the PRD. What is the core problem being solved? Who are the users? What are the critical success factors? Keep
+        these in mind as you validate alignment. For each item, don't just check if it's mentioned - verify that the
+        architecture provides a concrete technical solution.]]
+      lineNumber: 47
+    - type: special-note
+      content: >-
+        [[LLM: Architecture clarity is crucial for successful implementation. As you review this section, visualize the
+        system as if you were explaining it to a new developer. Are there any ambiguities that could lead to
+        misinterpretation? Would an AI agent be able to implement this architecture without confusion? Look for specific
+        diagrams, component definitions, and clear interaction patterns.]]
+      lineNumber: 75
+    - type: special-note
+      content: >-
+        [[LLM: Technology choices have long-term implications. For each technology decision, consider: Is this the
+        simplest solution that could work? Are we over-engineering? Will this scale? What are the maintenance
+        implications? Are there security vulnerabilities in the chosen versions? Verify that specific versions are
+        defined, not ranges.]]
+      lineNumber: 111
+    - type: special-note
+      content: >-
+        [[LLM: Skip this entire section if this is a backend-only or service-only project. Only evaluate if the project
+        includes a user interface.]]
+      lineNumber: 123
+    - type: special-note
+      content: >-
+        [[LLM: This entire section should be skipped for backend-only projects. Only evaluate if the project includes a
+        user interface. When evaluating, ensure alignment between the main architecture document and the
+        frontend-specific architecture document.]]
+      lineNumber: 149
+    - type: special-note
+      content: >-
+        [[LLM: Production systems fail in unexpected ways. As you review this section, think about Murphy's Law - what
+        could go wrong? Consider real-world scenarios: What happens during peak load? How does the system behave when a
+        critical service is down? Can the operations team diagnose issues at 3 AM? Look for specific resilience
+        patterns, not just mentions of "error handling".]]
+      lineNumber: 201
+    - type: special-note
+      content: "- [ ] Circuit breakers or fallbacks are specified for critical services"
+      lineNumber: 207
+    - type: special-note
+      content: >-
+        [[LLM: Security is not optional. Review this section with a hacker's mindset - how could someone exploit this
+        system? Also consider compliance: Are there industry-specific regulations that apply? GDPR? HIPAA? PCI? Ensure
+        the architecture addresses these proactively. Look for specific security controls, not just general
+        statements.]]
+      lineNumber: 237
+    - type: special-note
+      content: >-
+        [[LLM: Clear implementation guidance prevents costly mistakes. As you review this section, imagine you're a
+        developer starting on day one. Do they have everything they need to be productive? Are coding standards clear
+        enough to maintain consistency across the team? Look for specific examples and patterns.]]
+      lineNumber: 273
+    - type: special-note
+      content: "[[LLM: Skip this subsection for backend-only projects.]]"
+      lineNumber: 293
+    - type: special-note
+      content: >-
+        [[LLM: Dependencies are often the source of production issues. For each dependency, consider: What happens if
+        it's unavailable? Is there a newer version with security patches? Are we locked into a vendor? What's our
+        contingency plan? Verify specific versions and fallback strategies.]]
+      lineNumber: 319
+    - type: special-note
+      content: "- [ ] Fallback approaches for critical dependencies are specified"
+      lineNumber: 325
+    - type: special-note
+      content: >-
+        [[LLM: This architecture may be implemented by AI agents. Review with extreme clarity in mind. Are patterns
+        consistent? Is complexity minimized? Would an AI agent make incorrect assumptions? Remember: explicit is better
+        than implicit. Look for clear file structures, naming conventions, and implementation patterns.]]
+      lineNumber: 347
+    - type: special-note
+      content: >-
+        [[LLM: Skip this section for backend-only projects. Accessibility is a core requirement for any user
+        interface.]]
+      lineNumber: 383
+    - type: special-note
+      content: >-
+        [[LLM: FINAL VALIDATION REPORT GENERATION
+
+
+        Now that you've completed the checklist, generate a comprehensive validation report that includes:
+
+
+        1. Executive Summary
+
+           - Overall architecture readiness (High/Medium/Low)
+           - Critical risks identified
+           - Key strengths of the architecture
+           - Project type (Full-stack/Frontend/Backend) and sections evaluated
+
+        2. Section Analysis
+
+           - Pass rate for each major section (percentage of items passed)
+           - Most concerning failures or gaps
+           - Sections requiring immediate attention
+           - Note any sections skipped due to project type
+
+        3. Risk Assessment
+
+           - Top 5 risks by severity
+           - Mitigation recommendations for each
+           - Timeline impact of addressing issues
+
+        4. Recommendations
+
+           - Must-fix items before development
+           - Should-fix items for better quality
+           - Nice-to-have improvements
+
+        5. AI Implementation Readiness
+
+           - Specific concerns for AI agent implementation
+           - Areas needing additional clarification
+           - Complexity hotspots to address
+
+        6. Frontend-Specific Assessment (if applicable)
+           - Frontend architecture completeness
+           - Alignment between main and frontend architecture docs
+           - UI/UX specification coverage
+           - Component design clarity
+
+        After presenting the report, ask the user if they would like detailed analysis of any specific section,
+        especially those with warnings or failures.]]
+      lineNumber: 401

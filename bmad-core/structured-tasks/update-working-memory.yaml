@@ -1,0 +1,50 @@
+id: update-working-memory
+name: Update Working Memory
+category: memory
+description: Updates the agent's working memory with current task state
+priority: high
+tags:
+  - memory
+  - state-management
+  - context
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the agent
+  - name: taskId
+    type: string
+    description: Current task identifier
+    optional: true
+  - name: currentStep
+    type: string
+    description: Current step in the plan
+    optional: true
+  - name: plan
+    type: array
+    description: Task execution plan
+    optional: true
+  - name: context
+    type: object
+    description: Additional context to store
+    optional: true
+outputs:
+  - name: memory
+    type: object
+    description: Updated memory state
+dependencies: []
+executionSteps:
+  - Update the working memory JSON file for the agent
+  - Merge provided updates with existing memory
+  - Preserve existing data not being updated
+  - Return the updated memory state
+validationCriteria:
+  - Memory file exists and is valid JSON
+  - Updates are properly merged
+  - No data loss occurs
+exampleUsage: |
+  await updateWorkingMemory('dev', {
+    taskId: 'TASK-123',
+    currentStep: 'implementing-feature',
+    plan: ['analyze', 'implement', 'test'],
+    context: { feature: 'user-auth' }
+  });

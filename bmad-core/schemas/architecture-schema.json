@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bmad-method.com/schemas/architecture.json",
+  "title": "Architecture Schema",
+  "description": "JSON Schema for Architecture Document structure",
+  "type": "object",
+  "required": ["version", "sections"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Version of the Architecture document format"
+    },
+    "sections": {
+      "type": "object",
+      "description": "Main sections of the Architecture document",
+      "properties": {
+        "overview": {
+          "type": "string",
+          "minLength": 1,
+          "description": "High-level architecture overview"
+        },
+        "components": {
+          "type": "array",
+          "description": "System components",
+          "items": {
+            "type": "object",
+            "required": ["name", "description"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Component name"
+              },
+              "description": {
+                "type": "string",
+                "description": "Component description"
+              },
+              "technologies": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "dataFlow": {
+          "type": "string",
+          "description": "Description of data flow between components"
+        },
+        "deploymentArchitecture": {
+          "type": "string",
+          "description": "Deployment architecture details"
+        },
+        "securityConsiderations": {
+          "type": "array",
+          "description": "Security considerations",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

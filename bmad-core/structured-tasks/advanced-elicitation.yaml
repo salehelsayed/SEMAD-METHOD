@@ -1,0 +1,203 @@
+id: advanced-elicitation
+name: Advanced Elicitation Task
+purpose: |-
+  - Provide optional reflective and brainstorming actions to enhance content quality
+  - Enable deeper exploration of ideas through structured elicitation techniques
+  - Support iterative refinement through multiple analytical perspectives
+  - Usable during template-driven document creation or any chat conversation
+steps:
+  - id: step0
+    name: Initialize Memory
+    description: "Setup working memory for elicitation session"
+    actions:
+      - description: "Initialize working memory for elicitation context"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve relevant past elicitation patterns if available"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Intelligent Method Selection
+    description: |-
+      **Context Analysis**: Before presenting options, analyze:
+      **Method Selection Strategy**:
+      1. **Always Include Core Methods** (choose 3-4):
+      2. **Context-Specific Methods** (choose 4-5):
+      3. **Always Include**: "Proceed / No Further Actions" as option 9
+    actions:
+      - description: "**Content Type**: Technical specs, user stories, architecture, requirements, etc."
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Complexity Level**: Simple, moderate, or complex content"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Stakeholder Needs**: Who will use this information"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Risk Level**: High-impact decisions vs routine items"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Creative Potential**: Opportunities for innovation or alternatives"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Expand or Contract for Audience
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Critique and Refine
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify Potential Risks
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess Alignment with Goals
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Technical Content**: Tree of Thoughts, ReWOO, Meta-Prompting"
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "**User-Facing Content**: Agile Team Perspective, Stakeholder Roundtable"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Creative Content**: Innovation Tournament, Escape Room Challenge"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Strategic Content**: Red Team vs Blue Team, Hindsight Reflection"
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Section Context and Review
+    description: >-
+      When invoked after outputting a section:
+
+      1. **Provide Context Summary**: Give a brief 1-2 sentence summary of what the user should look for in the section
+      just presented
+
+      2. **Explain Visual Elements**: If the section contains diagrams, explain them briefly before offering elicitation
+      options
+
+      3. **Clarify Scope Options**: If the section contains multiple distinct items, inform the user they can apply
+      elicitation actions to:
+    actions:
+      - description: The entire section as a whole
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Individual items within the section (specify which item when selecting an action)
+        elicit: true
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Present Elicitation Options
+    description: |-
+      **Review Request Process:**
+      **Action List Presentation Format:**
+      ```text
+      **Advanced Elicitation Options**
+      Choose a number (0-8) or 9 to proceed:
+
+      0. [Method Name]
+      1. [Method Name]
+      2. [Method Name]
+      3. [Method Name]
+      4. [Method Name]
+      5. [Method Name]
+      6. [Method Name]
+      7. [Method Name]
+      8. [Method Name]
+      9. Proceed / No Further Actions
+      ```
+      **Response Handling:**
+    actions:
+      - description: Ask the user to review the drafted section
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: In the SAME message, inform them they can suggest direct changes OR select an elicitation method
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Present 9 intelligently selected methods (0-8) plus "Proceed" (9)
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Keep descriptions short - just the method name
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Await simple numeric selection
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Numbers 0-8**: Execute the selected method, then re-offer the choice"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Number 9**: Proceed to next section or continue conversation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Direct Feedback**: Apply user's suggested changes and continue"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Method Execution Framework
+    description: |-
+      **Execution Process:**
+      1. **Retrieve Method**: Access the specific elicitation method from the elicitation-methods data file
+      2. **Apply Context**: Execute the method from your current role's perspective
+      3. **Provide Results**: Deliver insights, critiques, or alternatives relevant to the content
+      4. **Re-offer Choice**: Present the same 9 options again until user selects 9 or gives direct feedback
+      **Execution Guidelines:**
+    actions:
+      - description: "**Be Concise**: Focus on actionable insights, not lengthy explanations"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Stay Relevant**: Tie all elicitation back to the specific content being analyzed"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Maintain Flow**: Keep the process moving efficiently"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Usage Scenarios
+    - Task Instructions
+  preservedContent: []

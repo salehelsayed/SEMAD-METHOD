@@ -1,0 +1,32 @@
+id: dynamic-plan-rules
+description: Rules for when to split tasks into sub-tasks.
+rules:
+  - condition: "steps.length > 5"
+    action: "split by step count"
+    description: "Break task into chunks when it has more than 5 steps"
+  - condition: "description contains 'and' or 'then'"
+    action: "split by conjunction"
+    description: "Split task at natural boundaries indicated by conjunctions"
+  - condition: "retrieved context tokens > 2000"
+    action: "split by context length"
+    description: "Split when context becomes too large to maintain focus"
+  - condition: "multiple domains involved"
+    action: "split by domain"
+    description: "Separate frontend, backend, and infrastructure tasks"
+  - condition: "dependencies between steps"
+    action: "split by dependency chain"
+    description: "Create sub-tasks when steps have complex dependencies"
+thresholds:
+  maxSteps: 5
+  maxContextTokens: 2000
+  maxComplexity: "high"
+splitStrategies:
+  byStepCount:
+    chunkSize: 5
+    preserveBoundaries: true
+  byConjunction:
+    keywords: ["and", "then", "additionally", "furthermore", "also"]
+    requireNewChunk: true
+  byDomain:
+    domains: ["frontend", "backend", "database", "infrastructure", "testing"]
+    separateByDomain: true

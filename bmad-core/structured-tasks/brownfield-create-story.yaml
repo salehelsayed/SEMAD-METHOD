@@ -1,0 +1,263 @@
+id: brownfield-create-story
+name: Create Brownfield Story Task
+purpose: >-
+  Create a single user story for very small brownfield enhancements that can be completed in one focused development
+  session. This task is for minimal additions or bug fixes that require existing system integration awareness.
+steps:
+  - id: step1
+    name: Quick Project Assessment
+    description: |-
+      Gather minimal but essential context about the existing project:
+      **Current System Context:**
+      **Change Scope:**
+    actions:
+      - description: "[ ] Relevant existing functionality identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Technology stack for this area noted"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration point(s) clearly understood"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing patterns for similar work identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Specific change clearly defined"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Impact boundaries identified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Success criteria established"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Story Creation
+    description: >-
+      Create a single focused story following this structure:
+
+      #### Story Title
+
+      {{Specific Enhancement}} - Brownfield Addition
+
+      #### User Story
+
+      As a {{user type}},
+
+      I want {{specific action/capability}},
+
+      So that {{clear benefit/value}}.
+
+      #### Story Context
+
+      **Existing System Integration:**
+
+      #### Acceptance Criteria
+
+      **Functional Requirements:**
+
+      1. {{Primary functional requirement}}
+
+      2. {{Secondary functional requirement (if any)}}
+
+      3. {{Integration requirement}}
+
+      **Integration Requirements:** 4. Existing {{relevant functionality}} continues to work unchanged 5. New
+      functionality follows existing {{pattern}} pattern 6. Integration with {{system/component}} maintains current
+      behavior
+
+      **Quality Requirements:** 7. Change is covered by appropriate tests 8. Documentation is updated if needed 9. No
+      regression in existing functionality verified
+
+      #### Technical Notes
+
+      #### Definition of Done
+    actions:
+      - description: "Integrates with: {{existing component/system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Technology: {{relevant tech stack}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Follows pattern: {{existing pattern to follow}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Touch points: {{specific integration points}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Integration Approach:** {{how it connects to existing system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Existing Pattern Reference:** {{link or description of pattern to follow}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Key Constraints:** {{any important limitations or requirements}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Functional requirements met"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration requirements verified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Existing functionality regression tested"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Code follows existing patterns and standards"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Tests pass (existing and new)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Documentation updated if applicable"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: "- **Key Constraints:** {{any important limitations or requirements}}"
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Risk and Compatibility Check
+    description: |-
+      **Minimal Risk Assessment:**
+      **Compatibility Verification:**
+    actions:
+      - description: "**Primary Risk:** {{main risk to existing system}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Mitigation:** {{simple mitigation approach}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Rollback:** {{how to undo if needed}}"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] No breaking changes to existing APIs"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Database changes (if any) are additive only"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] UI changes follow existing design patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Performance impact is negligible"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Validation Checklist
+    description: |-
+      Before finalizing the story, confirm:
+      **Scope Validation:**
+      **Clarity Check:**
+      The story creation is successful when:
+      1. Enhancement is clearly defined and appropriately scoped for single session
+      2. Integration approach is straightforward and low-risk
+      3. Existing system patterns are identified and will be followed
+      4. Rollback plan is simple and feasible
+      5. Acceptance criteria include existing functionality verification
+    actions:
+      - description: "[ ] Story can be completed in one development session"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration approach is straightforward"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Follows existing patterns exactly"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] No design or architecture work required"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Story requirements are unambiguous"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Integration points are clearly specified"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Success criteria are testable"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[ ] Rollback approach is simple"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: This task is for VERY SMALL brownfield changes only
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: If complexity grows during analysis, escalate to brownfield-create-epic
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Always prioritize existing system integrity
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: When in doubt about integration complexity, use brownfield-create-epic instead
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Stories should take no more than 4 hours of focused development work
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - When to Use This Task
+    - Instructions
+    - Success Criteria
+    - Important Notes
+  preservedContent:
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2
