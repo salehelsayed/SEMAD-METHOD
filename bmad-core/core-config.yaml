@@ -24,3 +24,8 @@ searchTools:
   defaultOutputFile: "search-tools.yaml"
 validationSchemas:
   storyContractSchema: "schemas/story-contract-schema.json"
+  architectureSchema: "schemas/architecture-schema.json"
+  prdSchema: "schemas/prd-schema.json"
+  checklistSchema: "schemas/checklist-schema.json"
+  taskSchema: "schemas/task-schema.json"
+  structuredTaskSchema: "schemas/structured-task-schema.json"

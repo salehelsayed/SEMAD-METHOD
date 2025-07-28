@@ -1,0 +1,57 @@
+template:
+  name: Workflow Status Report
+  description: Template for displaying current workflow execution status
+  version: "1.0"
+
+sections:
+  - name: Workflow Information
+    content: |
+      ## Workflow Status Report
+      
+      **Workflow Name**: {{workflow_name}}
+      **Workflow ID**: {{workflow_id}}
+      **Started**: {{start_time}}
+      **Current Status**: {{status}}
+      
+  - name: Active Agents
+    content: |
+      ### Active Agents
+      {{#each active_agents}}
+      - **{{name}}** ({{id}}): {{current_task}}
+        - Status: {{status}}
+        - Started: {{task_start_time}}
+      {{/each}}
+      
+  - name: Completed Steps
+    content: |
+      ### Completed Steps
+      {{#each completed_steps}}
+      ✓ **Step {{number}}**: {{description}}
+        - Agent: {{agent}}
+        - Duration: {{duration}}
+        - Result: {{result}}
+      {{/each}}
+      
+  - name: Pending Steps
+    content: |
+      ### Pending Steps
+      {{#each pending_steps}}
+      ○ **Step {{number}}**: {{description}}
+        - Assigned Agent: {{agent}}
+        - Dependencies: {{dependencies}}
+      {{/each}}
+      
+  - name: Context Summary
+    content: |
+      ### Current Context
+      {{#each context_items}}
+      - **{{key}}**: {{value}}
+      {{/each}}
+      
+  - name: Performance Metrics
+    content: |
+      ### Performance Metrics
+      - Total Duration: {{total_duration}}
+      - Steps Completed: {{completed_count}}/{{total_count}}
+      - Success Rate: {{success_rate}}%
+      - Average Step Duration: {{avg_duration}}

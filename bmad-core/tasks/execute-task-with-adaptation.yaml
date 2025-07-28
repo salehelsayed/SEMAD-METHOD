@@ -4,41 +4,36 @@ purpose: Execute a task file with automatic complexity analysis and sub-task cre
 notes: This task demonstrates how to use the task runner to execute tasks with dynamic plan adaptation
 
 steps:
-  - name: Initialize Task Runner
-    description: Create a task runner instance and prepare for execution
-    actions:
-      - description: Import the TaskRunner from tools/task-runner.js
-      - description: Create a new TaskRunner instance with the project root directory
-      - description: Verify agent has working memory initialized
-
-  - name: Load and Analyze Task
-    description: Load the specified task file and analyze its complexity
-    actions:
-      - description: Use taskRunner.executeTask() with the agent name and task path
-      - description: The runner will automatically apply planAdaptation() to check complexity
-      - description: Log whether the task was split into sub-tasks
-
-  - name: Process Sub-tasks
-    description: If sub-tasks were created, process them sequentially
-    actions:
-      - description: Iterate through each sub-task in the adapted plan
-      - description: Use taskRunner.executeSubTask() to start each sub-task
-      - description: Execute the sub-task steps
-      - description: Use taskRunner.completeSubTask() when done
-
-  - name: Update Progress
-    description: Track execution progress in working memory
-    actions:
-      - description: Record observations for each completed step
-      - description: Update the current step pointer
-      - description: Maintain context for future reference
-
-  - name: Handle Dynamic Complexity
-    description: Allow for real-time sub-task insertion if needed
-    actions:
-      - description: If encountering unexpected complexity, use insertSubTask()
-      - description: Provide clear title and steps for the new sub-task
-      - description: Continue execution with the updated plan
+  step0: |
+    Initialize working memory and Task Runner
+    - Import the TaskRunner from tools/task-runner.js
+    - Create a new TaskRunner instance with the project root directory
+    - Verify agent has working memory initialized
+  
+  step1: |
+    Load and Analyze Task
+    - Use taskRunner.executeTask() with the agent name and task path
+    - The runner will automatically apply planAdaptation() to check complexity
+    - Log whether the task was split into sub-tasks
+  
+  step2: |
+    Process Sub-tasks (if created)
+    - Iterate through each sub-task in the adapted plan
+    - Use taskRunner.executeSubTask() to start each sub-task
+    - Execute the sub-task steps
+    - Use taskRunner.completeSubTask() when done
+  
+  step3: |
+    Update Progress in working memory
+    - Record observations for each completed step
+    - Update the current step pointer
+    - Maintain context for future reference
+  
+  step4: |
+    Handle Dynamic Complexity
+    - If encountering unexpected complexity, use insertSubTask()
+    - Provide clear title and steps for the new sub-task
+    - Continue execution with the updated plan
 
 metadata:
   executionMode: SEQUENTIAL

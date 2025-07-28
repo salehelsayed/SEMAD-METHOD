@@ -4,13 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Use ModuleResolver for schema resolution
-let ModuleResolver;
-try {
-  ModuleResolver = require('../bmad-core/utils/module-resolver');
-} catch (e) {
-  // Fallback if bmad-core is in different location
-  ModuleResolver = require('../.bmad-core/utils/module-resolver');
-}
+const ModuleResolver = require('../bmad-core/utils/module-resolver');
 
 describe('StoryContract Schema Validation', () => {
   let ajv;
@@ -19,8 +13,13 @@ describe('StoryContract Schema Validation', () => {
   beforeAll(() => {
     // Load the schema using ModuleResolver
     const baseDir = path.join(__dirname, '..');
-    const schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', baseDir) || 
-      path.join(__dirname, '../bmad-core/schemas/story-contract-schema.json');
+    let schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', baseDir);
+    
+    // Fallback to direct path only if ModuleResolver fails
+    if (!schemaPath) {
+      schemaPath = path.join(__dirname, '../bmad-core/schemas/story-contract-schema.json');
+    }
+    
     const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
     
     ajv = new Ajv();

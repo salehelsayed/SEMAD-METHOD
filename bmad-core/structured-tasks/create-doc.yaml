@@ -1,0 +1,13 @@
+id: create-doc
+name: Create Document Task
+description: Create a structured document from a selected template
+type: task
+structuredTaskReference: ../structured-tasks/create-doc.yaml
+category: documentation
+priority: medium
+requiredInputs:
+  - destination_path
+  - template_name
+  - document_context (optional)
+outputs:
+  - saved_path: Path where the document was saved

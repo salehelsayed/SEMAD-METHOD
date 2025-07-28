@@ -4,7 +4,10 @@ const yaml = require('js-yaml');
 const { execSync } = require('child_process');
 
 describe('Validate Search Tools', () => {
-  const testDir = path.join(__dirname, 'test-outputs');
+  // Use unique directory for each test run to avoid conflicts
+  const testDirBase = path.join(__dirname, 'test-outputs-validate-search-tools');
+  const testId = Date.now() + Math.random().toString(36).substring(2);
+  const testDir = path.join(testDirBase, testId);
   const scriptPath = path.join(__dirname, '..', 'scripts', 'validate-search-tools.js');
   const testFilePath = path.join(testDir, 'test-search-tools.yaml');
 
@@ -18,7 +21,26 @@ describe('Validate Search Tools', () => {
   afterEach(() => {
     // Clean up test files
     if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true });
+      fs.rmSync(testDir, { recursive: true, force: true });
+    }
+    // Clean up base directory if empty
+    try {
+      if (fs.existsSync(testDirBase) && fs.readdirSync(testDirBase).length === 0) {
+        fs.rmSync(testDirBase, { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
+    }
+  });
+
+  afterAll(() => {
+    // Final cleanup of base directory
+    try {
+      if (fs.existsSync(testDirBase)) {
+        fs.rmSync(testDirBase, { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
     }
   });
 

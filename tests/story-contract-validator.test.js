@@ -106,7 +106,7 @@ describe('StoryContractValidator', () => {
           {
             method: 'POST',
             path: '/api/users',
-            // Missing description, requestBody, successResponse
+            // Missing description
           }
         ],
         filesToModify: [],
@@ -115,6 +115,11 @@ describe('StoryContractValidator', () => {
 
       const result = validator.validateContract(invalidContract);
       expect(result.valid).toBe(false);
+      expect(result.errors).toBeDefined();
+      expect(result.errors.length).toBeGreaterThan(0);
+      // Check that it's specifically about the missing description
+      const missingFieldError = result.errors.find(e => e.keyword === 'required' && e.params.missingProperty === 'description');
+      expect(missingFieldError).toBeDefined();
     });
 
     it('should throw error if schema not loaded', () => {

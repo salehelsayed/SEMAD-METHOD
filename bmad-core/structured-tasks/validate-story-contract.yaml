@@ -14,6 +14,17 @@ outputs:
     type: array
     description: "List of validation errors if any"
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    action: update-working-memory
+    inputs:
+      agentName: "qa"
+      taskId: "validate-story-contract"
+      context: 
+        description: "Initialize working memory for story contract validation"
+        patterns: "Retrieve previous validation patterns and common issues"
+  
   - id: load-story
     name: Load story file
     description: "Read the story file from the specified path"

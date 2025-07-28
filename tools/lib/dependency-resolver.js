@@ -15,15 +15,29 @@ class DependencyResolver {
 
   async resolveAgentDependencies(agentId) {
     const agentPath = path.join(this.bmadCore, 'agents', `${agentId}.md`);
-    const agentContent = await fs.readFile(agentPath, 'utf8');
+    let agentContent;
+    
+    try {
+      agentContent = await fs.readFile(agentPath, 'utf8');
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Error(`Agent file not found: ${agentPath}\nMake sure the agent '${agentId}' exists in bmad-core/agents/`);
+      }
+      throw error;
+    }
     
     // Extract YAML from markdown content with command cleaning
     const yamlContent = extractYamlFromAgent(agentContent, true);
     if (!yamlContent) {
-      throw new Error(`No YAML configuration found in agent ${agentId}`);
+      throw new Error(`No YAML configuration found in agent ${agentId}\nAgent files must contain a YAML configuration block enclosed in triple backticks`);
     }
     
-    const agentConfig = yaml.load(yamlContent);
+    let agentConfig;
+    try {
+      agentConfig = yaml.load(yamlContent);
+    } catch (error) {
+      throw new Error(`Failed to parse YAML in agent ${agentId}: ${error.message}\nCheck the YAML syntax in the agent configuration`);
+    }
     
     const dependencies = {
       agent: {
@@ -52,8 +66,23 @@ class DependencyResolver {
 
   async resolveTeamDependencies(teamId) {
     const teamPath = path.join(this.bmadCore, 'agent-teams', `${teamId}.yaml`);
-    const teamContent = await fs.readFile(teamPath, 'utf8');
-    const teamConfig = yaml.load(teamContent);
+    let teamContent;
+    
+    try {
+      teamContent = await fs.readFile(teamPath, 'utf8');
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Error(`Team file not found: ${teamPath}\nMake sure the team '${teamId}' exists in bmad-core/agent-teams/`);
+      }
+      throw error;
+    }
+    
+    let teamConfig;
+    try {
+      teamConfig = yaml.load(teamContent);
+    } catch (error) {
+      throw new Error(`Failed to parse YAML in team ${teamId}: ${error.message}\nCheck the YAML syntax in the team configuration`);
+    }
     
     const dependencies = {
       team: {
@@ -188,7 +217,8 @@ class DependencyResolver {
       }
 
       if (!content) {
-        console.warn(`Resource not found: ${type}/${id}`);
+        console.warn(`⚠️  Resource not found: ${type}/${id}`);
+        console.warn(`   Searched in: bmad-core/${type} and common/${type}`);
         return null;
       }
 
@@ -203,7 +233,10 @@ class DependencyResolver {
       this.cache.set(cacheKey, resource);
       return resource;
     } catch (error) {
-      console.error(`Error loading resource ${type}/${id}:`, error.message);
+      console.error(`❌ Error loading resource ${type}/${id}:`, error.message);
+      if (error.code === 'ENOENT') {
+        console.error(`   File not found in expected locations`);
+      }
       return null;
     }
   }

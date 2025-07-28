@@ -4,23 +4,47 @@ const yaml = require('js-yaml');
 const { execSync } = require('child_process');
 
 describe('Generate Search Tools', () => {
-  const testDir = path.join(__dirname, 'test-outputs');
+  // Use unique directory for each test run to avoid conflicts
+  const testDirBase = path.join(__dirname, 'test-outputs-generate-search-tools');
+  const testId = Date.now() + Math.random().toString(36).substring(2);
+  const testDir = path.join(testDirBase, testId);
   const scriptPath = path.join(__dirname, '..', 'scripts', 'generate-search-tools.js');
   const samplePrdPath = path.join(testDir, 'sample-prd.md');
   const outputPath = path.join(testDir, 'search-tools.yaml');
   const customMappingsPath = path.join(testDir, 'custom-mappings.yaml');
 
   beforeEach(() => {
-    // Create test directory
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
+    // Clean up any existing test directory first
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
+    // Create fresh test directory
+    fs.mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
     // Clean up test files
     if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true });
+      fs.rmSync(testDir, { recursive: true, force: true });
+    }
+    // Clean up base directory if empty
+    try {
+      if (fs.existsSync(testDirBase) && fs.readdirSync(testDirBase).length === 0) {
+        fs.rmSync(testDirBase, { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
+    }
+  });
+
+  afterAll(() => {
+    // Final cleanup of base directory
+    try {
+      if (fs.existsSync(testDirBase)) {
+        fs.rmSync(testDirBase, { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
     }
   });
 
@@ -44,7 +68,11 @@ The backend will be built with Express and TypeScript, while the frontend uses R
 - React components with TypeScript
 `;
 
-    fs.writeFileSync(samplePrdPath, samplePrd);
+    try {
+      fs.writeFileSync(samplePrdPath, samplePrd, 'utf8');
+    } catch (error) {
+      throw new Error(`Failed to write sample PRD: ${error.message}`);
+    }
 
     // Run the script
     execSync(`node ${scriptPath} --prd ${samplePrdPath} --output ${outputPath}`, {

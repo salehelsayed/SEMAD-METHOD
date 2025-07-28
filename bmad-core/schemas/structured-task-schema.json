@@ -1,0 +1,297 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Structured Task Schema",
+  "type": "object",
+  "required": ["id"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the structured task",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the structured task"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Description of what this structured task accomplishes"
+    },
+    "steps": {
+      "type": "array",
+      "description": "Sequential steps to execute",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "oneOf": [
+          {
+            "required": ["actions"]
+          },
+          {
+            "required": ["action"]
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the step",
+            "pattern": "^[a-zA-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the step"
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional description of the step"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action identifier for this step"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Inputs for this step's action",
+            "additionalProperties": true
+          },
+          "actions": {
+            "type": "array",
+            "description": "List of actions to perform",
+            "items": {
+              "type": "object",
+              "required": ["description"],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "What action to take"
+                },
+                "elicit": {
+                  "type": "boolean",
+                  "description": "Whether this action requires user input",
+                  "default": false
+                },
+                "metadata": {
+                  "type": "object",
+                  "description": "Additional metadata for the action",
+                  "properties": {
+                    "originalIndent": {
+                      "type": "number",
+                      "description": "Original indentation level from markdown"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes or hints for this step"
+          },
+          "output": {
+            "type": "string",
+            "description": "Expected output variable name"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema to validate output against"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Step metadata",
+            "properties": {
+              "level": {
+                "type": "number",
+                "description": "Heading level from original markdown"
+              },
+              "originalNumber": {
+                "type": "string",
+                "description": "Original step number from markdown"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inputs": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Expected inputs for the task as object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Data type of the input"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the input"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether this input is required"
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "description": "Expected inputs for the task as array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the input"
+              },
+              "type": {
+                "type": "string",
+                "description": "Data type of the input"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the input"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether this input is required"
+              },
+              "default": {
+                "description": "Default value for the input"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "outputs": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Expected outputs from the task as object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Data type of the output"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the output"
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "description": "Expected outputs from the task as array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the output"
+              },
+              "type": {
+                "type": "string",
+                "description": "Data type of the output"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the output"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or hints for the entire task"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this task accomplishes"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the task"
+    },
+    "priority": {
+      "type": "string",
+      "description": "Priority level of the task"
+    },
+    "complexity": {
+      "type": "string",
+      "description": "Complexity level of the task"
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "List of task dependencies",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Rules for task execution",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Preserved metadata from original markdown",
+      "properties": {
+        "originalSections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Original section headers from markdown"
+        },
+        "preservedContent": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of preserved content"
+              },
+              "content": {
+                "type": "string",
+                "description": "The preserved content"
+              },
+              "level": {
+                "type": "number",
+                "description": "Heading level if applicable"
+              },
+              "lineNumber": {
+                "type": "number",
+                "description": "Original line number in markdown"
+              }
+            }
+          },
+          "description": "Content preserved from markdown that doesn't fit standard structure"
+        },
+        "executionMode": {
+          "type": "string",
+          "enum": ["SEQUENTIAL", "PARALLEL", "CONDITIONAL"],
+          "description": "Execution mode for the task steps"
+        }
+      }
+    }
+  }
+}

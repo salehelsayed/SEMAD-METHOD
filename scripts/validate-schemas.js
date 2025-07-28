@@ -7,13 +7,7 @@ const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 
 // Use ModuleResolver for schema resolution
-let ModuleResolver;
-try {
-  ModuleResolver = require('../bmad-core/utils/module-resolver');
-} catch (e) {
-  // Fallback if bmad-core is in different location
-  ModuleResolver = require('../.bmad-core/utils/module-resolver');
-}
+const ModuleResolver = require('../bmad-core/utils/module-resolver');
 
 // Initialize AJV validator
 const ajv = new Ajv({ allErrors: true });
@@ -22,16 +16,49 @@ addFormats(ajv);
 
 // Load schemas using ModuleResolver
 const baseDir = path.join(__dirname, '..');
-const taskSchemaPath = ModuleResolver.resolveSchemaPath('taskSchema', baseDir) || 
-  path.join(__dirname, '..', 'bmad-core', 'schemas', 'task-schema.json');
-const checklistSchemaPath = ModuleResolver.resolveSchemaPath('checklistSchema', baseDir) || 
-  path.join(__dirname, '..', 'bmad-core', 'schemas', 'checklist-schema.json');
 
-const taskSchema = JSON.parse(fs.readFileSync(taskSchemaPath, 'utf8'));
-const checklistSchema = JSON.parse(fs.readFileSync(checklistSchemaPath, 'utf8'));
+// Schema loading function with fallback
+function loadSchema(schemaName, fallbackPath) {
+  let schemaPath = ModuleResolver.resolveSchemaPath(schemaName, baseDir);
+  
+  if (!schemaPath && fallbackPath) {
+    schemaPath = path.join(__dirname, '..', fallbackPath);
+  }
+  
+  if (!schemaPath || !fs.existsSync(schemaPath)) {
+    console.error(`\u274c Schema not found: ${schemaName}`);
+    console.error('  Searched locations:');
+    console.error(`    - Via ModuleResolver: ${schemaPath || 'not found'}`);
+    if (fallbackPath) {
+      console.error(`    - Fallback path: ${path.join(__dirname, '..', fallbackPath)}`);
+    }
+    throw new Error(`Schema not found: ${schemaName}`);
+  }
+  
+  try {
+    return JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+  } catch (error) {
+    console.error(`\u274c Failed to parse schema ${schemaName}: ${error.message}`);
+    throw error;
+  }
+}
+
+// Load schemas
+let taskSchema, structuredTaskSchema, checklistSchema;
+
+try {
+  taskSchema = loadSchema('taskSchema', 'bmad-core/schemas/task-schema.json');
+  structuredTaskSchema = loadSchema('structuredTaskSchema', 'bmad-core/schemas/structured-task-schema.json');
+  checklistSchema = loadSchema('checklistSchema', 'bmad-core/schemas/checklist-schema.json');
+} catch (error) {
+  console.error('\n\u26a0️  Failed to load validation schemas');
+  console.error('  Ensure all schema files exist and contain valid JSON');
+  process.exit(1);
+}
 
 // Compile validators
 const validateTask = ajv.compile(taskSchema);
+const validateStructuredTask = ajv.compile(structuredTaskSchema);
 const validateChecklist = ajv.compile(checklistSchema);
 
 function validateDirectory(dir, type, validator) {
@@ -57,9 +84,20 @@ function validateDirectory(dir, type, validator) {
         });
       }
     } catch (e) {
+      let errorMessage = `YAML parse error: ${e.message}`;
+      
+      // Provide more helpful error messages for common YAML issues
+      if (e.message.includes('duplicate key')) {
+        errorMessage += '\n    Hint: Check for duplicate property names in the YAML file';
+      } else if (e.message.includes('unexpected')) {
+        errorMessage += '\n    Hint: Check indentation and ensure proper YAML syntax';
+      } else if (e.message.includes('mapping values')) {
+        errorMessage += '\n    Hint: Ensure proper indentation for nested structures';
+      }
+      
       errors.push({
         file: filePath,
-        errors: [{ message: `YAML parse error: ${e.message}` }]
+        errors: [{ message: errorMessage }]
       });
     }
   }
@@ -75,9 +113,14 @@ function validateAll() {
   
   const dirs = [
     {
-      path: path.join(__dirname, '..', 'bmad-core', 'structured-tasks'),
-      type: 'task',
+      path: path.join(__dirname, '..', 'bmad-core', 'tasks'),
+      type: 'regular task',
       validator: validateTask
+    },
+    {
+      path: path.join(__dirname, '..', 'bmad-core', 'structured-tasks'),
+      type: 'structured task',
+      validator: validateStructuredTask
     },
     {
       path: path.join(__dirname, '..', 'bmad-core', 'structured-checklists'),
@@ -85,9 +128,14 @@ function validateAll() {
       validator: validateChecklist
     },
     {
-      path: path.join(__dirname, '..', 'common', 'structured-tasks'),
-      type: 'task',
+      path: path.join(__dirname, '..', 'common', 'tasks'),
+      type: 'regular task',
       validator: validateTask
+    },
+    {
+      path: path.join(__dirname, '..', 'common', 'structured-tasks'),
+      type: 'structured task',
+      validator: validateStructuredTask
     },
     {
       path: path.join(__dirname, '..', 'common', 'structured-checklists'),
@@ -123,10 +171,14 @@ function validateAll() {
   }
   
   if (allValid) {
-    console.log('All structured files are valid!');
+    console.log('\n\u2713 All structured files are valid!');
     process.exit(0);
   } else {
-    console.log('Validation failed. Please fix the errors above.');
+    console.log('\n\u274c Validation failed. Please fix the errors above.');
+    console.log('\nCommon issues:');
+    console.log('  - Missing required fields in YAML files');
+    console.log('  - Incorrect data types (e.g., string instead of array)');
+    console.log('  - Invalid YAML syntax (check indentation)');
     process.exit(1);
   }
 }
@@ -136,4 +188,4 @@ if (require.main === module) {
   validateAll();
 }
 
-module.exports = { validateTask, validateChecklist, validateAll };
+module.exports = { validateTask, validateStructuredTask, validateChecklist, validateAll };

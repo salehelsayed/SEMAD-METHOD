@@ -5,6 +5,18 @@ purpose: >-
   documents may not exist. This task bridges the gap between various documentation formats (document-project output,
   brownfield PRDs, epics, or user documentation) and executable stories for the Dev agent.
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for brownfield story creation task"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve previous brownfield project contexts and implementation patterns"
+        elicit: false
+        metadata:
+          originalIndent: 0
   - id: step1
     name: Documentation Context
     description: |-

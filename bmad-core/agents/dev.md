@@ -77,8 +77,9 @@ core_principles:
   - CRITICAL: ONLY update story file Dev Agent Record sections (checkboxes/Debug Log/Completion Notes/Change Log)
   - CRITICAL: FOLLOW THE develop-story command when the user tells you to implement the story
   - CRITICAL: Tests must be derived directly from the StoryContract - never invent tests not specified by the contract
+  - CRITICAL: When StoryContract contains a dataModels section, you MUST use the generate-datamodel-tests task to create comprehensive unit tests. The task will generate tests that validate required fields, data types, format constraints, enum values, patterns, and edge cases for each model.
   - Numbered Options - Always use numbered lists when presenting choices to the user
-  - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially.
+  - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol - break the task into smaller sub-tasks, record them in working memory and execute them sequentially.
   - When executing tasks, use the task-runner utility to automatically apply dynamic plan adaptation. The runner will analyze the task and create sub-tasks if needed.
 
 # All commands require * prefix when used (e.g., *help)
@@ -96,16 +97,28 @@ develop-story:
     - CRITICAL: DO NOT modify Status, Story, Acceptance Criteria, Dev Notes, Testing sections, or any other sections not listed above
   blocking: "HALT for: Unapproved deps needed, confirm with user | Ambiguous after story check | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression"
   ready-for-review: "Code matches requirements + All validations pass + Follows standards + File List complete"
-  completion: "For each item in StoryContract.apiEndpoints, write an integration test verifying the method, path, request body schema and success response schema → For each entry in StoryContract.filesToModify, implement the changes and write unit tests → If StoryContract includes a dataModels section, write unit tests to validate each schema's required fields and types → Use validation scripts from core-config to ensure the implemented code adheres to these specifications → Mark tasks as complete when all tests pass → run execute-checklist for story-dod-checklist → set story status: 'Ready for Review' → HALT"
+  completion: |
+    For each item in StoryContract.apiEndpoints, write an integration test verifying the method, path, request body schema and success response schema →
+    For each entry in StoryContract.filesToModify, implement the changes and write unit tests →
+    If StoryContract includes a dataModels section, execute the generate-datamodel-tests task to create comprehensive unit tests that validate each schema's required fields, types, formats, and constraints →
+    Use validation scripts from core-config to ensure the implemented code adheres to these specifications →
+    Mark tasks as complete when all tests pass →
+    run execute-checklist for story-dod-checklist →
+    set story status: 'Ready for Review' →
+    HALT
 
 dependencies:
   tasks:
     - execute-checklist.yaml
+  structured-tasks:
+    - generate-datamodel-tests.yaml
+    - validate-story-contract.yaml
   utils:
-    - task-runner: ../../../tools/task-runner.js
-    - validate-next-story.yaml
-    - update-working-memory.yaml
-    - retrieve-context.yaml
+    task-runner: ../../tools/task-runner.js
+    validate-next-story: bmad-core/utils/validate-next-story.yaml
+    update-working-memory: bmad-core/utils/update-working-memory.yaml
+    retrieve-context: bmad-core/utils/retrieve-context.yaml
+    datamodel-test-generator: bmad-core/utils/datamodel-test-generator.js
   checklists:
     - story-dod-checklist.yaml
 ```

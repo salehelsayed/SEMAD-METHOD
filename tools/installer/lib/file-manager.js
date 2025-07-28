@@ -203,7 +203,8 @@ class FileManager {
   async checkFileIntegrity(installDir, manifest) {
     const result = {
       missing: [],
-      modified: []
+      modified: [],
+      errors: []
     };
 
     for (const file of manifest.files) {
@@ -214,13 +215,21 @@ class FileManager {
         continue;
       }
       
-      if (!(await this.pathExists(filePath))) {
-        result.missing.push(file.path);
-      } else {
-        const currentHash = await this.calculateFileHash(filePath);
-        if (currentHash && currentHash !== file.hash) {
-          result.modified.push(file.path);
+      try {
+        if (!(await this.pathExists(filePath))) {
+          result.missing.push(file.path);
+        } else {
+          const currentHash = await this.calculateFileHash(filePath);
+          if (currentHash && currentHash !== file.hash) {
+            result.modified.push(file.path);
+          }
         }
+      } catch (error) {
+        result.errors.push({
+          file: file.path,
+          error: error.message
+        });
+        console.warn(chalk.yellow(`  \u26a0\ufe0f  Could not check integrity of ${file.path}: ${error.message}`));
       }
     }
 

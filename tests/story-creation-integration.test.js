@@ -252,11 +252,11 @@ src/
           }
         ],
         acceptanceCriteriaLinks: [
-          'Epic 1, Story 1.1, AC 1',
-          'Epic 1, Story 1.1, AC 2',
-          'Epic 1, Story 1.1, AC 3',
-          'Epic 1, Story 1.1, AC 4',
-          'Epic 1, Story 1.1, AC 5'
+          '#epic-1-story-1-1-ac-1',
+          '#epic-1-story-1-1-ac-2',
+          '#epic-1-story-1-1-ac-3',
+          '#epic-1-story-1-1-ac-4',
+          '#epic-1-story-1-1-ac-5'
         ]
       }
     };
@@ -311,11 +311,11 @@ StoryContract:
     - path: src/utils/passwordUtils.js
       reason: Create password hashing utilities
   acceptanceCriteriaLinks:
-    - "Epic 1, Story 1.1, AC 1"
-    - "Epic 1, Story 1.1, AC 2"
-    - "Epic 1, Story 1.1, AC 3"
-    - "Epic 1, Story 1.1, AC 4"
-    - "Epic 1, Story 1.1, AC 5"
+    - "#epic-1-story-1-1-ac-1"
+    - "#epic-1-story-1-1-ac-2"
+    - "#epic-1-story-1-1-ac-3"
+    - "#epic-1-story-1-1-ac-4"
+    - "#epic-1-story-1-1-ac-5"
 ---
 
 # Story 1.1: User Registration API

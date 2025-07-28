@@ -1,0 +1,88 @@
+template:
+  name: Agent Handoff Context
+  description: Template for passing context between agents during workflow handoffs
+  version: "1.0"
+
+sections:
+  - name: Handoff Header
+    content: |
+      ## Agent Handoff Context
+      
+      **From Agent**: {{from_agent.name}} ({{from_agent.id}})
+      **To Agent**: {{to_agent.name}} ({{to_agent.id}})
+      **Handoff Time**: {{handoff_time}}
+      **Workflow**: {{workflow_name}}
+      
+  - name: Completed Work Summary
+    content: |
+      ### Work Completed by {{from_agent.name}}
+      
+      {{completed_work_summary}}
+      
+      **Key Deliverables**:
+      {{#each deliverables}}
+      - {{name}}: {{description}}
+        - Location: {{path}}
+        - Status: {{status}}
+      {{/each}}
+      
+  - name: Context Transfer
+    content: |
+      ### Context for {{to_agent.name}}
+      
+      **Primary Objective**: {{next_objective}}
+      
+      **Required Inputs**:
+      {{#each required_inputs}}
+      - **{{name}}**: {{description}}
+        - Type: {{type}}
+        - Location: {{location}}
+      {{/each}}
+      
+      **Constraints**:
+      {{#each constraints}}
+      - {{description}}
+      {{/each}}
+      
+  - name: Dependencies
+    content: |
+      ### Dependencies and Prerequisites
+      
+      **Completed Dependencies**:
+      {{#each completed_dependencies}}
+      ✓ {{description}}
+      {{/each}}
+      
+      **Pending Dependencies**:
+      {{#each pending_dependencies}}
+      ○ {{description}} (Owner: {{owner}})
+      {{/each}}
+      
+  - name: Special Instructions
+    content: |
+      ### Special Instructions
+      
+      {{#if special_instructions}}
+      {{special_instructions}}
+      {{else}}
+      No special instructions provided.
+      {{/if}}
+      
+  - name: Working Memory
+    content: |
+      ### Working Memory Transfer
+      
+      **Key Decisions Made**:
+      {{#each decisions}}
+      - {{description}}: {{rationale}}
+      {{/each}}
+      
+      **Open Questions**:
+      {{#each open_questions}}
+      - {{question}} (Context: {{context}})
+      {{/each}}
+      
+      **Risk Items**:
+      {{#each risks}}
+      - {{description}} (Mitigation: {{mitigation}})
+      {{/each}}

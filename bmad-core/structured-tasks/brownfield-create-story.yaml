@@ -4,6 +4,18 @@ purpose: >-
   Create a single user story for very small brownfield enhancements that can be completed in one focused development
   session. This task is for minimal additions or bug fixes that require existing system integration awareness.
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for brownfield story creation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve any previous brownfield story patterns and integration approaches"
+        elicit: false
+        metadata:
+          originalIndent: 0
   - id: step1
     name: Quick Project Assessment
     description: |-

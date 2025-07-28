@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "backendAuthType": "public",
+  "executionArgs": {
+    "projectName": "SEMAD-METHOD",
+    "projectPath": "/Users/I560101/Project-Sat/SEMAD-METHOD",
+    "testIds": [],
+    "additionalInstruction": "Generate final validation report comparing before/after test results for: Memory Integration fixes (array handling), Story Contract validation (description field), Search Tools tests (tool-mappings.yaml creation), Test Environment issues (dynamic-planner imports). Focus on validating these specific fixes were successful and identify remaining issues.",
+    "envs": {
+      "API_KEY": "sk-user-991cZSlFSXh_hx5m68-9VILiL3QGCPq4a6uPsTeaYmqrhZ15L1jphHTjeh5QbEaGsSUAB1HjTKDryLXxyjgBgGMVTnFcFMmQOvnxtCdou7KupA1-xbGXXGo8W413KnCIVZM"
+    }
+  }
+}

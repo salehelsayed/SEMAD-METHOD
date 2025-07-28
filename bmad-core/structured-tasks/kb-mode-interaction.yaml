@@ -2,6 +2,18 @@ id: kb-mode-interaction
 name: KB Mode Interaction Task
 purpose: Provide a user-friendly interface to the BMad knowledge base without overwhelming users with information upfront.
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for KB mode interaction"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve previous KB interactions and commonly asked topics"
+        elicit: false
+        metadata:
+          originalIndent: 0
   - id: step1
     name: Welcome and Guide
     description: Announce entering KB mode with a brief, friendly introduction.

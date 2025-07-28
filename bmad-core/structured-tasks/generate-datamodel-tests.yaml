@@ -1,0 +1,225 @@
+id: generate-datamodel-tests
+name: Generate DataModel Unit Tests
+description: Generates unit tests for data models defined in a StoryContract
+category: development
+priority: high
+complexity: medium
+dependencies:
+  - validate-story-contract
+inputs:
+  - name: storyFilePath
+    type: string
+    required: true
+    description: Path to the story file containing StoryContract with dataModels
+  - name: testFramework
+    type: string
+    required: false
+    default: jest
+    description: Test framework to use (jest or mocha)
+  - name: outputDir
+    type: string
+    required: false
+    default: tests/models
+    description: Directory where test files will be generated
+outputs:
+  - name: generatedTests
+    type: object
+    description: Object containing test file names and their content
+  - name: testFilePaths
+    type: array
+    description: Array of paths to generated test files
+  - name: success
+    type: boolean
+    description: Whether test generation was successful
+steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: Set up working memory and retrieve relevant context
+    action: update-working-memory
+    inputs:
+      agentName: "dev"
+      taskId: "generate-datamodel-tests"
+      context: 
+        description: "Initialize working memory for datamodel test generation"
+        patterns: "Retrieve previous test generation patterns and conventions"
+  - id: validate-contract
+    name: Validate StoryContract
+    description: Ensure the story has a valid StoryContract before proceeding
+    action: validate-story-contract
+    inputs:
+      storyFilePath: "{{storyFilePath}}"
+    outputs:
+      validationResult: boolean
+      contract: object
+      errors: array
+    errorHandling:
+      onError: halt
+      message: "Story contract validation failed. Cannot generate tests without valid contract."
+
+  - id: check-datamodels
+    name: Check for DataModels
+    description: Verify that the StoryContract contains dataModels section
+    action: script
+    script: |
+      const contract = inputs.contract;
+      if (!contract.dataModels || Object.keys(contract.dataModels).length === 0) {
+        outputs.hasDataModels = false;
+        outputs.modelCount = 0;
+        console.log('No dataModels found in StoryContract');
+      } else {
+        outputs.hasDataModels = true;
+        outputs.modelCount = Object.keys(contract.dataModels).length;
+        outputs.modelNames = Object.keys(contract.dataModels);
+        console.log(`Found ${outputs.modelCount} data models: ${outputs.modelNames.join(', ')}`);
+      }
+    inputs:
+      contract: "{{outputs.validate-contract.contract}}"
+    outputs:
+      hasDataModels: boolean
+      modelCount: number
+      modelNames: array
+
+  - id: generate-tests
+    name: Generate Test Files
+    description: Generate unit tests for each data model
+    condition: "{{outputs.check-datamodels.hasDataModels}} === true"
+    action: script
+    script: |
+      const DataModelTestGenerator = require('../../utils/datamodel-test-generator');
+      const path = require('path');
+      
+      try {
+        const generator = new DataModelTestGenerator();
+        const contract = inputs.contract;
+        const testFramework = inputs.testFramework || 'jest';
+        
+        // Generate tests
+        const generatedTests = generator.generateDataModelTests(contract, testFramework);
+        
+        outputs.generatedTests = generatedTests;
+        outputs.testFileNames = Object.keys(generatedTests);
+        outputs.success = true;
+        
+        console.log(`Generated ${outputs.testFileNames.length} test files`);
+      } catch (error) {
+        outputs.generatedTests = {};
+        outputs.testFileNames = [];
+        outputs.success = false;
+        outputs.error = error.message;
+        console.error('Test generation failed:', error.message);
+      }
+    inputs:
+      contract: "{{outputs.validate-contract.contract}}"
+      testFramework: "{{testFramework}}"
+    outputs:
+      generatedTests: object
+      testFileNames: array
+      success: boolean
+      error: string
+
+  - id: write-test-files
+    name: Write Tests to Files
+    description: Write generated test content to files in the output directory
+    condition: "{{outputs.generate-tests.success}} === true"
+    action: script
+    script: |
+      const fs = require('fs');
+      const path = require('path');
+      
+      try {
+        const outputDir = inputs.outputDir || 'tests/models';
+        const generatedTests = inputs.generatedTests;
+        const testFilePaths = [];
+        
+        // Create output directory if it doesn't exist
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        // Write each test file
+        for (const [fileName, content] of Object.entries(generatedTests)) {
+          const filePath = path.join(outputDir, fileName);
+          fs.writeFileSync(filePath, content, 'utf8');
+          testFilePaths.push(filePath);
+          console.log(`Created test file: ${filePath}`);
+        }
+        
+        outputs.testFilePaths = testFilePaths;
+        outputs.success = true;
+        outputs.outputDir = outputDir;
+      } catch (error) {
+        outputs.testFilePaths = [];
+        outputs.success = false;
+        outputs.error = error.message;
+        console.error('Failed to write test files:', error.message);
+      }
+    inputs:
+      outputDir: "{{outputDir}}"
+      generatedTests: "{{outputs.generate-tests.generatedTests}}"
+    outputs:
+      testFilePaths: array
+      success: boolean
+      outputDir: string
+      error: string
+
+  - id: report-results
+    name: Report Generation Results
+    description: Provide summary of test generation
+    action: script
+    script: |
+      const hasDataModels = inputs.hasDataModels;
+      const modelCount = inputs.modelCount;
+      const testFilePaths = inputs.testFilePaths || [];
+      const success = inputs.writeSuccess;
+      
+      if (!hasDataModels) {
+        console.log('\n📊 Test Generation Summary:');
+        console.log('No dataModels found in StoryContract - no tests generated.');
+        outputs.summary = 'No dataModels to test';
+      } else if (success && testFilePaths.length > 0) {
+        console.log('\n✅ Test Generation Summary:');
+        console.log(`- Models found: ${modelCount}`);
+        console.log(`- Test files generated: ${testFilePaths.length}`);
+        console.log(`- Output directory: ${inputs.outputDir}`);
+        console.log('\nGenerated test files:');
+        testFilePaths.forEach(path => console.log(`  - ${path}`));
+        outputs.summary = `Successfully generated ${testFilePaths.length} test files for ${modelCount} models`;
+      } else {
+        console.log('\n❌ Test Generation Failed:');
+        console.log(`Error: ${inputs.error || 'Unknown error'}`);
+        outputs.summary = 'Test generation failed';
+      }
+      
+      outputs.success = success || !hasDataModels;
+    inputs:
+      hasDataModels: "{{outputs.check-datamodels.hasDataModels}}"
+      modelCount: "{{outputs.check-datamodels.modelCount}}"
+      testFilePaths: "{{outputs.write-test-files.testFilePaths}}"
+      writeSuccess: "{{outputs.write-test-files.success}}"
+      outputDir: "{{outputs.write-test-files.outputDir}}"
+      error: "{{outputs.write-test-files.error || outputs.generate-tests.error}}"
+    outputs:
+      summary: string
+      success: boolean
+
+validation:
+  requiredOutputs:
+    - generatedTests
+    - success
+  conditions:
+    - description: Task should complete successfully or report no models
+      condition: "outputs.success === true"
+  
+example:
+  inputs:
+    storyFilePath: "stories/user-management.md"
+    testFramework: "jest"
+    outputDir: "tests/models"
+  expectedOutputs:
+    generatedTests:
+      user.test.js: "// Jest test content for User model..."
+      role.test.js: "// Jest test content for Role model..."
+    testFilePaths:
+      - "tests/models/user.test.js"
+      - "tests/models/role.test.js"
+    success: true

@@ -423,6 +423,39 @@ dependencies:
 ```
 ==================== END: .bmad-2d-phaser-game-dev/agents/game-sm.md ====================
 
+==================== START: .bmad-2d-phaser-game-dev/tasks/update-working-memory.yaml ====================
+id: update-working-memory
+name: Update Working Memory Task
+description: Task definition for updating agent working memory
+type: task
+structuredTaskReference: ../structured-tasks/update-working-memory.yaml
+category: memory
+priority: high
+requiredInputs:
+  - agentName
+  - taskId (optional)
+  - currentStep (optional)
+  - plan (optional)
+  - context (optional)
+outputs:
+  - memory: Updated memory state
+==================== END: .bmad-2d-phaser-game-dev/tasks/update-working-memory.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/retrieve-context.yaml ====================
+id: retrieve-context
+name: Retrieve Context Task
+description: Task definition for retrieving context from memory
+type: task
+structuredTaskReference: ../structured-tasks/retrieve-context.yaml
+category: memory
+priority: high
+requiredInputs:
+  - query
+  - topN (optional)
+outputs:
+  - memories
+==================== END: .bmad-2d-phaser-game-dev/tasks/retrieve-context.yaml ====================
+
 ==================== START: .bmad-2d-phaser-game-dev/templates/project-brief-tmpl.yaml ====================
 template:
   id: project-brief-template-v2

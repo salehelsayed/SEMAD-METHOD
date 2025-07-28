@@ -26,7 +26,7 @@
       "description": "List of API endpoints to be implemented",
       "items": {
         "type": "object",
-        "required": ["method", "path"],
+        "required": ["method", "path", "description"],
         "properties": {
           "method": {
             "type": "string",

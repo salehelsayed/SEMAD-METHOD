@@ -1,0 +1,218 @@
+# Tool Mappings for Search Tools Generation
+# Maps keywords/technologies to specific search tools and repositories
+
+version: "1.0"
+mappings:
+  # Authentication & Security
+  authentication:
+    - tool: github
+      repositories: 
+        - "passportjs/passport"
+        - "jaredhanson/oauth2orize"
+    - tool: npmjs
+      packages: ["passport", "jsonwebtoken", "bcrypt"]
+    - tool: stackoverflow
+      tags: ["authentication", "jwt", "oauth"]
+    
+  oauth:
+    - tool: github
+      repositories: ["panva/node-oidc-provider"]
+    - tool: npmjs
+      packages: ["passport-oauth2", "simple-oauth2"]
+      
+  jwt:
+    - tool: github
+      repositories: ["auth0/node-jsonwebtoken"]
+    - tool: npmjs
+      packages: ["jsonwebtoken", "express-jwt"]
+    
+  # Databases
+  postgresql:
+    - tool: github
+      repositories: ["brianc/node-postgres", "typeorm/typeorm"]
+    - tool: npmjs
+      packages: ["pg", "typeorm", "sequelize"]
+    - tool: postgresql-docs
+      
+  elasticsearch:
+    - tool: github
+      repositories: ["elastic/elasticsearch-js"]
+    - tool: npmjs
+      packages: ["@elastic/elasticsearch", "elasticsearch"]
+    - tool: elastic-docs
+    
+  redis:
+    - tool: github
+      repositories: ["redis/node-redis", "luin/ioredis"]
+    - tool: npmjs
+      packages: ["redis", "ioredis", "node-redis"]
+    - tool: redis-docs
+    
+  # Frameworks
+  express:
+    - tool: github
+      repositories: ["expressjs/express", "expressjs/cors", "expressjs/body-parser"]
+    - tool: npmjs
+      packages: ["express", "cors", "body-parser", "helmet"]
+    - tool: expressjs-docs
+    
+  react:
+    - tool: github
+      repositories: ["facebook/react", "vercel/next.js"]
+    - tool: npmjs
+      packages: ["react", "react-dom", "next"]
+    - tool: react-docs
+    
+  nextjs:
+    - tool: github
+      repositories: ["vercel/next.js"]
+    - tool: npmjs
+      packages: ["next", "@next/bundle-analyzer"]
+    - tool: nextjs-docs
+    
+  # Payment & E-commerce
+  stripe:
+    - tool: github
+      repositories: ["stripe/stripe-node"]
+    - tool: npmjs
+      packages: ["stripe", "@stripe/stripe-js"]
+    - tool: stripe-api-docs
+    
+  payment:
+    - tool: github
+      repositories: ["stripe/stripe-node", "paypal/Checkout-NodeJS-SDK"]
+    - tool: npmjs
+      packages: ["stripe", "@paypal/checkout-server-sdk"]
+    
+  # Messaging & Real-time
+  websocket:
+    - tool: github
+      repositories: ["socketio/socket.io", "websockets/ws"]
+    - tool: npmjs
+      packages: ["socket.io", "ws", "socket.io-client"]
+    
+  rabbitmq:
+    - tool: github
+      repositories: ["amqp-node/amqplib"]
+    - tool: npmjs
+      packages: ["amqplib", "amqp-connection-manager"]
+    - tool: rabbitmq-docs
+    
+  # DevOps & Infrastructure
+  kubernetes:
+    - tool: github
+      repositories: ["kubernetes-client/javascript", "helm/helm"]
+    - tool: npmjs
+      packages: ["@kubernetes/client-node"]
+    - tool: kubernetes-docs
+    
+  aws:
+    - tool: github
+      repositories: ["aws/aws-sdk-js-v3"]
+    - tool: npmjs
+      packages: ["@aws-sdk/client-s3", "@aws-sdk/client-dynamodb"]
+    - tool: aws-docs
+    
+  # API Technologies
+  graphql:
+    - tool: github
+      repositories: ["graphql/graphql-js", "apollographql/apollo-server"]
+    - tool: npmjs
+      packages: ["graphql", "apollo-server-express", "@apollo/client"]
+    - tool: graphql-docs
+    
+  rest:
+    - tool: github
+      repositories: ["axios/axios", "sindresorhus/got"]
+    - tool: npmjs
+      packages: ["axios", "got", "node-fetch"]
+    
+  # ORM & Database Tools
+  typeorm:
+    - tool: github
+      repositories: ["typeorm/typeorm"]
+    - tool: npmjs
+      packages: ["typeorm", "@nestjs/typeorm"]
+    - tool: typeorm-docs
+    
+  # Caching
+  cache:
+    - tool: github
+      repositories: ["redis/node-redis", "node-cache/node-cache"]
+    - tool: npmjs
+      packages: ["node-cache", "cache-manager"]
+    
+  # API Gateway
+  kong:
+    - tool: github
+      repositories: ["Kong/kong"]
+    - tool: kong-docs
+    
+  gateway:
+    - tool: github
+      repositories: ["Kong/kong", "Netflix/zuul"]
+    - tool: npmjs
+      packages: ["express-gateway", "moleculer-web"]
+
+# Tool definitions
+tools:
+  github:
+    baseUrl: "https://github.com/search"
+    queryParam: "q"
+    
+  npmjs:
+    baseUrl: "https://www.npmjs.com/search"
+    queryParam: "q"
+    
+  stackoverflow:
+    baseUrl: "https://stackoverflow.com/search"
+    queryParam: "q"
+    
+  stripe-api-docs:
+    baseUrl: "https://stripe.com/docs/api"
+    searchPath: "/search"
+    
+  postgresql-docs:
+    baseUrl: "https://www.postgresql.org/docs/current"
+    searchPath: "/search"
+    
+  elastic-docs:
+    baseUrl: "https://www.elastic.co/guide/en/elasticsearch/reference/current"
+    searchPath: "/search.html"
+    
+  redis-docs:
+    baseUrl: "https://redis.io/docs"
+    searchPath: "/search"
+    
+  expressjs-docs:
+    baseUrl: "https://expressjs.com"
+    searchPath: "/en/api.html"
+    
+  react-docs:
+    baseUrl: "https://react.dev"
+    searchPath: "/search"
+    
+  nextjs-docs:
+    baseUrl: "https://nextjs.org/docs"
+    searchPath: "/api-reference"
+    
+  rabbitmq-docs:
+    baseUrl: "https://www.rabbitmq.com/documentation.html"
+    
+  kubernetes-docs:
+    baseUrl: "https://kubernetes.io/docs"
+    searchPath: "/search"
+    
+  aws-docs:
+    baseUrl: "https://docs.aws.amazon.com"
+    searchPath: "/search"
+    
+  graphql-docs:
+    baseUrl: "https://graphql.org/learn"
+    
+  typeorm-docs:
+    baseUrl: "https://typeorm.io"
+    
+  kong-docs:
+    baseUrl: "https://docs.konghq.com"
+    searchPath: "/search"

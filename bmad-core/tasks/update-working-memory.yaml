@@ -1,0 +1,15 @@
+id: update-working-memory
+name: Update Working Memory Task
+description: Task definition for updating agent working memory
+type: task
+structuredTaskReference: ../structured-tasks/update-working-memory.yaml
+category: memory
+priority: high
+requiredInputs:
+  - agentName
+  - taskId (optional)
+  - currentStep (optional)
+  - plan (optional)
+  - context (optional)
+outputs:
+  - memory: Updated memory state

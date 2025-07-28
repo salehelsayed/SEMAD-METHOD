@@ -19,6 +19,16 @@ outputs:
     description: "Path to output search tools file"
     default: "search-tools.yaml"
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for search tools generation"
+        action: "Execute task `update-working-memory` with agentName='sm' and taskId='generate-search-tools'"
+        elicit: false
+      - description: "Retrieve previous search patterns and keyword extraction methods"
+        action: "Execute task `retrieve-context` with query='search tool generation patterns'"
+        elicit: false
   - id: parse-prd
     name: Parse PRD and Extract Keywords
     description: "Run the keyword extraction script to generate search tools from PRD content"

@@ -1,13 +1,25 @@
 id: dynamic-plan-rules
-description: Rules for when to split tasks into sub-tasks.
+description: Rules for when to split tasks into sub‑tasks.  These rules help an
+  agent break down complex work into manageable parts based on step count,
+  conjunctions, context length, domains, dependencies, and additional
+  considerations such as the number of files or API endpoints, the
+  complexity of data models, external setup work, and concurrency.  The
+  thresholds and conditions below are inspired by cognitive load
+  guidelines and industry best practices, including the “magic number
+  seven plus or minus two” which suggests humans can comfortably manage
+  about seven items at once【565024404099452†L2022-L2029】, modular data modelling
+  recommendations to split complex schemas into separate subject areas
+ 【942637457282368†L490-L495】, and advice to separate setup and technical tasks
+  from development work【972970486728972†L237-L242】.
 rules:
+  # Existing rules
   - condition: "steps.length > 5"
     action: "split by step count"
     description: "Break task into chunks when it has more than 5 steps"
   - condition: "description contains 'and' or 'then'"
     action: "split by conjunction"
     description: "Split task at natural boundaries indicated by conjunctions"
-  - condition: "retrieved context tokens > 2000"
+  - condition: "retrieved context tokens > maxContextTokens"
     action: "split by context length"
     description: "Split when context becomes too large to maintain focus"
   - condition: "multiple domains involved"
@@ -15,11 +27,67 @@ rules:
     description: "Separate frontend, backend, and infrastructure tasks"
   - condition: "dependencies between steps"
     action: "split by dependency chain"
-    description: "Create sub-tasks when steps have complex dependencies"
+    description: "Create sub‑tasks when steps have complex dependencies"
+
+  # New rules
+  - condition: "StoryContract.filesToModify.length > maxFiles or StoryContract.apiEndpoints.length > maxEndpoints"
+    action: "split by artefacts"
+    description: >-
+      Break the task into separate sub‑tasks for each file or API endpoint when
+      there are many artefacts to modify or implement.  Limiting the number of
+      concurrent artefacts to about seven helps keep work within the bounds of
+      human short‑term memory【565024404099452†L2022-L2029】 and prevents large pull
+      requests that slow down review processes【311030643400100†L300-L306】.
+
+  - condition: "dataModels.length > 1 or schema.fields.length > maxFields"
+    action: "split by data model"
+    description: >-
+      Separate modelling work from endpoint development when there are multiple
+      data models or a single schema with many fields.  A modular design
+      recommends breaking the model into subject areas that can be understood in
+      isolation【942637457282368†L490-L495】; keeping each local view to about
+      six or seven entities ensures it fits within cognitive limits【565024404099452†L2022-L2029】.
+
+  - condition: "description matches /\binstall\b|\bconfigure\b|\bupgrade\b/i"
+    action: "split by external setup"
+    description: >-
+      Detects phrases like “install”, “configure”, “upgrade”, “setup” or
+      “initialize” and separates environment or dependency setup (e.g., database
+      migrations or tool installation) into its own sub‑task.  Setup and
+      technical tasks should not be mixed with feature delivery to avoid
+      confusion and to allow proper planning【972970486728972†L237-L242】.
+
+  - condition: "description matches /for each|while|async|await/i"
+    action: "split by concurrency"
+    description: >-
+      If the task description mentions loops or concurrency constructs such as
+      “for each”, “while”, “async” or “await”, create sub‑tasks to design
+      concurrent behaviour separately from business logic.  Separating
+      asynchronous thread logic from core business logic makes code easier to
+      test and maintain【61876412218705†L33-L43】.
+
 thresholds:
+  # Maximum number of steps before splitting
   maxSteps: 5
+  # Maximum tokens of retrieved context (PRD/architecture or scratchpad) before splitting.
+  # Typical models like GPT‑3.5 support around 4,000 tokens and GPT‑4 up to 32,000
+  # tokens【329989590427775†L103-L108】.  Limiting context to half of a base model’s
+  # capacity (2,000 tokens) prevents overflow and keeps the agent focused.
   maxContextTokens: 2000
+  # Maximum perceived complexity rating (user‑defined) before splitting
   maxComplexity: "high"
+  # Maximum number of files to modify before splitting the task.  Seven is
+  # derived from the cognitive limit of working memory【565024404099452†L2022-L2029】.
+  maxFiles: 7
+  # Maximum number of API endpoints to implement before splitting.  Keeping
+  # endpoint count at five or fewer aligns with recommendations for small pull
+  # requests and reduces review time【311030643400100†L300-L306】.
+  maxEndpoints: 5
+  # Maximum number of fields in a single data model before splitting modelling
+  # work away from endpoint development.  Based on the magic number seven rule
+  #【565024404099452†L2022-L2029】.
+  maxFields: 7
+
 splitStrategies:
   byStepCount:
     chunkSize: 5
@@ -30,3 +98,15 @@ splitStrategies:
   byDomain:
     domains: ["frontend", "backend", "database", "infrastructure", "testing"]
     separateByDomain: true
+  byArtefacts:
+    separateEach: true
+    preserveBoundaries: true
+  byDataModel:
+    separateModelling: true
+    separateEndpoint: true
+  byExternalSetup:
+    keywords: ["install", "configure", "upgrade", "setup", "initialize"]
+    separateSetupTask: true
+  byConcurrency:
+    keywords: ["for each", "while", "async", "await"]
+    separateConcurrencyDesign: true

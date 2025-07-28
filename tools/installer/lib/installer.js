@@ -96,8 +96,16 @@ class Installer {
             await fileManager.ensureDirectory(installDir);
             console.log(`✓ Created directory: ${installDir}`);
           } catch (error) {
-            console.error(`Failed to create directory: ${error.message}`);
-            console.error('You may need to check permissions or use a different path.');
+            console.error(chalk.red(`\u274c Failed to create directory: ${error.message}`));
+            if (error.code === 'EACCES') {
+              console.error(chalk.yellow('\n\u26a0️  Permission denied'));
+              console.error(chalk.dim('  Try running with elevated permissions or choose a different directory'));
+            } else if (error.code === 'ENOSPC') {
+              console.error(chalk.yellow('\n\u26a0️  No space left on device'));
+              console.error(chalk.dim('  Free up disk space and try again'));
+            } else {
+              console.error(chalk.dim('  Check that the parent directory exists and you have write permissions'));
+            }
             process.exit(1);
           }
         }
@@ -112,6 +120,8 @@ class Installer {
           return await this.performUpdate(config, installDir, state.manifest, spinner);
         } else {
           spinner.fail('No existing v4 installation found to update');
+          console.error(chalk.yellow('\n\u26a0️  Cannot update - no existing installation found'));
+          console.error(chalk.dim('  Use --full or --agent=<name> to create a new installation'));
           throw new Error('No existing v4 installation found');
         }
       }
@@ -1237,8 +1247,15 @@ class Installer {
 
         console.log(chalk.green(`✓ Installed expansion pack: ${pack.name} to ${`.${packId}`}`));
       } catch (error) {
-        console.error(`Failed to install expansion pack ${packId}: ${error.message}`);
-        console.error(`Stack trace: ${error.stack}`);
+        console.error(chalk.red(`\u274c Failed to install expansion pack ${packId}: ${error.message}`));
+        if (error.code === 'ENOENT') {
+          console.error(chalk.yellow('  The expansion pack source files may be missing'));
+        } else if (error.message.includes('YAML')) {
+          console.error(chalk.yellow('  The expansion pack configuration may contain invalid YAML'));
+        }
+        if (process.env.DEBUG) {
+          console.error(chalk.dim(`\nStack trace: ${error.stack}`));
+        }
       }
     }
 
@@ -1298,7 +1315,9 @@ class Installer {
                       
                       console.log(chalk.dim(`  Added core dependency: ${depType}/${depFileName}`));
                     } else {
-                      console.warn(chalk.yellow(`  Warning: Dependency ${depType}/${dep} not found in core or expansion pack`));
+                      console.warn(chalk.yellow(`  \u26a0️  Warning: Dependency ${depType}/${dep} not found`));
+                      console.warn(chalk.dim(`     Searched in expansion pack and bmad-core`));
+                      console.warn(chalk.dim(`     The agent may not function correctly without this dependency`));
                     }
                   }
                 }
@@ -1406,7 +1425,9 @@ class Installer {
                 }
               }
             } else {
-              console.warn(chalk.yellow(`  Warning: Core agent ${agentId} not found for team ${path.basename(teamFile, '.yaml')}`));
+              console.warn(chalk.yellow(`  \u26a0️  Warning: Core agent ${agentId} not found for team ${path.basename(teamFile, '.yaml')}`));
+              console.warn(chalk.dim(`     Team may not function correctly without this agent`));
+              console.warn(chalk.dim(`     Ensure the agent exists in bmad-core/agents/`));
             }
           }
         }

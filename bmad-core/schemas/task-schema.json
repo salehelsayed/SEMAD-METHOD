@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Structured Task Schema",
   "type": "object",
-  "required": ["id", "name", "purpose", "steps"],
+  "required": ["id", "name"],
   "properties": {
     "id": {
       "type": "string",
@@ -17,49 +17,61 @@
       "description": "Description of what this task accomplishes"
     },
     "steps": {
-      "type": "array",
-      "description": "Sequential steps to execute",
-      "items": {
-        "type": "object",
-        "required": ["id", "name", "actions"],
-        "properties": {
-          "id": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Steps as key-value pairs (legacy format)",
+          "additionalProperties": {
             "type": "string",
-            "description": "Unique identifier for the step"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the step"
-          },
-          "description": {
-            "type": "string",
-            "description": "Additional description of the step"
-          },
-          "actions": {
-            "type": "array",
-            "description": "List of actions to perform",
-            "items": {
-              "type": "object",
-              "required": ["description"],
-              "properties": {
-                "description": {
-                  "type": "string",
-                  "description": "What action to take"
-                },
-                "elicit": {
-                  "type": "boolean",
-                  "description": "Whether this action requires user input",
-                  "default": false
+            "description": "Step description"
+          }
+        },
+        {
+          "type": "array",
+          "description": "Sequential steps to execute",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "actions"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the step"
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the step"
+              },
+              "description": {
+                "type": "string",
+                "description": "Additional description of the step"
+              },
+              "actions": {
+                "type": "array",
+                "description": "List of actions to perform",
+                "items": {
+                  "type": "object",
+                  "required": ["description"],
+                  "properties": {
+                    "description": {
+                      "type": "string",
+                      "description": "What action to take"
+                    },
+                    "elicit": {
+                      "type": "boolean",
+                      "description": "Whether this action requires user input",
+                      "default": false
+                    }
+                  }
                 }
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional notes or hints for this step"
               }
             }
-          },
-          "notes": {
-            "type": "string",
-            "description": "Additional notes or hints for this step"
           }
         }
-      }
+      ]
     },
     "inputs": {
       "type": "object",
@@ -67,13 +79,65 @@
       "additionalProperties": true
     },
     "outputs": {
-      "type": "object",
-      "description": "Expected outputs from the task",
-      "additionalProperties": true
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Expected outputs from the task",
+          "additionalProperties": true
+        },
+        {
+          "type": "array",
+          "description": "List of expected outputs",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Output name"
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      ]
     },
     "notes": {
       "type": "string",
       "description": "Additional notes or hints for the entire task"
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of task (e.g., task, utility)"
+    },
+    "structuredTaskReference": {
+      "type": "string",
+      "description": "Reference to a structured task file"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the task"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Priority level of the task"
+    },
+    "requiredInputs": {
+      "type": "array",
+      "description": "List of required inputs",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true
+          }
+        ]
+      }
     },
     "metadata": {
       "type": "object",
@@ -90,8 +154,17 @@
         "executionMode": {
           "type": "string",
           "description": "Execution mode (e.g., SEQUENTIAL)"
+        },
+        "requiresWorkingMemory": {
+          "type": "boolean",
+          "description": "Whether the task requires working memory"
+        },
+        "taskType": {
+          "type": "string",
+          "description": "Specific type of task"
         }
-      }
+      },
+      "additionalProperties": true
     }
   }
 }

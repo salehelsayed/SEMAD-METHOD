@@ -50,10 +50,10 @@ describe('Generate Search Tools Structured Task', () => {
     const taskContent = fs.readFileSync(taskPath, 'utf8');
     const task = yaml.load(taskContent);
 
-    expect(task.steps.length).toBe(2);
+    expect(task.steps.length).toBe(3);
     
-    // First step - parse PRD
-    const parseStep = task.steps[0];
+    // Second step - parse PRD (first step is initialization)
+    const parseStep = task.steps[1];
     expect(parseStep).toHaveProperty('id', 'parse-prd');
     expect(parseStep).toHaveProperty('name', 'Parse PRD and Extract Keywords');
     expect(parseStep).toHaveProperty('actions');
@@ -66,8 +66,8 @@ describe('Generate Search Tools Structured Task', () => {
     expect(scriptAction.action).toContain('{{inputs.mappingsPath}}');
     expect(scriptAction.action).toContain('{{outputs.searchToolsFile}}');
     
-    // Second step - validate output
-    const validateStep = task.steps[1];
+    // Third step - validate output
+    const validateStep = task.steps[2];
     expect(validateStep).toHaveProperty('id', 'validate-output');
     expect(validateStep).toHaveProperty('name', 'Validate Generated Search Tools');
     expect(validateStep).toHaveProperty('actions');

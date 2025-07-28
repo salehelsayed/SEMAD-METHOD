@@ -7,13 +7,8 @@ const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const glob = require('glob');
 
-// Try to import ModuleResolver, fall back to direct path if not available
-let ModuleResolver;
-try {
-  ModuleResolver = require('../bmad-core/utils/module-resolver');
-} catch (error) {
-  // ModuleResolver not available, will use fallback path
-}
+// Import ModuleResolver for schema resolution
+const ModuleResolver = require('../bmad-core/utils/module-resolver');
 
 // Initialize AJV with strict mode
 const ajv = new Ajv({ strict: true, allErrors: true });
@@ -25,16 +20,14 @@ function loadSchema() {
   try {
     let schemaPath;
     
-    if (ModuleResolver) {
-      // Try to resolve using ModuleResolver
-      schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', process.cwd());
-      
-      if (!schemaPath) {
-        schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', __dirname);
-      }
+    // Try to resolve using ModuleResolver
+    schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', process.cwd());
+    
+    if (!schemaPath) {
+      schemaPath = ModuleResolver.resolveSchemaPath('storyContractSchema', __dirname);
     }
     
-    // Fallback to direct paths
+    // Fallback to direct paths only if ModuleResolver fails
     if (!schemaPath) {
       const fallbackPaths = [
         path.join(__dirname, '..', 'bmad-core', 'schemas', 'story-contract-schema.json'),
@@ -198,6 +191,26 @@ function main() {
     process.exit(1);
   }
 }
+
+// Export for testing
+module.exports = {
+  validateStoryContract: async (filePath) => {
+    const schema = loadSchema();
+    try {
+      const contract = extractStoryContract(filePath);
+      const result = validateContract(contract, schema);
+      return {
+        valid: result.valid,
+        errors: result.errors.map(e => formatErrors([e]))
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        errors: [error.message]
+      };
+    }
+  }
+};
 
 // Run if called directly
 if (require.main === module) {

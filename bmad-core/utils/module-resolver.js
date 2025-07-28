@@ -34,6 +34,8 @@ class ModuleResolver {
         'story-contract-schema': 'storyContractSchema',
         'taskSchema': 'taskSchema',
         'task-schema': 'taskSchema',
+        'structuredTaskSchema': 'structuredTaskSchema',
+        'structured-task-schema': 'structuredTaskSchema',
         'checklistSchema': 'checklistSchema',
         'checklist-schema': 'checklistSchema'
       };

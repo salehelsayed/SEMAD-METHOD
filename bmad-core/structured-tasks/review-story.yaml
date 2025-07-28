@@ -2,15 +2,15 @@ id: review-story
 name: review-story
 purpose: "Review and validate story implementation with QA perspective, maintaining context through working memory"
 steps:
-  - id: step1
-    name: Initialize Working Memory
+  - id: step0
+    name: Initialize Memory and Context
     description: "Initialize working memory for QA review session"
     actions:
       - description: Execute task `update-working-memory` with agentName='qa' and taskId='review-story'
         elicit: false
       - description: Execute task `retrieve-context` with query='story implementation review patterns' to load relevant QA memories
         elicit: false
-  - id: step2
+  - id: step1
     name: Record Review Observations
     description: "Record key findings and patterns for future reviews"
     actions:

@@ -9,6 +9,18 @@ purpose: |-
   - Guide systematic investigation of complex topics
   - Ensure actionable insights are captured
 steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for research prompt creation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve previous research patterns and methodologies"
+        elicit: false
+        metadata:
+          originalIndent: 0
   - id: step1
     name: Research Focus Options
     description: |-

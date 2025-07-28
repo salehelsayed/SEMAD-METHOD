@@ -38,37 +38,59 @@ async function updateWorkingMemory(agentName, updates) {
     };
   }
   
-  // Merge all updates into memory (future-proof for arbitrary fields)
-  Object.assign(memory, updates);
+  // Handle special cases that need custom merging logic before Object.assign
+  const specialUpdates = {};
   
-  // Handle special cases that need custom merging logic
   if (updates.context !== undefined && typeof memory.context === 'object' && typeof updates.context === 'object') {
     // Merge context objects instead of replacing
-    memory.context = { ...memory.context, ...updates.context };
+    specialUpdates.context = { ...memory.context, ...updates.context };
   }
   
-  if (updates.plan !== undefined && !Array.isArray(updates.plan)) {
-    // If plan update is a single item, append it instead of replacing array
-    memory.plan = memory.plan || [];
-    memory.plan.push(updates.plan);
-  }
-  
-  if (updates.observations !== undefined && !Array.isArray(updates.observations)) {
-    // If observations update is a single item, append it
-    memory.observations = memory.observations || [];
-    memory.observations.push(updates.observations);
-    
-    // Enforce maximum history length
-    if (memory.observations.length > MAX_OBSERVATIONS) {
-      memory.observations.shift();
+  if (updates.plan !== undefined) {
+    if (Array.isArray(updates.plan)) {
+      specialUpdates.plan = updates.plan;
+    } else {
+      // If plan update is a single item, append it instead of replacing array
+      specialUpdates.plan = [...(memory.plan || []), updates.plan];
     }
   }
   
-  if (updates.subTasks !== undefined && !Array.isArray(updates.subTasks)) {
-    // If subTasks update is a single item, append it
-    memory.subTasks = memory.subTasks || [];
-    memory.subTasks.push(updates.subTasks);
+  if (updates.observations !== undefined) {
+    if (Array.isArray(updates.observations)) {
+      specialUpdates.observations = updates.observations;
+    } else {
+      // If observations update is a single item, append it
+      const observations = [...(memory.observations || []), updates.observations];
+      // Enforce maximum history length
+      if (observations.length > MAX_OBSERVATIONS) {
+        observations.shift();
+      }
+      specialUpdates.observations = observations;
+    }
   }
+  
+  if (updates.subTasks !== undefined) {
+    if (Array.isArray(updates.subTasks)) {
+      specialUpdates.subTasks = updates.subTasks;
+    } else {
+      // If subTasks update is a single item, append it
+      specialUpdates.subTasks = [...(memory.subTasks || []), updates.subTasks];
+    }
+  }
+  
+  // Define valid memory fields
+  const validFields = ['taskId', 'plan', 'currentStep', 'context', 'observations', 'subTasks'];
+  
+  // Filter updates to only include valid fields
+  const filteredUpdates = {};
+  for (const key of validFields) {
+    if (key in updates) {
+      filteredUpdates[key] = updates[key];
+    }
+  }
+  
+  // Merge filtered updates and special updates into memory
+  Object.assign(memory, filteredUpdates, specialUpdates);
   
   await fs.writeJson(memoryFile, memory, { spaces: 2 });
   
@@ -115,7 +137,14 @@ async function getWorkingMemory(agentName) {
     return await fs.readJson(memoryFile);
   }
   
-  return null;
+  // Return default structure when file doesn't exist
+  return {
+    taskId: null,
+    plan: [],
+    currentStep: null,
+    context: {},
+    observations: []
+  };
 }
 
 async function clearWorkingMemory(agentName) {

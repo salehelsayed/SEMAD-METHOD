@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "build_agents_and_teams_with_dependency_resolution",
+    "description": "Test the /build endpoint to ensure agents and teams are built correctly with proper dependency resolution."
+  },
+  {
+    "id": "TC002",
+    "title": "validate_schemas_tasks_and_configurations",
+    "description": "Test the /validate endpoint to verify that schemas, tasks, and configurations are validated accurately."
+  },
+  {
+    "id": "TC003",
+    "title": "list_available_agents_and_capabilities",
+    "description": "Test the /list_agents endpoint to confirm it lists all available agents along with their capabilities."
+  },
+  {
+    "id": "TC004",
+    "title": "load_agent_configurations_from_markdown_files",
+    "description": "Test the /agents/load endpoint to ensure agent configurations are loaded correctly from markdown files."
+  },
+  {
+    "id": "TC005",
+    "title": "validate_agent_dependencies_and_configurations",
+    "description": "Test the /agents/validate endpoint to verify validation of agent dependencies and configurations."
+  },
+  {
+    "id": "TC006",
+    "title": "build_agent_teams_with_bundled_dependencies",
+    "description": "Test the /teams/build endpoint to ensure agent teams are built with all necessary bundled dependencies."
+  },
+  {
+    "id": "TC007",
+    "title": "execute_structured_tasks_with_schema_validation",
+    "description": "Test the /tasks/execute endpoint to confirm execution of structured tasks with proper schema validation."
+  },
+  {
+    "id": "TC008",
+    "title": "dynamic_task_planning_and_decomposition",
+    "description": "Test the /tasks/plan endpoint to verify dynamic planning and decomposition of complex tasks."
+  },
+  {
+    "id": "TC009",
+    "title": "validate_json_schemas_for_tasks_and_checklists",
+    "description": "Test the /validate/schemas endpoint to ensure JSON schemas for tasks and checklists are validated correctly."
+  },
+  {
+    "id": "TC010",
+    "title": "manage_working_memory_for_active_tasks",
+    "description": "Test the /memory/working endpoint to verify management of working memory during active tasks."
+  }
+]

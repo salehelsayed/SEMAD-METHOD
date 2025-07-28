@@ -2,6 +2,22 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
+// Import error classes
+const {
+  TaskError,
+  ValidationError,
+  TaskExecutionError,
+  MemoryStateError,
+  ActionExecutionError,
+  DependencyError,
+  ConfigurationError
+} = require('../bmad-core/errors/task-errors');
+
+// Import utilities
+const { MemoryTransaction } = require('../bmad-core/utils/memory-transaction');
+const { CleanupRegistry } = require('../bmad-core/utils/cleanup-registry');
+const { TaskRecovery } = require('../bmad-core/utils/task-recovery');
+
 // Dynamic module resolution helper
 function resolveModule(moduleName, fallbackPath) {
   const possiblePaths = [
@@ -31,6 +47,7 @@ const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../bm
 const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../bmad-core/agents/index'));
 const StructuredTaskLoader = require('./lib/structured-task-loader');
 const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator'));
+const ModuleResolver = require(resolveModule('utils/module-resolver', '../bmad-core/utils/module-resolver'));
 
 class TaskRunner {
   constructor(rootDir) {
@@ -38,6 +55,8 @@ class TaskRunner {
     this.taskLoader = new StructuredTaskLoader(rootDir);
     this.storyContractValidator = null;
     this.coreConfig = null;
+    this.cleanupRegistry = new CleanupRegistry();
+    this.taskRecovery = null; // Will be initialized when memory is available
     this.loadCoreConfig();
   }
 
@@ -54,7 +73,9 @@ class TaskRunner {
       ];
       
       let configLoaded = false;
+      let testedPath = null;
       for (const configPath of configPaths) {
+        testedPath = configPath;
         if (fs.existsSync(configPath)) {
           const configContent = fs.readFileSync(configPath, 'utf8');
           this.coreConfig = yaml.load(configContent);
@@ -64,10 +85,31 @@ class TaskRunner {
       }
       
       if (!configLoaded) {
-        console.warn('Failed to find core-config.yaml in any expected location');
+        console.error('\u274c Core configuration not found');
+        console.error('  Searched in:');
+        configPaths.forEach(p => console.error(`    - ${p}`));
+        console.error('\n  The core-config.yaml file is required for task execution');
+        throw new ConfigurationError(
+          'Failed to find core-config.yaml in any expected location',
+          testedPath,
+          { searchedPaths: configPaths }
+        );
       }
     } catch (error) {
-      console.warn('Failed to load core-config.yaml:', error.message);
+      if (error instanceof ConfigurationError) {
+        throw error;
+      }
+      console.error('\u274c Failed to load core configuration:', error.message);
+      if (error.code === 'ENOENT') {
+        console.error('  The core-config.yaml file is missing');
+      } else if (error.message.includes('YAML')) {
+        console.error('  The core-config.yaml file contains invalid YAML syntax');
+      }
+      throw new ConfigurationError(
+        `Failed to load core-config.yaml: ${error.message}`,
+        'core-config.yaml',
+        { originalError: error.message }
+      );
     }
   }
 
@@ -79,7 +121,32 @@ class TaskRunner {
    * @returns {Object} Execution result with adapted memory
    */
   async executeTask(agentName, taskPath, context = {}) {
+    // Initialize task recovery if not already done
+    if (!this.taskRecovery) {
+      const memoryModule = { 
+        getAll: () => ({}), 
+        get: (key) => null,
+        set: (key, value) => {},
+        delete: (key) => {},
+        clear: () => {}
+      };
+      this.taskRecovery = new TaskRecovery(memoryModule);
+    }
+
+    // Instead of using transactions with the async memory API,
+    // we'll create checkpoints and handle rollback manually
+    let checkpointId = null;
+    
     try {
+      // Register cleanup for task execution state
+      this.cleanupRegistry.register(async () => {
+        const memory = await getWorkingMemory(agentName);
+        if (memory && memory.task_execution_state) {
+          delete memory.task_execution_state;
+          await updateWorkingMemory(agentName, memory);
+        }
+      }, 'Clear task execution state');
+
       // Load the task
       const taskData = await this.taskLoader.loadTask(taskPath);
       let task = null;
@@ -99,16 +166,45 @@ class TaskRunner {
       let memory = await getWorkingMemory(agentName);
       if (!memory) {
         // Initialize memory using the centralized function
-        const { initializeWorkingMemory } = require('../bmad-core/agents/index');
-        await initializeWorkingMemory(agentName);
-        memory = await getWorkingMemory(agentName);
+        try {
+          const { initializeWorkingMemory } = require('../bmad-core/agents/index');
+          await initializeWorkingMemory(agentName);
+          memory = await getWorkingMemory(agentName);
+        } catch (initError) {
+          throw new MemoryStateError(
+            `Failed to initialize working memory for agent ${agentName}`,
+            'INITIALIZE',
+            { agentName, error: initError.message }
+          );
+        }
       }
+      
+      // Create checkpoint before modifications
+      const currentMemory = JSON.parse(JSON.stringify(memory || {}));
+      checkpointId = `checkpoint_${Date.now()}`;
       
       // Ensure memory exists before updating
       if (memory) {
+        // Store checkpoint
+        memory[`_checkpoint_${checkpointId}`] = {
+          id: checkpointId,
+          timestamp: new Date().toISOString(),
+          state: currentMemory
+        };
+        
+        this.cleanupRegistry.register(async () => {
+          // Cleanup checkpoint after successful execution
+          const mem = await getWorkingMemory(agentName);
+          if (mem && mem[`_checkpoint_${checkpointId}`]) {
+            delete mem[`_checkpoint_${checkpointId}`];
+            await updateWorkingMemory(agentName, mem);
+          }
+        }, `Remove checkpoint ${checkpointId}`);
+
         // Update with task-specific data
         memory.taskId = task.id || task.name;
         memory.context = context;
+        await updateWorkingMemory(agentName, memory);
       } else {
         // Create a minimal memory structure if initialization failed
         memory = {
@@ -117,10 +213,20 @@ class TaskRunner {
           plan: [],
           subTasks: []
         };
+        await updateWorkingMemory(agentName, memory);
       }
 
       // Apply dynamic plan adaptation
-      const adaptedMemory = planAdaptation(memory, task);
+      let adaptedMemory;
+      try {
+        adaptedMemory = planAdaptation(memory, task);
+      } catch (planError) {
+        throw new TaskExecutionError(
+          `Failed to adapt plan for task: ${planError.message}`,
+          { id: 'plan-adaptation', name: 'Plan Adaptation' },
+          { task: task.name, error: planError.message }
+        );
+      }
 
       // Save the adapted memory
       await updateWorkingMemory(agentName, adaptedMemory);
@@ -133,6 +239,9 @@ class TaskRunner {
       // Process steps and validate outputs if schema is defined
       const stepsWithValidation = await this.processStepsWithValidation(task, agentName, context);
 
+      // Execute cleanup actions on success
+      await this.cleanupRegistry.executeAndClear();
+
       return {
         success: true,
         taskName: task.name,
@@ -142,14 +251,75 @@ class TaskRunner {
         memory: adaptedMemory,
         stepsValidation: stepsWithValidation
       };
-
     } catch (error) {
-      console.error(`Error executing task: ${error.message}`);
-      return {
-        success: false,
-        error: error.message
-      };
+      // Handle different error types appropriately
+      return await this.handleTaskError(error, agentName, taskPath, context);
     }
+  }
+
+  /**
+   * Handle task errors with proper error classification and recovery
+   * @param {Error} error - The error that occurred
+   * @param {string} agentName - The agent that was executing the task
+   * @param {string} taskPath - Path to the task file
+   * @param {Object} context - Execution context
+   * @returns {Object} Error result with recovery information
+   */
+  async handleTaskError(error, agentName, taskPath, context) {
+    console.error(`Error executing task: ${error.message}`);
+    
+    // Attempt recovery
+    const recoveryResult = await this.taskRecovery.recoverFromError(error, {
+      agentName,
+      taskPath,
+      context,
+      rollbackActions: []
+    });
+
+    // Execute any remaining cleanup actions
+    const cleanupResults = await this.cleanupRegistry.executeAndClear();
+    
+    // Format error response based on error type
+    let errorResponse = {
+      success: false,
+      error: error.message,
+      errorType: error.constructor.name,
+      errorCode: error.code || 'UNKNOWN_ERROR',
+      recovery: recoveryResult
+    };
+
+    if (error instanceof TaskError) {
+      // Include error-specific context
+      errorResponse.context = error.context;
+      errorResponse.timestamp = error.timestamp;
+      
+      if (error instanceof ValidationError) {
+        errorResponse.validationErrors = error.validationErrors;
+      } else if (error instanceof TaskExecutionError) {
+        errorResponse.failedStep = error.step;
+      } else if (error instanceof ActionExecutionError) {
+        errorResponse.failedAction = error.action;
+        errorResponse.actionInputs = error.inputs;
+      } else if (error instanceof DependencyError) {
+        errorResponse.dependency = error.dependency;
+        errorResponse.originalError = error.originalError?.message;
+      } else if (error instanceof ConfigurationError) {
+        errorResponse.configPath = error.configPath;
+      }
+    }
+
+    // Include stack trace for debugging
+    if (process.env.NODE_ENV !== 'production') {
+      errorResponse.stack = error.stack;
+    }
+
+    // Include cleanup results if any failed
+    const failedCleanups = cleanupResults.filter(r => r.status === 'failed');
+    if (failedCleanups.length > 0) {
+      errorResponse.cleanupFailures = failedCleanups;
+    }
+
+    return errorResponse;
   }
 
   /**
@@ -202,27 +372,46 @@ class TaskRunner {
    * @returns {Object} Execution result
    */
   async executeSubTask(agentName, subTaskId) {
-    const memory = await getWorkingMemory(agentName);
-    if (!memory || !memory.subTasks) {
-      throw new Error('No sub-tasks found in memory');
+    try {
+      const memory = await getWorkingMemory(agentName);
+      if (!memory || !memory.subTasks) {
+        throw new MemoryStateError(
+          'No sub-tasks found in memory',
+          'READ',
+          { agentName, operation: 'executeSubTask' }
+        );
+      }
+
+      const subTask = memory.subTasks.find(st => st.id === subTaskId);
+      if (!subTask) {
+        throw new TaskExecutionError(
+          `Sub-task ${subTaskId} not found`,
+          { id: subTaskId, name: 'Unknown Sub-task' },
+          { availableSubTasks: memory.subTasks.map(st => st.id) }
+        );
+      }
+
+      // Update current step
+      await updateWorkingMemory(agentName, { currentStep: subTaskId });
+
+      // Mark sub-task as in progress
+      subTask.status = 'in_progress';
+      await updateWorkingMemory(agentName, { subTasks: memory.subTasks });
+
+      return {
+        success: true,
+        subTask: subTask
+      };
+    } catch (error) {
+      if (error instanceof TaskError) {
+        throw error;
+      }
+      throw new TaskExecutionError(
+        `Failed to execute sub-task: ${error.message}`,
+        { id: subTaskId, name: 'Sub-task Execution' },
+        { originalError: error.message }
+      );
     }
-
-    const subTask = memory.subTasks.find(st => st.id === subTaskId);
-    if (!subTask) {
-      throw new Error(`Sub-task ${subTaskId} not found`);
-    }
-
-    // Update current step
-    await updateWorkingMemory(agentName, { currentStep: subTaskId });
-
-    // Mark sub-task as in progress
-    subTask.status = 'in_progress';
-    await updateWorkingMemory(agentName, { subTasks: memory.subTasks });
-
-    return {
-      success: true,
-      subTask: subTask
-    };
   }
 
   /**
@@ -232,34 +421,53 @@ class TaskRunner {
    * @returns {Object} Completion result
    */
   async completeSubTask(agentName, subTaskId) {
-    const memory = await getWorkingMemory(agentName);
-    if (!memory || !memory.subTasks) {
-      throw new Error('No sub-tasks found in memory');
+    try {
+      const memory = await getWorkingMemory(agentName);
+      if (!memory || !memory.subTasks) {
+        throw new MemoryStateError(
+          'No sub-tasks found in memory',
+          'READ',
+          { agentName, operation: 'completeSubTask' }
+        );
+      }
+
+      const subTask = memory.subTasks.find(st => st.id === subTaskId);
+      if (!subTask) {
+        throw new TaskExecutionError(
+          `Sub-task ${subTaskId} not found`,
+          { id: subTaskId, name: 'Unknown Sub-task' },
+          { availableSubTasks: memory.subTasks.map(st => st.id) }
+        );
+      }
+
+      // Mark sub-task as completed
+      subTask.status = 'completed';
+
+      // Update plan status
+      const planItem = memory.plan.find(item => item.id === subTaskId);
+      if (planItem) {
+        planItem.status = 'completed';
+      }
+
+      await updateWorkingMemory(agentName, { 
+        subTasks: memory.subTasks,
+        plan: memory.plan
+      });
+
+      return {
+        success: true,
+        completedSubTask: subTask
+      };
+    } catch (error) {
+      if (error instanceof TaskError) {
+        throw error;
+      }
+      throw new TaskExecutionError(
+        `Failed to complete sub-task: ${error.message}`,
+        { id: subTaskId, name: 'Sub-task Completion' },
+        { originalError: error.message }
+      );
     }
-
-    const subTask = memory.subTasks.find(st => st.id === subTaskId);
-    if (!subTask) {
-      throw new Error(`Sub-task ${subTaskId} not found`);
-    }
-
-    // Mark sub-task as completed
-    subTask.status = 'completed';
-
-    // Update plan status
-    const planItem = memory.plan.find(item => item.id === subTaskId);
-    if (planItem) {
-      planItem.status = 'completed';
-    }
-
-    await updateWorkingMemory(agentName, { 
-      subTasks: memory.subTasks,
-      plan: memory.plan
-    });
-
-    return {
-      success: true,
-      completedSubTask: subTask
-    };
   }
 
   /**
@@ -319,7 +527,7 @@ class TaskRunner {
           // Halt execution on validation failure
           const errorMessage = `Step "${step.name}" validation failed:\n${this.formatValidationErrors(validationResult.errors)}`;
           console.error(errorMessage);
-          throw new Error(errorMessage);
+          throw new ValidationError(errorMessage, validationResult.errors);
         }
       }
 
@@ -399,7 +607,12 @@ class TaskRunner {
             // Command failed with non-zero exit code
             const errorMessage = `Step action failed: ${command}\n${error.message}`;
             console.error(errorMessage);
-            throw new Error(errorMessage);
+            throw new ActionExecutionError(
+              errorMessage,
+              action.action,
+              { command, inputs: context.inputs, outputs: context.outputs },
+              { exitCode: error.code, stderr: error.stderr, stdout: error.stdout }
+            );
           }
         }
       }
@@ -456,7 +669,12 @@ class TaskRunner {
         return await this.executeWorkflowAction(action, resolvedInputs, step.outputs, context);
         
       default:
-        throw new Error(`Unknown action namespace: ${namespace}`);
+        throw new ActionExecutionError(
+          `Unknown action namespace: ${namespace}`,
+          step.action,
+          resolvedInputs,
+          { availableNamespaces: ['file', 'yaml', 'script', 'logic', 'workflow'] }
+        );
     }
   }
 
@@ -507,16 +725,35 @@ class TaskRunner {
     switch (action) {
       case 'read':
         if (!inputs.path) {
-          throw new Error('file:read requires a path input');
+          throw new ActionExecutionError(
+            'file:read requires a path input',
+            'file:read',
+            inputs,
+            { requiredInputs: ['path'] }
+          );
         }
-        const content = fs.readFileSync(inputs.path, 'utf8');
-        if (outputs && outputs.content) {
-          return { [outputs.content]: content };
+        try {
+          const content = fs.readFileSync(inputs.path, 'utf8');
+          if (outputs && outputs.content) {
+            return { [outputs.content]: content };
+          }
+          return content;
+        } catch (error) {
+          throw new ActionExecutionError(
+            `Failed to read file: ${error.message}`,
+            'file:read',
+            inputs,
+            { path: inputs.path, error: error.message }
+          );
         }
-        return content;
         
       default:
-        throw new Error(`Unknown file action: ${action}`);
+        throw new ActionExecutionError(
+          `Unknown file action: ${action}`,
+          `file:${action}`,
+          inputs,
+          { availableActions: ['read'] }
+        );
     }
   }
 
@@ -532,25 +769,52 @@ class TaskRunner {
         // Extract YAML frontmatter between --- markers
         const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
         if (!frontmatterMatch) {
-          throw new Error('No YAML frontmatter found in content');
+          throw new ActionExecutionError(
+            'No YAML frontmatter found in content',
+            'yaml:extract-frontmatter',
+            inputs,
+            { contentPreview: content.substring(0, 100) }
+          );
         }
         
-        const yamlContent = yaml.load(frontmatterMatch[1]);
-        const extractedData = yamlContent[key];
-        
-        if (!extractedData) {
-          throw new Error(`Key '${key}' not found in YAML frontmatter`);
+        try {
+          const yamlContent = yaml.load(frontmatterMatch[1]);
+          const extractedData = yamlContent[key];
+          
+          if (!extractedData) {
+            throw new ActionExecutionError(
+              `Key '${key}' not found in YAML frontmatter`,
+              'yaml:extract-frontmatter',
+              inputs,
+              { availableKeys: Object.keys(yamlContent) }
+            );
+          }
+          
+          // Return the extracted data in the expected format
+          if (outputs && outputs.contractData) {
+            return { [outputs.contractData]: extractedData };
+          }
+          
+          return extractedData;
+        } catch (error) {
+          if (error instanceof ActionExecutionError) {
+            throw error;
+          }
+          throw new ActionExecutionError(
+            `Failed to parse YAML: ${error.message}`,
+            'yaml:extract-frontmatter',
+            inputs,
+            { yamlError: error.message }
+          );
         }
-        
-        // Return the extracted data in the expected format
-        if (outputs && outputs.contractData) {
-          return { [outputs.contractData]: extractedData };
-        }
-        
-        return extractedData;
         
       default:
-        throw new Error(`Unknown yaml action: ${action}`);
+        throw new ActionExecutionError(
+          `Unknown yaml action: ${action}`,
+          `yaml:${action}`,
+          inputs,
+          { availableActions: ['extract-frontmatter'] }
+        );
     }
   }
 
@@ -610,7 +874,12 @@ class TaskRunner {
         }
         
       default:
-        throw new Error(`Unknown script action: ${action}`);
+        throw new ActionExecutionError(
+          `Unknown script action: ${action}`,
+          `script:${action}`,
+          inputs,
+          { availableActions: ['execute'] }
+        );
     }
   }
 
@@ -631,7 +900,12 @@ class TaskRunner {
         return result;
         
       default:
-        throw new Error(`Unknown logic action: ${action}`);
+        throw new ActionExecutionError(
+          `Unknown logic action: ${action}`,
+          `logic:${action}`,
+          inputs,
+          { availableActions: ['evaluate'] }
+        );
     }
   }
 
@@ -671,12 +945,21 @@ class TaskRunner {
           const errorMessage = inputs.errorMessage 
             ? this.resolveTemplateValue(inputs.errorMessage, context)
             : 'Workflow halted by condition';
-          throw new Error(errorMessage);
+          throw new TaskExecutionError(
+            errorMessage,
+            { id: 'conditional-halt', name: 'Conditional Halt' },
+            { condition: inputs.condition, evaluated: conditionResult }
+          );
         }
         return true;
         
       default:
-        throw new Error(`Unknown workflow action: ${action}`);
+        throw new ActionExecutionError(
+          `Unknown workflow action: ${action}`,
+          `workflow:${action}`,
+          inputs,
+          { availableActions: ['conditional-halt'] }
+        );
     }
   }
 
@@ -697,7 +980,12 @@ class TaskRunner {
       const func = new Function(...contextKeys, `return ${resolvedExpression}`);
       return func(...contextValues);
     } catch (error) {
-      throw new Error(`Failed to evaluate expression: ${expression}\n${error.message}`);
+      throw new ActionExecutionError(
+        `Failed to evaluate expression: ${expression}\n${error.message}`,
+        'expression-evaluation',
+        { expression, context: Object.keys(context) },
+        { resolvedExpression, error: error.message }
+      );
     }
   }
 
@@ -729,23 +1017,28 @@ class TaskRunner {
       return this.storyContractValidator.validateContract(outputData);
     }
 
-    // Handle other schema types from core-config
-    if (this.coreConfig && this.coreConfig.validationSchemas && this.coreConfig.validationSchemas[step.schema]) {
-      const schemaPath = this.coreConfig.validationSchemas[step.schema];
+    // Handle other schema types - try ModuleResolver first
+    let schemaPath = ModuleResolver.resolveSchemaPath(step.schema, this.rootDir);
+    
+    // If not found via ModuleResolver, check core-config
+    if (!schemaPath && this.coreConfig && this.coreConfig.validationSchemas && this.coreConfig.validationSchemas[step.schema]) {
+      const configSchemaPath = this.coreConfig.validationSchemas[step.schema];
       
       // Resolve relative paths from root directory
-      const resolvedPath = path.isAbsolute(schemaPath) 
-        ? schemaPath 
-        : path.join(this.rootDir, schemaPath);
-      
-      // Load and validate against custom schema
+      schemaPath = path.isAbsolute(configSchemaPath) 
+        ? configSchemaPath 
+        : path.join(this.rootDir, configSchemaPath);
+    }
+    
+    if (schemaPath) {
+      // Load and validate against schema
       try {
         const Ajv = require('ajv');
         const addFormats = require('ajv-formats');
         const ajv = new Ajv();
         // Add format support including uri-reference
         addFormats(ajv);
-        const schema = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
+        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
         const validate = ajv.compile(schema);
         
         const outputData = context[step.output] || null;

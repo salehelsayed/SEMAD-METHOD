@@ -1,0 +1,20 @@
+id: execute-checklist
+name: Execute Checklist
+description: Generic task for executing any checklist file with progress tracking
+type: task
+structuredTaskReference: ../structured-tasks/execute-checklist.yaml
+steps:
+  step0: "Initialize working memory for checklist execution and retrieve relevant context"
+  step1: "Load and parse the specified checklist file"
+  step2: "Determine execution mode (interactive or comprehensive)"
+  step3: "Execute checklist items according to selected mode"
+  step4: "Generate summary report with results and findings"
+  step5: "Update working memory with execution results and present findings"
+category: validation
+priority: high
+requiredInputs:
+  - checklistPath: The path to the checklist file to execute
+  - mode: Execution mode (interactive or comprehensive)
+outputs:
+  - results: Checklist execution results and findings
+  - completionStatus: Overall checklist completion status

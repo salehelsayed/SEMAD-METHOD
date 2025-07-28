@@ -105,10 +105,15 @@ These references map directly to bundle sections:
 
   async buildAgents() {
     const agents = await this.resolver.listAgents();
+    
+    if (agents.length === 0) {
+      throw new Error('No agents found in bmad-core/agents directory');
+    }
 
     for (const agentId of agents) {
       console.log(`  Building agent: ${agentId}`);
-      const bundle = await this.buildAgentBundle(agentId);
+      try {
+        const bundle = await this.buildAgentBundle(agentId);
 
       // Write to all output directories
       for (const outputDir of this.outputDirs) {
@@ -117,6 +122,10 @@ These references map directly to bundle sections:
         const outputFile = path.join(outputPath, `${agentId}.txt`);
         await fs.writeFile(outputFile, bundle, "utf8");
       }
+      } catch (error) {
+        console.error(`    ✗ Failed to build agent ${agentId}: ${error.message}`);
+        throw new Error(`Agent build failed for ${agentId}: ${error.message}`);
+      }
     }
 
     console.log(`Built ${agents.length} agent bundles in ${this.outputDirs.length} locations`);
@@ -124,10 +133,16 @@ These references map directly to bundle sections:
 
   async buildTeams() {
     const teams = await this.resolver.listTeams();
+    
+    if (teams.length === 0) {
+      console.warn('  No teams found in bmad-core/agent-teams directory');
+      return;
+    }
 
     for (const teamId of teams) {
       console.log(`  Building team: ${teamId}`);
-      const bundle = await this.buildTeamBundle(teamId);
+      try {
+        const bundle = await this.buildTeamBundle(teamId);
 
       // Write to all output directories
       for (const outputDir of this.outputDirs) {
@@ -136,13 +151,23 @@ These references map directly to bundle sections:
         const outputFile = path.join(outputPath, `${teamId}.txt`);
         await fs.writeFile(outputFile, bundle, "utf8");
       }
+      } catch (error) {
+        console.error(`    ✗ Failed to build team ${teamId}: ${error.message}`);
+        throw new Error(`Team build failed for ${teamId}: ${error.message}`);
+      }
     }
 
     console.log(`Built ${teams.length} team bundles in ${this.outputDirs.length} locations`);
   }
 
   async buildAgentBundle(agentId) {
-    const dependencies = await this.resolver.resolveAgentDependencies(agentId);
+    let dependencies;
+    try {
+      dependencies = await this.resolver.resolveAgentDependencies(agentId);
+    } catch (error) {
+      throw new Error(`Failed to resolve dependencies for agent ${agentId}: ${error.message}`);
+    }
+    
     const template = this.generateWebInstructions('agent');
 
     const sections = [template];
@@ -161,7 +186,13 @@ These references map directly to bundle sections:
   }
 
   async buildTeamBundle(teamId) {
-    const dependencies = await this.resolver.resolveTeamDependencies(teamId);
+    let dependencies;
+    try {
+      dependencies = await this.resolver.resolveTeamDependencies(teamId);
+    } catch (error) {
+      throw new Error(`Failed to resolve dependencies for team ${teamId}: ${error.message}`);
+    }
+    
     const template = this.generateWebInstructions('team');
 
     const sections = [template];

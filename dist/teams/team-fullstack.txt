@@ -627,6 +627,13 @@ Provide a user-friendly interface to the BMad knowledge base without overwhelmin
 
 ## Task Execution
 
+### 1. Initialize Memory and Context
+
+Set up working memory and retrieve relevant context
+
+- Initialize working memory for KB mode interaction
+- Retrieve previous KB interactions and commonly asked topics
+
 ### 1. Welcome and Guide
 
 Announce entering KB mode with a brief, friendly introduction.
@@ -681,6 +688,39 @@ Or ask me about anything else related to BMad-Method!
 - Remind them they can return to KB mode anytime with *kb-mode
 - Suggest next steps based on what was discussed
 ==================== END: .bmad-core/structured-tasks/kb-mode-interaction.yaml ====================
+
+==================== START: .bmad-core/tasks/update-working-memory.yaml ====================
+id: update-working-memory
+name: Update Working Memory Task
+description: Task definition for updating agent working memory
+type: task
+structuredTaskReference: ../structured-tasks/update-working-memory.yaml
+category: memory
+priority: high
+requiredInputs:
+  - agentName
+  - taskId (optional)
+  - currentStep (optional)
+  - plan (optional)
+  - context (optional)
+outputs:
+  - memory: Updated memory state
+==================== END: .bmad-core/tasks/update-working-memory.yaml ====================
+
+==================== START: .bmad-core/tasks/retrieve-context.yaml ====================
+id: retrieve-context
+name: Retrieve Context Task
+description: Task definition for retrieving context from memory
+type: task
+structuredTaskReference: ../structured-tasks/retrieve-context.yaml
+category: memory
+priority: high
+requiredInputs:
+  - query
+  - topN (optional)
+outputs:
+  - memories
+==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
 
 ==================== START: .bmad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
@@ -1720,6 +1760,13 @@ CRITICAL: First, help the user select the most appropriate research focus based 
 
 
 ## Important Notes
+
+### 1. Initialize Memory and Context
+
+Set up working memory and retrieve relevant context
+
+- Initialize working memory for research prompt creation
+- Retrieve previous research patterns and methodologies
 
 ### 1. Research Focus Options
 
@@ -3396,6 +3443,13 @@ Create a single user story for very small brownfield enhancements that can be co
 
 ## Important Notes
 
+### 1. Initialize Memory and Context
+
+Set up working memory and retrieve relevant context
+
+- Initialize working memory for brownfield story creation
+- Retrieve any previous brownfield story patterns and integration approaches
+
 ### 1. Quick Project Assessment
 
 Gather minimal but essential context about the existing project:
@@ -3488,9 +3542,78 @@ The story creation is successful when:
 ==================== END: .bmad-core/structured-tasks/brownfield-create-story.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/execute-checklist.yaml ====================
-# Checklist Validation Task
+# Execute Checklist
 
-## Task Execution
+## Purpose
+
+Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
+
+## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+
+### 1. Initialize Working Memory
+
+Initialize working memory for checklist execution session
+
+- Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+- Verify checklist file exists at specified path
+- Load checklist content and parse structure
+
+### 2. Determine Execution Mode
+
+Determine how to execute the checklist based on user preference
+
+- Check if execution mode was provided in input
+- If mode not specified, ask user for preference:
+- **How would you like to work through this checklist?**
+- 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+- 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
+- **[USER INPUT REQUIRED]** Select option (1 or 2):
+
+### 3. Parse Checklist Structure
+
+Analyze the checklist to identify sections and items
+
+- Identify main sections in the checklist
+- Extract checklist items (lines starting with '- [ ]')
+- Parse any LLM instructions embedded in [[LLM: ]] blocks
+- Create structured representation of checklist hierarchy
+- Record total items count and section breakdown in memory
+
+### 4. Execute Checklist Items
+
+Work through each checklist item based on selected mode
+
+- For each section in the checklist:
+- Read and understand the section context and any LLM instructions
+- Evaluate each checklist item in the section
+- Mark items as checked [x] or unchecked [ ] based on evaluation
+- Document findings, issues, or observations for each item
+- **[USER INPUT REQUIRED]** If interactive mode: Present section findings and await confirmation
+- Update progress tracking in working memory
+
+### 5. Generate Summary Report
+
+Create comprehensive report of checklist execution results
+
+- Calculate overall completion percentage
+- Summarize findings by category/section
+- Identify critical issues or blockers
+- Generate recommendations based on unchecked items
+- If checklist includes specific report format (e.g., validation tables), use that format
+- Store execution results in working memory for future reference
+
+### 6. Present Results and Next Steps
+
+Present the final results and offer follow-up actions
+
+- Display the summary report to the user
+- Highlight any critical issues or blockers found
+- Show completion statistics (X of Y items passed)
+- If unchecked items exist, offer to:
+- 1. Get detailed analysis of failed items
+- 2. Generate action plan to address issues
+- 3. Re-run specific sections
+- **[USER INPUT REQUIRED]** Would you like to perform any follow-up actions?
 ==================== END: .bmad-core/structured-tasks/execute-checklist.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/shard-doc.yaml ====================
@@ -7521,6 +7644,24 @@ agent_config:
     - Testing
     - Change Log
 
+header:
+  id: story-contract
+  title: StoryContract
+  type: yaml-block
+  instruction: This section contains the formal StoryContract parsed from PRD and Architecture documents
+  template: |
+    ---
+    StoryContract:
+      version: "{{contract_version}}"
+      story_id: "{{story_id}}"
+      epic_id: "{{epic_id}}"
+      apiEndpoints: {{api_endpoints}}
+      filesToModify: {{files_to_modify}}
+      acceptanceCriteriaLinks: {{acceptance_criteria_links}}
+    ---
+  owner: scrum-master
+  editors: [scrum-master]
+
 sections:
   - id: status
     title: Status
@@ -7992,6 +8133,12 @@ workflow:
         If skipped, use existing project documentation.
         SAVE OUTPUT: Copy final prd.md to your project's docs/ folder.
 
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
     - step: architecture_decision
       agent: pm/architect
       action: determine if architecture document needed
@@ -8268,6 +8415,12 @@ workflow:
         - update-working-memory: after_completion
       notes: "Creates comprehensive PRD focused on service enhancement with existing system analysis. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
 
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
     - agent: architect
       creates: architecture.md
       uses: brownfield-architecture-tmpl
@@ -8472,6 +8625,12 @@ workflow:
         - retrieve-context: at_start
         - update-working-memory: after_completion
       notes: "Creates comprehensive PRD focused on UI enhancement with existing system analysis. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
 
     - agent: ux-expert
       creates: front-end-spec.md
@@ -8692,6 +8851,12 @@ workflow:
         - retrieve-context: at_start
         - update-working-memory: after_completion
       notes: "Creates PRD from project brief using prd-tmpl. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
 
     - agent: ux-expert
       creates: front-end-spec.md
@@ -8953,6 +9118,12 @@ workflow:
         - update-working-memory: after_completion
       notes: "Creates PRD from project brief using prd-tmpl, focused on API/service requirements. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
 
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
     - agent: architect
       creates: architecture.md
       requires: prd.md
@@ -9177,6 +9348,12 @@ workflow:
         - retrieve-context: at_start
         - update-working-memory: after_completion
       notes: "Creates PRD from project brief using prd-tmpl, focused on UI/frontend requirements. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
 
     - agent: ux-expert
       creates: front-end-spec.md
