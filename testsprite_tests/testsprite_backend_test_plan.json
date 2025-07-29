@@ -1,52 +1,102 @@
 [
   {
-    "id": "TC001",
-    "title": "build_agents_and_teams_with_dependency_resolution",
-    "description": "Test the /build endpoint to ensure agents and teams are built correctly with proper dependency resolution."
+    "id": "TC011",
+    "title": "parse_and_validate_structured_tasks_yaml",
+    "description": "Test that structured tasks defined in YAML/JSON are parsed correctly and validated against the structured-task schema."
   },
   {
-    "id": "TC002",
-    "title": "validate_schemas_tasks_and_configurations",
-    "description": "Test the /validate endpoint to verify that schemas, tasks, and configurations are validated accurately."
+    "id": "TC012",
+    "title": "persist_and_retrieve_working_memory",
+    "description": "Test that working memory is initialized, updated, and retrieved correctly for each agent, including persistence across multiple task executions."
   },
   {
-    "id": "TC003",
-    "title": "list_available_agents_and_capabilities",
-    "description": "Test the /list_agents endpoint to confirm it lists all available agents along with their capabilities."
+    "id": "TC013",
+    "title": "divide_and_conquer_subtask_decomposition",
+    "description": "Test dynamic plan adaptation by verifying that complex tasks are decomposed into parallel sub‑tasks and that their results are merged back properly."
   },
   {
-    "id": "TC004",
-    "title": "load_agent_configurations_from_markdown_files",
-    "description": "Test the /agents/load endpoint to ensure agent configurations are loaded correctly from markdown files."
+    "id": "TC014",
+    "title": "generate_and_ingest_search_tools_into_qdrant",
+    "description": "Test that search tools are generated from the PRD, stored in search-tools.yaml, and ingested into the Qdrant vector store for retrieval during development."
   },
   {
-    "id": "TC005",
-    "title": "validate_agent_dependencies_and_configurations",
-    "description": "Test the /agents/validate endpoint to verify validation of agent dependencies and configurations."
+    "id": "TC015",
+    "title": "extract_and_validate_story_contracts",
+    "description": "Test that StoryContract blocks are correctly extracted from story files, validated against the story-contract schema, and aligned with PRD and architecture specifications."
   },
   {
-    "id": "TC006",
-    "title": "build_agent_teams_with_bundled_dependencies",
-    "description": "Test the /teams/build endpoint to ensure agent teams are built with all necessary bundled dependencies."
+    "id": "TC016",
+    "title": "concurrent_memory_updates_and_race_conditions",
+    "description": "Test concurrent updates to the working memory for a single agent to ensure no race conditions corrupt the memory file."
   },
   {
-    "id": "TC007",
-    "title": "execute_structured_tasks_with_schema_validation",
-    "description": "Test the /tasks/execute endpoint to confirm execution of structured tasks with proper schema validation."
+    "id": "TC017",
+    "title": "initialize_and_fallback_working_memory",
+    "description": "Test that working memory initializes properly when no memory file exists and provides meaningful fallback behavior if initialization fails."
   },
   {
-    "id": "TC008",
-    "title": "dynamic_task_planning_and_decomposition",
-    "description": "Test the /tasks/plan endpoint to verify dynamic planning and decomposition of complex tasks."
+    "id": "TC018",
+    "title": "prompt_generation_from_structured_tasks",
+    "description": "Test that prompts generated for the LLM from structured tasks and checklists are constructed correctly and include all required context and metadata."
   },
   {
-    "id": "TC009",
-    "title": "validate_json_schemas_for_tasks_and_checklists",
-    "description": "Test the /validate/schemas endpoint to ensure JSON schemas for tasks and checklists are validated correctly."
+    "id": "TC019",
+    "title": "error_handling_for_malformed_yaml",
+    "description": "Test the system’s response when encountering missing or malformed YAML/JSON task or checklist files, ensuring clear and actionable error messages."
   },
   {
-    "id": "TC010",
-    "title": "manage_working_memory_for_active_tasks",
-    "description": "Test the /memory/working endpoint to verify management of working memory during active tasks."
+    "id": "TC020",
+    "title": "multi_agent_workflow_with_memory_isolation",
+    "description": "Test a full multi-agent workflow (planning through development) to confirm that each agent’s working memory remains isolated and does not bleed into other agents’ contexts."
+  },
+  {
+    "id": "TC021",
+    "title": "custom_search_tool_mapping_overrides",
+    "description": "Test that user‑defined tool mappings in core-config.yaml override default mappings during search tools generation."
+  },
+  {
+    "id": "TC022",
+    "title": "keyword_extraction_and_stop_word_filtering",
+    "description": "Test that the search-tools generator correctly extracts domain-specific keywords from the PRD and filters out stop words."
+  },
+  {
+    "id": "TC023",
+    "title": "prd_and_architecture_sharding_and_ingestion",
+    "description": "Test that PRD and architecture documents are sharded according to configuration and ingested correctly into the system for story and task generation."
+  },
+  {
+    "id": "TC024",
+    "title": "story_contract_validation_error_reporting",
+    "description": "Test that invalid or missing fields in a StoryContract are detected and that descriptive validation errors are returned."
+  },
+  {
+    "id": "TC025",
+    "title": "working_memory_observation_history_limits",
+    "description": "Test that working memory correctly retains only the configured maximum number of observations and discards the oldest when the limit is exceeded."
+  },
+  {
+    "id": "TC026",
+    "title": "agent_memory_isolation_across_agents",
+    "description": "Test that updates to one agent’s working memory do not affect another agent’s memory, ensuring data isolation."
+  },
+  {
+    "id": "TC027",
+    "title": "validate_all_structured_task_and_checklist_directories",
+    "description": "Test that all YAML files in the structured-tasks and structured-checklists directories are validated and reported accurately by the validation scripts."
+  },
+  {
+    "id": "TC028",
+    "title": "dynamic_task_replanning_based_on_user_feedback",
+    "description": "Test that the system can adjust an existing plan dynamically when users provide new information or feedback mid‑execution."
+  },
+  {
+    "id": "TC029",
+    "title": "external_documentation_search_via_generated_queries",
+    "description": "Test that generated search queries return relevant external documentation and that the results are integrated into the development context."
+  },
+  {
+    "id": "TC030",
+    "title": "end_to_end_planning_to_development_pipeline",
+    "description": "Test the full pipeline from PRD creation, task structuring and validation, dynamic plan adaptation, search tools generation, working memory update, and final implementation to ensure all components interact seamlessly."
   }
 ]
