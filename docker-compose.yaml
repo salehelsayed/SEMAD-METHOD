@@ -1,0 +1,19 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:${QDRANT_TAG:-latest}      # pin a tag if you like
+    container_name: "${COMPOSE_PROJECT_NAME:-qdrant}_${QDRANT_PORT:-6333}"
+    restart: unless-stopped
+
+    # ---------- Networking ----------
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"   # host:container
+
+    # ---------- Persistent storage ----------
+    volumes:
+      # puts all Qdrant collection files under ./qdrant_storage in the repo
+      - "./qdrant_storage:/qdrant/storage"
+
+    # ---------- Optional basic configuration ----------
+    #environment:
+      # change or remove as needed
+      #QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-}     # "" means no auth

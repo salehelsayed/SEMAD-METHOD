@@ -485,6 +485,70 @@ These references map directly to bundle sections:
                   );
                 }
               }
+            } else if (typeof resources === 'object') {
+              // Handle object format for dependencies like utils
+              for (const [key, resourcePath] of Object.entries(resources)) {
+                let found = false;
+
+                // Try expansion pack first
+                const expandPath = path.join(packDir, resourceType, resourcePath);
+                try {
+                  const resourceContent = await fs.readFile(expandPath, "utf8");
+                  const resourceWebPath = this.convertToWebPath(expandPath, packName);
+                  sections.push(
+                    this.formatSection(resourceWebPath, resourceContent, packName)
+                  );
+                  found = true;
+                } catch (error) {
+                  // Not in expansion pack, continue
+                }
+
+                // If not found in expansion pack, try core
+                if (!found) {
+                  const corePath = path.join(
+                    this.rootDir,
+                    "bmad-core",
+                    resourceType,
+                    resourcePath
+                  );
+                  try {
+                    const coreContent = await fs.readFile(corePath, "utf8");
+                    const coreWebPath = this.convertToWebPath(corePath, packName);
+                    sections.push(
+                      this.formatSection(coreWebPath, coreContent, packName)
+                    );
+                    found = true;
+                  } catch (error) {
+                    // Not in core either, continue
+                  }
+                }
+
+                // If not found in core, try common folder
+                if (!found) {
+                  const commonPath = path.join(
+                    this.rootDir,
+                    "common",
+                    resourceType,
+                    resourcePath
+                  );
+                  try {
+                    const commonContent = await fs.readFile(commonPath, "utf8");
+                    const commonWebPath = this.convertToWebPath(commonPath, packName);
+                    sections.push(
+                      this.formatSection(commonWebPath, commonContent, packName)
+                    );
+                    found = true;
+                  } catch (error) {
+                    // Not in common either, continue
+                  }
+                }
+
+                if (!found) {
+                  console.warn(
+                    `    ⚠ Dependency ${resourceType}#${key} (${resourcePath}) not found in expansion pack or core`
+                  );
+                }
+              }
             }
           }
         }
@@ -572,6 +636,14 @@ These references map directly to bundle sections:
                       allDependencies.set(key, { type: resourceType, name: resourceName });
                     }
                   }
+                } else if (typeof resources === 'object') {
+                  // Handle object format for dependencies like utils
+                  for (const [utilKey, resourcePath] of Object.entries(resources)) {
+                    const key = `${resourceType}#${resourcePath}`;
+                    if (!allDependencies.has(key)) {
+                      allDependencies.set(key, { type: resourceType, name: resourcePath });
+                    }
+                  }
                 }
               }
             }
@@ -599,6 +671,14 @@ These references map directly to bundle sections:
                       const key = `${resourceType}#${resourceName}`;
                       if (!allDependencies.has(key)) {
                         allDependencies.set(key, { type: resourceType, name: resourceName });
+                      }
+                    }
+                  } else if (typeof resources === 'object') {
+                    // Handle object format for dependencies like utils
+                    for (const [utilKey, resourcePath] of Object.entries(resources)) {
+                      const key = `${resourceType}#${resourcePath}`;
+                      if (!allDependencies.has(key)) {
+                        allDependencies.set(key, { type: resourceType, name: resourcePath });
                       }
                     }
                   }

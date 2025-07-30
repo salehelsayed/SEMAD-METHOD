@@ -62,117 +62,33 @@ activation-instructions:
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
-  - STAY IN CHARACTER!
-  - Assess user goal against available agents and workflows in this bundle
-  - If clear match to an agent's expertise, suggest transformation with *agent command
-  - If project-oriented, suggest *workflow-guidance to explore options
-  - Load resources only when needed - never pre-load
+  - STAY IN CHARACTER\!
 agent:
   name: BMad Orchestrator
   id: bmad-orchestrator
-  title: BMad Master Orchestrator
-  icon: 🎭
-  whenToUse: Use for workflow coordination, multi-agent tasks, role switching guidance, and when unsure which specialist to consult
+  title: BMad Workflow Orchestrator
+  icon: 🎼
+  whenToUse: Use when you need to coordinate multi-agent workflows, manage complex project execution, or orchestrate the BMad-Method process.
 persona:
-  role: Master Orchestrator & BMad Method Expert
-  style: Knowledgeable, guiding, adaptable, efficient, encouraging, technically brilliant yet approachable. Helps customize and use BMad Method while orchestrating agents
-  identity: Unified interface to all BMad-Method capabilities, dynamically transforms into any specialized agent
-  focus: Orchestrating the right agent/capability for each need, loading resources only when needed
+  role: Workflow Orchestrator & Process Coordinator
+  identity: Expert in coordinating multi-agent workflows and managing BMad-Method execution
+  style: Systematic, organized, and process-focused - ensures smooth workflow execution and agent coordination
   core_principles:
-    - Become any agent on demand, loading files only when needed
-    - Never pre-load resources - discover and load at runtime
-    - Assess needs and recommend best approach/agent/workflow
-    - Track current state and guide to next logical steps
-    - When embodied, specialized persona's principles take precedence
-    - Be explicit about active persona and current task
-    - Always use numbered lists for choices
-    - Process commands starting with * immediately
-    - Always remind users that commands require * prefix
-    - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially
+    - Orchestrate multi-agent workflows seamlessly
+    - Manage context and state across agent transitions
+    - Ensure workflow integrity and completion
+    - Coordinate resource allocation and dependencies
+    - Track workflow progress and milestones
+    - Maintain clear communication between agents
 commands:
-  help: Show this guide with available agents and workflows
-  chat-mode: Start conversational mode for detailed assistance
-  kb-mode: Load full BMad knowledge base
-  status: Show current context, active agent, and progress
-  agent: Transform into a specialized agent (list if name not specified)
-  exit: Return to BMad or exit session
-  task: Run a specific task (list if name not specified)
-  workflow: Start a specific workflow (list if name not specified)
-  workflow-guidance: Get personalized help selecting the right workflow
-  plan: Create detailed workflow plan before starting
-  plan-status: Show current workflow plan progress
-  plan-update: Update workflow plan status
-  checklist: Execute a checklist (list if name not specified)
-  yolo: Toggle skip confirmations mode
-  party-mode: Group chat with all agents
-  doc-out: Output full document
-help-display-template: |
-  === BMad Orchestrator Commands ===
-  All commands must start with * (asterisk)
-
-  Core Commands:
-  *help ............... Show this guide
-  *chat-mode .......... Start conversational mode for detailed assistance
-  *kb-mode ............ Load full BMad knowledge base
-  *status ............. Show current context, active agent, and progress
-  *exit ............... Return to BMad or exit session
-
-  Agent & Task Management:
-  *agent [name] ....... Transform into specialized agent (list if no name)
-  *task [name] ........ Run specific task (list if no name, requires agent)
-  *checklist [name] ... Execute checklist (list if no name, requires agent)
-
-  Workflow Commands:
-  *workflow [name] .... Start specific workflow (list if no name)
-  *workflow-guidance .. Get personalized help selecting the right workflow
-  *plan ............... Create detailed workflow plan before starting
-  *plan-status ........ Show current workflow plan progress
-  *plan-update ........ Update workflow plan status
-
-  Other Commands:
-  *yolo ............... Toggle skip confirmations mode
-  *party-mode ......... Group chat with all agents
-  *doc-out ............ Output full document
-
-  === Available Specialist Agents ===
-  [Dynamically list each agent in bundle with format:
-  *agent {id}: {title}
-    When to use: {whenToUse}
-    Key deliverables: {main outputs/documents}]
-
-  === Available Workflows ===
-  [Dynamically list each workflow in bundle with format:
-  *workflow {id}: {name}
-    Purpose: {description}]
-
-  💡 Tip: Each agent has unique tasks, templates, and checklists. Switch to an agent to access their capabilities!
-fuzzy-matching:
-  - 85% confidence threshold
-  - Show numbered list if unsure
-transformation:
-  - Match name/role to agents
-  - Announce transformation
-  - Operate until exit
-loading:
-  - KB: Only for *kb-mode or BMad questions
-  - Agents: Only when transforming
-  - Templates/Tasks: Only when executing
-  - Always indicate loading
-kb-mode-behavior:
-  - When *kb-mode is invoked, use kb-mode-interaction task
-  - Don't dump all KB content immediately
-  - Present topic areas and wait for user selection
-  - Provide focused, contextual responses
-workflow-guidance:
-  - Discover available workflows in the bundle at runtime
-  - Understand each workflow's purpose, options, and decision points
-  - Ask clarifying questions based on the workflow's structure
-  - Guide users through workflow selection when multiple options exist
-  - When appropriate, suggest: Would you like me to create a detailed workflow plan before starting?
-  - For workflows with divergent paths, help users choose the right path
-  - Adapt questions to the specific domain (e.g., game dev vs infrastructure vs web dev)
-  - Only recommend workflows that actually exist in the current bundle
-  - When *workflow-guidance is called, start an interactive session and list all available workflows with brief descriptions
+  - help: Show these listed commands in a numbered list
+  - workflow {name}: Execute a specific workflow (no name = list available workflows)
+  - agents: List available agents and their purposes
+  - status: Show current workflow status and active agents
+  - context: Display current workflow context
+  - handoff {agent}: Hand off control to another agent with context
+  - kb: Toggle KB mode for workflow knowledge
+  - exit: Exit orchestrator mode (confirm)
 dependencies:
   tasks:
     - advanced-elicitation.yaml
@@ -180,12 +96,23 @@ dependencies:
     - kb-mode-interaction.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+  templates:
+    - workflow-status-tmpl.yaml
+    - handoff-context-tmpl.yaml
   data:
     - bmad-kb.md
-    - elicitation-methods.md
+    - workflow-patterns.md
+  workflows:
+    - brownfield-fullstack.yaml
+    - brownfield-service.yaml
+    - brownfield-ui.yaml
+    - greenfield-fullstack.yaml
+    - greenfield-service.yaml
+    - greenfield-ui.yaml
   utils:
     - workflow-management.md
 ```
+EOF < /dev/null
 ==================== END: .bmad-core/agents/bmad-orchestrator.md ====================
 
 ==================== START: .bmad-core/agents/po.md ====================
@@ -365,11 +292,11 @@ dependencies:
     - generate-datamodel-tests.yaml
     - validate-story-contract.yaml
   utils:
-    - task-runner: ../../../tools/task-runner.js
-    - validate-next-story.yaml
-    - update-working-memory.yaml
-    - retrieve-context.yaml
-    - datamodel-test-generator: ../../../bmad-core/utils/datamodel-test-generator.js
+    task-runner: ../../tools/task-runner.js
+    validate-next-story: validate-next-story.yaml
+    update-working-memory: update-working-memory.yaml
+    retrieve-context: retrieve-context.yaml
+    datamodel-test-generator: datamodel-test-generator.js
   checklists:
     - story-dod-checklist.yaml
 ```
@@ -640,6 +567,157 @@ requiredInputs:
 outputs:
   - memories
 ==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
+
+==================== START: .bmad-core/templates/workflow-status-tmpl.yaml ====================
+template:
+  name: Workflow Status Report
+  description: Template for displaying current workflow execution status
+  version: "1.0"
+
+sections:
+  - name: Workflow Information
+    content: |
+      ## Workflow Status Report
+      
+      **Workflow Name**: {{workflow_name}}
+      **Workflow ID**: {{workflow_id}}
+      **Started**: {{start_time}}
+      **Current Status**: {{status}}
+      
+  - name: Active Agents
+    content: |
+      ### Active Agents
+      {{#each active_agents}}
+      - **{{name}}** ({{id}}): {{current_task}}
+        - Status: {{status}}
+        - Started: {{task_start_time}}
+      {{/each}}
+      
+  - name: Completed Steps
+    content: |
+      ### Completed Steps
+      {{#each completed_steps}}
+      ✓ **Step {{number}}**: {{description}}
+        - Agent: {{agent}}
+        - Duration: {{duration}}
+        - Result: {{result}}
+      {{/each}}
+      
+  - name: Pending Steps
+    content: |
+      ### Pending Steps
+      {{#each pending_steps}}
+      ○ **Step {{number}}**: {{description}}
+        - Assigned Agent: {{agent}}
+        - Dependencies: {{dependencies}}
+      {{/each}}
+      
+  - name: Context Summary
+    content: |
+      ### Current Context
+      {{#each context_items}}
+      - **{{key}}**: {{value}}
+      {{/each}}
+      
+  - name: Performance Metrics
+    content: |
+      ### Performance Metrics
+      - Total Duration: {{total_duration}}
+      - Steps Completed: {{completed_count}}/{{total_count}}
+      - Success Rate: {{success_rate}}%
+      - Average Step Duration: {{avg_duration}}
+==================== END: .bmad-core/templates/workflow-status-tmpl.yaml ====================
+
+==================== START: .bmad-core/templates/handoff-context-tmpl.yaml ====================
+template:
+  name: Agent Handoff Context
+  description: Template for passing context between agents during workflow handoffs
+  version: "1.0"
+
+sections:
+  - name: Handoff Header
+    content: |
+      ## Agent Handoff Context
+      
+      **From Agent**: {{from_agent.name}} ({{from_agent.id}})
+      **To Agent**: {{to_agent.name}} ({{to_agent.id}})
+      **Handoff Time**: {{handoff_time}}
+      **Workflow**: {{workflow_name}}
+      
+  - name: Completed Work Summary
+    content: |
+      ### Work Completed by {{from_agent.name}}
+      
+      {{completed_work_summary}}
+      
+      **Key Deliverables**:
+      {{#each deliverables}}
+      - {{name}}: {{description}}
+        - Location: {{path}}
+        - Status: {{status}}
+      {{/each}}
+      
+  - name: Context Transfer
+    content: |
+      ### Context for {{to_agent.name}}
+      
+      **Primary Objective**: {{next_objective}}
+      
+      **Required Inputs**:
+      {{#each required_inputs}}
+      - **{{name}}**: {{description}}
+        - Type: {{type}}
+        - Location: {{location}}
+      {{/each}}
+      
+      **Constraints**:
+      {{#each constraints}}
+      - {{description}}
+      {{/each}}
+      
+  - name: Dependencies
+    content: |
+      ### Dependencies and Prerequisites
+      
+      **Completed Dependencies**:
+      {{#each completed_dependencies}}
+      ✓ {{description}}
+      {{/each}}
+      
+      **Pending Dependencies**:
+      {{#each pending_dependencies}}
+      ○ {{description}} (Owner: {{owner}})
+      {{/each}}
+      
+  - name: Special Instructions
+    content: |
+      ### Special Instructions
+      
+      {{#if special_instructions}}
+      {{special_instructions}}
+      {{else}}
+      No special instructions provided.
+      {{/if}}
+      
+  - name: Working Memory
+    content: |
+      ### Working Memory Transfer
+      
+      **Key Decisions Made**:
+      {{#each decisions}}
+      - {{description}}: {{rationale}}
+      {{/each}}
+      
+      **Open Questions**:
+      {{#each open_questions}}
+      - {{question}} (Context: {{context}})
+      {{/each}}
+      
+      **Risk Items**:
+      {{#each risks}}
+      - {{description}} (Mitigation: {{mitigation}})
+      {{/each}}
+==================== END: .bmad-core/templates/handoff-context-tmpl.yaml ====================
 
 ==================== START: .bmad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
@@ -1447,213 +1525,316 @@ Use the **expansion-creator** pack to build your own:
 - **Contributing**: See `CONTRIBUTING.md` for full guidelines
 ==================== END: .bmad-core/data/bmad-kb.md ====================
 
-==================== START: .bmad-core/data/elicitation-methods.md ====================
-# Elicitation Methods Data
+==================== START: .bmad-core/data/workflow-patterns.md ====================
+# BMad Workflow Patterns
 
-## Core Reflective Methods
+## Overview
+This document describes common workflow patterns used in the BMad-Method system for multi-agent coordination and task execution.
 
-**Expand or Contract for Audience**
-- Ask whether to 'expand' (add detail, elaborate) or 'contract' (simplify, clarify)
-- Identify specific target audience if relevant
-- Tailor content complexity and depth accordingly
+## Basic Patterns
 
-**Explain Reasoning (CoT Step-by-Step)**
-- Walk through the step-by-step thinking process
-- Reveal underlying assumptions and decision points
-- Show how conclusions were reached from current role's perspective
+### Sequential Workflow
+Agents execute tasks one after another in a defined sequence.
 
-**Critique and Refine**
-- Review output for flaws, inconsistencies, or improvement areas
-- Identify specific weaknesses from role's expertise
-- Suggest refined version reflecting domain knowledge
+```yaml
+pattern: sequential
+agents:
+  - analyst: gather-requirements
+  - architect: design-system
+  - dev: implement-solution
+  - qa: validate-implementation
+```
 
-## Structural Analysis Methods
+### Parallel Workflow
+Multiple agents work simultaneously on independent tasks.
 
-**Analyze Logical Flow and Dependencies**
-- Examine content structure for logical progression
-- Check internal consistency and coherence
-- Identify and validate dependencies between elements
-- Confirm effective ordering and sequencing
+```yaml
+pattern: parallel
+agents:
+  concurrent:
+    - ux-expert: design-ui
+    - architect: design-api
+  merge: pm
+```
 
-**Assess Alignment with Overall Goals**
-- Evaluate content contribution to stated objectives
-- Identify any misalignments or gaps
-- Interpret alignment from specific role's perspective
-- Suggest adjustments to better serve goals
+### Conditional Workflow
+Workflow branches based on conditions or outcomes.
 
-## Risk and Challenge Methods
+```yaml
+pattern: conditional
+decision_point: requirement-complexity
+branches:
+  simple: [dev, qa]
+  complex: [architect, dev, qa]
+  critical: [analyst, architect, dev, qa, po]
+```
 
-**Identify Potential Risks and Unforeseen Issues**
-- Brainstorm potential risks from role's expertise
-- Identify overlooked edge cases or scenarios
-- Anticipate unintended consequences
-- Highlight implementation challenges
+## Advanced Patterns
 
-**Challenge from Critical Perspective**
-- Adopt critical stance on current content
-- Play devil's advocate from specified viewpoint
-- Argue against proposal highlighting weaknesses
-- Apply YAGNI principles when appropriate (scope trimming)
+### Iterative Refinement
+Agents collaborate in cycles to refine outputs.
 
-## Creative Exploration Methods
+```yaml
+pattern: iterative
+cycles:
+  - agents: [analyst, pm]
+    until: requirements-clear
+  - agents: [architect, dev]
+    until: design-approved
+```
 
-**Tree of Thoughts Deep Dive**
-- Break problem into discrete "thoughts" or intermediate steps
-- Explore multiple reasoning paths simultaneously
-- Use self-evaluation to classify each path as "sure", "likely", or "impossible"
-- Apply search algorithms (BFS/DFS) to find optimal solution paths
+### Hub and Spoke
+Central coordinator manages distributed agents.
 
-**Hindsight is 20/20: The 'If Only...' Reflection**
-- Imagine retrospective scenario based on current content
-- Identify the one "if only we had known/done X..." insight
-- Describe imagined consequences humorously or dramatically
-- Extract actionable learnings for current context
+```yaml
+pattern: hub-spoke
+hub: bmad-orchestrator
+spokes:
+  - agent: analyst
+    trigger: new-requirement
+  - agent: dev
+    trigger: story-ready
+  - agent: qa
+    trigger: code-complete
+```
 
-## Multi-Persona Collaboration Methods
+### Pipeline Pattern
+Continuous flow with buffering between stages.
 
-**Agile Team Perspective Shift**
-- Rotate through different Scrum team member viewpoints
-- Product Owner: Focus on user value and business impact
-- Scrum Master: Examine process flow and team dynamics
-- Developer: Assess technical implementation and complexity
-- QA: Identify testing scenarios and quality concerns
+```yaml
+pattern: pipeline
+stages:
+  - name: analysis
+    agent: analyst
+    buffer: requirement-queue
+  - name: development
+    agent: dev
+    buffer: story-queue
+  - name: testing
+    agent: qa
+    buffer: test-queue
+```
 
-**Stakeholder Round Table**
-- Convene virtual meeting with multiple personas
-- Each persona contributes unique perspective on content
-- Identify conflicts and synergies between viewpoints
-- Synthesize insights into actionable recommendations
+## Context Management Patterns
 
-**Meta-Prompting Analysis**
-- Step back to analyze the structure and logic of current approach
-- Question the format and methodology being used
-- Suggest alternative frameworks or mental models
-- Optimize the elicitation process itself
+### Context Accumulation
+Each agent adds to a growing context.
 
-## Advanced 2025 Techniques
+```yaml
+context_strategy: accumulate
+agents:
+  - analyst:
+      adds: [requirements, constraints]
+  - architect:
+      adds: [design, technical-decisions]
+  - dev:
+      adds: [implementation-details, test-results]
+```
 
-**Self-Consistency Validation**
-- Generate multiple reasoning paths for same problem
-- Compare consistency across different approaches
-- Identify most reliable and robust solution
-- Highlight areas where approaches diverge and why
+### Context Transformation
+Agents transform context for next agent.
 
-**ReWOO (Reasoning Without Observation)**
-- Separate parametric reasoning from tool-based actions
-- Create reasoning plan without external dependencies
-- Identify what can be solved through pure reasoning
-- Optimize for efficiency and reduced token usage
+```yaml
+context_strategy: transform
+transformations:
+  - from: analyst
+    to: architect
+    transform: requirements-to-specs
+  - from: architect
+    to: dev
+    transform: specs-to-tasks
+```
 
-**Persona-Pattern Hybrid**
-- Combine specific role expertise with elicitation pattern
-- Architect + Risk Analysis: Deep technical risk assessment
-- UX Expert + User Journey: End-to-end experience critique
-- PM + Stakeholder Analysis: Multi-perspective impact review
+### Context Filtering
+Only relevant context passed between agents.
 
-**Emergent Collaboration Discovery**
-- Allow multiple perspectives to naturally emerge
-- Identify unexpected insights from persona interactions
-- Explore novel combinations of viewpoints
-- Capture serendipitous discoveries from multi-agent thinking
+```yaml
+context_strategy: filter
+rules:
+  - from: analyst
+    to: dev
+    include: [acceptance-criteria, api-specs]
+    exclude: [market-research, competitor-analysis]
+```
 
-## Game-Based Elicitation Methods
+## Error Handling Patterns
 
-**Red Team vs Blue Team**
-- Red Team: Attack the proposal, find vulnerabilities
-- Blue Team: Defend and strengthen the approach
-- Competitive analysis reveals blind spots
-- Results in more robust, battle-tested solutions
+### Retry with Backoff
+Automatic retry with increasing delays.
 
-**Innovation Tournament**
-- Pit multiple alternative approaches against each other
-- Score each approach across different criteria
-- Crowd-source evaluation from different personas
-- Identify winning combination of features
+```yaml
+error_strategy: retry
+max_attempts: 3
+backoff: exponential
+base_delay: 1000
+```
 
-**Escape Room Challenge**
-- Present content as constraints to work within
-- Find creative solutions within tight limitations
-- Identify minimum viable approach
-- Discover innovative workarounds and optimizations
+### Circuit Breaker
+Prevent cascading failures.
 
-## Process Control
+```yaml
+error_strategy: circuit-breaker
+threshold: 5
+timeout: 30000
+recovery: gradual
+```
 
-**Proceed / No Further Actions**
-- Acknowledge choice to finalize current work
-- Accept output as-is or move to next step
-- Prepare to continue without additional elicitation
-==================== END: .bmad-core/data/elicitation-methods.md ====================
+### Compensating Transaction
+Rollback on failure with compensation.
 
-==================== START: .bmad-core/utils/workflow-management.md ====================
-# Workflow Management
+```yaml
+error_strategy: compensate
+rollback_sequence:
+  - agent: dev
+    action: revert-changes
+  - agent: architect
+    action: update-design
+  - agent: pm
+    action: notify-stakeholders
+```
 
-Enables BMad orchestrator to manage and execute team workflows.
+## Performance Patterns
 
-## Dynamic Workflow Loading
+### Resource Pooling
+Reuse agent instances across workflows.
 
-Read available workflows from current team configuration's `workflows` field. Each team bundle defines its own supported workflows.
+```yaml
+optimization: pooling
+pool_size: 5
+idle_timeout: 300000
+warm_start: true
+```
 
-**Key Commands**:
+### Lazy Loading
+Load agents only when needed.
 
-- `/workflows` - List workflows in current bundle or workflows folder
-- `/agent-list` - Show agents in current bundle
+```yaml
+optimization: lazy-load
+preload: [bmad-orchestrator]
+on_demand: [analyst, architect, dev, qa]
+```
 
-## Workflow Commands
+### Caching Strategy
+Cache frequently accessed contexts.
 
-### /workflows
-
-Lists available workflows with titles and descriptions.
-
-### /workflow-start {workflow-id}
-
-Starts workflow and transitions to first agent.
-
-### /workflow-status
-
-Shows current progress, completed artifacts, and next steps.
-
-### /workflow-resume
-
-Resumes workflow from last position. User can provide completed artifacts.
-
-### /workflow-next
-
-Shows next recommended agent and action.
-
-## Execution Flow
-
-1. **Starting**: Load definition → Identify first stage → Transition to agent → Guide artifact creation
-
-2. **Stage Transitions**: Mark complete → Check conditions → Load next agent → Pass artifacts
-
-3. **Artifact Tracking**: Track status, creator, timestamps in workflow_state
-
-4. **Interruption Handling**: Analyze provided artifacts → Determine position → Suggest next step
-
-## Context Passing
-
-When transitioning, pass:
-
-- Previous artifacts
-- Current workflow stage
-- Expected outputs
-- Decisions/constraints
-
-## Multi-Path Workflows
-
-Handle conditional paths by asking clarifying questions when needed.
+```yaml
+optimization: caching
+cache_strategy: lru
+max_size: 100
+ttl: 3600000
+```
 
 ## Best Practices
 
-1. Show progress
-2. Explain transitions
-3. Preserve context
-4. Allow flexibility
-5. Track state
+1. **Start Simple**: Begin with sequential patterns and evolve as needed
+2. **Monitor Performance**: Track workflow execution times and bottlenecks
+3. **Handle Failures Gracefully**: Always include error recovery strategies
+4. **Document Decisions**: Record why specific patterns were chosen
+5. **Test Workflows**: Validate workflows with different scenarios
+6. **Version Control**: Track workflow changes over time
+7. **Security First**: Ensure context doesn't leak sensitive data between agents
+==================== END: .bmad-core/data/workflow-patterns.md ====================
 
-## Agent Integration
+==================== START: .bmad-core/utils/workflow-management.md ====================
+# Workflow Management Utility
 
-Agents should be workflow-aware: know active workflow, their role, access artifacts, understand expected outputs.
+## Overview
+Utility for managing and coordinating multi-agent workflows in the BMad-Method system.
+
+## Core Functions
+
+### Workflow State Management
+- Track workflow execution state
+- Manage workflow context across agents
+- Handle workflow transitions and handoffs
+- Maintain workflow history and audit trail
+
+### Agent Coordination
+- Facilitate agent-to-agent communication
+- Manage agent activation and deactivation
+- Handle context passing between agents
+- Coordinate resource allocation
+
+### Workflow Execution
+- Execute workflow steps in sequence
+- Handle conditional branching
+- Manage parallel workflow execution
+- Handle error recovery and rollback
+
+### Context Management
+- Maintain global workflow context
+- Merge agent-specific contexts
+- Handle context transformations
+- Persist context across sessions
+
+## Usage Patterns
+
+### Basic Workflow Execution
+```yaml
+workflow:
+  name: project-development
+  steps:
+    - agent: analyst
+      task: create-prd
+    - agent: architect
+      task: create-architecture
+    - agent: sm
+      task: create-stories
+```
+
+### Context Handoff
+```yaml
+handoff:
+  from: analyst
+  to: architect
+  context:
+    - prd_document
+    - requirements
+    - constraints
+```
+
+### Parallel Execution
+```yaml
+parallel:
+  agents:
+    - id: ux-expert
+      task: create-mockups
+    - id: architect
+      task: design-api
+  merge_strategy: combine
+```
+
+## Best Practices
+
+1. **Clear Context Definition**: Always define clear context boundaries
+2. **Error Handling**: Include rollback strategies for failed steps
+3. **State Persistence**: Save workflow state at key checkpoints
+4. **Agent Independence**: Design workflows to minimize agent coupling
+5. **Monitoring**: Track workflow progress and performance metrics
+
+## Error Recovery
+
+### Checkpoint Strategy
+- Save state before critical operations
+- Enable workflow resumption from last checkpoint
+- Maintain recovery metadata
+
+### Rollback Procedures
+- Define compensating actions
+- Handle partial completion scenarios
+- Maintain data consistency
+
+## Performance Optimization
+
+### Resource Management
+- Pool agent instances when possible
+- Cache frequently used contexts
+- Optimize context serialization
+
+### Execution Strategies
+- Use async execution where applicable
+- Batch similar operations
+- Minimize context switching overhead
 ==================== END: .bmad-core/utils/workflow-management.md ====================
 
 ==================== START: .bmad-core/structured-tasks/execute-checklist.yaml ====================
@@ -3020,55 +3201,2331 @@ Be honest - it's better to flag issues now than have them discovered later.]]
 Status: pending
 ==================== END: .bmad-core/structured-checklists/story-dod-checklist.yaml ====================
 
+==================== START: .bmad-core/task-runner.js ====================
+const path = require('path');
+const fs = require('fs');
+const yaml = require('js-yaml');
+
+// Import error classes
+const {
+  TaskError,
+  ValidationError,
+  TaskExecutionError,
+  MemoryStateError,
+  ActionExecutionError,
+  DependencyError,
+  ConfigurationError
+} = require('../bmad-core/errors/task-errors');
+
+// Import utilities
+const { MemoryTransaction } = require('../bmad-core/utils/memory-transaction');
+const { CleanupRegistry } = require('../bmad-core/utils/cleanup-registry');
+const { TaskRecovery } = require('../bmad-core/utils/task-recovery');
+
+// Dynamic module resolution helper
+function resolveModule(moduleName, fallbackPath) {
+  const possiblePaths = [
+    path.join(__dirname, '..', 'bmad-core', moduleName),
+    path.join(__dirname, '..', '.bmad-core', moduleName),
+    path.join(__dirname, '..', moduleName)
+  ];
+  
+  for (const modulePath of possiblePaths) {
+    try {
+      require.resolve(modulePath);
+      return modulePath;
+    } catch (e) {
+      // Continue to next path
+    }
+  }
+  
+  // Try as npm package
+  try {
+    return require.resolve(`bmad-method/bmad-core/${moduleName}`);
+  } catch (e) {
+    return fallbackPath;
+  }
+}
+
+const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../bmad-core/tools/dynamic-planner'));
+const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../bmad-core/agents/index'));
+const StructuredTaskLoader = require('./lib/structured-task-loader');
+const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator'));
+const ModuleResolver = require(resolveModule('utils/module-resolver', '../bmad-core/utils/module-resolver'));
+
+class TaskRunner {
+  constructor(rootDir) {
+    this.rootDir = rootDir;
+    this.taskLoader = new StructuredTaskLoader(rootDir);
+    this.storyContractValidator = null;
+    this.coreConfig = null;
+    this.cleanupRegistry = new CleanupRegistry();
+    this.taskRecovery = null; // Will be initialized when memory is available
+    this.loadCoreConfig();
+  }
+
+  /**
+   * Load core configuration to access validation schemas
+   */
+  loadCoreConfig() {
+    try {
+      // Try multiple possible config locations
+      const configPaths = [
+        path.join(this.rootDir, 'bmad-core', 'core-config.yaml'),
+        path.join(this.rootDir, '.bmad-core', 'core-config.yaml'),
+        path.join(this.rootDir, 'core-config.yaml')
+      ];
+      
+      let configLoaded = false;
+      let testedPath = null;
+      for (const configPath of configPaths) {
+        testedPath = configPath;
+        if (fs.existsSync(configPath)) {
+          const configContent = fs.readFileSync(configPath, 'utf8');
+          this.coreConfig = yaml.load(configContent);
+          configLoaded = true;
+          break;
+        }
+      }
+      
+      if (!configLoaded) {
+        console.error('\u274c Core configuration not found');
+        console.error('  Searched in:');
+        configPaths.forEach(p => console.error(`    - ${p}`));
+        console.error('\n  The core-config.yaml file is required for task execution');
+        throw new ConfigurationError(
+          'Failed to find core-config.yaml in any expected location',
+          testedPath,
+          { searchedPaths: configPaths }
+        );
+      }
+    } catch (error) {
+      if (error instanceof ConfigurationError) {
+        throw error;
+      }
+      console.error('\u274c Failed to load core configuration:', error.message);
+      if (error.code === 'ENOENT') {
+        console.error('  The core-config.yaml file is missing');
+      } else if (error.message.includes('YAML')) {
+        console.error('  The core-config.yaml file contains invalid YAML syntax');
+      }
+      throw new ConfigurationError(
+        `Failed to load core-config.yaml: ${error.message}`,
+        'core-config.yaml',
+        { originalError: error.message }
+      );
+    }
+  }
+
+  /**
+   * Execute a task with dynamic plan adaptation
+   * @param {string} agentName - The agent executing the task
+   * @param {string} taskPath - Path to the task file
+   * @param {Object} context - Additional context for task execution
+   * @returns {Object} Execution result with adapted memory
+   */
+  async executeTask(agentName, taskPath, context = {}) {
+    // Initialize task recovery if not already done
+    if (!this.taskRecovery) {
+      const memoryModule = { 
+        getAll: () => ({}), 
+        get: (key) => null,
+        set: (key, value) => {},
+        delete: (key) => {},
+        clear: () => {}
+      };
+      this.taskRecovery = new TaskRecovery(memoryModule);
+    }
+
+    // Instead of using transactions with the async memory API,
+    // we'll create checkpoints and handle rollback manually
+    let checkpointId = null;
+    
+    try {
+      // Register cleanup for task execution state
+      this.cleanupRegistry.register(async () => {
+        const memory = await getWorkingMemory(agentName);
+        if (memory && memory.task_execution_state) {
+          delete memory.task_execution_state;
+          await updateWorkingMemory(agentName, memory);
+        }
+      }, 'Clear task execution state');
+
+      // Load the task
+      const taskData = await this.taskLoader.loadTask(taskPath);
+      let task = null;
+
+      if (taskData.type === 'structured') {
+        task = taskData.data;
+      } else {
+        // For markdown tasks, create a minimal task structure
+        task = {
+          name: path.basename(taskPath, path.extname(taskPath)),
+          description: taskData.raw.split('\n')[0],
+          steps: this.extractStepsFromMarkdown(taskData.raw)
+        };
+      }
+
+      // Get current working memory or initialize if it doesn't exist
+      let memory = await getWorkingMemory(agentName);
+      if (!memory) {
+        // Initialize memory using the centralized function
+        try {
+          const { initializeWorkingMemory } = require('../bmad-core/agents/index');
+          await initializeWorkingMemory(agentName);
+          memory = await getWorkingMemory(agentName);
+        } catch (initError) {
+          throw new MemoryStateError(
+            `Failed to initialize working memory for agent ${agentName}`,
+            'INITIALIZE',
+            { agentName, error: initError.message }
+          );
+        }
+      }
+      
+      // Create checkpoint before modifications
+      const currentMemory = JSON.parse(JSON.stringify(memory || {}));
+      checkpointId = `checkpoint_${Date.now()}`;
+      
+      // Ensure memory exists before updating
+      if (memory) {
+        // Store checkpoint
+        memory[`_checkpoint_${checkpointId}`] = {
+          id: checkpointId,
+          timestamp: new Date().toISOString(),
+          state: currentMemory
+        };
+        
+        this.cleanupRegistry.register(async () => {
+          // Cleanup checkpoint after successful execution
+          const mem = await getWorkingMemory(agentName);
+          if (mem && mem[`_checkpoint_${checkpointId}`]) {
+            delete mem[`_checkpoint_${checkpointId}`];
+            await updateWorkingMemory(agentName, mem);
+          }
+        }, `Remove checkpoint ${checkpointId}`);
+
+        // Update with task-specific data
+        memory.taskId = task.id || task.name;
+        memory.context = context;
+        await updateWorkingMemory(agentName, memory);
+      } else {
+        // Create a minimal memory structure if initialization failed
+        memory = {
+          taskId: task.id || task.name,
+          context: context,
+          plan: [],
+          subTasks: []
+        };
+        await updateWorkingMemory(agentName, memory);
+      }
+
+      // Apply dynamic plan adaptation
+      let adaptedMemory;
+      try {
+        adaptedMemory = planAdaptation(memory, task);
+      } catch (planError) {
+        throw new TaskExecutionError(
+          `Failed to adapt plan for task: ${planError.message}`,
+          { id: 'plan-adaptation', name: 'Plan Adaptation' },
+          { task: task.name, error: planError.message }
+        );
+      }
+
+      // Save the adapted memory
+      await updateWorkingMemory(agentName, adaptedMemory);
+
+      // Log adaptation results
+      if (adaptedMemory.subTasks && adaptedMemory.subTasks.length > 0) {
+        console.log(`Task "${task.name}" was split into ${adaptedMemory.subTasks.length} sub-tasks`);
+      }
+
+      // Process steps and validate outputs if schema is defined
+      const stepsWithValidation = await this.processStepsWithValidation(task, agentName, context);
+
+      // Execute cleanup actions on success
+      await this.cleanupRegistry.executeAndClear();
+
+      return {
+        success: true,
+        taskName: task.name,
+        originalSteps: task.steps ? task.steps.length : 0,
+        subTasks: adaptedMemory.subTasks,
+        adaptedPlan: adaptedMemory.plan,
+        memory: adaptedMemory,
+        stepsValidation: stepsWithValidation
+      };
+    } catch (error) {
+      // Handle different error types appropriately
+      return await this.handleTaskError(error, agentName, taskPath, context);
+    }
+  }
+
+  /**
+   * Handle task errors with proper error classification and recovery
+   * @param {Error} error - The error that occurred
+   * @param {string} agentName - The agent that was executing the task
+   * @param {string} taskPath - Path to the task file
+   * @param {Object} context - Execution context
+   * @returns {Object} Error result with recovery information
+   */
+  async handleTaskError(error, agentName, taskPath, context) {
+    console.error(`Error executing task: ${error.message}`);
+    
+    // Attempt recovery
+    const recoveryResult = await this.taskRecovery.recoverFromError(error, {
+      agentName,
+      taskPath,
+      context,
+      rollbackActions: []
+    });
+
+    // Execute any remaining cleanup actions
+    const cleanupResults = await this.cleanupRegistry.executeAndClear();
+    
+    // Format error response based on error type
+    let errorResponse = {
+      success: false,
+      error: error.message,
+      errorType: error.constructor.name,
+      errorCode: error.code || 'UNKNOWN_ERROR',
+      recovery: recoveryResult
+    };
+
+    if (error instanceof TaskError) {
+      // Include error-specific context
+      errorResponse.context = error.context;
+      errorResponse.timestamp = error.timestamp;
+      
+      if (error instanceof ValidationError) {
+        errorResponse.validationErrors = error.validationErrors;
+      } else if (error instanceof TaskExecutionError) {
+        errorResponse.failedStep = error.step;
+      } else if (error instanceof ActionExecutionError) {
+        errorResponse.failedAction = error.action;
+        errorResponse.actionInputs = error.inputs;
+      } else if (error instanceof DependencyError) {
+        errorResponse.dependency = error.dependency;
+        errorResponse.originalError = error.originalError?.message;
+      } else if (error instanceof ConfigurationError) {
+        errorResponse.configPath = error.configPath;
+      }
+    }
+
+    // Include stack trace for debugging
+    if (process.env.NODE_ENV !== 'production') {
+      errorResponse.stack = error.stack;
+    }
+
+    // Include cleanup results if any failed
+    const failedCleanups = cleanupResults.filter(r => r.status === 'failed');
+    if (failedCleanups.length > 0) {
+      errorResponse.cleanupFailures = failedCleanups;
+    }
+
+    return errorResponse;
+  }
+
+  /**
+   * Extract steps from markdown content (simple heuristic)
+   * @param {string} markdown - Markdown content
+   * @returns {Array} Array of step objects
+   */
+  extractStepsFromMarkdown(markdown) {
+    const steps = [];
+    const lines = markdown.split('\n');
+    
+    // Look for numbered lists or headers that indicate steps
+    const stepPattern = /^(?:#{2,3}\s+)?(\d+)\.\s+(.+)/;
+    const bulletPattern = /^[-*]\s+(.+)/;
+    
+    let currentStep = null;
+    
+    for (const line of lines) {
+      const stepMatch = line.match(stepPattern);
+      const bulletMatch = line.match(bulletPattern);
+      
+      if (stepMatch) {
+        if (currentStep) {
+          steps.push(currentStep);
+        }
+        currentStep = {
+          name: stepMatch[2].trim(),
+          description: ''
+        };
+      } else if (bulletMatch && currentStep) {
+        // Add bullet points as part of the current step's description
+        currentStep.description += (currentStep.description ? '\n' : '') + '- ' + bulletMatch[1];
+      } else if (currentStep && line.trim() && !line.startsWith('#')) {
+        // Add non-empty lines to current step description
+        currentStep.description += (currentStep.description ? '\n' : '') + line.trim();
+      }
+    }
+    
+    if (currentStep) {
+      steps.push(currentStep);
+    }
+    
+    return steps;
+  }
+
+  /**
+   * Execute a sub-task
+   * @param {string} agentName - The agent executing the sub-task
+   * @param {string} subTaskId - ID of the sub-task to execute
+   * @returns {Object} Execution result
+   */
+  async executeSubTask(agentName, subTaskId) {
+    try {
+      const memory = await getWorkingMemory(agentName);
+      if (!memory || !memory.subTasks) {
+        throw new MemoryStateError(
+          'No sub-tasks found in memory',
+          'READ',
+          { agentName, operation: 'executeSubTask' }
+        );
+      }
+
+      const subTask = memory.subTasks.find(st => st.id === subTaskId);
+      if (!subTask) {
+        throw new TaskExecutionError(
+          `Sub-task ${subTaskId} not found`,
+          { id: subTaskId, name: 'Unknown Sub-task' },
+          { availableSubTasks: memory.subTasks.map(st => st.id) }
+        );
+      }
+
+      // Update current step
+      await updateWorkingMemory(agentName, { currentStep: subTaskId });
+
+      // Mark sub-task as in progress
+      subTask.status = 'in_progress';
+      await updateWorkingMemory(agentName, { subTasks: memory.subTasks });
+
+      return {
+        success: true,
+        subTask: subTask
+      };
+    } catch (error) {
+      if (error instanceof TaskError) {
+        throw error;
+      }
+      throw new TaskExecutionError(
+        `Failed to execute sub-task: ${error.message}`,
+        { id: subTaskId, name: 'Sub-task Execution' },
+        { originalError: error.message }
+      );
+    }
+  }
+
+  /**
+   * Complete a sub-task
+   * @param {string} agentName - The agent completing the sub-task
+   * @param {string} subTaskId - ID of the sub-task to complete
+   * @returns {Object} Completion result
+   */
+  async completeSubTask(agentName, subTaskId) {
+    try {
+      const memory = await getWorkingMemory(agentName);
+      if (!memory || !memory.subTasks) {
+        throw new MemoryStateError(
+          'No sub-tasks found in memory',
+          'READ',
+          { agentName, operation: 'completeSubTask' }
+        );
+      }
+
+      const subTask = memory.subTasks.find(st => st.id === subTaskId);
+      if (!subTask) {
+        throw new TaskExecutionError(
+          `Sub-task ${subTaskId} not found`,
+          { id: subTaskId, name: 'Unknown Sub-task' },
+          { availableSubTasks: memory.subTasks.map(st => st.id) }
+        );
+      }
+
+      // Mark sub-task as completed
+      subTask.status = 'completed';
+
+      // Update plan status
+      const planItem = memory.plan.find(item => item.id === subTaskId);
+      if (planItem) {
+        planItem.status = 'completed';
+      }
+
+      await updateWorkingMemory(agentName, { 
+        subTasks: memory.subTasks,
+        plan: memory.plan
+      });
+
+      return {
+        success: true,
+        completedSubTask: subTask
+      };
+    } catch (error) {
+      if (error instanceof TaskError) {
+        throw error;
+      }
+      throw new TaskExecutionError(
+        `Failed to complete sub-task: ${error.message}`,
+        { id: subTaskId, name: 'Sub-task Completion' },
+        { originalError: error.message }
+      );
+    }
+  }
+
+  /**
+   * Process task steps and validate outputs where schema is defined
+   * @param {Object} task - The task object containing steps
+   * @param {string} agentName - The agent executing the task
+   * @param {Object} context - Execution context
+   * @param {boolean} executeSteps - Whether to execute steps or just validate existing outputs
+   * @returns {Array} Array of step results with validation status
+   */
+  async processStepsWithValidation(task, agentName, context, executeSteps = true) {
+    if (!task.steps || task.steps.length === 0) {
+      return [];
+    }
+
+    const stepResults = [];
+
+    for (const step of task.steps) {
+      const stepResult = {
+        id: step.id,
+        name: step.name,
+        hasSchema: !!step.schema,
+        validation: null
+      };
+
+      // Execute the step to produce output
+      if (executeSteps) {
+        // Check if outputs already exist in context (for structured tasks with multiple outputs)
+        let shouldExecute = true;
+        if (step.outputs) {
+          // For structured tasks, check if any output is missing
+          shouldExecute = Object.values(step.outputs).some(outputKey => !context[outputKey]);
+        } else if (step.output) {
+          // For legacy tasks with single output
+          shouldExecute = !context[step.output];
+        }
+        
+        if (shouldExecute) {
+          const outputData = await this.executeStepActions(step, agentName, context);
+          
+          // Store the step output in context for validation and future steps
+          if (outputData !== undefined) {
+            if (step.output) {
+              context[step.output] = outputData;
+            }
+            // executeStepActions already handles storing outputs for structured tasks
+          }
+        }
+      }
+
+      if (step.schema && step.output) {
+        // Validate step output against schema
+        const validationResult = await this.validateStepOutput(step, context);
+        stepResult.validation = validationResult;
+
+        if (!validationResult.valid) {
+          // Halt execution on validation failure
+          const errorMessage = `Step "${step.name}" validation failed:\n${this.formatValidationErrors(validationResult.errors)}`;
+          console.error(errorMessage);
+          throw new ValidationError(errorMessage, validationResult.errors);
+        }
+      }
+
+      stepResults.push(stepResult);
+    }
+
+    return stepResults;
+  }
+
+  /**
+   * Execute step actions to produce output
+   * @param {Object} step - The step containing actions
+   * @param {string} agentName - The agent executing the step
+   * @param {Object} context - Execution context
+   * @returns {*} The output data produced by the step
+   */
+  async executeStepActions(step, agentName, context) {
+    // This is a placeholder implementation
+    // In a real system, this would execute the step's actions and return the result
+    // For now, we'll check if the output already exists in the context
+    // (which would be set by the agent during actual execution)
+    
+    if (step.output && context[step.output]) {
+      return context[step.output];
+    }
+    
+    // Handle namespaced actions from structured tasks
+    if (step.action) {
+      const result = await this.executeNamespacedAction(step, context);
+      
+      // Store outputs in context if they're returned
+      if (result && typeof result === 'object' && !Array.isArray(result)) {
+        Object.assign(context, result);
+      }
+      
+      return result;
+    }
+    
+    // Execute actions if they exist (old format)
+    if (step.actions && step.actions.length > 0) {
+      const { exec } = require('child_process');
+      const util = require('util');
+      const execAsync = util.promisify(exec);
+      
+      for (const action of step.actions) {
+        if (action.action && typeof action.action === 'string') {
+          // Replace template variables in the action
+          let command = action.action;
+          
+          // Replace input variables
+          if (context.inputs) {
+            Object.keys(context.inputs).forEach(key => {
+              command = command.replace(new RegExp(`{{inputs.${key}}}`, 'g'), context.inputs[key]);
+            });
+          }
+          
+          // Replace output variables
+          if (context.outputs) {
+            Object.keys(context.outputs).forEach(key => {
+              command = command.replace(new RegExp(`{{outputs.${key}}}`, 'g'), context.outputs[key]);
+            });
+          }
+          
+          try {
+            console.log(`Executing: ${command}`);
+            const { stdout, stderr } = await execAsync(command, { cwd: this.rootDir });
+            
+            if (stderr) {
+              console.warn(`Warning: ${stderr}`);
+            }
+            
+            // For validation steps, the command exit code determines success
+            // execAsync will throw if the command exits with non-zero code
+            console.log(`Command completed successfully`);
+            
+          } catch (error) {
+            // Command failed with non-zero exit code
+            const errorMessage = `Step action failed: ${command}\n${error.message}`;
+            console.error(errorMessage);
+            throw new ActionExecutionError(
+              errorMessage,
+              action.action,
+              { command, inputs: context.inputs, outputs: context.outputs },
+              { exitCode: error.code, stderr: error.stderr, stdout: error.stdout }
+            );
+          }
+        }
+      }
+    }
+    
+    // For the parse-story step, we can simulate the StoryContract creation
+    if (step.id === 'parse-story' && step.output === 'storyContract') {
+      // This would normally be generated by the agent from PRD and architecture docs
+      // For testing, return a minimal valid StoryContract
+      return {
+        version: "1.0",
+        story_id: "TEST-STORY-001",
+        epic_id: "TEST-EPIC-001",
+        apiEndpoints: [],
+        filesToModify: [],
+        acceptanceCriteriaLinks: []
+      };
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * Execute namespaced actions from structured tasks
+   * @param {Object} step - The step containing the namespaced action
+   * @param {Object} context - Execution context with inputs/outputs
+   * @returns {*} The output data produced by the action
+   */
+  async executeNamespacedAction(step, context) {
+    const [namespace, action] = step.action.split(':');
+    
+    // Resolve template variables in inputs
+    const resolvedInputs = {};
+    if (step.inputs) {
+      for (const [key, value] of Object.entries(step.inputs)) {
+        resolvedInputs[key] = this.resolveTemplateValue(value, context);
+      }
+    }
+    
+    switch (namespace) {
+      case 'file':
+        return await this.executeFileAction(action, resolvedInputs, step.outputs);
+        
+      case 'yaml':
+        return await this.executeYamlAction(action, resolvedInputs, step.outputs, context);
+        
+      case 'script':
+        return await this.executeScriptAction(action, resolvedInputs, step.outputs, context);
+        
+      case 'logic':
+        return await this.executeLogicAction(action, resolvedInputs, step.outputs, context);
+        
+      case 'workflow':
+        return await this.executeWorkflowAction(action, resolvedInputs, step.outputs, context);
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown action namespace: ${namespace}`,
+          step.action,
+          resolvedInputs,
+          { availableNamespaces: ['file', 'yaml', 'script', 'logic', 'workflow'] }
+        );
+    }
+  }
+
+  /**
+   * Resolve template values in inputs
+   * @param {*} value - The value that may contain template variables
+   * @param {Object} context - The context containing variable values
+   * @returns {*} The resolved value
+   */
+  resolveTemplateValue(value, context) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    
+    // Replace template variables {{variableName}}
+    return value.replace(/{{([^}]+)}}/g, (match, path) => {
+      const parts = path.split('.');
+      let result = context;
+      
+      // First try to resolve the full path
+      for (const part of parts) {
+        if (result && result[part] !== undefined) {
+          result = result[part];
+        } else {
+          result = undefined;
+          break;
+        }
+      }
+      
+      // If not found and it's a single part, check if it's a direct input
+      if (result === undefined && parts.length === 1 && context.inputs && context.inputs[path] !== undefined) {
+        result = context.inputs[path];
+      }
+      
+      // If still not found, return the original match
+      if (result === undefined) {
+        return match;
+      }
+      
+      return result;
+    });
+  }
+
+  /**
+   * Execute file-related actions
+   */
+  async executeFileAction(action, inputs, outputs) {
+    switch (action) {
+      case 'read':
+        if (!inputs.path) {
+          throw new ActionExecutionError(
+            'file:read requires a path input',
+            'file:read',
+            inputs,
+            { requiredInputs: ['path'] }
+          );
+        }
+        try {
+          const content = fs.readFileSync(inputs.path, 'utf8');
+          if (outputs && outputs.content) {
+            return { [outputs.content]: content };
+          }
+          return content;
+        } catch (error) {
+          throw new ActionExecutionError(
+            `Failed to read file: ${error.message}`,
+            'file:read',
+            inputs,
+            { path: inputs.path, error: error.message }
+          );
+        }
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown file action: ${action}`,
+          `file:${action}`,
+          inputs,
+          { availableActions: ['read'] }
+        );
+    }
+  }
+
+  /**
+   * Execute YAML-related actions
+   */
+  async executeYamlAction(action, inputs, outputs, context) {
+    switch (action) {
+      case 'extract-frontmatter':
+        const content = inputs.content;
+        const key = inputs.key;
+        
+        // Extract YAML frontmatter between --- markers
+        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (!frontmatterMatch) {
+          throw new ActionExecutionError(
+            'No YAML frontmatter found in content',
+            'yaml:extract-frontmatter',
+            inputs,
+            { contentPreview: content.substring(0, 100) }
+          );
+        }
+        
+        try {
+          const yamlContent = yaml.load(frontmatterMatch[1]);
+          const extractedData = yamlContent[key];
+          
+          if (!extractedData) {
+            throw new ActionExecutionError(
+              `Key '${key}' not found in YAML frontmatter`,
+              'yaml:extract-frontmatter',
+              inputs,
+              { availableKeys: Object.keys(yamlContent) }
+            );
+          }
+          
+          // Return the extracted data in the expected format
+          if (outputs && outputs.contractData) {
+            return { [outputs.contractData]: extractedData };
+          }
+          
+          return extractedData;
+        } catch (error) {
+          if (error instanceof ActionExecutionError) {
+            throw error;
+          }
+          throw new ActionExecutionError(
+            `Failed to parse YAML: ${error.message}`,
+            'yaml:extract-frontmatter',
+            inputs,
+            { yamlError: error.message }
+          );
+        }
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown yaml action: ${action}`,
+          `yaml:${action}`,
+          inputs,
+          { availableActions: ['extract-frontmatter'] }
+        );
+    }
+  }
+
+  /**
+   * Execute script-related actions
+   */
+  async executeScriptAction(action, inputs, outputs, context) {
+    const { exec } = require('child_process');
+    const util = require('util');
+    const execAsync = util.promisify(exec);
+    
+    switch (action) {
+      case 'execute':
+        const scriptPath = path.join(this.rootDir, inputs.script);
+        const args = inputs.args || [];
+        
+        // Resolve template variables in args
+        const resolvedArgs = args.map(arg => 
+          typeof arg === 'string' ? this.resolveTemplateValue(arg, context) : arg
+        );
+        
+        const command = `node ${scriptPath} ${resolvedArgs.join(' ')}`;
+        
+        try {
+          const { stdout, stderr } = await execAsync(command, { cwd: this.rootDir });
+          
+          if (outputs) {
+            if (outputs.exitCode) {
+              context[outputs.exitCode] = 0;
+            }
+            if (outputs.stdout) {
+              context[outputs.stdout] = stdout;
+            }
+            if (outputs.stderr) {
+              context[outputs.stderr] = stderr;
+            }
+          }
+          
+          return { exitCode: 0, stdout, stderr };
+          
+        } catch (error) {
+          const exitCode = error.code || 1;
+          
+          if (outputs) {
+            if (outputs.exitCode) {
+              context[outputs.exitCode] = exitCode;
+            }
+            if (outputs.stdout) {
+              context[outputs.stdout] = error.stdout || '';
+            }
+            if (outputs.stderr) {
+              context[outputs.stderr] = error.stderr || error.message;
+            }
+          }
+          
+          return { exitCode, stdout: error.stdout || '', stderr: error.stderr || error.message };
+        }
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown script action: ${action}`,
+          `script:${action}`,
+          inputs,
+          { availableActions: ['execute'] }
+        );
+    }
+  }
+
+  /**
+   * Execute logic-related actions
+   */
+  async executeLogicAction(action, inputs, outputs, context) {
+    switch (action) {
+      case 'evaluate':
+        // Safely evaluate the expression
+        const expression = inputs.expression;
+        const result = this.evaluateExpression(expression, context);
+        
+        if (outputs && outputs.result) {
+          context[outputs.result] = result;
+        }
+        
+        return result;
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown logic action: ${action}`,
+          `logic:${action}`,
+          inputs,
+          { availableActions: ['evaluate'] }
+        );
+    }
+  }
+
+  /**
+   * Execute workflow-related actions
+   */
+  async executeWorkflowAction(action, inputs, outputs, context) {
+    switch (action) {
+      case 'conditional-halt':
+        // Evaluate the condition if it's a string expression
+        let conditionResult = inputs.condition;
+        
+        if (typeof inputs.condition === 'string') {
+          // Always resolve template variables first
+          const resolvedCondition = this.resolveTemplateValue(inputs.condition, context);
+          
+          // Check if it's an expression that needs evaluation
+          if (resolvedCondition.includes('!') || resolvedCondition.includes('===') || 
+              resolvedCondition.includes('!==') || resolvedCondition.includes('>') || 
+              resolvedCondition.includes('<') || resolvedCondition.includes('&&') || 
+              resolvedCondition.includes('||')) {
+            // Evaluate as expression
+            try {
+              conditionResult = this.evaluateExpression(resolvedCondition, context);
+            } catch (e) {
+              // If evaluation fails, try simple boolean conversion
+              conditionResult = resolvedCondition === 'true' || resolvedCondition === true;
+            }
+          } else {
+            // Simple boolean conversion
+            conditionResult = resolvedCondition === 'true' || resolvedCondition === true;
+          }
+        }
+        
+        if (conditionResult) {
+          // Also resolve the error message template if needed
+          const errorMessage = inputs.errorMessage 
+            ? this.resolveTemplateValue(inputs.errorMessage, context)
+            : 'Workflow halted by condition';
+          throw new TaskExecutionError(
+            errorMessage,
+            { id: 'conditional-halt', name: 'Conditional Halt' },
+            { condition: inputs.condition, evaluated: conditionResult }
+          );
+        }
+        return true;
+        
+      default:
+        throw new ActionExecutionError(
+          `Unknown workflow action: ${action}`,
+          `workflow:${action}`,
+          inputs,
+          { availableActions: ['conditional-halt'] }
+        );
+    }
+  }
+
+  /**
+   * Safely evaluate expressions with context
+   */
+  evaluateExpression(expression, context) {
+    // Replace template variables before evaluation
+    const resolvedExpression = this.resolveTemplateValue(expression, context);
+    
+    // Use Function constructor for safer evaluation than eval
+    try {
+      // Create a sandboxed context for evaluation
+      const contextKeys = Object.keys(context);
+      const contextValues = Object.values(context);
+      
+      // Build the function with proper parameter names
+      const func = new Function(...contextKeys, `return ${resolvedExpression}`);
+      return func(...contextValues);
+    } catch (error) {
+      throw new ActionExecutionError(
+        `Failed to evaluate expression: ${expression}\n${error.message}`,
+        'expression-evaluation',
+        { expression, context: Object.keys(context) },
+        { resolvedExpression, error: error.message }
+      );
+    }
+  }
+
+  /**
+   * Validate step output against defined schema
+   * @param {Object} step - The step containing schema and output definitions
+   * @param {Object} context - Execution context that may contain the output data
+   * @returns {Object} Validation result
+   */
+  async validateStepOutput(step, context) {
+    // Handle different schema types
+    if (step.schema === 'storyContractSchema') {
+      // Initialize validator if not already done
+      if (!this.storyContractValidator) {
+        this.storyContractValidator = new StoryContractValidator();
+      }
+
+      // Get the output data from context
+      const outputData = context[step.output] || null;
+      
+      if (!outputData) {
+        return {
+          valid: false,
+          errors: [{ message: `No output data found for '${step.output}'` }]
+        };
+      }
+
+      // Validate against story contract schema
+      return this.storyContractValidator.validateContract(outputData);
+    }
+
+    // Handle other schema types - try ModuleResolver first
+    let schemaPath = ModuleResolver.resolveSchemaPath(step.schema, this.rootDir);
+    
+    // If not found via ModuleResolver, check core-config
+    if (!schemaPath && this.coreConfig && this.coreConfig.validationSchemas && this.coreConfig.validationSchemas[step.schema]) {
+      const configSchemaPath = this.coreConfig.validationSchemas[step.schema];
+      
+      // Resolve relative paths from root directory
+      schemaPath = path.isAbsolute(configSchemaPath) 
+        ? configSchemaPath 
+        : path.join(this.rootDir, configSchemaPath);
+    }
+    
+    if (schemaPath) {
+      // Load and validate against schema
+      try {
+        const Ajv = require('ajv');
+        const addFormats = require('ajv-formats');
+        const ajv = new Ajv();
+        // Add format support including uri-reference
+        addFormats(ajv);
+        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+        const validate = ajv.compile(schema);
+        
+        const outputData = context[step.output] || null;
+        const valid = validate(outputData);
+        
+        return {
+          valid,
+          errors: valid ? [] : validate.errors
+        };
+      } catch (error) {
+        return {
+          valid: false,
+          errors: [{ message: `Failed to load schema ${step.schema}: ${error.message}` }]
+        };
+      }
+    }
+
+    return {
+      valid: true,
+      errors: []
+    };
+  }
+
+  /**
+   * Format validation errors for display
+   * @param {Array} errors - Array of validation errors
+   * @returns {string} Formatted error message
+   */
+  formatValidationErrors(errors) {
+    if (!errors || errors.length === 0) {
+      return 'No errors';
+    }
+
+    // Check if we have a StoryContractValidator instance
+    if (this.storyContractValidator) {
+      return this.storyContractValidator.formatErrors(errors);
+    }
+
+    // Default formatting for other schemas
+    return errors.map(err => {
+      const path = err.instancePath || '/';
+      const message = err.message || 'Unknown error';
+      return `${path}: ${message}`;
+    }).join('\n');
+  }
+}
+
+module.exports = TaskRunner;
+==================== END: .bmad-core/task-runner.js ====================
+
 ==================== START: .bmad-core/utils/validate-next-story.yaml ====================
 id: validate-next-story
-name: Validate Next Story Utility
-description: Utility configuration for validating story readiness
-type: utility
-taskReference: ../structured-tasks/validate-next-story.yaml
-implementation: ./story-contract-validator.js
-exports:
-  - validateStory
-  - checkStoryCompleteness
-  - validateStoryContract
-configuration:
-  templatePath: ../templates/story-tmpl.yaml
-  schemaPath: ../schemas/story-contract-schema.json
-  strictMode: true
-  requireContract: true
+name: Validate Next Story Task
+purpose: >-
+  To comprehensively validate a story draft before implementation begins, ensuring it is complete, accurate, and
+  provides sufficient context for successful development. This task identifies issues and gaps that need to be
+  addressed, preventing hallucinations and ensuring implementation readiness.
+steps:
+  - id: step1
+    name: Load Core Configuration and Inputs
+    description: ""
+    actions:
+      - description: Load `.bmad-core/core-config.yaml`
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: >-
+          If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for
+          story validation."
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Identify and load the following inputs:"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Story file**: The drafted story to validate (provided by user or discovered in `devStoryLocation`)"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Parent epic**: The epic containing this story's requirements"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Architecture documents**: Based on configuration (sharded or monolithic)"
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: "**Story template**: `bmad-core/templates/story-tmpl.md` for completeness validation"
+        elicit: false
+        metadata:
+          originalIndent: 2
+    metadata:
+      level: 3
+      originalNumber: "0"
+  - id: step2
+    name: Template Completeness Validation
+    description: ""
+    actions:
+      - description: Load `bmad-core/templates/story-tmpl.md` and extract all section headings from the template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: >-
+          **Missing sections check**: Compare story sections against template sections to verify all required sections
+          are present
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: >-
+          **Placeholder validation**: Ensure no template placeholders remain unfilled (e.g., `{{EpicNum}}`, `{{role}}`,
+          `_TBD_`)
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Agent section verification**: Confirm all sections from template exist for future agent use"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Structure compliance**: Verify story follows template structure and formatting"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step3
+    name: File Structure and Source Tree Validation
+    description: ""
+    actions:
+      - description: "**File paths clarity**: Are new/existing files to be created/modified clearly specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Source tree relevance**: Is relevant project structure included in Dev Notes?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Directory structure**: Are new directories/components properly located according to project structure?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**File creation sequence**: Do tasks specify where files should be created in logical order?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Path accuracy**: Are file paths consistent with project structure from architecture docs?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step4
+    name: UI/Frontend Completeness Validation (if applicable)
+    description: ""
+    actions:
+      - description: "**Component specifications**: Are UI components sufficiently detailed for implementation?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Styling/design guidance**: Is visual implementation guidance clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**User interaction flows**: Are UX patterns and behaviors specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Responsive/accessibility**: Are these considerations addressed if required?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Integration points**: Are frontend-backend integration points clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step5
+    name: Acceptance Criteria Satisfaction Assessment
+    description: ""
+    actions:
+      - description: "**AC coverage**: Will all acceptance criteria be satisfied by the listed tasks?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**AC testability**: Are acceptance criteria measurable and verifiable?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Missing scenarios**: Are edge cases or error conditions covered?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Success definition**: Is \"done\" clearly defined for each AC?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Task-AC mapping**: Are tasks properly linked to specific acceptance criteria?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step6
+    name: Validation and Testing Instructions Review
+    description: ""
+    actions:
+      - description: "**Test approach clarity**: Are testing methods clearly specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Test scenarios**: Are key test cases identified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Validation steps**: Are acceptance criteria validation steps clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Testing tools/frameworks**: Are required testing tools specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Test data requirements**: Are test data needs identified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "5"
+  - id: step7
+    name: Security Considerations Assessment (if applicable)
+    description: ""
+    actions:
+      - description: "**Security requirements**: Are security needs identified and addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Authentication/authorization**: Are access controls specified?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Data protection**: Are sensitive data handling requirements clear?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Vulnerability prevention**: Are common security issues addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Compliance requirements**: Are regulatory/compliance needs addressed?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "6"
+  - id: step8
+    name: Tasks/Subtasks Sequence Validation
+    description: ""
+    actions:
+      - description: "**Logical order**: Do tasks follow proper implementation sequence?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Dependencies**: Are task dependencies clear and correct?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Granularity**: Are tasks appropriately sized and actionable?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Completeness**: Do tasks cover all requirements and acceptance criteria?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Blocking issues**: Are there any tasks that would block others?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "7"
+  - id: step9
+    name: Anti-Hallucination Verification
+    description: ""
+    actions:
+      - description: "**Source verification**: Every technical claim must be traceable to source documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Architecture alignment**: Dev Notes content matches architecture specifications"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**No invented details**: Flag any technical decisions not supported by source documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Reference accuracy**: Verify all source references are correct and accessible"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Fact checking**: Cross-reference claims against epic and architecture documents"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "8"
+  - id: step10
+    name: Dev Agent Implementation Readiness
+    description: ""
+    actions:
+      - description: "**Self-contained context**: Can the story be implemented without reading external docs?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Clear instructions**: Are implementation steps unambiguous?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Complete technical context**: Are all required technical details present in Dev Notes?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Missing information**: Identify any critical information gaps"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Actionability**: Are all tasks actionable by a development agent?"
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: "- **Missing information**: Identify any critical information gaps"
+    metadata:
+      level: 3
+      originalNumber: "9"
+  - id: step11
+    name: Generate Validation Report
+    description: |-
+      Provide a structured validation report including:
+      #### Template Compliance Issues
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+      #### Nice-to-Have Improvements (Optional Enhancements)
+      #### Anti-Hallucination Findings
+      #### Final Assessment
+    actions:
+      - description: Missing sections from story template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unfilled placeholders or template variables
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Structural formatting issues
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing essential information for implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inaccurate or unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Incomplete acceptance criteria coverage
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing required sections
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unclear implementation guidance
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing security considerations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Task sequencing problems
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Incomplete testing instructions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Additional context that would help implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Clarifications that would improve efficiency
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Documentation improvements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing source references
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inconsistencies with architecture documents
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Invented libraries, patterns, or standards
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**GO**: Story is ready for implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**NO-GO**: Story requires fixes before implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Implementation Readiness Score**: 1-10 scale"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Confidence Level**: High/Medium/Low for successful implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+    metadata:
+      level: 3
+      originalNumber: "10"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+  preservedContent:
+    - type: section-header
+      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+      level: 2
+  executionMode: SEQUENTIAL
 ==================== END: .bmad-core/utils/validate-next-story.yaml ====================
 
 ==================== START: .bmad-core/utils/update-working-memory.yaml ====================
 id: update-working-memory
-name: Update Working Memory Utility
-description: Utility configuration for updating agent working memory
-type: utility
-taskReference: ../structured-tasks/update-working-memory.yaml
-implementation: ./memory-lifecycle.js
-exports:
-  - updateWorkingMemory
-configuration:
-  memoryPath: ../ai/working_memory_{agentName}.json
-  transactionEnabled: true
-  autoBackup: true
+name: Update Working Memory
+category: memory
+description: Updates the agent's working memory with current task state
+priority: high
+tags:
+  - memory
+  - state-management
+  - context
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the agent
+  - name: taskId
+    type: string
+    description: Current task identifier
+    optional: true
+  - name: currentStep
+    type: string
+    description: Current step in the plan
+    optional: true
+  - name: plan
+    type: array
+    description: Task execution plan
+    optional: true
+  - name: context
+    type: object
+    description: Additional context to store
+    optional: true
+outputs:
+  - name: memory
+    type: object
+    description: Updated memory state
+dependencies: []
+executionSteps:
+  - Update the working memory JSON file for the agent
+  - Merge provided updates with existing memory
+  - Preserve existing data not being updated
+  - Return the updated memory state
+validationCriteria:
+  - Memory file exists and is valid JSON
+  - Updates are properly merged
+  - No data loss occurs
+exampleUsage: |
+  await updateWorkingMemory('dev', {
+    taskId: 'TASK-123',
+    currentStep: 'implementing-feature',
+    plan: ['analyze', 'implement', 'test'],
+    context: { feature: 'user-auth' }
+  });
 ==================== END: .bmad-core/utils/update-working-memory.yaml ====================
 
 ==================== START: .bmad-core/utils/retrieve-context.yaml ====================
 id: retrieve-context
-name: Retrieve Context Utility
-description: Utility configuration for retrieving context from memory
-type: utility
-taskReference: ../structured-tasks/retrieve-context.yaml
-implementation: ./qdrant.js
-exports:
-  - retrieveContext
-  - searchMemory
-configuration:
-  collection: bmad-memories
-  topN: 5
-  scoreThreshold: 0.7
-  embeddingModel: text-embedding-ada-002
+name: Retrieve Context from Memory
+category: memory
+description: Retrieves relevant context from long-term memory using similarity search
+priority: high
+tags:
+  - memory
+  - context-retrieval
+  - qdrant
+requiredInputs:
+  - name: query
+    type: string
+    description: Query string to search for similar memories
+  - name: topN
+    type: number
+    description: Number of top results to retrieve
+    optional: true
+    default: 5
+outputs:
+  - name: memories
+    type: array
+    description: Array of retrieved memory snippets with scores
+dependencies: []
+executionSteps:
+  - Connect to Qdrant vector database
+  - Generate embedding for the query
+  - Perform similarity search
+  - Return top N matching memories with scores
+validationCriteria:
+  - Query is a non-empty string
+  - Returns array of memory objects
+  - Each memory has score and content
+exampleUsage: |
+  const memories = await retrieveMemory(
+    'user authentication implementation',
+    5
+  );
+  // Returns: [
+  //   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
+  //   ...
+  // ]
 ==================== END: .bmad-core/utils/retrieve-context.yaml ====================
+
+==================== START: .bmad-core/utils/datamodel-test-generator.js ====================
+const fs = require('fs');
+const path = require('path');
+const yaml = require('js-yaml');
+const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
+
+// Constants for security and performance
+const MAX_PATTERN_LENGTH = 200;
+const MAX_PATTERN_COMPLEXITY = 10; // Max number of quantifiers/alternations
+const LARGE_SCHEMA_THRESHOLD = 50000; // 50KB threshold for external schema files
+
+class DataModelTestGenerator {
+  constructor() {
+    this.ajv = new Ajv({ allErrors: true });
+    addFormats(this.ajv);
+  }
+
+  /**
+   * Generate unit tests for data models defined in a StoryContract
+   * @param {Object} storyContract - The StoryContract containing dataModels
+   * @param {string} testFramework - The test framework to use (jest, mocha, etc.)
+   * @returns {Object} Object containing test file paths and their content
+   */
+  generateDataModelTests(storyContract, testFramework = 'jest') {
+    if (!storyContract.dataModels || Object.keys(storyContract.dataModels).length === 0) {
+      return {};
+    }
+
+    const tests = {};
+    const schemaFiles = {};
+    
+    for (const [modelName, schema] of Object.entries(storyContract.dataModels)) {
+      const testFileName = `${this.toKebabCase(modelName)}.test.js`;
+      const result = this.generateTestContent(modelName, schema, testFramework);
+      
+      tests[testFileName] = result.testContent;
+      
+      // Add schema file if needed
+      if (result.schemaFile) {
+        schemaFiles[result.schemaFile.name] = result.schemaFile.content;
+      }
+    }
+
+    // Return both tests and schema files
+    return { tests, schemaFiles };
+  }
+
+  /**
+   * Check if schema is too large and should be in external file
+   * @param {Object} schema - The schema object
+   * @returns {boolean} True if schema should be external
+   */
+  isSchemaLarge(schema) {
+    const schemaSize = JSON.stringify(schema).length;
+    return schemaSize > LARGE_SCHEMA_THRESHOLD;
+  }
+
+  /**
+   * Generate schema reference for tests
+   * @param {string} modelName - Name of the model
+   * @param {Object} schema - The schema object
+   * @param {boolean} useExternalFile - Whether to use external file
+   * @returns {Object} Object with schemaSetup and schemaImport
+   */
+  generateSchemaReference(modelName, schema, useExternalFile) {
+    if (useExternalFile) {
+      const schemaFileName = `${this.toKebabCase(modelName)}.schema.json`;
+      return {
+        schemaImport: `const schema = require('./${schemaFileName}');`,
+        schemaSetup: '',
+        schemaFile: {
+          name: schemaFileName,
+          content: JSON.stringify(schema, null, 2)
+        }
+      };
+    } else {
+      return {
+        schemaImport: '',
+        schemaSetup: `  const schema = ${JSON.stringify(schema, null, 2)};`,
+        schemaFile: null
+      };
+    }
+  }
+
+  /**
+   * Generate test content for a single data model
+   * @param {string} modelName - Name of the data model
+   * @param {Object} schema - JSON Schema for the model
+   * @param {string} testFramework - Test framework to use
+   * @returns {Object} Object with test content and optional schema file
+   */
+  generateTestContent(modelName, schema, testFramework) {
+    const useExternalSchema = this.isSchemaLarge(schema);
+    const schemaRef = this.generateSchemaReference(modelName, schema, useExternalSchema);
+    
+    let testContent;
+    if (testFramework === 'jest') {
+      testContent = this.generateJestTests(modelName, schema, schemaRef);
+    } else if (testFramework === 'mocha') {
+      testContent = this.generateMochaTests(modelName, schema, schemaRef);
+    } else {
+      throw new Error(`Unsupported test framework: ${testFramework}`);
+    }
+    
+    return {
+      testContent,
+      schemaFile: schemaRef.schemaFile
+    };
+  }
+
+  /**
+   * Generate common test setup code
+   * @param {string} testFramework - 'jest' or 'mocha'
+   * @param {Object} schemaRef - Schema reference object
+   * @returns {string} Common setup code
+   */
+  generateCommonSetup(testFramework, schemaRef) {
+    const imports = `const Ajv = require('ajv');
+const addFormats = require('ajv-formats');${
+      schemaRef.schemaImport ? '\n' + schemaRef.schemaImport : ''
+    }`;
+    
+    return imports;
+  }
+
+  /**
+   * Generate validation test cases (shared between Jest and Mocha)
+   * @param {string} modelName - Name of the data model
+   * @param {Object} schema - JSON Schema for the model
+   * @param {string} testFramework - 'jest' or 'mocha'
+   * @returns {Array} Array of test case objects
+   */
+  generateValidationTestCases(modelName, schema, testFramework) {
+    const testCases = [];
+    const requiredFields = schema.required || [];
+    const properties = schema.properties || {};
+    
+    // Valid object test
+    testCases.push({
+      type: 'valid',
+      description: `should validate a complete valid ${modelName}`,
+      setup: `const valid${modelName} = ${this.generateValidExample(schema)};`,
+      assertion: 'expectValid',
+      target: `valid${modelName}`
+    });
+    
+    // Minimal object test
+    if (requiredFields.length > 0) {
+      testCases.push({
+        type: 'valid',
+        description: `should validate ${modelName} with only required fields`,
+        setup: `const minimal${modelName} = ${this.generateMinimalExample(schema)};`,
+        assertion: 'expectValid',
+        target: `minimal${modelName}`
+      });
+    }
+    
+    // Missing required field tests
+    for (const field of requiredFields) {
+      testCases.push({
+        type: 'invalid',
+        description: `should fail validation when missing required field: ${field}`,
+        setup: `const invalid${modelName} = ${this.generateValidExample(schema)};\n      delete invalid${modelName}.${field};`,
+        assertion: 'expectRequired',
+        target: `invalid${modelName}`,
+        field: field
+      });
+    }
+    
+    // Type validation tests
+    for (const [propName, propSchema] of Object.entries(properties)) {
+      if (propSchema.type) {
+        testCases.push({
+          type: 'invalid',
+          description: `should fail validation when ${propName} has wrong type`,
+          setup: this.generateTypeTestSetup(modelName, propName, propSchema),
+          assertion: 'expectType',
+          target: `invalid${modelName}`,
+          property: propName
+        });
+      }
+      
+      if (propSchema.enum) {
+        testCases.push({
+          type: 'invalid',
+          description: `should fail validation when ${propName} is not one of allowed values`,
+          setup: this.generateEnumTestSetup(modelName, propName, propSchema),
+          assertion: 'expectEnum',
+          target: `invalid${modelName}`,
+          property: propName
+        });
+      }
+      
+      if (propSchema.pattern) {
+        testCases.push({
+          type: 'invalid',
+          description: `should fail validation when ${propName} does not match pattern`,
+          setup: this.generatePatternTestSetup(modelName, propName, propSchema),
+          assertion: 'expectPattern',
+          target: `invalid${modelName}`,
+          property: propName
+        });
+      }
+      
+      if (propSchema.format) {
+        testCases.push({
+          type: 'invalid',
+          description: `should fail validation when ${propName} has invalid ${propSchema.format} format`,
+          setup: this.generateFormatTestSetup(modelName, propName, propSchema),
+          assertion: 'expectFormat',
+          target: `invalid${modelName}`,
+          property: propName
+        });
+      }
+    }
+    
+    return testCases;
+  }
+
+  /**
+   * Generate Jest tests for a data model
+   * @param {string} modelName - Name of the data model
+   * @param {Object} schema - JSON Schema for the model
+   * @param {Object} schemaRef - Schema reference object
+   * @returns {string} Jest test content
+   */
+  generateJestTests(modelName, schema, schemaRef) {
+    const testCases = this.generateValidationTestCases(modelName, schema, 'jest');
+    
+    let testContent = `${this.generateCommonSetup('jest', schemaRef)}
+
+describe('${modelName} Data Model Validation', () => {
+  let ajv;
+  let validate;
+${schemaRef.schemaSetup}
+  
+  beforeAll(() => {
+    ajv = new Ajv({ allErrors: true });
+    addFormats(ajv);
+    validate = ajv.compile(schema);
+  });
+
+  describe('Valid ${modelName} objects', () => {
+`;
+
+    // Generate test cases
+    const validTests = testCases.filter(tc => tc.type === 'valid');
+    const invalidTests = testCases.filter(tc => tc.type === 'invalid');
+    
+    // Add valid test cases
+    for (const testCase of validTests) {
+      testContent += this.generateJestTestCase(testCase);
+    }
+    
+    testContent += `  });
+
+  describe('Invalid ${modelName} objects', () => {
+`;
+    
+    // Add invalid test cases
+    for (const testCase of invalidTests) {
+      testContent += this.generateJestTestCase(testCase);
+    }
+    
+    testContent += `  });
+});
+`;
+
+    return testContent;
+  }
+
+  /**
+   * Generate a Jest test case
+   * @param {Object} testCase - Test case object
+   * @returns {string} Jest test code
+   */
+  generateJestTestCase(testCase) {
+    let testCode = `    test('${testCase.description}', () => {
+      ${testCase.setup}
+      
+      const isValid = validate(${testCase.target});
+`;
+    
+    switch (testCase.assertion) {
+      case 'expectValid':
+        testCode += `      expect(isValid).toBe(true);
+      expect(validate.errors).toBeNull();
+`;
+        break;
+      case 'expectRequired':
+        testCode += `      expect(isValid).toBe(false);
+      expect(validate.errors).toContainEqual(
+        expect.objectContaining({
+          keyword: 'required',
+          params: { missingProperty: '${testCase.field}' }
+        })
+      );
+`;
+        break;
+      case 'expectType':
+      case 'expectEnum':
+      case 'expectPattern':
+      case 'expectFormat':
+        const keyword = testCase.assertion.replace('expect', '').toLowerCase();
+        testCode += `      expect(isValid).toBe(false);
+      expect(validate.errors).toContainEqual(
+        expect.objectContaining({
+          keyword: '${keyword}',
+          instancePath: '/${testCase.property}'
+        })
+      );
+`;
+        break;
+    }
+    
+    testCode += `    });
+
+`;
+    return testCode;
+  }
+
+  /**
+   * Generate a Mocha test case
+   * @param {Object} testCase - Test case object
+   * @returns {string} Mocha test code
+   */
+  generateMochaTestCase(testCase) {
+    let testCode = `    it('${testCase.description}', () => {
+      ${testCase.setup}
+      
+      const isValid = validate(${testCase.target});
+`;
+    
+    switch (testCase.assertion) {
+      case 'expectValid':
+        testCode += `      expect(isValid).to.be.true;
+      expect(validate.errors).to.be.null;
+`;
+        break;
+      case 'expectRequired':
+        testCode += `      expect(isValid).to.be.false;
+      expect(validate.errors).to.deep.include({
+        keyword: 'required',
+        params: { missingProperty: '${testCase.field}' },
+        schemaPath: '#/required',
+        instancePath: ''
+      });
+`;
+        break;
+      case 'expectType':
+      case 'expectEnum':
+      case 'expectPattern':
+      case 'expectFormat':
+        const keyword = testCase.assertion.replace('expect', '').toLowerCase();
+        testCode += `      expect(isValid).to.be.false;
+      const error = validate.errors.find(e => e.keyword === '${keyword}' && e.instancePath === '/${testCase.property}');
+      expect(error).to.exist;
+`;
+        break;
+    }
+    
+    testCode += `    });
+
+`;
+    return testCode;
+  }
+
+  /**
+   * Generate Mocha tests for a data model
+   * @param {string} modelName - Name of the data model
+   * @param {Object} schema - JSON Schema for the model
+   * @param {Object} schemaRef - Schema reference object
+   * @returns {string} Mocha test content
+   */
+  generateMochaTests(modelName, schema, schemaRef) {
+    const testCases = this.generateValidationTestCases(modelName, schema, 'mocha');
+    
+    let testContent = `const { expect } = require('chai');
+${this.generateCommonSetup('mocha', schemaRef)}
+
+describe('${modelName} Data Model Validation', () => {
+  let ajv;
+  let validate;
+${schemaRef.schemaSetup}
+  
+  before(() => {
+    ajv = new Ajv({ allErrors: true });
+    addFormats(ajv);
+    validate = ajv.compile(schema);
+  });
+
+  describe('Valid ${modelName} objects', () => {
+`;
+
+    // Generate test cases
+    const validTests = testCases.filter(tc => tc.type === 'valid');
+    const invalidTests = testCases.filter(tc => tc.type === 'invalid');
+    
+    // Add valid test cases
+    for (const testCase of validTests) {
+      testContent += this.generateMochaTestCase(testCase);
+    }
+    
+    testContent += `  });
+
+  describe('Invalid ${modelName} objects', () => {
+`;
+    
+    // Add invalid test cases
+    for (const testCase of invalidTests) {
+      testContent += this.generateMochaTestCase(testCase);
+    }
+    
+    testContent += `  });
+});
+`;
+
+    return testContent;
+  }
+
+  /**
+   * Generate a valid example object based on the schema
+   * @param {Object} schema - JSON Schema
+   * @returns {string} JSON string of valid example
+   */
+  generateValidExample(schema) {
+    const example = {};
+    
+    if (schema.properties) {
+      for (const [propName, propSchema] of Object.entries(schema.properties)) {
+        example[propName] = this.generateExampleValue(propSchema);
+      }
+    }
+    
+    return JSON.stringify(example, null, 2);
+  }
+
+  /**
+   * Generate a minimal example with only required fields
+   * @param {Object} schema - JSON Schema
+   * @returns {string} JSON string of minimal example
+   */
+  generateMinimalExample(schema) {
+    const example = {};
+    const required = schema.required || [];
+    
+    if (schema.properties) {
+      for (const field of required) {
+        if (schema.properties[field]) {
+          example[field] = this.generateExampleValue(schema.properties[field]);
+        }
+      }
+    }
+    
+    return JSON.stringify(example, null, 2);
+  }
+
+  /**
+   * Generate an example value based on property schema
+   * @param {Object} propSchema - Property schema
+   * @returns {any} Example value
+   */
+  generateExampleValue(propSchema) {
+    if (propSchema.example !== undefined) {
+      return propSchema.example;
+    }
+    
+    if (propSchema.default !== undefined) {
+      return propSchema.default;
+    }
+    
+    if (propSchema.enum && propSchema.enum.length > 0) {
+      return propSchema.enum[0];
+    }
+    
+    switch (propSchema.type) {
+      case 'string':
+        if (propSchema.format === 'email') return 'test@example.com';
+        if (propSchema.format === 'date') return '2024-01-01';
+        if (propSchema.format === 'date-time') return '2024-01-01T00:00:00Z';
+        if (propSchema.format === 'uri') return 'https://example.com';
+        if (propSchema.format === 'uuid') return '550e8400-e29b-41d4-a716-446655440000';
+        if (propSchema.pattern) return this.generateStringFromPattern(propSchema.pattern);
+        return 'example string';
+        
+      case 'number':
+      case 'integer':
+        if (propSchema.minimum !== undefined) return propSchema.minimum;
+        if (propSchema.maximum !== undefined) return propSchema.maximum;
+        return 42;
+        
+      case 'boolean':
+        return true;
+        
+      case 'array':
+        const itemExample = propSchema.items ? this.generateExampleValue(propSchema.items) : 'item';
+        return [itemExample];
+        
+      case 'object':
+        if (propSchema.properties) {
+          const obj = {};
+          for (const [key, value] of Object.entries(propSchema.properties)) {
+            obj[key] = this.generateExampleValue(value);
+          }
+          return obj;
+        }
+        return {};
+        
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Generate type test setup
+   */
+  generateTypeTestSetup(modelName, propName, propSchema) {
+    const wrongTypeValue = this.getWrongTypeValue(propSchema.type);
+    return `const invalid${modelName} = ${this.generateValidExample({ properties: { [propName]: propSchema } })};
+      invalid${modelName}.${propName} = ${JSON.stringify(wrongTypeValue)};`;
+  }
+
+  /**
+   * Generate enum test setup
+   */
+  generateEnumTestSetup(modelName, propName, propSchema) {
+    return `const invalid${modelName} = ${this.generateValidExample({ properties: { [propName]: propSchema } })};
+      invalid${modelName}.${propName} = 'invalid_enum_value';`;
+  }
+
+  /**
+   * Generate pattern test setup
+   */
+  generatePatternTestSetup(modelName, propName, propSchema) {
+    return `const invalid${modelName} = ${this.generateValidExample({ properties: { [propName]: propSchema } })};
+      invalid${modelName}.${propName} = 'invalid_pattern_value';`;
+  }
+
+  /**
+   * Generate format test setup
+   */
+  generateFormatTestSetup(modelName, propName, propSchema) {
+    const invalidFormatValue = this.getInvalidFormatValue(propSchema.format);
+    return `const invalid${modelName} = ${this.generateValidExample({ properties: { [propName]: propSchema } })};
+      invalid${modelName}.${propName} = '${invalidFormatValue}';`;
+  }
+
+  /**
+   * Get a value of the wrong type for testing
+   */
+  getWrongTypeValue(correctType) {
+    const typeMap = {
+      'string': 123,
+      'number': 'not a number',
+      'integer': 'not an integer',
+      'boolean': 'not a boolean',
+      'array': 'not an array',
+      'object': 'not an object'
+    };
+    return typeMap[correctType] || null;
+  }
+
+  /**
+   * Get an invalid value for format testing
+   */
+  getInvalidFormatValue(format) {
+    const formatMap = {
+      'email': 'not-an-email',
+      'date': 'not-a-date',
+      'date-time': 'not-a-datetime',
+      'uri': 'not a uri',
+      'uuid': 'not-a-uuid',
+      'ipv4': 'not.an.ip',
+      'ipv6': 'not:an:ipv6'
+    };
+    return formatMap[format] || 'invalid';
+  }
+
+  /**
+   * Validate regex pattern for security (ReDoS prevention)
+   * @param {string} pattern - The regex pattern to validate
+   * @returns {boolean} True if pattern is safe, false otherwise
+   */
+  isPatternSafe(pattern) {
+    // Check pattern length
+    if (pattern.length > MAX_PATTERN_LENGTH) {
+      console.warn(`Pattern too long (${pattern.length} > ${MAX_PATTERN_LENGTH}): ${pattern}`);
+      return false;
+    }
+
+    // Check for dangerous patterns that can cause ReDoS
+    const dangerousPatterns = [
+      /\([^)]*\*\)[*+]/,           // (a*)*
+      /\([^)]*\+\)[*+]/,           // (a+)+
+      /\([^)]*\{[^}]*\}\)[*+]/,    // (a{n,m})*
+      /\([^)]*\|[^)]*\)\+\+/,      // (a|b)++
+      /\\\\d\*\\\\d\*/,            // \d*\d*
+      /\[[^\]]*\]\*\[[^\]]*\]\*/   // [a-z]*[0-9]*
+    ];
+
+    for (const dangerous of dangerousPatterns) {
+      if (dangerous.test(pattern)) {
+        console.warn(`Potentially dangerous pattern detected: ${pattern}`);
+        return false;
+      }
+    }
+
+    // Count complexity indicators
+    const quantifiers = (pattern.match(/[*+?{]/g) || []).length;
+    const alternations = (pattern.match(/\|/g) || []).length;
+    const complexity = quantifiers + alternations;
+
+    if (complexity > MAX_PATTERN_COMPLEXITY) {
+      console.warn(`Pattern too complex (complexity ${complexity} > ${MAX_PATTERN_COMPLEXITY}): ${pattern}`);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Generate a string that matches a simple pattern
+   * @param {string} pattern - The regex pattern to match
+   * @returns {string} A string that matches the pattern
+   */
+  generateStringFromPattern(pattern) {
+    // Validate pattern for security
+    if (!this.isPatternSafe(pattern)) {
+      console.warn(`Unsafe pattern detected, using fallback: ${pattern}`);
+      return 'safe-pattern-fallback';
+    }
+
+    // This is a simplified implementation
+    // For complex patterns, you might want to use a library like randexp
+    
+    // Common patterns
+    if (pattern === '^[a-z0-9-]+$') return 'example-slug-123';
+    if (pattern === '^CAT-[0-9]{4}$') return 'CAT-1234';
+    if (pattern === '^[A-Z]{2,4}$') return 'ABC';
+    if (pattern === '^\\d{4}-\\d{2}-\\d{2}$') return '2024-01-01';
+    if (pattern === '^[a-zA-Z0-9_-]+$') return 'user_name-123';
+    if (pattern === '^[a-z]{2}-[A-Z]{2}$') return 'en-US';
+    // Phone pattern (E.164 format)
+    if (pattern === '^\\+?[1-9]\\d{1,14}$') return '+1234567890';
+    if (pattern.includes('[A-Z]') && pattern.includes('[0-9]')) return 'ABC123';
+    if (pattern.includes('\\d{3,}')) return '12345';
+    if (pattern.includes('[a-z]+')) return 'example';
+    if (pattern.includes('[A-Z]+')) return 'EXAMPLE';
+    if (pattern.includes('\\d+')) return '12345';
+    
+    // Default fallback
+    return 'pattern-match';
+  }
+
+  /**
+   * Convert camelCase to kebab-case
+   */
+  toKebabCase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  }
+
+  /**
+   * Extract data models from a story file
+   * @param {string} storyFilePath - Path to the story file
+   * @returns {Object|null} Data models from the story contract
+   */
+  extractDataModelsFromStory(storyFilePath) {
+    try {
+      const content = fs.readFileSync(storyFilePath, 'utf8');
+      
+      // Look for YAML front matter containing StoryContract
+      const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+      
+      if (yamlMatch) {
+        const yamlContent = yamlMatch[1];
+        const parsed = yaml.load(yamlContent);
+        
+        if (parsed && parsed.StoryContract && parsed.StoryContract.dataModels) {
+          return parsed.StoryContract.dataModels;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      throw new Error(`Failed to extract data models from story: ${error.message}`);
+    }
+  }
+
+  /**
+   * Write generated tests to files
+   * @param {Object} result - Object with tests and schemaFiles
+   * @param {string} outputDir - Directory to write test files to
+   */
+  writeTestsToFiles(result, outputDir) {
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Handle backward compatibility
+    const tests = result.tests || result;
+    const schemaFiles = result.schemaFiles || {};
+    
+    // Write test files
+    for (const [fileName, content] of Object.entries(tests)) {
+      const filePath = path.join(outputDir, fileName);
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(`Generated test file: ${filePath}`);
+    }
+    
+    // Write schema files if any
+    for (const [fileName, content] of Object.entries(schemaFiles)) {
+      const filePath = path.join(outputDir, fileName);
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(`Generated schema file: ${filePath}`);
+    }
+  }
+}
+
+module.exports = DataModelTestGenerator;
+==================== END: .bmad-core/utils/datamodel-test-generator.js ====================
 
 ==================== START: .bmad-core/structured-tasks/review-story.yaml ====================
 # review-story

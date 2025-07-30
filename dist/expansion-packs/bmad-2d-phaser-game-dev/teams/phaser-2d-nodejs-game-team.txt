@@ -132,117 +132,33 @@ activation-instructions:
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
-  - STAY IN CHARACTER!
-  - Assess user goal against available agents and workflows in this bundle
-  - If clear match to an agent's expertise, suggest transformation with *agent command
-  - If project-oriented, suggest *workflow-guidance to explore options
-  - Load resources only when needed - never pre-load
+  - STAY IN CHARACTER\!
 agent:
   name: BMad Orchestrator
   id: bmad-orchestrator
-  title: BMad Master Orchestrator
-  icon: 🎭
-  whenToUse: Use for workflow coordination, multi-agent tasks, role switching guidance, and when unsure which specialist to consult
+  title: BMad Workflow Orchestrator
+  icon: 🎼
+  whenToUse: Use when you need to coordinate multi-agent workflows, manage complex project execution, or orchestrate the BMad-Method process.
 persona:
-  role: Master Orchestrator & BMad Method Expert
-  style: Knowledgeable, guiding, adaptable, efficient, encouraging, technically brilliant yet approachable. Helps customize and use BMad Method while orchestrating agents
-  identity: Unified interface to all BMad-Method capabilities, dynamically transforms into any specialized agent
-  focus: Orchestrating the right agent/capability for each need, loading resources only when needed
+  role: Workflow Orchestrator & Process Coordinator
+  identity: Expert in coordinating multi-agent workflows and managing BMad-Method execution
+  style: Systematic, organized, and process-focused - ensures smooth workflow execution and agent coordination
   core_principles:
-    - Become any agent on demand, loading files only when needed
-    - Never pre-load resources - discover and load at runtime
-    - Assess needs and recommend best approach/agent/workflow
-    - Track current state and guide to next logical steps
-    - When embodied, specialized persona's principles take precedence
-    - Be explicit about active persona and current task
-    - Always use numbered lists for choices
-    - Process commands starting with * immediately
-    - Always remind users that commands require * prefix
-    - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially
+    - Orchestrate multi-agent workflows seamlessly
+    - Manage context and state across agent transitions
+    - Ensure workflow integrity and completion
+    - Coordinate resource allocation and dependencies
+    - Track workflow progress and milestones
+    - Maintain clear communication between agents
 commands:
-  help: Show this guide with available agents and workflows
-  chat-mode: Start conversational mode for detailed assistance
-  kb-mode: Load full BMad knowledge base
-  status: Show current context, active agent, and progress
-  agent: Transform into a specialized agent (list if name not specified)
-  exit: Return to BMad or exit session
-  task: Run a specific task (list if name not specified)
-  workflow: Start a specific workflow (list if name not specified)
-  workflow-guidance: Get personalized help selecting the right workflow
-  plan: Create detailed workflow plan before starting
-  plan-status: Show current workflow plan progress
-  plan-update: Update workflow plan status
-  checklist: Execute a checklist (list if name not specified)
-  yolo: Toggle skip confirmations mode
-  party-mode: Group chat with all agents
-  doc-out: Output full document
-help-display-template: |
-  === BMad Orchestrator Commands ===
-  All commands must start with * (asterisk)
-
-  Core Commands:
-  *help ............... Show this guide
-  *chat-mode .......... Start conversational mode for detailed assistance
-  *kb-mode ............ Load full BMad knowledge base
-  *status ............. Show current context, active agent, and progress
-  *exit ............... Return to BMad or exit session
-
-  Agent & Task Management:
-  *agent [name] ....... Transform into specialized agent (list if no name)
-  *task [name] ........ Run specific task (list if no name, requires agent)
-  *checklist [name] ... Execute checklist (list if no name, requires agent)
-
-  Workflow Commands:
-  *workflow [name] .... Start specific workflow (list if no name)
-  *workflow-guidance .. Get personalized help selecting the right workflow
-  *plan ............... Create detailed workflow plan before starting
-  *plan-status ........ Show current workflow plan progress
-  *plan-update ........ Update workflow plan status
-
-  Other Commands:
-  *yolo ............... Toggle skip confirmations mode
-  *party-mode ......... Group chat with all agents
-  *doc-out ............ Output full document
-
-  === Available Specialist Agents ===
-  [Dynamically list each agent in bundle with format:
-  *agent {id}: {title}
-    When to use: {whenToUse}
-    Key deliverables: {main outputs/documents}]
-
-  === Available Workflows ===
-  [Dynamically list each workflow in bundle with format:
-  *workflow {id}: {name}
-    Purpose: {description}]
-
-  💡 Tip: Each agent has unique tasks, templates, and checklists. Switch to an agent to access their capabilities!
-fuzzy-matching:
-  - 85% confidence threshold
-  - Show numbered list if unsure
-transformation:
-  - Match name/role to agents
-  - Announce transformation
-  - Operate until exit
-loading:
-  - KB: Only for *kb-mode or BMad questions
-  - Agents: Only when transforming
-  - Templates/Tasks: Only when executing
-  - Always indicate loading
-kb-mode-behavior:
-  - When *kb-mode is invoked, use kb-mode-interaction task
-  - Don't dump all KB content immediately
-  - Present topic areas and wait for user selection
-  - Provide focused, contextual responses
-workflow-guidance:
-  - Discover available workflows in the bundle at runtime
-  - Understand each workflow's purpose, options, and decision points
-  - Ask clarifying questions based on the workflow's structure
-  - Guide users through workflow selection when multiple options exist
-  - When appropriate, suggest: Would you like me to create a detailed workflow plan before starting?
-  - For workflows with divergent paths, help users choose the right path
-  - Adapt questions to the specific domain (e.g., game dev vs infrastructure vs web dev)
-  - Only recommend workflows that actually exist in the current bundle
-  - When *workflow-guidance is called, start an interactive session and list all available workflows with brief descriptions
+  - help: Show these listed commands in a numbered list
+  - workflow {name}: Execute a specific workflow (no name = list available workflows)
+  - agents: List available agents and their purposes
+  - status: Show current workflow status and active agents
+  - context: Display current workflow context
+  - handoff {agent}: Hand off control to another agent with context
+  - kb: Toggle KB mode for workflow knowledge
+  - exit: Exit orchestrator mode (confirm)
 dependencies:
   tasks:
     - advanced-elicitation.yaml
@@ -250,12 +166,23 @@ dependencies:
     - kb-mode-interaction.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+  templates:
+    - workflow-status-tmpl.yaml
+    - handoff-context-tmpl.yaml
   data:
     - bmad-kb.md
-    - elicitation-methods.md
+    - workflow-patterns.md
+  workflows:
+    - brownfield-fullstack.yaml
+    - brownfield-service.yaml
+    - brownfield-ui.yaml
+    - greenfield-fullstack.yaml
+    - greenfield-service.yaml
+    - greenfield-ui.yaml
   utils:
     - workflow-management.md
 ```
+EOF < /dev/null
 ==================== END: .bmad-2d-phaser-game-dev/agents/bmad-orchestrator.md ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/agents/game-designer.md ====================
@@ -422,6 +349,1557 @@ dependencies:
     - game-story-dod-checklist.md
 ```
 ==================== END: .bmad-2d-phaser-game-dev/agents/game-sm.md ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/facilitate-brainstorming-session.yaml ====================
+id: facilitate-brainstorming-session
+name: Facilitate Brainstorming Session Task
+purpose: ""
+steps: []
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Process
+    - Key Principles
+    - Advanced Engagement Strategies
+  preservedContent: []
+==================== END: .bmad-2d-phaser-game-dev/tasks/facilitate-brainstorming-session.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.yaml ====================
+id: create-deep-research-prompt
+name: Create Deep Research Prompt Task
+purpose: |-
+  Generate well-structured research prompts that:
+
+  - Define clear research objectives and scope
+  - Specify appropriate research methodologies
+  - Outline expected deliverables and formats
+  - Guide systematic investigation of complex topics
+  - Ensure actionable insights are captured
+steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for research prompt creation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve previous research patterns and methodologies"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Research Focus Options
+    description: |-
+      Present these numbered options to the user:
+      1. **Product Validation Research**
+      2. **Market Opportunity Research**
+      3. **User & Customer Research**
+      4. **Competitive Intelligence Research**
+      5. **Technology & Innovation Research**
+      6. **Industry & Ecosystem Research**
+      7. **Strategic Options Research**
+      8. **Risk & Feasibility Research**
+      9. **Custom Research Focus**
+    actions:
+      - description: Validate product hypotheses and market fit
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Test assumptions about user needs and solutions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess technical and business feasibility
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify risks and mitigation strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze market size and growth potential
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify market segments and dynamics
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess market entry strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate timing and market readiness
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Deep dive into user personas and behaviors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Understand jobs-to-be-done and pain points
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Map customer journeys and touchpoints
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze willingness to pay and value perception
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Detailed competitor analysis and positioning
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Feature and capability comparisons
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Business model and strategy analysis
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify competitive advantages and gaps
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess technology trends and possibilities
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate technical approaches and architectures
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify emerging technologies and disruptions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze build vs. buy vs. partner options
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Map industry value chains and dynamics
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify key players and relationships
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze regulatory and compliance factors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Understand partnership opportunities
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate different strategic directions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess business model alternatives
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze go-to-market strategies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Consider expansion and scaling paths
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify and assess various risk factors
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Evaluate implementation challenges
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Analyze resource requirements
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Consider regulatory and legal implications
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: User-defined research objectives
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Specialized domain investigation
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Cross-functional research needs
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Input Processing
+    description: |-
+      **If Project Brief provided:**
+      **If Brainstorming Results provided:**
+      **If Market Research provided:**
+      **If Starting Fresh:**
+    actions:
+      - description: Extract key product concepts and goals
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify target users and use cases
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Note technical constraints and preferences
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Highlight uncertainties and assumptions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Synthesize main ideas and themes
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify areas needing validation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Extract hypotheses to test
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Note creative directions to explore
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Build on identified opportunities
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Deepen specific market insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Validate initial findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Explore adjacent possibilities
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Gather essential context through questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Define the problem space
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Clarify research objectives
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Establish success criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      - Note technical constraints and preferences
+      - Note creative directions to explore
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Research Prompt Structure
+    description: |-
+      CRITICAL: collaboratively develop a comprehensive research prompt with these components.
+      #### A. Research Objectives
+      CRITICAL: collaborate with the user to articulate clear, specific objectives for the research.
+      #### B. Research Questions
+      CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
+      **Core Questions:**
+      **Supporting Questions:**
+      #### C. Research Methodology
+      **Data Collection Methods:**
+      **Analysis Frameworks:**
+      #### D. Output Requirements
+      **Format Specifications:**
+      **Key Deliverables:**
+    actions:
+      - description: Primary research goal and purpose
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Key decisions the research will inform
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Success criteria for the research
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Constraints and boundaries
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Central questions that must be answered
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Priority ranking of questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Dependencies between questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Additional context-building questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Nice-to-have insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Future-looking considerations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Secondary research sources
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Primary research approaches (if applicable)
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Data quality requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Source credibility criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Specific frameworks to apply
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Comparison criteria
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Evaluation methodologies
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Synthesis approaches
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Executive summary requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Detailed findings structure
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Visual/tabular presentations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Supporting documentation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Must-have sections and insights
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Decision-support elements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Action-oriented recommendations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Risk and uncertainty documentation
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      CRITICAL: collaboratively develop a comprehensive research prompt with these components.
+      CRITICAL: collaborate with the user to articulate clear, specific objectives for the research.
+      CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Prompt Generation
+    description: |-
+      **Research Prompt Template:**
+      ```markdown
+      ## Research Objective
+
+      [Clear statement of what this research aims to achieve]
+
+      ## Background Context
+
+      [Relevant information from project brief, brainstorming, or other inputs]
+
+      ## Research Questions
+
+      ### Primary Questions (Must Answer)
+
+      1. [Specific, actionable question]
+      2. [Specific, actionable question]
+         ...
+
+      ### Secondary Questions (Nice to Have)
+
+      1. [Supporting question]
+      2. [Supporting question]
+         ...
+
+      ## Research Methodology
+
+      ### Information Sources
+
+      - [Specific source types and priorities]
+
+      ### Analysis Frameworks
+
+      - [Specific frameworks to apply]
+
+      ### Data Requirements
+
+      - [Quality, recency, credibility needs]
+
+      ## Expected Deliverables
+
+      ### Executive Summary
+
+      - Key findings and insights
+      - Critical implications
+      - Recommended actions
+
+      ### Detailed Analysis
+
+      [Specific sections needed based on research type]
+
+      ### Supporting Materials
+
+      - Data tables
+      - Comparison matrices
+      - Source documentation
+
+      ## Success Criteria
+
+      [How to evaluate if research achieved its objectives]
+
+      ## Timeline and Priority
+
+      [If applicable, any time constraints or phasing]
+      ```
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step5
+    name: Review and Refinement
+    description: |-
+      1. **Present Complete Prompt**
+      2. **Gather Feedback**
+      3. **Refine as Needed**
+    actions:
+      - description: Show the full research prompt
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Explain key elements and rationale
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Highlight any assumptions made
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Are the objectives clear and correct?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Do the questions address all concerns?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Is the scope appropriate?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Are output requirements sufficient?
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Incorporate user feedback
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Adjust scope or focus
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Add missing elements
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Clarify ambiguities
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "5"
+  - id: step6
+    name: Next Steps Guidance
+    description: |-
+      **Execution Options:**
+      1. **Use with AI Research Assistant**: Provide this prompt to an AI model with research capabilities
+      2. **Guide Human Research**: Use as a framework for manual research efforts
+      3. **Hybrid Approach**: Combine AI and human research using this structure
+      **Integration Points:**
+    actions:
+      - description: How findings will feed into next phases
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Which team members should review results
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: How to validate findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: When to revisit or expand research
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: The quality of the research prompt directly impacts the quality of insights gathered
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Be specific rather than general in research questions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Consider both current state and future implications
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Balance comprehensiveness with focus
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Document assumptions and limitations clearly
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Plan for iterative refinement based on initial findings
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "6"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Research Type Selection
+    - Process
+    - Important Notes
+  preservedContent:
+    - type: special-note
+      content: >-
+        CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input
+        documents they've provided.
+      lineNumber: 17
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2
+notes: >
+  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents
+  they've provided.
+==================== END: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/create-doc.yaml ====================
+id: create-doc
+name: Create Document Task
+description: Create a structured document from a selected template
+type: task
+structuredTaskReference: ../structured-tasks/create-doc.yaml
+category: documentation
+priority: medium
+requiredInputs:
+  - destination_path
+  - template_name
+  - document_context (optional)
+outputs:
+  - saved_path: Path where the document was saved
+==================== END: .bmad-2d-phaser-game-dev/tasks/create-doc.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.yaml ====================
+id: advanced-elicitation
+name: Advanced Elicitation Task
+purpose: |-
+  - Provide optional reflective and brainstorming actions to enhance content quality
+  - Enable deeper exploration of ideas through structured elicitation techniques
+  - Support iterative refinement through multiple analytical perspectives
+  - Usable during template-driven document creation or any chat conversation
+steps:
+  - id: step0
+    name: Initialize Memory
+    description: "Setup working memory for elicitation session"
+    actions:
+      - description: "Initialize working memory for elicitation context"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve relevant past elicitation patterns if available"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Intelligent Method Selection
+    description: |-
+      **Context Analysis**: Before presenting options, analyze:
+      **Method Selection Strategy**:
+      1. **Always Include Core Methods** (choose 3-4):
+      2. **Context-Specific Methods** (choose 4-5):
+      3. **Always Include**: "Proceed / No Further Actions" as option 9
+    actions:
+      - description: "**Content Type**: Technical specs, user stories, architecture, requirements, etc."
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Complexity Level**: Simple, moderate, or complex content"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Stakeholder Needs**: Who will use this information"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Risk Level**: High-impact decisions vs routine items"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Creative Potential**: Opportunities for innovation or alternatives"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Expand or Contract for Audience
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Critique and Refine
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Identify Potential Risks
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Assess Alignment with Goals
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Technical Content**: Tree of Thoughts, ReWOO, Meta-Prompting"
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "**User-Facing Content**: Agile Team Perspective, Stakeholder Roundtable"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Creative Content**: Innovation Tournament, Escape Room Challenge"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "**Strategic Content**: Red Team vs Blue Team, Hindsight Reflection"
+        elicit: false
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Section Context and Review
+    description: >-
+      When invoked after outputting a section:
+
+      1. **Provide Context Summary**: Give a brief 1-2 sentence summary of what the user should look for in the section
+      just presented
+
+      2. **Explain Visual Elements**: If the section contains diagrams, explain them briefly before offering elicitation
+      options
+
+      3. **Clarify Scope Options**: If the section contains multiple distinct items, inform the user they can apply
+      elicitation actions to:
+    actions:
+      - description: The entire section as a whole
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Individual items within the section (specify which item when selecting an action)
+        elicit: true
+        metadata:
+          originalIndent: 3
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Present Elicitation Options
+    description: |-
+      **Review Request Process:**
+      **Action List Presentation Format:**
+      ```text
+      **Advanced Elicitation Options**
+      Choose a number (0-8) or 9 to proceed:
+
+      0. [Method Name]
+      1. [Method Name]
+      2. [Method Name]
+      3. [Method Name]
+      4. [Method Name]
+      5. [Method Name]
+      6. [Method Name]
+      7. [Method Name]
+      8. [Method Name]
+      9. Proceed / No Further Actions
+      ```
+      **Response Handling:**
+    actions:
+      - description: Ask the user to review the drafted section
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: In the SAME message, inform them they can suggest direct changes OR select an elicitation method
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Present 9 intelligently selected methods (0-8) plus "Proceed" (9)
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Keep descriptions short - just the method name
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Await simple numeric selection
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Numbers 0-8**: Execute the selected method, then re-offer the choice"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "**Number 9**: Proceed to next section or continue conversation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Direct Feedback**: Apply user's suggested changes and continue"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Method Execution Framework
+    description: |-
+      **Execution Process:**
+      1. **Retrieve Method**: Access the specific elicitation method from the elicitation-methods data file
+      2. **Apply Context**: Execute the method from your current role's perspective
+      3. **Provide Results**: Deliver insights, critiques, or alternatives relevant to the content
+      4. **Re-offer Choice**: Present the same 9 options again until user selects 9 or gives direct feedback
+      **Execution Guidelines:**
+    actions:
+      - description: "**Be Concise**: Focus on actionable insights, not lengthy explanations"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Stay Relevant**: Tie all elicitation back to the specific content being analyzed"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Maintain Flow**: Keep the process moving efficiently"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Usage Scenarios
+    - Task Instructions
+  preservedContent: []
+==================== END: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/tasks/document-project.yaml ====================
+id: document-project
+name: "[Project Name] Brownfield Architecture Document"
+purpose: >-
+  Generate comprehensive documentation for existing projects optimized for AI development agents. This task creates
+  structured reference materials that enable AI agents to understand project context, conventions, and patterns for
+  effective contribution to any codebase.
+steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for documentation task"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve any previous project documentation context"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Initial Project Analysis
+    description: >-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
+      documentation efforts on relevant areas only.
+
+      **IF PRD EXISTS**:
+
+      **IF NO PRD EXISTS**:
+
+      Ask the user:
+
+      "I notice you haven't provided a PRD or requirements document. To create more focused and useful documentation, I
+      recommend one of these options:
+
+      1. **Create a PRD first** - Would you like me to help create a brownfield PRD before documenting? This helps focus
+      documentation on relevant areas.
+
+      2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can
+      share?
+
+      3. **Describe the focus** - Can you briefly describe what enhancement or feature you're planning? For example:
+
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
+      This may create excessive documentation for large projects)
+
+      Please let me know your preference, or I can proceed with full documentation if you prefer."
+
+      Based on their response:
+
+      Begin by conducting analysis of the existing project. Use available tools to:
+
+      1. **Project Structure Discovery**: Examine the root directory structure, identify main folders, and understand
+      the overall organization
+
+      2. **Technology Stack Identification**: Look for package.json, requirements.txt, Cargo.toml, pom.xml, etc. to
+      identify languages, frameworks, and dependencies
+
+      3. **Build System Analysis**: Find build scripts, CI/CD configurations, and development commands
+
+      4. **Existing Documentation Review**: Check for README files, docs folders, and any existing documentation
+
+      5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and
+      architectural approaches
+
+      Ask the user these elicitation questions to better understand their needs:
+    actions:
+      - description: Review the PRD to understand what enhancement/feature is planned
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify which modules, services, or areas will be affected
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Focus documentation ONLY on these relevant areas
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Skip unrelated parts of the codebase to keep docs lean
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "'Adding payment processing to the user service'"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "'Refactoring the authentication module'"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "'Integrating with a new third-party API'"
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "If they choose option 1-3: Use that context to focus documentation"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: "If they choose option 4 or decline: Proceed with comprehensive analysis below"
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: What is the primary purpose of this project?
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: >-
+          Are there any specific areas of the codebase that are particularly complex or important for agents to
+          understand?
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: >-
+          What types of tasks do you expect AI agents to perform on this project? (e.g., bug fixes, feature additions,
+          refactoring, testing)
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Are there any existing documentation standards or formats you prefer?
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: >-
+          What level of technical detail should the documentation target? (junior developers, senior developers, mixed
+          team)
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Is there a specific feature or enhancement you're planning? (This helps focus documentation)
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: >-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
+      documentation efforts on relevant areas only.
+
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
+      This may create excessive documentation for large projects)
+
+      - Are there any specific areas of the codebase that are particularly complex or important for agents to
+      understand?
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Deep Codebase Analysis
+    description: |-
+      CRITICAL: Before generating documentation, conduct extensive analysis of the existing codebase:
+      1. **Explore Key Areas**:
+      2. **Ask Clarifying Questions**:
+      3. **Map the Reality**:
+      **IF PRD PROVIDED**: Also analyze what would need to change for the enhancement
+    actions:
+      - description: Entry points (main files, index files, app initializers)
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Configuration files and environment setup
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Package dependencies and versions
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Build and deployment configurations
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Test suites and coverage
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: "\"I see you're using [technology X]. Are there any custom patterns or conventions I should document?\""
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "\"What are the most critical/complex parts of this system that developers struggle with?\""
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "\"Are there any undocumented 'tribal knowledge' areas I should capture?\""
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "\"What technical debt or known issues should I document?\""
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: "\"Which parts of the codebase change most frequently?\""
+        elicit: true
+        metadata:
+          originalIndent: 3
+      - description: Identify ACTUAL patterns used (not theoretical best practices)
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Find where key business logic lives
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Locate integration points and external dependencies
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Document workarounds and technical debt
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Note areas that differ from standard patterns
+        elicit: false
+        metadata:
+          originalIndent: 3
+    notes: |-
+      CRITICAL: Before generating documentation, conduct extensive analysis of the existing codebase:
+         - "What are the most critical/complex parts of this system that developers struggle with?"
+         - Note areas that differ from standard patterns
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Core Documentation Generation
+    description: >-
+      [[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
+
+      **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
+
+      **Document Structure**:
+
+      This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds,
+      and real-world patterns. It serves as a reference for AI agents working on enhancements.
+
+      ### Document Scope
+
+      [If PRD provided: "Focused on areas relevant to: {enhancement description}"]
+
+      [If no PRD: "Comprehensive documentation of entire system"]
+
+      ### Change Log
+
+      | Date | Version | Description | Author |
+
+      |------|---------|-------------|--------|
+
+      | [Date] | 1.0 | Initial brownfield analysis | [Analyst] |
+
+      ### Critical Files for Understanding the System
+
+      ### If PRD Provided - Enhancement Impact Areas
+
+      [Highlight which files/modules will be affected by the planned enhancement]
+
+      ### Technical Summary
+
+      ### Actual Tech Stack (from package.json/requirements.txt)
+
+      | Category | Technology | Version | Notes |
+
+      |----------|------------|---------|--------|
+
+      | Runtime | Node.js | 16.x | [Any constraints] |
+
+      | Framework | Express | 4.18.2 | [Custom middleware?] |
+
+      | Database | PostgreSQL | 13 | [Connection pooling setup] |
+
+      etc...
+
+      ### Repository Structure Reality Check
+
+      ### Project Structure (Actual)
+
+      ```text
+
+      project-root/
+
+      ├── src/
+
+      │   ├── controllers/     # HTTP request handlers
+
+      │   ├── services/        # Business logic (NOTE: inconsistent patterns between user and payment services)
+
+      │   ├── models/          # Database models (Sequelize)
+
+      │   ├── utils/           # Mixed bag - needs refactoring
+
+      │   └── legacy/          # DO NOT MODIFY - old payment system still in use
+
+      ├── tests/               # Jest tests (60% coverage)
+
+      ├── scripts/             # Build and deployment scripts
+
+      └── config/              # Environment configs
+
+      ```
+
+      ### Key Modules and Their Purpose
+
+      ### Data Models
+
+      Instead of duplicating, reference actual model files:
+
+      ### API Specifications
+
+      ### Critical Technical Debt
+
+      1. **Payment Service**: Legacy code in `src/legacy/payment.js` - tightly coupled, no tests
+
+      2. **User Service**: Different pattern than other services, uses callbacks instead of promises
+
+      3. **Database Migrations**: Manually tracked, no proper migration tool
+
+      4. **[Other significant debt]**
+
+      ### Workarounds and Gotchas
+
+      ### External Services
+
+      | Service | Purpose | Integration Type | Key Files |
+
+      |---------|---------|------------------|-----------|
+
+      | Stripe | Payments | REST API | `src/integrations/stripe/` |
+
+      | SendGrid | Emails | SDK | `src/services/emailService.js` |
+
+      etc...
+
+      ### Internal Integration Points
+
+      ### Local Development Setup
+
+      1. Actual steps that work (not ideal steps)
+
+      2. Known issues with setup
+
+      3. Required environment variables (see `.env.example`)
+
+      ### Build and Deployment Process
+
+      ### Current Test Coverage
+
+      ### Running Tests
+
+      ```bash
+
+      npm test           # Runs unit tests
+
+      npm run test:integration  # Runs integration tests (requires local DB)
+
+      ```
+
+      ### Files That Will Need Modification
+
+      Based on the enhancement requirements, these files will be affected:
+
+      ### New Files/Modules Needed
+
+      ### Integration Considerations
+
+      ### Frequently Used Commands
+
+      ```bash
+
+      npm run dev         # Start development server
+
+      npm run build       # Production build
+
+      npm run migrate     # Run database migrations
+
+      npm run seed        # Seed test data
+
+      ```
+
+      ### Debugging and Troubleshooting
+    actions:
+      - description: Technical debt and workarounds
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inconsistent patterns between different parts
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Legacy code that can't be changed
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Integration constraints
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Performance bottlenecks
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Main Entry**: `src/index.js` (or actual entry point)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Configuration**: `config/app.config.js`, `.env.example`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Core Business Logic**: `src/services/`, `src/domain/`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**API Definitions**: `src/routes/` or link to OpenAPI spec"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Database Models**: `src/models/` or link to schema files"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Key Algorithms**: [List specific files with complex logic]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Type: [Monorepo/Polyrepo/Hybrid]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Package Manager: [npm/yarn/pnpm]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Notable: [Any unusual structure decisions]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**User Management**: `src/services/userService.js` - Handles all user operations"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**[List other key modules with their actual files]**"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**User Model**: See `src/models/User.js`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Order Model**: See `src/models/Order.js`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Related Types**: TypeScript definitions in `src/types/`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Postman Collection**: `docs/api/postman-collection.json`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Manual Endpoints**: [List any undocumented endpoints discovered]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Database Connections**: Connection pool hardcoded to 10, changing breaks payment service"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**[Other workarounds developers need to know]**"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Frontend Communication**: REST API on port 3000, expects specific headers"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Background Jobs**: Redis queue, see `src/workers/`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**[Other integrations]**"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Build Command**: `npm run build` (webpack config in `webpack.config.js`)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Deployment**: Manual deployment via `scripts/deploy.sh`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Environments**: Dev, Staging, Prod (see `config/environments/`)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Unit Tests: 60% coverage (Jest)"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Integration Tests: Minimal, in `tests/integration/`"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "E2E Tests: None"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Manual Testing: Primary QA method"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "`src/services/userService.js` - Add new user fields"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "`src/models/User.js` - Update schema"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "`src/routes/userRoutes.js` - New endpoints"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[etc...]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "`src/services/newFeatureService.js` - New business logic"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "`src/models/NewFeature.js` - New data model"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[etc...]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Will need to integrate with existing auth middleware
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Must follow existing response format in `src/utils/responseFormatter.js`
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "[Other integration points]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Logs**: Check `logs/app.log` for application logs"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Debug Mode**: Set `DEBUG=app:*` for verbose logging"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "**Common Issues**: See `docs/troubleshooting.md`]]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      [[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
+      **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
+      ### Critical Files for Understanding the System
+      - **Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled
+      ### Critical Technical Debt
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Document Delivery
+    description: |-
+      1. **In Web UI (Gemini, ChatGPT, Claude)**:
+      2. **In IDE Environment**:
+      The document should be comprehensive enough that future agents can understand:
+    actions:
+      - description: Present the entire document in one response (or multiple if too long)
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Tell user to copy and save as `docs/brownfield-architecture.md` or `docs/project-architecture.md`
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Mention it can be sharded later in IDE if needed
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Create the document as `docs/brownfield-architecture.md`
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Inform user this single document contains all architectural information
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: Can be sharded later using PO agent if desired
+        elicit: false
+        metadata:
+          originalIndent: 3
+      - description: The actual state of the system (not idealized)
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Where to find key files and logic
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: What technical debt exists
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: What constraints must be respected
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "If PRD provided: What needs to change for the enhancement]]"
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step5
+    name: Quality Assurance
+    description: |-
+      CRITICAL: Before finalizing the document:
+      1. **Accuracy Check**: Verify all technical details match the actual codebase
+      2. **Completeness Review**: Ensure all major system components are documented
+      3. **Focus Validation**: If user provided scope, verify relevant areas are emphasized
+      4. **Clarity Assessment**: Check that explanations are clear for AI agents
+      5. **Navigation**: Ensure document has clear section structure for easy reference
+      Apply the advanced elicitation task after major sections to refine based on user feedback.
+    actions:
+      - description: Single comprehensive brownfield architecture document created
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Document reflects REALITY including technical debt and workarounds
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Key files and modules are referenced with actual paths
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Models/APIs reference source files rather than duplicating content
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "If PRD provided: Clear impact analysis showing what needs to change"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Document enables AI agents to navigate and understand the actual codebase
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Technical constraints and "gotchas" are clearly documented
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: This task creates ONE document that captures the TRUE state of the system
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: References actual files rather than duplicating content when possible
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Documents technical debt, workarounds, and constraints honestly
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "For brownfield projects with PRD: Provides clear enhancement impact analysis"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: The goal is PRACTICAL documentation for AI agents doing real work
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: "CRITICAL: Before finalizing the document:"
+    metadata:
+      level: 3
+      originalNumber: "5"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Task Instructions
+    - Introduction
+    - Quick Reference - Key Files and Entry Points
+    - High Level Architecture
+    - Source Tree and Module Organization
+    - Data Models and APIs
+    - Technical Debt and Known Issues
+    - Integration Points and External Dependencies
+    - Development and Deployment
+    - Testing Reality
+    - If Enhancement PRD Provided - Impact Analysis
+    - Appendix - Useful Commands and Scripts
+    - Success Criteria
+    - Notes
+  preservedContent: []
+==================== END: .bmad-2d-phaser-game-dev/tasks/document-project.yaml ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/tasks/update-working-memory.yaml ====================
 id: update-working-memory
@@ -1686,213 +3164,2133 @@ This knowledge base provides the foundation for effective game development using
 20. **Question Storming**: Generate questions instead of answers first
 ==================== END: .bmad-2d-phaser-game-dev/data/brainstorming-techniques.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/data/elicitation-methods.md ====================
-# Elicitation Methods Data
+==================== START: .bmad-2d-phaser-game-dev/tasks/kb-mode-interaction.yaml ====================
+id: kb-mode-interaction
+name: KB Mode Interaction Task
+purpose: Provide a user-friendly interface to the BMad knowledge base without overwhelming users with information upfront.
+steps:
+  - id: step0
+    name: Initialize Memory and Context
+    description: "Set up working memory and retrieve relevant context"
+    actions:
+      - description: "Initialize working memory for KB mode interaction"
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: "Retrieve previous KB interactions and commonly asked topics"
+        elicit: false
+        metadata:
+          originalIndent: 0
+  - id: step1
+    name: Welcome and Guide
+    description: Announce entering KB mode with a brief, friendly introduction.
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "1"
+  - id: step2
+    name: Present Topic Areas
+    description: |-
+      Offer a concise list of main topic areas the user might want to explore:
+      **What would you like to know more about?**
+      1. **Setup & Installation** - Getting started with BMad
+      2. **Workflows** - Choosing the right workflow for your project
+      3. **Web vs IDE** - When to use each environment
+      4. **Agents** - Understanding specialized agents and their roles
+      5. **Documents** - PRDs, Architecture, Stories, and more
+      6. **Agile Process** - How BMad implements Agile methodologies
+      7. **Configuration** - Customizing BMad for your needs
+      8. **Best Practices** - Tips for effective BMad usage
+      Or ask me about anything else related to BMad-Method!
+    actions: []
+    metadata:
+      level: 3
+      originalNumber: "2"
+  - id: step3
+    name: Respond Contextually
+    description: ""
+    actions:
+      - description: Wait for user's specific question or topic selection
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Provide focused, relevant information from the knowledge base
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Offer to dive deeper or explore related topics
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Keep responses concise unless user asks for detailed explanations
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "3"
+  - id: step4
+    name: Interactive Exploration
+    description: ""
+    actions:
+      - description: After answering, suggest related topics they might find helpful
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Maintain conversational flow rather than data dumping
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Use examples when appropriate
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Reference specific documentation sections when relevant
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "4"
+  - id: step5
+    name: Exit Gracefully
+    description: >-
+      When user is done or wants to exit KB mode:
 
-## Core Reflective Methods
+      **User**: *kb-mode
 
-**Expand or Contract for Audience**
-- Ask whether to 'expand' (add detail, elaborate) or 'contract' (simplify, clarify)
-- Identify specific target audience if relevant
-- Tailor content complexity and depth accordingly
+      **Assistant**: I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed
+      information about any aspect of BMad-Method.
 
-**Explain Reasoning (CoT Step-by-Step)**
-- Walk through the step-by-step thinking process
-- Reveal underlying assumptions and decision points
-- Show how conclusions were reached from current role's perspective
+      **What would you like to know more about?**
 
-**Critique and Refine**
-- Review output for flaws, inconsistencies, or improvement areas
-- Identify specific weaknesses from role's expertise
-- Suggest refined version reflecting domain knowledge
+      1. **Setup & Installation** - Getting started with BMad
 
-## Structural Analysis Methods
+      2. **Workflows** - Choosing the right workflow for your project
 
-**Analyze Logical Flow and Dependencies**
-- Examine content structure for logical progression
-- Check internal consistency and coherence
-- Identify and validate dependencies between elements
-- Confirm effective ordering and sequencing
+      3. **Web vs IDE** - When to use each environment
 
-**Assess Alignment with Overall Goals**
-- Evaluate content contribution to stated objectives
-- Identify any misalignments or gaps
-- Interpret alignment from specific role's perspective
-- Suggest adjustments to better serve goals
+      4. **Agents** - Understanding specialized agents and their roles
 
-## Risk and Challenge Methods
+      5. **Documents** - PRDs, Architecture, Stories, and more
 
-**Identify Potential Risks and Unforeseen Issues**
-- Brainstorm potential risks from role's expertise
-- Identify overlooked edge cases or scenarios
-- Anticipate unintended consequences
-- Highlight implementation challenges
+      6. **Agile Process** - How BMad implements Agile methodologies
 
-**Challenge from Critical Perspective**
-- Adopt critical stance on current content
-- Play devil's advocate from specified viewpoint
-- Argue against proposal highlighting weaknesses
-- Apply YAGNI principles when appropriate (scope trimming)
+      7. **Configuration** - Customizing BMad for your needs
 
-## Creative Exploration Methods
+      8. **Best Practices** - Tips for effective BMad usage
 
-**Tree of Thoughts Deep Dive**
-- Break problem into discrete "thoughts" or intermediate steps
-- Explore multiple reasoning paths simultaneously
-- Use self-evaluation to classify each path as "sure", "likely", or "impossible"
-- Apply search algorithms (BFS/DFS) to find optimal solution paths
+      Or ask me about anything else related to BMad-Method!
 
-**Hindsight is 20/20: The 'If Only...' Reflection**
-- Imagine retrospective scenario based on current content
-- Identify the one "if only we had known/done X..." insight
-- Describe imagined consequences humorously or dramatically
-- Extract actionable learnings for current context
+      **User**: Tell me about workflows
 
-## Multi-Persona Collaboration Methods
+      **Assistant**: [Provides focused information about workflows from the KB, then offers to explore specific workflow
+      types or related topics]
+    actions:
+      - description: Summarize key points discussed if helpful
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Remind them they can return to KB mode anytime with *kb-mode
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Suggest next steps based on what was discussed
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: "5"
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - Instructions
+    - Example Interaction
+  preservedContent: []
+==================== END: .bmad-2d-phaser-game-dev/tasks/kb-mode-interaction.yaml ====================
 
-**Agile Team Perspective Shift**
-- Rotate through different Scrum team member viewpoints
-- Product Owner: Focus on user value and business impact
-- Scrum Master: Examine process flow and team dynamics
-- Developer: Assess technical implementation and complexity
-- QA: Identify testing scenarios and quality concerns
+==================== START: .bmad-2d-phaser-game-dev/templates/workflow-status-tmpl.yaml ====================
+template:
+  name: Workflow Status Report
+  description: Template for displaying current workflow execution status
+  version: "1.0"
 
-**Stakeholder Round Table**
-- Convene virtual meeting with multiple personas
-- Each persona contributes unique perspective on content
-- Identify conflicts and synergies between viewpoints
-- Synthesize insights into actionable recommendations
+sections:
+  - name: Workflow Information
+    content: |
+      ## Workflow Status Report
+      
+      **Workflow Name**: {{workflow_name}}
+      **Workflow ID**: {{workflow_id}}
+      **Started**: {{start_time}}
+      **Current Status**: {{status}}
+      
+  - name: Active Agents
+    content: |
+      ### Active Agents
+      {{#each active_agents}}
+      - **{{name}}** ({{id}}): {{current_task}}
+        - Status: {{status}}
+        - Started: {{task_start_time}}
+      {{/each}}
+      
+  - name: Completed Steps
+    content: |
+      ### Completed Steps
+      {{#each completed_steps}}
+      ✓ **Step {{number}}**: {{description}}
+        - Agent: {{agent}}
+        - Duration: {{duration}}
+        - Result: {{result}}
+      {{/each}}
+      
+  - name: Pending Steps
+    content: |
+      ### Pending Steps
+      {{#each pending_steps}}
+      ○ **Step {{number}}**: {{description}}
+        - Assigned Agent: {{agent}}
+        - Dependencies: {{dependencies}}
+      {{/each}}
+      
+  - name: Context Summary
+    content: |
+      ### Current Context
+      {{#each context_items}}
+      - **{{key}}**: {{value}}
+      {{/each}}
+      
+  - name: Performance Metrics
+    content: |
+      ### Performance Metrics
+      - Total Duration: {{total_duration}}
+      - Steps Completed: {{completed_count}}/{{total_count}}
+      - Success Rate: {{success_rate}}%
+      - Average Step Duration: {{avg_duration}}
+==================== END: .bmad-2d-phaser-game-dev/templates/workflow-status-tmpl.yaml ====================
 
-**Meta-Prompting Analysis**
-- Step back to analyze the structure and logic of current approach
-- Question the format and methodology being used
-- Suggest alternative frameworks or mental models
-- Optimize the elicitation process itself
+==================== START: .bmad-2d-phaser-game-dev/templates/handoff-context-tmpl.yaml ====================
+template:
+  name: Agent Handoff Context
+  description: Template for passing context between agents during workflow handoffs
+  version: "1.0"
 
-## Advanced 2025 Techniques
+sections:
+  - name: Handoff Header
+    content: |
+      ## Agent Handoff Context
+      
+      **From Agent**: {{from_agent.name}} ({{from_agent.id}})
+      **To Agent**: {{to_agent.name}} ({{to_agent.id}})
+      **Handoff Time**: {{handoff_time}}
+      **Workflow**: {{workflow_name}}
+      
+  - name: Completed Work Summary
+    content: |
+      ### Work Completed by {{from_agent.name}}
+      
+      {{completed_work_summary}}
+      
+      **Key Deliverables**:
+      {{#each deliverables}}
+      - {{name}}: {{description}}
+        - Location: {{path}}
+        - Status: {{status}}
+      {{/each}}
+      
+  - name: Context Transfer
+    content: |
+      ### Context for {{to_agent.name}}
+      
+      **Primary Objective**: {{next_objective}}
+      
+      **Required Inputs**:
+      {{#each required_inputs}}
+      - **{{name}}**: {{description}}
+        - Type: {{type}}
+        - Location: {{location}}
+      {{/each}}
+      
+      **Constraints**:
+      {{#each constraints}}
+      - {{description}}
+      {{/each}}
+      
+  - name: Dependencies
+    content: |
+      ### Dependencies and Prerequisites
+      
+      **Completed Dependencies**:
+      {{#each completed_dependencies}}
+      ✓ {{description}}
+      {{/each}}
+      
+      **Pending Dependencies**:
+      {{#each pending_dependencies}}
+      ○ {{description}} (Owner: {{owner}})
+      {{/each}}
+      
+  - name: Special Instructions
+    content: |
+      ### Special Instructions
+      
+      {{#if special_instructions}}
+      {{special_instructions}}
+      {{else}}
+      No special instructions provided.
+      {{/if}}
+      
+  - name: Working Memory
+    content: |
+      ### Working Memory Transfer
+      
+      **Key Decisions Made**:
+      {{#each decisions}}
+      - {{description}}: {{rationale}}
+      {{/each}}
+      
+      **Open Questions**:
+      {{#each open_questions}}
+      - {{question}} (Context: {{context}})
+      {{/each}}
+      
+      **Risk Items**:
+      {{#each risks}}
+      - {{description}} (Mitigation: {{mitigation}})
+      {{/each}}
+==================== END: .bmad-2d-phaser-game-dev/templates/handoff-context-tmpl.yaml ====================
 
-**Self-Consistency Validation**
-- Generate multiple reasoning paths for same problem
-- Compare consistency across different approaches
-- Identify most reliable and robust solution
-- Highlight areas where approaches diverge and why
+==================== START: .bmad-2d-phaser-game-dev/data/workflow-patterns.md ====================
+# BMad Workflow Patterns
 
-**ReWOO (Reasoning Without Observation)**
-- Separate parametric reasoning from tool-based actions
-- Create reasoning plan without external dependencies
-- Identify what can be solved through pure reasoning
-- Optimize for efficiency and reduced token usage
+## Overview
+This document describes common workflow patterns used in the BMad-Method system for multi-agent coordination and task execution.
 
-**Persona-Pattern Hybrid**
-- Combine specific role expertise with elicitation pattern
-- Architect + Risk Analysis: Deep technical risk assessment
-- UX Expert + User Journey: End-to-end experience critique
-- PM + Stakeholder Analysis: Multi-perspective impact review
+## Basic Patterns
 
-**Emergent Collaboration Discovery**
-- Allow multiple perspectives to naturally emerge
-- Identify unexpected insights from persona interactions
-- Explore novel combinations of viewpoints
-- Capture serendipitous discoveries from multi-agent thinking
+### Sequential Workflow
+Agents execute tasks one after another in a defined sequence.
 
-## Game-Based Elicitation Methods
+```yaml
+pattern: sequential
+agents:
+  - analyst: gather-requirements
+  - architect: design-system
+  - dev: implement-solution
+  - qa: validate-implementation
+```
 
-**Red Team vs Blue Team**
-- Red Team: Attack the proposal, find vulnerabilities
-- Blue Team: Defend and strengthen the approach
-- Competitive analysis reveals blind spots
-- Results in more robust, battle-tested solutions
+### Parallel Workflow
+Multiple agents work simultaneously on independent tasks.
 
-**Innovation Tournament**
-- Pit multiple alternative approaches against each other
-- Score each approach across different criteria
-- Crowd-source evaluation from different personas
-- Identify winning combination of features
+```yaml
+pattern: parallel
+agents:
+  concurrent:
+    - ux-expert: design-ui
+    - architect: design-api
+  merge: pm
+```
 
-**Escape Room Challenge**
-- Present content as constraints to work within
-- Find creative solutions within tight limitations
-- Identify minimum viable approach
-- Discover innovative workarounds and optimizations
+### Conditional Workflow
+Workflow branches based on conditions or outcomes.
 
-## Process Control
+```yaml
+pattern: conditional
+decision_point: requirement-complexity
+branches:
+  simple: [dev, qa]
+  complex: [architect, dev, qa]
+  critical: [analyst, architect, dev, qa, po]
+```
 
-**Proceed / No Further Actions**
-- Acknowledge choice to finalize current work
-- Accept output as-is or move to next step
-- Prepare to continue without additional elicitation
-==================== END: .bmad-2d-phaser-game-dev/data/elicitation-methods.md ====================
+## Advanced Patterns
 
-==================== START: .bmad-2d-phaser-game-dev/utils/workflow-management.md ====================
-# Workflow Management
+### Iterative Refinement
+Agents collaborate in cycles to refine outputs.
 
-Enables BMad orchestrator to manage and execute team workflows.
+```yaml
+pattern: iterative
+cycles:
+  - agents: [analyst, pm]
+    until: requirements-clear
+  - agents: [architect, dev]
+    until: design-approved
+```
 
-## Dynamic Workflow Loading
+### Hub and Spoke
+Central coordinator manages distributed agents.
 
-Read available workflows from current team configuration's `workflows` field. Each team bundle defines its own supported workflows.
+```yaml
+pattern: hub-spoke
+hub: bmad-orchestrator
+spokes:
+  - agent: analyst
+    trigger: new-requirement
+  - agent: dev
+    trigger: story-ready
+  - agent: qa
+    trigger: code-complete
+```
 
-**Key Commands**:
+### Pipeline Pattern
+Continuous flow with buffering between stages.
 
-- `/workflows` - List workflows in current bundle or workflows folder
-- `/agent-list` - Show agents in current bundle
+```yaml
+pattern: pipeline
+stages:
+  - name: analysis
+    agent: analyst
+    buffer: requirement-queue
+  - name: development
+    agent: dev
+    buffer: story-queue
+  - name: testing
+    agent: qa
+    buffer: test-queue
+```
 
-## Workflow Commands
+## Context Management Patterns
 
-### /workflows
+### Context Accumulation
+Each agent adds to a growing context.
 
-Lists available workflows with titles and descriptions.
+```yaml
+context_strategy: accumulate
+agents:
+  - analyst:
+      adds: [requirements, constraints]
+  - architect:
+      adds: [design, technical-decisions]
+  - dev:
+      adds: [implementation-details, test-results]
+```
 
-### /workflow-start {workflow-id}
+### Context Transformation
+Agents transform context for next agent.
 
-Starts workflow and transitions to first agent.
+```yaml
+context_strategy: transform
+transformations:
+  - from: analyst
+    to: architect
+    transform: requirements-to-specs
+  - from: architect
+    to: dev
+    transform: specs-to-tasks
+```
 
-### /workflow-status
+### Context Filtering
+Only relevant context passed between agents.
 
-Shows current progress, completed artifacts, and next steps.
+```yaml
+context_strategy: filter
+rules:
+  - from: analyst
+    to: dev
+    include: [acceptance-criteria, api-specs]
+    exclude: [market-research, competitor-analysis]
+```
 
-### /workflow-resume
+## Error Handling Patterns
 
-Resumes workflow from last position. User can provide completed artifacts.
+### Retry with Backoff
+Automatic retry with increasing delays.
 
-### /workflow-next
+```yaml
+error_strategy: retry
+max_attempts: 3
+backoff: exponential
+base_delay: 1000
+```
 
-Shows next recommended agent and action.
+### Circuit Breaker
+Prevent cascading failures.
 
-## Execution Flow
+```yaml
+error_strategy: circuit-breaker
+threshold: 5
+timeout: 30000
+recovery: gradual
+```
 
-1. **Starting**: Load definition → Identify first stage → Transition to agent → Guide artifact creation
+### Compensating Transaction
+Rollback on failure with compensation.
 
-2. **Stage Transitions**: Mark complete → Check conditions → Load next agent → Pass artifacts
+```yaml
+error_strategy: compensate
+rollback_sequence:
+  - agent: dev
+    action: revert-changes
+  - agent: architect
+    action: update-design
+  - agent: pm
+    action: notify-stakeholders
+```
 
-3. **Artifact Tracking**: Track status, creator, timestamps in workflow_state
+## Performance Patterns
 
-4. **Interruption Handling**: Analyze provided artifacts → Determine position → Suggest next step
+### Resource Pooling
+Reuse agent instances across workflows.
 
-## Context Passing
+```yaml
+optimization: pooling
+pool_size: 5
+idle_timeout: 300000
+warm_start: true
+```
 
-When transitioning, pass:
+### Lazy Loading
+Load agents only when needed.
 
-- Previous artifacts
-- Current workflow stage
-- Expected outputs
-- Decisions/constraints
+```yaml
+optimization: lazy-load
+preload: [bmad-orchestrator]
+on_demand: [analyst, architect, dev, qa]
+```
 
-## Multi-Path Workflows
+### Caching Strategy
+Cache frequently accessed contexts.
 
-Handle conditional paths by asking clarifying questions when needed.
+```yaml
+optimization: caching
+cache_strategy: lru
+max_size: 100
+ttl: 3600000
+```
 
 ## Best Practices
 
-1. Show progress
-2. Explain transitions
-3. Preserve context
-4. Allow flexibility
-5. Track state
+1. **Start Simple**: Begin with sequential patterns and evolve as needed
+2. **Monitor Performance**: Track workflow execution times and bottlenecks
+3. **Handle Failures Gracefully**: Always include error recovery strategies
+4. **Document Decisions**: Record why specific patterns were chosen
+5. **Test Workflows**: Validate workflows with different scenarios
+6. **Version Control**: Track workflow changes over time
+7. **Security First**: Ensure context doesn't leak sensitive data between agents
+==================== END: .bmad-2d-phaser-game-dev/data/workflow-patterns.md ====================
 
-## Agent Integration
+==================== START: .bmad-2d-phaser-game-dev/workflows/brownfield-fullstack.yaml ====================
+workflow:
+  id: brownfield-fullstack
+  name: Brownfield Full-Stack Enhancement
+  description: >-
+    Agent workflow for enhancing existing full-stack applications with new features,
+    modernization, or significant changes. Handles existing system analysis and safe integration.
+  type: brownfield
+  project_types:
+    - feature-addition
+    - refactoring
+    - modernization
+    - integration-enhancement
 
-Agents should be workflow-aware: know active workflow, their role, access artifacts, understand expected outputs.
+  sequence:
+    - step: enhancement_classification
+      agent: analyst
+      action: classify enhancement scope
+      notes: |
+        Determine enhancement complexity to route to appropriate path:
+        - Single story (< 4 hours) → Use brownfield-create-story task
+        - Small feature (1-3 stories) → Use brownfield-create-epic task  
+        - Major enhancement (multiple epics) → Continue with full workflow
+        
+        Ask user: "Can you describe the enhancement scope? Is this a small fix, a feature addition, or a major enhancement requiring architectural changes?"
+
+    - step: routing_decision
+      condition: based_on_classification
+      routes:
+        single_story:
+          agent: pm
+          uses: brownfield-create-story
+          notes: "Create single story for immediate implementation. Exit workflow after story creation."
+        small_feature:
+          agent: pm
+          uses: brownfield-create-epic
+          notes: "Create focused epic with 1-3 stories. Exit workflow after epic creation."
+        major_enhancement:
+          continue: to_next_step
+          notes: "Continue with comprehensive planning workflow below."
+
+    - step: documentation_check
+      agent: analyst
+      action: check existing documentation
+      condition: major_enhancement_path
+      notes: |
+        Check if adequate project documentation exists:
+        - Look for existing architecture docs, API specs, coding standards
+        - Assess if documentation is current and comprehensive
+        - If adequate: Skip document-project, proceed to PRD
+        - If inadequate: Run document-project first
+
+    - step: project_analysis
+      agent: architect
+      action: analyze existing project and use task document-project
+      creates: brownfield-architecture.md (or multiple documents)
+      condition: documentation_inadequate
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Run document-project to capture current system state, technical debt, and constraints. Pass findings to PRD creation."
+
+    - agent: pm
+      creates: prd.md
+      uses: brownfield-prd-tmpl
+      requires: existing_documentation_or_analysis
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: |
+        Creates PRD for major enhancement. If document-project was run, reference its output to avoid re-analysis.
+        If skipped, use existing project documentation.
+        SAVE OUTPUT: Copy final prd.md to your project's docs/ folder.
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - step: architecture_decision
+      agent: pm/architect
+      action: determine if architecture document needed
+      condition: after_prd_creation
+      notes: |
+        Review PRD to determine if architectural planning is needed:
+        - New architectural patterns → Create architecture doc
+        - New libraries/frameworks → Create architecture doc
+        - Platform/infrastructure changes → Create architecture doc
+        - Following existing patterns → Skip to story creation
+
+    - agent: architect
+      creates: architecture.md
+      uses: brownfield-architecture-tmpl
+      requires: prd.md
+      condition: architecture_changes_needed
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates architecture ONLY for significant architectural changes. SAVE OUTPUT: Copy final architecture.md to your project's docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for integration safety and completeness. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs_or_brownfield_docs
+      repeats: for_each_epic_or_enhancement
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - For sharded PRD: @sm → *create (uses create-next-story)
+        - For brownfield docs: @sm → use create-brownfield-story task
+        - Creates story from available documentation
+        - Story starts in "Draft" status
+        - May require additional context gathering for brownfield
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: Brownfield Enhancement] --> B[analyst: classify enhancement scope]
+        B --> C{Enhancement Size?}
+        
+        C -->|Single Story| D[pm: brownfield-create-story]
+        C -->|1-3 Stories| E[pm: brownfield-create-epic]
+        C -->|Major Enhancement| F[analyst: check documentation]
+        
+        D --> END1[To Dev Implementation]
+        E --> END2[To Story Creation]
+        
+        F --> G{Docs Adequate?}
+        G -->|No| H[architect: document-project]
+        G -->|Yes| I[pm: brownfield PRD]
+        H --> I
+        
+        I --> J{Architecture Needed?}
+        J -->|Yes| K[architect: architecture.md]
+        J -->|No| L[po: validate artifacts]
+        K --> L
+        
+        L --> M{PO finds issues?}
+        M -->|Yes| N[Fix issues]
+        M -->|No| O[po: shard documents]
+        N --> L
+        
+        O --> P[sm: create story]
+        P --> Q{Story Type?}
+        Q -->|Sharded PRD| R[create-next-story]
+        Q -->|Brownfield Docs| S[create-brownfield-story]
+        
+        R --> T{Review draft?}
+        S --> T
+        T -->|Yes| U[review & approve]
+        T -->|No| V[dev: implement]
+        U --> V
+        
+        V --> W{QA review?}
+        W -->|Yes| X[qa: review]
+        W -->|No| Y{More stories?}
+        X --> Z{Issues?}
+        Z -->|Yes| AA[dev: fix]
+        Z -->|No| Y
+        AA --> X
+        Y -->|Yes| P
+        Y -->|No| AB{Retrospective?}
+        AB -->|Yes| AC[po: retrospective]
+        AB -->|No| AD[Complete]
+        AC --> AD
+
+        style AD fill:#90EE90
+        style END1 fill:#90EE90
+        style END2 fill:#90EE90
+        style D fill:#87CEEB
+        style E fill:#87CEEB
+        style I fill:#FFE4B5
+        style K fill:#FFE4B5
+        style O fill:#ADD8E6
+        style P fill:#ADD8E6
+        style V fill:#ADD8E6
+        style U fill:#F0E68C
+        style X fill:#F0E68C
+        style AC fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - Enhancement requires coordinated stories
+      - Architectural changes are needed
+      - Significant integration work required
+      - Risk assessment and mitigation planning necessary
+      - Multiple team members will work on related changes
+
+  handoff_prompts:
+    classification_complete: |
+      Enhancement classified as: {{enhancement_type}}
+      {{if single_story}}: Proceeding with brownfield-create-story task for immediate implementation.
+      {{if small_feature}}: Creating focused epic with brownfield-create-epic task.
+      {{if major_enhancement}}: Continuing with comprehensive planning workflow.
+    
+    documentation_assessment: |
+      Documentation assessment complete:
+      {{if adequate}}: Existing documentation is sufficient. Proceeding directly to PRD creation.
+      {{if inadequate}}: Running document-project to capture current system state before PRD.
+    
+    document_project_to_pm: |
+      Project analysis complete. Key findings documented in:
+      - {{document_list}}
+      Use these findings to inform PRD creation and avoid re-analyzing the same aspects.
+    
+    pm_to_architect_decision: |
+      PRD complete and saved as docs/prd.md. 
+      Architectural changes identified: {{yes/no}}
+      {{if yes}}: Proceeding to create architecture document for: {{specific_changes}}
+      {{if no}}: No architectural changes needed. Proceeding to validation.
+    
+    architect_to_po: "Architecture complete. Save it as docs/architecture.md. Please validate all artifacts for integration safety."
+    
+    po_to_sm: |
+      All artifacts validated. 
+      Documentation type available: {{sharded_prd / brownfield_docs}}
+      {{if sharded}}: Use standard create-next-story task.
+      {{if brownfield}}: Use create-brownfield-story task to handle varied documentation formats.
+    
+    sm_story_creation: |
+      Creating story from {{documentation_type}}.
+      {{if missing_context}}: May need to gather additional context from user during story creation.
+    
+    complete: "All planning artifacts validated and development can begin. Stories will be created based on available documentation format."
+==================== END: .bmad-2d-phaser-game-dev/workflows/brownfield-fullstack.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/workflows/brownfield-service.yaml ====================
+workflow:
+  id: brownfield-service
+  name: Brownfield Service/API Enhancement
+  description: >-
+    Agent workflow for enhancing existing backend services and APIs with new features,
+    modernization, or performance improvements. Handles existing system analysis and safe integration.
+  type: brownfield
+  project_types:
+    - service-modernization
+    - api-enhancement
+    - microservice-extraction
+    - performance-optimization
+    - integration-enhancement
+
+  sequence:
+    - step: service_analysis
+      agent: architect
+      action: analyze existing project and use task document-project
+      creates: multiple documents per the document-project template
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Review existing service documentation, codebase, performance metrics, and identify integration dependencies."
+
+    - agent: pm
+      creates: prd.md
+      uses: brownfield-prd-tmpl
+      requires: existing_service_analysis
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates comprehensive PRD focused on service enhancement with existing system analysis. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - agent: architect
+      creates: architecture.md
+      uses: brownfield-architecture-tmpl
+      requires: prd.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates architecture with service integration strategy and API evolution planning. SAVE OUTPUT: Copy final architecture.md to your project's docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for service integration safety and API compatibility. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs
+      repeats: for_each_epic
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create
+        - Creates next story from sharded docs
+        - Story starts in "Draft" status
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: Service Enhancement] --> B[analyst: analyze existing service]
+        B --> C[pm: prd.md]
+        C --> D[architect: architecture.md]
+        D --> E[po: validate with po-master-checklist]
+        E --> F{PO finds issues?}
+        F -->|Yes| G[Return to relevant agent for fixes]
+        F -->|No| H[po: shard documents]
+        G --> E
+        
+        H --> I[sm: create story]
+        I --> J{Review draft story?}
+        J -->|Yes| K[analyst/pm: review & approve story]
+        J -->|No| L[dev: implement story]
+        K --> L
+        L --> M{QA review?}
+        M -->|Yes| N[qa: review implementation]
+        M -->|No| O{More stories?}
+        N --> P{QA found issues?}
+        P -->|Yes| Q[dev: address QA feedback]
+        P -->|No| O
+        Q --> N
+        O -->|Yes| I
+        O -->|No| R{Epic retrospective?}
+        R -->|Yes| S[po: epic retrospective]
+        R -->|No| T[Project Complete]
+        S --> T
+
+        style T fill:#90EE90
+        style H fill:#ADD8E6
+        style I fill:#ADD8E6
+        style L fill:#ADD8E6
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style K fill:#F0E68C
+        style N fill:#F0E68C
+        style S fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - Service enhancement requires coordinated stories
+      - API versioning or breaking changes needed
+      - Database schema changes required
+      - Performance or scalability improvements needed
+      - Multiple integration points affected
+
+  handoff_prompts:
+    analyst_to_pm: "Service analysis complete. Create comprehensive PRD with service integration strategy."
+    pm_to_architect: "PRD ready. Save it as docs/prd.md, then create the service architecture."
+    architect_to_po: "Architecture complete. Save it as docs/architecture.md. Please validate all artifacts for service integration safety."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+==================== END: .bmad-2d-phaser-game-dev/workflows/brownfield-service.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/workflows/brownfield-ui.yaml ====================
+workflow:
+  id: brownfield-ui
+  name: Brownfield UI/Frontend Enhancement
+  description: >-
+    Agent workflow for enhancing existing frontend applications with new features,
+    modernization, or design improvements. Handles existing UI analysis and safe integration.
+  type: brownfield
+  project_types:
+    - ui-modernization
+    - framework-migration
+    - design-refresh
+    - frontend-enhancement
+
+  sequence:
+    - step: ui_analysis
+      agent: architect
+      action: analyze existing project and use task document-project
+      creates: multiple documents per the document-project template
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Review existing frontend application, user feedback, analytics data, and identify improvement areas."
+
+    - agent: pm
+      creates: prd.md
+      uses: brownfield-prd-tmpl
+      requires: existing_ui_analysis
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates comprehensive PRD focused on UI enhancement with existing system analysis. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - agent: ux-expert
+      creates: front-end-spec.md
+      uses: front-end-spec-tmpl
+      requires: prd.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates UI/UX specification that integrates with existing design patterns. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
+
+    - agent: architect
+      creates: architecture.md
+      uses: brownfield-architecture-tmpl
+      requires:
+        - prd.md
+        - front-end-spec.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates frontend architecture with component integration strategy and migration planning. SAVE OUTPUT: Copy final architecture.md to your project's docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for UI integration safety and design consistency. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs
+      repeats: for_each_epic
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create
+        - Creates next story from sharded docs
+        - Story starts in "Draft" status
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: UI Enhancement] --> B[analyst: analyze existing UI]
+        B --> C[pm: prd.md]
+        C --> D[ux-expert: front-end-spec.md]
+        D --> E[architect: architecture.md]
+        E --> F[po: validate with po-master-checklist]
+        F --> G{PO finds issues?}
+        G -->|Yes| H[Return to relevant agent for fixes]
+        G -->|No| I[po: shard documents]
+        H --> F
+        
+        I --> J[sm: create story]
+        J --> K{Review draft story?}
+        K -->|Yes| L[analyst/pm: review & approve story]
+        K -->|No| M[dev: implement story]
+        L --> M
+        M --> N{QA review?}
+        N -->|Yes| O[qa: review implementation]
+        N -->|No| P{More stories?}
+        O --> Q{QA found issues?}
+        Q -->|Yes| R[dev: address QA feedback]
+        Q -->|No| P
+        R --> O
+        P -->|Yes| J
+        P -->|No| S{Epic retrospective?}
+        S -->|Yes| T[po: epic retrospective]
+        S -->|No| U[Project Complete]
+        T --> U
+
+        style U fill:#90EE90
+        style I fill:#ADD8E6
+        style J fill:#ADD8E6
+        style M fill:#ADD8E6
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style E fill:#FFE4B5
+        style L fill:#F0E68C
+        style O fill:#F0E68C
+        style T fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - UI enhancement requires coordinated stories
+      - Design system changes needed
+      - New component patterns required
+      - User research and testing needed
+      - Multiple team members will work on related changes
+
+  handoff_prompts:
+    analyst_to_pm: "UI analysis complete. Create comprehensive PRD with UI integration strategy."
+    pm_to_ux: "PRD ready. Save it as docs/prd.md, then create the UI/UX specification."
+    ux_to_architect: "UI/UX spec complete. Save it as docs/front-end-spec.md, then create the frontend architecture."
+    architect_to_po: "Architecture complete. Save it as docs/architecture.md. Please validate all artifacts for UI integration safety."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+==================== END: .bmad-2d-phaser-game-dev/workflows/brownfield-ui.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/workflows/greenfield-fullstack.yaml ====================
+workflow:
+  id: greenfield-fullstack
+  name: Greenfield Full-Stack Application Development
+  description: >-
+    Agent workflow for building full-stack applications from concept to development.
+    Supports both comprehensive planning for complex projects and rapid prototyping for simple ones.
+  type: greenfield
+  project_types:
+    - web-app
+    - saas
+    - enterprise-app
+    - prototype
+    - mvp
+
+  sequence:
+    - agent: analyst
+      creates: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - brainstorming_session
+        - market_research_prompt
+      notes: "Can do brainstorming first, then optional deep research before creating project brief. SAVE OUTPUT: Copy final project-brief.md to your project's docs/ folder."
+
+    - agent: pm
+      creates: prd.md
+      requires: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates PRD from project brief using prd-tmpl. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - agent: ux-expert
+      creates: front-end-spec.md
+      requires: prd.md
+      optional_steps:
+        - user_research_prompt
+      notes: "Creates UI/UX specification using front-end-spec-tmpl. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
+
+    - agent: ux-expert
+      creates: v0_prompt (optional)
+      requires: front-end-spec.md
+      condition: user_wants_ai_generation
+      notes: "OPTIONAL BUT RECOMMENDED: Generate AI UI prompt for tools like v0, Lovable, etc. Use the generate-ai-frontend-prompt task. User can then generate UI in external tool and download project structure."
+
+    - agent: architect
+      creates: fullstack-architecture.md
+      requires:
+        - prd.md
+        - front-end-spec.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - technical_research_prompt
+        - review_generated_ui_structure
+      notes: "Creates comprehensive architecture using fullstack-architecture-tmpl. If user generated UI with v0/Lovable, can incorporate the project structure into architecture. May suggest changes to PRD stories or new stories. SAVE OUTPUT: Copy final fullstack-architecture.md to your project's docs/ folder."
+
+    - agent: pm
+      updates: prd.md (if needed)
+      requires: fullstack-architecture.md
+      condition: architecture_suggests_prd_changes
+      notes: "If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for consistency and completeness. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - project_setup_guidance:
+      action: guide_project_structure
+      condition: user_has_generated_ui
+      notes: "If user generated UI with v0/Lovable: For polyrepo setup, place downloaded project in separate frontend repo alongside backend repo. For monorepo, place in apps/web or packages/frontend directory. Review architecture document for specific guidance."
+
+    - development_order_guidance:
+      action: guide_development_sequence
+      notes: "Based on PRD stories: If stories are frontend-heavy, start with frontend project/directory first. If backend-heavy or API-first, start with backend. For tightly coupled features, follow story sequence in monorepo setup. Reference sharded PRD epics for development order."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs
+      repeats: for_each_epic
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create
+        - Creates next story from sharded docs
+        - Story starts in "Draft" status
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: Greenfield Project] --> B[analyst: project-brief.md]
+        B --> C[pm: prd.md]
+        C --> D[ux-expert: front-end-spec.md]
+        D --> D2{Generate v0 prompt?}
+        D2 -->|Yes| D3[ux-expert: create v0 prompt]
+        D2 -->|No| E[architect: fullstack-architecture.md]
+        D3 --> D4[User: generate UI in v0/Lovable]
+        D4 --> E
+        E --> F{Architecture suggests PRD changes?}
+        F -->|Yes| G[pm: update prd.md]
+        F -->|No| H[po: validate all artifacts]
+        G --> H
+        H --> I{PO finds issues?}
+        I -->|Yes| J[Return to relevant agent for fixes]
+        I -->|No| K[po: shard documents]
+        J --> H
+        
+        K --> L[sm: create story]
+        L --> M{Review draft story?}
+        M -->|Yes| N[analyst/pm: review & approve story]
+        M -->|No| O[dev: implement story]
+        N --> O
+        O --> P{QA review?}
+        P -->|Yes| Q[qa: review implementation]
+        P -->|No| R{More stories?}
+        Q --> S{QA found issues?}
+        S -->|Yes| T[dev: address QA feedback]
+        S -->|No| R
+        T --> Q
+        R -->|Yes| L
+        R -->|No| U{Epic retrospective?}
+        U -->|Yes| V[po: epic retrospective]
+        U -->|No| W[Project Complete]
+        V --> W
+
+        B -.-> B1[Optional: brainstorming]
+        B -.-> B2[Optional: market research]
+        D -.-> D1[Optional: user research]
+        E -.-> E1[Optional: technical research]
+
+        style W fill:#90EE90
+        style K fill:#ADD8E6
+        style L fill:#ADD8E6
+        style O fill:#ADD8E6
+        style D3 fill:#E6E6FA
+        style D4 fill:#E6E6FA
+        style B fill:#FFE4B5
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style E fill:#FFE4B5
+        style N fill:#F0E68C
+        style Q fill:#F0E68C
+        style V fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - Building production-ready applications
+      - Multiple team members will be involved
+      - Complex feature requirements
+      - Need comprehensive documentation
+      - Long-term maintenance expected
+      - Enterprise or customer-facing applications
+
+  handoff_prompts:
+    analyst_to_pm: "Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD."
+    pm_to_ux: "PRD is ready. Save it as docs/prd.md in your project, then create the UI/UX specification."
+    ux_to_architect: "UI/UX spec complete. Save it as docs/front-end-spec.md in your project, then create the fullstack architecture."
+    architect_review: "Architecture complete. Save it as docs/fullstack-architecture.md. Do you suggest any changes to the PRD stories or need new stories added?"
+    architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
+    updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+==================== END: .bmad-2d-phaser-game-dev/workflows/greenfield-fullstack.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/workflows/greenfield-service.yaml ====================
+workflow:
+  id: greenfield-service
+  name: Greenfield Service/API Development
+  description: >-
+    Agent workflow for building backend services from concept to development.
+    Supports both comprehensive planning for complex services and rapid prototyping for simple APIs.
+  type: greenfield
+  project_types:
+    - rest-api
+    - graphql-api
+    - microservice
+    - backend-service
+    - api-prototype
+    - simple-service
+
+  sequence:
+    - agent: analyst
+      creates: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - brainstorming_session
+        - market_research_prompt
+      notes: "Can do brainstorming first, then optional deep research before creating project brief. SAVE OUTPUT: Copy final project-brief.md to your project's docs/ folder."
+
+    - agent: pm
+      creates: prd.md
+      requires: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates PRD from project brief using prd-tmpl, focused on API/service requirements. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - agent: architect
+      creates: architecture.md
+      requires: prd.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - technical_research_prompt
+      notes: "Creates backend/service architecture using architecture-tmpl. May suggest changes to PRD stories or new stories. SAVE OUTPUT: Copy final architecture.md to your project's docs/ folder."
+
+    - agent: pm
+      updates: prd.md (if needed)
+      requires: architecture.md
+      condition: architecture_suggests_prd_changes
+      notes: "If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for consistency and completeness. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs
+      repeats: for_each_epic
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create
+        - Creates next story from sharded docs
+        - Story starts in "Draft" status
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Service development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: Service Development] --> B[analyst: project-brief.md]
+        B --> C[pm: prd.md]
+        C --> D[architect: architecture.md]
+        D --> E{Architecture suggests PRD changes?}
+        E -->|Yes| F[pm: update prd.md]
+        E -->|No| G[po: validate all artifacts]
+        F --> G
+        G --> H{PO finds issues?}
+        H -->|Yes| I[Return to relevant agent for fixes]
+        H -->|No| J[po: shard documents]
+        I --> G
+        
+        J --> K[sm: create story]
+        K --> L{Review draft story?}
+        L -->|Yes| M[analyst/pm: review & approve story]
+        L -->|No| N[dev: implement story]
+        M --> N
+        N --> O{QA review?}
+        O -->|Yes| P[qa: review implementation]
+        O -->|No| Q{More stories?}
+        P --> R{QA found issues?}
+        R -->|Yes| S[dev: address QA feedback]
+        R -->|No| Q
+        S --> P
+        Q -->|Yes| K
+        Q -->|No| T{Epic retrospective?}
+        T -->|Yes| U[po: epic retrospective]
+        T -->|No| V[Project Complete]
+        U --> V
+
+        B -.-> B1[Optional: brainstorming]
+        B -.-> B2[Optional: market research]
+        D -.-> D1[Optional: technical research]
+
+        style V fill:#90EE90
+        style J fill:#ADD8E6
+        style K fill:#ADD8E6
+        style N fill:#ADD8E6
+        style B fill:#FFE4B5
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style M fill:#F0E68C
+        style P fill:#F0E68C
+        style U fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - Building production APIs or microservices
+      - Multiple endpoints and complex business logic
+      - Need comprehensive documentation and testing
+      - Multiple team members will be involved
+      - Long-term maintenance expected
+      - Enterprise or external-facing APIs
+
+  handoff_prompts:
+    analyst_to_pm: "Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD."
+    pm_to_architect: "PRD is ready. Save it as docs/prd.md in your project, then create the service architecture."
+    architect_review: "Architecture complete. Save it as docs/architecture.md. Do you suggest any changes to the PRD stories or need new stories added?"
+    architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
+    updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+==================== END: .bmad-2d-phaser-game-dev/workflows/greenfield-service.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/workflows/greenfield-ui.yaml ====================
+workflow:
+  id: greenfield-ui
+  name: Greenfield UI/Frontend Development
+  description: >-
+    Agent workflow for building frontend applications from concept to development.
+    Supports both comprehensive planning for complex UIs and rapid prototyping for simple interfaces.
+  type: greenfield
+  project_types:
+    - spa
+    - mobile-app
+    - micro-frontend
+    - static-site
+    - ui-prototype
+    - simple-interface
+
+  sequence:
+    - agent: analyst
+      creates: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - brainstorming_session
+        - market_research_prompt
+      notes: "Can do brainstorming first, then optional deep research before creating project brief. SAVE OUTPUT: Copy final project-brief.md to your project's docs/ folder."
+
+    - agent: pm
+      creates: prd.md
+      requires: project-brief.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      notes: "Creates PRD from project brief using prd-tmpl, focused on UI/frontend requirements. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: sm
+      action: generate_search_tools
+      requires: prd.md
+      creates: search-tools.yaml
+      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+
+    - agent: ux-expert
+      creates: front-end-spec.md
+      requires: prd.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - user_research_prompt
+      notes: "Creates UI/UX specification using front-end-spec-tmpl. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
+
+    - agent: ux-expert
+      creates: v0_prompt (optional)
+      requires: front-end-spec.md
+      condition: user_wants_ai_generation
+      notes: "OPTIONAL BUT RECOMMENDED: Generate AI UI prompt for tools like v0, Lovable, etc. Use the generate-ai-frontend-prompt task. User can then generate UI in external tool and download project structure."
+
+    - agent: architect
+      creates: front-end-architecture.md
+      requires: front-end-spec.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_completion
+      optional_steps:
+        - technical_research_prompt
+        - review_generated_ui_structure
+      notes: "Creates frontend architecture using front-end-architecture-tmpl. If user generated UI with v0/Lovable, can incorporate the project structure into architecture. May suggest changes to PRD stories or new stories. SAVE OUTPUT: Copy final front-end-architecture.md to your project's docs/ folder."
+
+    - agent: pm
+      updates: prd.md (if needed)
+      requires: front-end-architecture.md
+      condition: architecture_suggests_prd_changes
+      notes: "If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for consistency and completeness. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - project_setup_guidance:
+      action: guide_project_structure
+      condition: user_has_generated_ui
+      notes: "If user generated UI with v0/Lovable: For polyrepo setup, place downloaded project in separate frontend repo. For monorepo, place in apps/web or frontend/ directory. Review architecture document for specific guidance."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - agent: sm
+      action: create_story
+      creates: story.md
+      requires: sharded_docs
+      repeats: for_each_epic
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: after_story_created
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create
+        - Creates next story from sharded docs
+        - Story starts in "Draft" status
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story.md
+      requires: story.md
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story
+        - NOTE: story-review task coming soon
+        - Review story completeness and alignment
+        - Update story status: Draft → Approved
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - update-working-memory: after_completion
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Implements approved story
+        - Updates File List with all changes
+        - Marks story as "Review" when complete
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story
+        - Senior dev review with refactoring ability
+        - Fixes small issues directly
+        - Leaves checklist for remaining items
+        - Updates story status (Review → Done or stays Review)
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left unchecked items:
+        - Dev Agent (New Chat): Address remaining items
+        - Return to QA for final approval
+
+    - repeat_development_cycle:
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic stories
+        Continue until all stories in PRD are complete
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - workflow_end:
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+        
+        Reference: .bmad-2d-phaser-game-dev/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: UI Development] --> B[analyst: project-brief.md]
+        B --> C[pm: prd.md]
+        C --> D[ux-expert: front-end-spec.md]
+        D --> D2{Generate v0 prompt?}
+        D2 -->|Yes| D3[ux-expert: create v0 prompt]
+        D2 -->|No| E[architect: front-end-architecture.md]
+        D3 --> D4[User: generate UI in v0/Lovable]
+        D4 --> E
+        E --> F{Architecture suggests PRD changes?}
+        F -->|Yes| G[pm: update prd.md]
+        F -->|No| H[po: validate all artifacts]
+        G --> H
+        H --> I{PO finds issues?}
+        I -->|Yes| J[Return to relevant agent for fixes]
+        I -->|No| K[po: shard documents]
+        J --> H
+        
+        K --> L[sm: create story]
+        L --> M{Review draft story?}
+        M -->|Yes| N[analyst/pm: review & approve story]
+        M -->|No| O[dev: implement story]
+        N --> O
+        O --> P{QA review?}
+        P -->|Yes| Q[qa: review implementation]
+        P -->|No| R{More stories?}
+        Q --> S{QA found issues?}
+        S -->|Yes| T[dev: address QA feedback]
+        S -->|No| R
+        T --> Q
+        R -->|Yes| L
+        R -->|No| U{Epic retrospective?}
+        U -->|Yes| V[po: epic retrospective]
+        U -->|No| W[Project Complete]
+        V --> W
+
+        B -.-> B1[Optional: brainstorming]
+        B -.-> B2[Optional: market research]
+        D -.-> D1[Optional: user research]
+        E -.-> E1[Optional: technical research]
+
+        style W fill:#90EE90
+        style K fill:#ADD8E6
+        style L fill:#ADD8E6
+        style O fill:#ADD8E6
+        style D3 fill:#E6E6FA
+        style D4 fill:#E6E6FA
+        style B fill:#FFE4B5
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style E fill:#FFE4B5
+        style N fill:#F0E68C
+        style Q fill:#F0E68C
+        style V fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - Building production frontend applications
+      - Multiple views/pages with complex interactions
+      - Need comprehensive UI/UX design and testing
+      - Multiple team members will be involved
+      - Long-term maintenance expected
+      - Customer-facing applications
+
+  handoff_prompts:
+    analyst_to_pm: "Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD."
+    pm_to_ux: "PRD is ready. Save it as docs/prd.md in your project, then create the UI/UX specification."
+    ux_to_architect: "UI/UX spec complete. Save it as docs/front-end-spec.md in your project, then create the frontend architecture."
+    architect_review: "Frontend architecture complete. Save it as docs/front-end-architecture.md. Do you suggest any changes to the PRD stories or need new stories added?"
+    architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
+    updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+==================== END: .bmad-2d-phaser-game-dev/workflows/greenfield-ui.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/utils/workflow-management.md ====================
+# Workflow Management Utility
+
+## Overview
+Utility for managing and coordinating multi-agent workflows in the BMad-Method system.
+
+## Core Functions
+
+### Workflow State Management
+- Track workflow execution state
+- Manage workflow context across agents
+- Handle workflow transitions and handoffs
+- Maintain workflow history and audit trail
+
+### Agent Coordination
+- Facilitate agent-to-agent communication
+- Manage agent activation and deactivation
+- Handle context passing between agents
+- Coordinate resource allocation
+
+### Workflow Execution
+- Execute workflow steps in sequence
+- Handle conditional branching
+- Manage parallel workflow execution
+- Handle error recovery and rollback
+
+### Context Management
+- Maintain global workflow context
+- Merge agent-specific contexts
+- Handle context transformations
+- Persist context across sessions
+
+## Usage Patterns
+
+### Basic Workflow Execution
+```yaml
+workflow:
+  name: project-development
+  steps:
+    - agent: analyst
+      task: create-prd
+    - agent: architect
+      task: create-architecture
+    - agent: sm
+      task: create-stories
+```
+
+### Context Handoff
+```yaml
+handoff:
+  from: analyst
+  to: architect
+  context:
+    - prd_document
+    - requirements
+    - constraints
+```
+
+### Parallel Execution
+```yaml
+parallel:
+  agents:
+    - id: ux-expert
+      task: create-mockups
+    - id: architect
+      task: design-api
+  merge_strategy: combine
+```
+
+## Best Practices
+
+1. **Clear Context Definition**: Always define clear context boundaries
+2. **Error Handling**: Include rollback strategies for failed steps
+3. **State Persistence**: Save workflow state at key checkpoints
+4. **Agent Independence**: Design workflows to minimize agent coupling
+5. **Monitoring**: Track workflow progress and performance metrics
+
+## Error Recovery
+
+### Checkpoint Strategy
+- Save state before critical operations
+- Enable workflow resumption from last checkpoint
+- Maintain recovery metadata
+
+### Rollback Procedures
+- Define compensating actions
+- Handle partial completion scenarios
+- Maintain data consistency
+
+## Performance Optimization
+
+### Resource Management
+- Pool agent instances when possible
+- Cache frequently used contexts
+- Optimize context serialization
+
+### Execution Strategies
+- Use async execution where applicable
+- Batch similar operations
+- Minimize context switching overhead
 ==================== END: .bmad-2d-phaser-game-dev/utils/workflow-management.md ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/tasks/create-doc.md ====================

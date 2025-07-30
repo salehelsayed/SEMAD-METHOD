@@ -54,10 +54,23 @@ class DependencyResolver {
     // Resolve other dependencies
     const depTypes = ['tasks', 'templates', 'checklists', 'data', 'utils'];
     for (const depType of depTypes) {
-      const deps = agentConfig.dependencies?.[depType] || [];
-      for (const depId of deps) {
-        const resource = await this.loadResource(depType, depId);
-        if (resource) dependencies.resources.push(resource);
+      const deps = agentConfig.dependencies?.[depType];
+      if (!deps) continue;
+      
+      // Handle both array and object formats
+      if (Array.isArray(deps)) {
+        // Array format: ['task1', 'task2']
+        for (const depId of deps) {
+          const resource = await this.loadResource(depType, depId);
+          if (resource) dependencies.resources.push(resource);
+        }
+      } else if (typeof deps === 'object') {
+        // Object format: { 'key': 'path/to/resource' }
+        for (const [key, depPath] of Object.entries(deps)) {
+          // For object format, use the value as the resource ID
+          const resource = await this.loadResource(depType, depPath);
+          if (resource) dependencies.resources.push(resource);
+        }
       }
     }
 

@@ -65,117 +65,33 @@ activation-instructions:
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
-  - STAY IN CHARACTER!
-  - Assess user goal against available agents and workflows in this bundle
-  - If clear match to an agent's expertise, suggest transformation with *agent command
-  - If project-oriented, suggest *workflow-guidance to explore options
-  - Load resources only when needed - never pre-load
+  - STAY IN CHARACTER\!
 agent:
   name: BMad Orchestrator
   id: bmad-orchestrator
-  title: BMad Master Orchestrator
-  icon: 🎭
-  whenToUse: Use for workflow coordination, multi-agent tasks, role switching guidance, and when unsure which specialist to consult
+  title: BMad Workflow Orchestrator
+  icon: 🎼
+  whenToUse: Use when you need to coordinate multi-agent workflows, manage complex project execution, or orchestrate the BMad-Method process.
 persona:
-  role: Master Orchestrator & BMad Method Expert
-  style: Knowledgeable, guiding, adaptable, efficient, encouraging, technically brilliant yet approachable. Helps customize and use BMad Method while orchestrating agents
-  identity: Unified interface to all BMad-Method capabilities, dynamically transforms into any specialized agent
-  focus: Orchestrating the right agent/capability for each need, loading resources only when needed
+  role: Workflow Orchestrator & Process Coordinator
+  identity: Expert in coordinating multi-agent workflows and managing BMad-Method execution
+  style: Systematic, organized, and process-focused - ensures smooth workflow execution and agent coordination
   core_principles:
-    - Become any agent on demand, loading files only when needed
-    - Never pre-load resources - discover and load at runtime
-    - Assess needs and recommend best approach/agent/workflow
-    - Track current state and guide to next logical steps
-    - When embodied, specialized persona's principles take precedence
-    - Be explicit about active persona and current task
-    - Always use numbered lists for choices
-    - Process commands starting with * immediately
-    - Always remind users that commands require * prefix
-    - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially
+    - Orchestrate multi-agent workflows seamlessly
+    - Manage context and state across agent transitions
+    - Ensure workflow integrity and completion
+    - Coordinate resource allocation and dependencies
+    - Track workflow progress and milestones
+    - Maintain clear communication between agents
 commands:
-  help: Show this guide with available agents and workflows
-  chat-mode: Start conversational mode for detailed assistance
-  kb-mode: Load full BMad knowledge base
-  status: Show current context, active agent, and progress
-  agent: Transform into a specialized agent (list if name not specified)
-  exit: Return to BMad or exit session
-  task: Run a specific task (list if name not specified)
-  workflow: Start a specific workflow (list if name not specified)
-  workflow-guidance: Get personalized help selecting the right workflow
-  plan: Create detailed workflow plan before starting
-  plan-status: Show current workflow plan progress
-  plan-update: Update workflow plan status
-  checklist: Execute a checklist (list if name not specified)
-  yolo: Toggle skip confirmations mode
-  party-mode: Group chat with all agents
-  doc-out: Output full document
-help-display-template: |
-  === BMad Orchestrator Commands ===
-  All commands must start with * (asterisk)
-
-  Core Commands:
-  *help ............... Show this guide
-  *chat-mode .......... Start conversational mode for detailed assistance
-  *kb-mode ............ Load full BMad knowledge base
-  *status ............. Show current context, active agent, and progress
-  *exit ............... Return to BMad or exit session
-
-  Agent & Task Management:
-  *agent [name] ....... Transform into specialized agent (list if no name)
-  *task [name] ........ Run specific task (list if no name, requires agent)
-  *checklist [name] ... Execute checklist (list if no name, requires agent)
-
-  Workflow Commands:
-  *workflow [name] .... Start specific workflow (list if no name)
-  *workflow-guidance .. Get personalized help selecting the right workflow
-  *plan ............... Create detailed workflow plan before starting
-  *plan-status ........ Show current workflow plan progress
-  *plan-update ........ Update workflow plan status
-
-  Other Commands:
-  *yolo ............... Toggle skip confirmations mode
-  *party-mode ......... Group chat with all agents
-  *doc-out ............ Output full document
-
-  === Available Specialist Agents ===
-  [Dynamically list each agent in bundle with format:
-  *agent {id}: {title}
-    When to use: {whenToUse}
-    Key deliverables: {main outputs/documents}]
-
-  === Available Workflows ===
-  [Dynamically list each workflow in bundle with format:
-  *workflow {id}: {name}
-    Purpose: {description}]
-
-  💡 Tip: Each agent has unique tasks, templates, and checklists. Switch to an agent to access their capabilities!
-fuzzy-matching:
-  - 85% confidence threshold
-  - Show numbered list if unsure
-transformation:
-  - Match name/role to agents
-  - Announce transformation
-  - Operate until exit
-loading:
-  - KB: Only for *kb-mode or BMad questions
-  - Agents: Only when transforming
-  - Templates/Tasks: Only when executing
-  - Always indicate loading
-kb-mode-behavior:
-  - When *kb-mode is invoked, use kb-mode-interaction task
-  - Don't dump all KB content immediately
-  - Present topic areas and wait for user selection
-  - Provide focused, contextual responses
-workflow-guidance:
-  - Discover available workflows in the bundle at runtime
-  - Understand each workflow's purpose, options, and decision points
-  - Ask clarifying questions based on the workflow's structure
-  - Guide users through workflow selection when multiple options exist
-  - When appropriate, suggest: Would you like me to create a detailed workflow plan before starting?
-  - For workflows with divergent paths, help users choose the right path
-  - Adapt questions to the specific domain (e.g., game dev vs infrastructure vs web dev)
-  - Only recommend workflows that actually exist in the current bundle
-  - When *workflow-guidance is called, start an interactive session and list all available workflows with brief descriptions
+  - help: Show these listed commands in a numbered list
+  - workflow {name}: Execute a specific workflow (no name = list available workflows)
+  - agents: List available agents and their purposes
+  - status: Show current workflow status and active agents
+  - context: Display current workflow context
+  - handoff {agent}: Hand off control to another agent with context
+  - kb: Toggle KB mode for workflow knowledge
+  - exit: Exit orchestrator mode (confirm)
 dependencies:
   tasks:
     - advanced-elicitation.yaml
@@ -183,12 +99,23 @@ dependencies:
     - kb-mode-interaction.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+  templates:
+    - workflow-status-tmpl.yaml
+    - handoff-context-tmpl.yaml
   data:
     - bmad-kb.md
-    - elicitation-methods.md
+    - workflow-patterns.md
+  workflows:
+    - brownfield-fullstack.yaml
+    - brownfield-service.yaml
+    - brownfield-ui.yaml
+    - greenfield-fullstack.yaml
+    - greenfield-service.yaml
+    - greenfield-ui.yaml
   utils:
     - workflow-management.md
 ```
+EOF < /dev/null
 ==================== END: .bmad-core/agents/bmad-orchestrator.md ====================
 
 ==================== START: .bmad-core/agents/analyst.md ====================
@@ -664,6 +591,157 @@ requiredInputs:
 outputs:
   - memories
 ==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
+
+==================== START: .bmad-core/templates/workflow-status-tmpl.yaml ====================
+template:
+  name: Workflow Status Report
+  description: Template for displaying current workflow execution status
+  version: "1.0"
+
+sections:
+  - name: Workflow Information
+    content: |
+      ## Workflow Status Report
+      
+      **Workflow Name**: {{workflow_name}}
+      **Workflow ID**: {{workflow_id}}
+      **Started**: {{start_time}}
+      **Current Status**: {{status}}
+      
+  - name: Active Agents
+    content: |
+      ### Active Agents
+      {{#each active_agents}}
+      - **{{name}}** ({{id}}): {{current_task}}
+        - Status: {{status}}
+        - Started: {{task_start_time}}
+      {{/each}}
+      
+  - name: Completed Steps
+    content: |
+      ### Completed Steps
+      {{#each completed_steps}}
+      ✓ **Step {{number}}**: {{description}}
+        - Agent: {{agent}}
+        - Duration: {{duration}}
+        - Result: {{result}}
+      {{/each}}
+      
+  - name: Pending Steps
+    content: |
+      ### Pending Steps
+      {{#each pending_steps}}
+      ○ **Step {{number}}**: {{description}}
+        - Assigned Agent: {{agent}}
+        - Dependencies: {{dependencies}}
+      {{/each}}
+      
+  - name: Context Summary
+    content: |
+      ### Current Context
+      {{#each context_items}}
+      - **{{key}}**: {{value}}
+      {{/each}}
+      
+  - name: Performance Metrics
+    content: |
+      ### Performance Metrics
+      - Total Duration: {{total_duration}}
+      - Steps Completed: {{completed_count}}/{{total_count}}
+      - Success Rate: {{success_rate}}%
+      - Average Step Duration: {{avg_duration}}
+==================== END: .bmad-core/templates/workflow-status-tmpl.yaml ====================
+
+==================== START: .bmad-core/templates/handoff-context-tmpl.yaml ====================
+template:
+  name: Agent Handoff Context
+  description: Template for passing context between agents during workflow handoffs
+  version: "1.0"
+
+sections:
+  - name: Handoff Header
+    content: |
+      ## Agent Handoff Context
+      
+      **From Agent**: {{from_agent.name}} ({{from_agent.id}})
+      **To Agent**: {{to_agent.name}} ({{to_agent.id}})
+      **Handoff Time**: {{handoff_time}}
+      **Workflow**: {{workflow_name}}
+      
+  - name: Completed Work Summary
+    content: |
+      ### Work Completed by {{from_agent.name}}
+      
+      {{completed_work_summary}}
+      
+      **Key Deliverables**:
+      {{#each deliverables}}
+      - {{name}}: {{description}}
+        - Location: {{path}}
+        - Status: {{status}}
+      {{/each}}
+      
+  - name: Context Transfer
+    content: |
+      ### Context for {{to_agent.name}}
+      
+      **Primary Objective**: {{next_objective}}
+      
+      **Required Inputs**:
+      {{#each required_inputs}}
+      - **{{name}}**: {{description}}
+        - Type: {{type}}
+        - Location: {{location}}
+      {{/each}}
+      
+      **Constraints**:
+      {{#each constraints}}
+      - {{description}}
+      {{/each}}
+      
+  - name: Dependencies
+    content: |
+      ### Dependencies and Prerequisites
+      
+      **Completed Dependencies**:
+      {{#each completed_dependencies}}
+      ✓ {{description}}
+      {{/each}}
+      
+      **Pending Dependencies**:
+      {{#each pending_dependencies}}
+      ○ {{description}} (Owner: {{owner}})
+      {{/each}}
+      
+  - name: Special Instructions
+    content: |
+      ### Special Instructions
+      
+      {{#if special_instructions}}
+      {{special_instructions}}
+      {{else}}
+      No special instructions provided.
+      {{/if}}
+      
+  - name: Working Memory
+    content: |
+      ### Working Memory Transfer
+      
+      **Key Decisions Made**:
+      {{#each decisions}}
+      - {{description}}: {{rationale}}
+      {{/each}}
+      
+      **Open Questions**:
+      {{#each open_questions}}
+      - {{question}} (Context: {{context}})
+      {{/each}}
+      
+      **Risk Items**:
+      {{#each risks}}
+      - {{description}} (Mitigation: {{mitigation}})
+      {{/each}}
+==================== END: .bmad-core/templates/handoff-context-tmpl.yaml ====================
 
 ==================== START: .bmad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
@@ -1471,213 +1549,316 @@ Use the **expansion-creator** pack to build your own:
 - **Contributing**: See `CONTRIBUTING.md` for full guidelines
 ==================== END: .bmad-core/data/bmad-kb.md ====================
 
-==================== START: .bmad-core/data/elicitation-methods.md ====================
-# Elicitation Methods Data
+==================== START: .bmad-core/data/workflow-patterns.md ====================
+# BMad Workflow Patterns
 
-## Core Reflective Methods
+## Overview
+This document describes common workflow patterns used in the BMad-Method system for multi-agent coordination and task execution.
 
-**Expand or Contract for Audience**
-- Ask whether to 'expand' (add detail, elaborate) or 'contract' (simplify, clarify)
-- Identify specific target audience if relevant
-- Tailor content complexity and depth accordingly
+## Basic Patterns
 
-**Explain Reasoning (CoT Step-by-Step)**
-- Walk through the step-by-step thinking process
-- Reveal underlying assumptions and decision points
-- Show how conclusions were reached from current role's perspective
+### Sequential Workflow
+Agents execute tasks one after another in a defined sequence.
 
-**Critique and Refine**
-- Review output for flaws, inconsistencies, or improvement areas
-- Identify specific weaknesses from role's expertise
-- Suggest refined version reflecting domain knowledge
+```yaml
+pattern: sequential
+agents:
+  - analyst: gather-requirements
+  - architect: design-system
+  - dev: implement-solution
+  - qa: validate-implementation
+```
 
-## Structural Analysis Methods
+### Parallel Workflow
+Multiple agents work simultaneously on independent tasks.
 
-**Analyze Logical Flow and Dependencies**
-- Examine content structure for logical progression
-- Check internal consistency and coherence
-- Identify and validate dependencies between elements
-- Confirm effective ordering and sequencing
+```yaml
+pattern: parallel
+agents:
+  concurrent:
+    - ux-expert: design-ui
+    - architect: design-api
+  merge: pm
+```
 
-**Assess Alignment with Overall Goals**
-- Evaluate content contribution to stated objectives
-- Identify any misalignments or gaps
-- Interpret alignment from specific role's perspective
-- Suggest adjustments to better serve goals
+### Conditional Workflow
+Workflow branches based on conditions or outcomes.
 
-## Risk and Challenge Methods
+```yaml
+pattern: conditional
+decision_point: requirement-complexity
+branches:
+  simple: [dev, qa]
+  complex: [architect, dev, qa]
+  critical: [analyst, architect, dev, qa, po]
+```
 
-**Identify Potential Risks and Unforeseen Issues**
-- Brainstorm potential risks from role's expertise
-- Identify overlooked edge cases or scenarios
-- Anticipate unintended consequences
-- Highlight implementation challenges
+## Advanced Patterns
 
-**Challenge from Critical Perspective**
-- Adopt critical stance on current content
-- Play devil's advocate from specified viewpoint
-- Argue against proposal highlighting weaknesses
-- Apply YAGNI principles when appropriate (scope trimming)
+### Iterative Refinement
+Agents collaborate in cycles to refine outputs.
 
-## Creative Exploration Methods
+```yaml
+pattern: iterative
+cycles:
+  - agents: [analyst, pm]
+    until: requirements-clear
+  - agents: [architect, dev]
+    until: design-approved
+```
 
-**Tree of Thoughts Deep Dive**
-- Break problem into discrete "thoughts" or intermediate steps
-- Explore multiple reasoning paths simultaneously
-- Use self-evaluation to classify each path as "sure", "likely", or "impossible"
-- Apply search algorithms (BFS/DFS) to find optimal solution paths
+### Hub and Spoke
+Central coordinator manages distributed agents.
 
-**Hindsight is 20/20: The 'If Only...' Reflection**
-- Imagine retrospective scenario based on current content
-- Identify the one "if only we had known/done X..." insight
-- Describe imagined consequences humorously or dramatically
-- Extract actionable learnings for current context
+```yaml
+pattern: hub-spoke
+hub: bmad-orchestrator
+spokes:
+  - agent: analyst
+    trigger: new-requirement
+  - agent: dev
+    trigger: story-ready
+  - agent: qa
+    trigger: code-complete
+```
 
-## Multi-Persona Collaboration Methods
+### Pipeline Pattern
+Continuous flow with buffering between stages.
 
-**Agile Team Perspective Shift**
-- Rotate through different Scrum team member viewpoints
-- Product Owner: Focus on user value and business impact
-- Scrum Master: Examine process flow and team dynamics
-- Developer: Assess technical implementation and complexity
-- QA: Identify testing scenarios and quality concerns
+```yaml
+pattern: pipeline
+stages:
+  - name: analysis
+    agent: analyst
+    buffer: requirement-queue
+  - name: development
+    agent: dev
+    buffer: story-queue
+  - name: testing
+    agent: qa
+    buffer: test-queue
+```
 
-**Stakeholder Round Table**
-- Convene virtual meeting with multiple personas
-- Each persona contributes unique perspective on content
-- Identify conflicts and synergies between viewpoints
-- Synthesize insights into actionable recommendations
+## Context Management Patterns
 
-**Meta-Prompting Analysis**
-- Step back to analyze the structure and logic of current approach
-- Question the format and methodology being used
-- Suggest alternative frameworks or mental models
-- Optimize the elicitation process itself
+### Context Accumulation
+Each agent adds to a growing context.
 
-## Advanced 2025 Techniques
+```yaml
+context_strategy: accumulate
+agents:
+  - analyst:
+      adds: [requirements, constraints]
+  - architect:
+      adds: [design, technical-decisions]
+  - dev:
+      adds: [implementation-details, test-results]
+```
 
-**Self-Consistency Validation**
-- Generate multiple reasoning paths for same problem
-- Compare consistency across different approaches
-- Identify most reliable and robust solution
-- Highlight areas where approaches diverge and why
+### Context Transformation
+Agents transform context for next agent.
 
-**ReWOO (Reasoning Without Observation)**
-- Separate parametric reasoning from tool-based actions
-- Create reasoning plan without external dependencies
-- Identify what can be solved through pure reasoning
-- Optimize for efficiency and reduced token usage
+```yaml
+context_strategy: transform
+transformations:
+  - from: analyst
+    to: architect
+    transform: requirements-to-specs
+  - from: architect
+    to: dev
+    transform: specs-to-tasks
+```
 
-**Persona-Pattern Hybrid**
-- Combine specific role expertise with elicitation pattern
-- Architect + Risk Analysis: Deep technical risk assessment
-- UX Expert + User Journey: End-to-end experience critique
-- PM + Stakeholder Analysis: Multi-perspective impact review
+### Context Filtering
+Only relevant context passed between agents.
 
-**Emergent Collaboration Discovery**
-- Allow multiple perspectives to naturally emerge
-- Identify unexpected insights from persona interactions
-- Explore novel combinations of viewpoints
-- Capture serendipitous discoveries from multi-agent thinking
+```yaml
+context_strategy: filter
+rules:
+  - from: analyst
+    to: dev
+    include: [acceptance-criteria, api-specs]
+    exclude: [market-research, competitor-analysis]
+```
 
-## Game-Based Elicitation Methods
+## Error Handling Patterns
 
-**Red Team vs Blue Team**
-- Red Team: Attack the proposal, find vulnerabilities
-- Blue Team: Defend and strengthen the approach
-- Competitive analysis reveals blind spots
-- Results in more robust, battle-tested solutions
+### Retry with Backoff
+Automatic retry with increasing delays.
 
-**Innovation Tournament**
-- Pit multiple alternative approaches against each other
-- Score each approach across different criteria
-- Crowd-source evaluation from different personas
-- Identify winning combination of features
+```yaml
+error_strategy: retry
+max_attempts: 3
+backoff: exponential
+base_delay: 1000
+```
 
-**Escape Room Challenge**
-- Present content as constraints to work within
-- Find creative solutions within tight limitations
-- Identify minimum viable approach
-- Discover innovative workarounds and optimizations
+### Circuit Breaker
+Prevent cascading failures.
 
-## Process Control
+```yaml
+error_strategy: circuit-breaker
+threshold: 5
+timeout: 30000
+recovery: gradual
+```
 
-**Proceed / No Further Actions**
-- Acknowledge choice to finalize current work
-- Accept output as-is or move to next step
-- Prepare to continue without additional elicitation
-==================== END: .bmad-core/data/elicitation-methods.md ====================
+### Compensating Transaction
+Rollback on failure with compensation.
 
-==================== START: .bmad-core/utils/workflow-management.md ====================
-# Workflow Management
+```yaml
+error_strategy: compensate
+rollback_sequence:
+  - agent: dev
+    action: revert-changes
+  - agent: architect
+    action: update-design
+  - agent: pm
+    action: notify-stakeholders
+```
 
-Enables BMad orchestrator to manage and execute team workflows.
+## Performance Patterns
 
-## Dynamic Workflow Loading
+### Resource Pooling
+Reuse agent instances across workflows.
 
-Read available workflows from current team configuration's `workflows` field. Each team bundle defines its own supported workflows.
+```yaml
+optimization: pooling
+pool_size: 5
+idle_timeout: 300000
+warm_start: true
+```
 
-**Key Commands**:
+### Lazy Loading
+Load agents only when needed.
 
-- `/workflows` - List workflows in current bundle or workflows folder
-- `/agent-list` - Show agents in current bundle
+```yaml
+optimization: lazy-load
+preload: [bmad-orchestrator]
+on_demand: [analyst, architect, dev, qa]
+```
 
-## Workflow Commands
+### Caching Strategy
+Cache frequently accessed contexts.
 
-### /workflows
-
-Lists available workflows with titles and descriptions.
-
-### /workflow-start {workflow-id}
-
-Starts workflow and transitions to first agent.
-
-### /workflow-status
-
-Shows current progress, completed artifacts, and next steps.
-
-### /workflow-resume
-
-Resumes workflow from last position. User can provide completed artifacts.
-
-### /workflow-next
-
-Shows next recommended agent and action.
-
-## Execution Flow
-
-1. **Starting**: Load definition → Identify first stage → Transition to agent → Guide artifact creation
-
-2. **Stage Transitions**: Mark complete → Check conditions → Load next agent → Pass artifacts
-
-3. **Artifact Tracking**: Track status, creator, timestamps in workflow_state
-
-4. **Interruption Handling**: Analyze provided artifacts → Determine position → Suggest next step
-
-## Context Passing
-
-When transitioning, pass:
-
-- Previous artifacts
-- Current workflow stage
-- Expected outputs
-- Decisions/constraints
-
-## Multi-Path Workflows
-
-Handle conditional paths by asking clarifying questions when needed.
+```yaml
+optimization: caching
+cache_strategy: lru
+max_size: 100
+ttl: 3600000
+```
 
 ## Best Practices
 
-1. Show progress
-2. Explain transitions
-3. Preserve context
-4. Allow flexibility
-5. Track state
+1. **Start Simple**: Begin with sequential patterns and evolve as needed
+2. **Monitor Performance**: Track workflow execution times and bottlenecks
+3. **Handle Failures Gracefully**: Always include error recovery strategies
+4. **Document Decisions**: Record why specific patterns were chosen
+5. **Test Workflows**: Validate workflows with different scenarios
+6. **Version Control**: Track workflow changes over time
+7. **Security First**: Ensure context doesn't leak sensitive data between agents
+==================== END: .bmad-core/data/workflow-patterns.md ====================
 
-## Agent Integration
+==================== START: .bmad-core/utils/workflow-management.md ====================
+# Workflow Management Utility
 
-Agents should be workflow-aware: know active workflow, their role, access artifacts, understand expected outputs.
+## Overview
+Utility for managing and coordinating multi-agent workflows in the BMad-Method system.
+
+## Core Functions
+
+### Workflow State Management
+- Track workflow execution state
+- Manage workflow context across agents
+- Handle workflow transitions and handoffs
+- Maintain workflow history and audit trail
+
+### Agent Coordination
+- Facilitate agent-to-agent communication
+- Manage agent activation and deactivation
+- Handle context passing between agents
+- Coordinate resource allocation
+
+### Workflow Execution
+- Execute workflow steps in sequence
+- Handle conditional branching
+- Manage parallel workflow execution
+- Handle error recovery and rollback
+
+### Context Management
+- Maintain global workflow context
+- Merge agent-specific contexts
+- Handle context transformations
+- Persist context across sessions
+
+## Usage Patterns
+
+### Basic Workflow Execution
+```yaml
+workflow:
+  name: project-development
+  steps:
+    - agent: analyst
+      task: create-prd
+    - agent: architect
+      task: create-architecture
+    - agent: sm
+      task: create-stories
+```
+
+### Context Handoff
+```yaml
+handoff:
+  from: analyst
+  to: architect
+  context:
+    - prd_document
+    - requirements
+    - constraints
+```
+
+### Parallel Execution
+```yaml
+parallel:
+  agents:
+    - id: ux-expert
+      task: create-mockups
+    - id: architect
+      task: design-api
+  merge_strategy: combine
+```
+
+## Best Practices
+
+1. **Clear Context Definition**: Always define clear context boundaries
+2. **Error Handling**: Include rollback strategies for failed steps
+3. **State Persistence**: Save workflow state at key checkpoints
+4. **Agent Independence**: Design workflows to minimize agent coupling
+5. **Monitoring**: Track workflow progress and performance metrics
+
+## Error Recovery
+
+### Checkpoint Strategy
+- Save state before critical operations
+- Enable workflow resumption from last checkpoint
+- Maintain recovery metadata
+
+### Rollback Procedures
+- Define compensating actions
+- Handle partial completion scenarios
+- Maintain data consistency
+
+## Performance Optimization
+
+### Resource Management
+- Pool agent instances when possible
+- Cache frequently used contexts
+- Optimize context serialization
+
+### Execution Strategies
+- Use async execution where applicable
+- Batch similar operations
+- Minimize context switching overhead
 ==================== END: .bmad-core/utils/workflow-management.md ====================
 
 ==================== START: .bmad-core/structured-tasks/facilitate-brainstorming-session.yaml ====================
