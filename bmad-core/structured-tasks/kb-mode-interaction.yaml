@@ -4,14 +4,14 @@ purpose: Provide a user-friendly interface to the BMad knowledge base without ov
 steps:
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for KB mode interaction"
+      - description: Initialize working memory for KB mode interaction
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve previous KB interactions and commonly asked topics"
-        elicit: false
+      - description: Retrieve previous KB interactions and commonly asked topics
+        elicit: true
         metadata:
           originalIndent: 0
   - id: step1
@@ -20,7 +20,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Present Topic Areas
     description: |-
@@ -38,17 +38,17 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Respond Contextually
-    description: ""
+    description: ''
     actions:
       - description: Wait for user's specific question or topic selection
         elicit: true
         metadata:
           originalIndent: 0
       - description: Provide focused, relevant information from the knowledge base
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Offer to dive deeper or explore related topics
@@ -61,10 +61,10 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Interactive Exploration
-    description: ""
+    description: ''
     actions:
       - description: After answering, suggest related topics they might find helpful
         elicit: false
@@ -84,41 +84,25 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Exit Gracefully
-    description: >-
+    description: |-
       When user is done or wants to exit KB mode:
-
       **User**: *kb-mode
-
-      **Assistant**: I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed
-      information about any aspect of BMad-Method.
-
+      **Assistant**: I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed information about any aspect of BMad-Method.
       **What would you like to know more about?**
-
       1. **Setup & Installation** - Getting started with BMad
-
       2. **Workflows** - Choosing the right workflow for your project
-
       3. **Web vs IDE** - When to use each environment
-
       4. **Agents** - Understanding specialized agents and their roles
-
       5. **Documents** - PRDs, Architecture, Stories, and more
-
       6. **Agile Process** - How BMad implements Agile methodologies
-
       7. **Configuration** - Customizing BMad for your needs
-
       8. **Best Practices** - Tips for effective BMad usage
-
       Or ask me about anything else related to BMad-Method!
-
       **User**: Tell me about workflows
-
-      **Assistant**: [Provides focused information about workflows from the KB, then offers to explore specific workflow
-      types or related topics]
+      **Assistant**: [Provides focused information about workflows from the KB, then offers to explore specific workflow types or related topics]
     actions:
       - description: Summarize key points discussed if helpful
         elicit: false
@@ -134,7 +118,7 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
 inputs: {}
 outputs: {}
 metadata:

@@ -1,67 +1,39 @@
 id: document-project
-name: "[Project Name] Brownfield Architecture Document"
-purpose: >-
-  Generate comprehensive documentation for existing projects optimized for AI development agents. This task creates
-  structured reference materials that enable AI agents to understand project context, conventions, and patterns for
-  effective contribution to any codebase.
+name: '[Project Name] Brownfield Architecture Document'
+purpose: Generate comprehensive documentation for existing projects optimized for AI development agents. This task creates structured reference materials that enable AI agents to understand project context, conventions, and patterns for effective contribution to any codebase.
 steps:
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for documentation task"
+      - description: Initialize working memory for documentation task
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve any previous project documentation context"
+      - description: Retrieve any previous project documentation context
         elicit: false
         metadata:
           originalIndent: 0
   - id: step1
     name: Initial Project Analysis
-    description: >-
-      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
-      documentation efforts on relevant areas only.
-
+    description: |-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
       **IF PRD EXISTS**:
-
       **IF NO PRD EXISTS**:
-
       Ask the user:
-
-      "I notice you haven't provided a PRD or requirements document. To create more focused and useful documentation, I
-      recommend one of these options:
-
-      1. **Create a PRD first** - Would you like me to help create a brownfield PRD before documenting? This helps focus
-      documentation on relevant areas.
-
-      2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can
-      share?
-
+      "I notice you haven't provided a PRD or requirements document. To create more focused and useful documentation, I recommend one of these options:
+      1. **Create a PRD first** - Would you like me to help create a brownfield PRD before documenting? This helps focus documentation on relevant areas.
+      2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can share?
       3. **Describe the focus** - Can you briefly describe what enhancement or feature you're planning? For example:
-
-      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
-      This may create excessive documentation for large projects)
-
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
       Please let me know your preference, or I can proceed with full documentation if you prefer."
-
       Based on their response:
-
       Begin by conducting analysis of the existing project. Use available tools to:
-
-      1. **Project Structure Discovery**: Examine the root directory structure, identify main folders, and understand
-      the overall organization
-
-      2. **Technology Stack Identification**: Look for package.json, requirements.txt, Cargo.toml, pom.xml, etc. to
-      identify languages, frameworks, and dependencies
-
+      1. **Project Structure Discovery**: Examine the root directory structure, identify main folders, and understand the overall organization
+      2. **Technology Stack Identification**: Look for package.json, requirements.txt, Cargo.toml, pom.xml, etc. to identify languages, frameworks, and dependencies
       3. **Build System Analysis**: Find build scripts, CI/CD configurations, and development commands
-
       4. **Existing Documentation Review**: Check for README files, docs folders, and any existing documentation
-
-      5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and
-      architectural approaches
-
+      5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and architectural approaches
       Ask the user these elicitation questions to better understand their needs:
     actions:
       - description: Review the PRD to understand what enhancement/feature is planned
@@ -80,23 +52,23 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "'Adding payment processing to the user service'"
+      - description: '''Adding payment processing to the user service'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "'Refactoring the authentication module'"
+      - description: '''Refactoring the authentication module'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "'Integrating with a new third-party API'"
+      - description: '''Integrating with a new third-party API'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "If they choose option 1-3: Use that context to focus documentation"
+      - description: 'If they choose option 1-3: Use that context to focus documentation'
         elicit: true
         metadata:
           originalIndent: 0
-      - description: "If they choose option 4 or decline: Proceed with comprehensive analysis below"
+      - description: 'If they choose option 4 or decline: Proceed with comprehensive analysis below'
         elicit: true
         metadata:
           originalIndent: 0
@@ -104,15 +76,11 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          Are there any specific areas of the codebase that are particularly complex or important for agents to
-          understand?
+      - description: Are there any specific areas of the codebase that are particularly complex or important for agents to understand?
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          What types of tasks do you expect AI agents to perform on this project? (e.g., bug fixes, feature additions,
-          refactoring, testing)
+      - description: What types of tasks do you expect AI agents to perform on this project? (e.g., bug fixes, feature additions, refactoring, testing)
         elicit: true
         metadata:
           originalIndent: 0
@@ -120,9 +88,7 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          What level of technical detail should the documentation target? (junior developers, senior developers, mixed
-          team)
+      - description: What level of technical detail should the documentation target? (junior developers, senior developers, mixed team)
         elicit: true
         metadata:
           originalIndent: 0
@@ -130,18 +96,13 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-    notes: >-
-      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
-      documentation efforts on relevant areas only.
-
-      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
-      This may create excessive documentation for large projects)
-
-      - Are there any specific areas of the codebase that are particularly complex or important for agents to
-      understand?
+    notes: |-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
+      - Are there any specific areas of the codebase that are particularly complex or important for agents to understand?
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Deep Codebase Analysis
     description: |-
@@ -171,23 +132,23 @@ steps:
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "\"I see you're using [technology X]. Are there any custom patterns or conventions I should document?\""
+      - description: '"I see you''re using [technology X]. Are there any custom patterns or conventions I should document?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"What are the most critical/complex parts of this system that developers struggle with?\""
+      - description: '"What are the most critical/complex parts of this system that developers struggle with?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"Are there any undocumented 'tribal knowledge' areas I should capture?\""
+      - description: '"Are there any undocumented ''tribal knowledge'' areas I should capture?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"What technical debt or known issues should I document?\""
+      - description: '"What technical debt or known issues should I document?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"Which parts of the codebase change most frequently?\""
+      - description: '"Which parts of the codebase change most frequently?"'
         elicit: true
         metadata:
           originalIndent: 3
@@ -217,161 +178,85 @@ steps:
          - Note areas that differ from standard patterns
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Core Documentation Generation
-    description: >-
+    description: |-
       [[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
-
       **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
-
       **Document Structure**:
-
-      This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds,
-      and real-world patterns. It serves as a reference for AI agents working on enhancements.
-
+      This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds, and real-world patterns. It serves as a reference for AI agents working on enhancements.
       ### Document Scope
-
       [If PRD provided: "Focused on areas relevant to: {enhancement description}"]
-
       [If no PRD: "Comprehensive documentation of entire system"]
-
       ### Change Log
-
       | Date | Version | Description | Author |
-
       |------|---------|-------------|--------|
-
       | [Date] | 1.0 | Initial brownfield analysis | [Analyst] |
-
       ### Critical Files for Understanding the System
-
       ### If PRD Provided - Enhancement Impact Areas
-
       [Highlight which files/modules will be affected by the planned enhancement]
-
       ### Technical Summary
-
       ### Actual Tech Stack (from package.json/requirements.txt)
-
       | Category | Technology | Version | Notes |
-
       |----------|------------|---------|--------|
-
       | Runtime | Node.js | 16.x | [Any constraints] |
-
       | Framework | Express | 4.18.2 | [Custom middleware?] |
-
       | Database | PostgreSQL | 13 | [Connection pooling setup] |
-
       etc...
-
       ### Repository Structure Reality Check
-
       ### Project Structure (Actual)
-
       ```text
-
       project-root/
-
       ├── src/
-
       │   ├── controllers/     # HTTP request handlers
-
       │   ├── services/        # Business logic (NOTE: inconsistent patterns between user and payment services)
-
       │   ├── models/          # Database models (Sequelize)
-
       │   ├── utils/           # Mixed bag - needs refactoring
-
       │   └── legacy/          # DO NOT MODIFY - old payment system still in use
-
       ├── tests/               # Jest tests (60% coverage)
-
       ├── scripts/             # Build and deployment scripts
-
       └── config/              # Environment configs
-
       ```
-
       ### Key Modules and Their Purpose
-
       ### Data Models
-
       Instead of duplicating, reference actual model files:
-
       ### API Specifications
-
       ### Critical Technical Debt
-
       1. **Payment Service**: Legacy code in `src/legacy/payment.js` - tightly coupled, no tests
-
       2. **User Service**: Different pattern than other services, uses callbacks instead of promises
-
       3. **Database Migrations**: Manually tracked, no proper migration tool
-
       4. **[Other significant debt]**
-
       ### Workarounds and Gotchas
-
       ### External Services
-
       | Service | Purpose | Integration Type | Key Files |
-
       |---------|---------|------------------|-----------|
-
       | Stripe | Payments | REST API | `src/integrations/stripe/` |
-
       | SendGrid | Emails | SDK | `src/services/emailService.js` |
-
       etc...
-
       ### Internal Integration Points
-
       ### Local Development Setup
-
       1. Actual steps that work (not ideal steps)
-
       2. Known issues with setup
-
       3. Required environment variables (see `.env.example`)
-
       ### Build and Deployment Process
-
       ### Current Test Coverage
-
       ### Running Tests
-
       ```bash
-
       npm test           # Runs unit tests
-
       npm run test:integration  # Runs integration tests (requires local DB)
-
       ```
-
       ### Files That Will Need Modification
-
       Based on the enhancement requirements, these files will be affected:
-
       ### New Files/Modules Needed
-
       ### Integration Considerations
-
       ### Frequently Used Commands
-
       ```bash
-
       npm run dev         # Start development server
-
       npm run build       # Production build
-
       npm run migrate     # Run database migrations
-
       npm run seed        # Seed test data
-
       ```
-
       ### Debugging and Troubleshooting
     actions:
       - description: Technical debt and workarounds
@@ -394,159 +279,159 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Main Entry**: `src/index.js` (or actual entry point)"
+      - description: '**Main Entry**: `src/index.js` (or actual entry point)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Configuration**: `config/app.config.js`, `.env.example`"
+      - description: '**Configuration**: `config/app.config.js`, `.env.example`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Core Business Logic**: `src/services/`, `src/domain/`"
+      - description: '**Core Business Logic**: `src/services/`, `src/domain/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**API Definitions**: `src/routes/` or link to OpenAPI spec"
+      - description: '**API Definitions**: `src/routes/` or link to OpenAPI spec'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Database Models**: `src/models/` or link to schema files"
+      - description: '**Database Models**: `src/models/` or link to schema files'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Key Algorithms**: [List specific files with complex logic]"
+      - description: '**Key Algorithms**: [List specific files with complex logic]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Type: [Monorepo/Polyrepo/Hybrid]"
+      - description: 'Type: [Monorepo/Polyrepo/Hybrid]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Package Manager: [npm/yarn/pnpm]"
+      - description: 'Package Manager: [npm/yarn/pnpm]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Notable: [Any unusual structure decisions]"
+      - description: 'Notable: [Any unusual structure decisions]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**User Management**: `src/services/userService.js` - Handles all user operations"
+      - description: '**User Management**: `src/services/userService.js` - Handles all user operations'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation"
+      - description: '**Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled"
+      - description: '**Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[List other key modules with their actual files]**"
+      - description: '**[List other key modules with their actual files]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**User Model**: See `src/models/User.js`"
+      - description: '**User Model**: See `src/models/User.js`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Order Model**: See `src/models/Order.js`"
+      - description: '**Order Model**: See `src/models/Order.js`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Related Types**: TypeScript definitions in `src/types/`"
+      - description: '**Related Types**: TypeScript definitions in `src/types/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)"
+      - description: '**OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Postman Collection**: `docs/api/postman-collection.json`"
+      - description: '**Postman Collection**: `docs/api/postman-collection.json`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Manual Endpoints**: [List any undocumented endpoints discovered]"
+      - description: '**Manual Endpoints**: [List any undocumented endpoints discovered]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)"
+      - description: '**Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Database Connections**: Connection pool hardcoded to 10, changing breaks payment service"
+      - description: '**Database Connections**: Connection pool hardcoded to 10, changing breaks payment service'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[Other workarounds developers need to know]**"
+      - description: '**[Other workarounds developers need to know]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Frontend Communication**: REST API on port 3000, expects specific headers"
+      - description: '**Frontend Communication**: REST API on port 3000, expects specific headers'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Background Jobs**: Redis queue, see `src/workers/`"
+      - description: '**Background Jobs**: Redis queue, see `src/workers/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[Other integrations]**"
+      - description: '**[Other integrations]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Build Command**: `npm run build` (webpack config in `webpack.config.js`)"
+      - description: '**Build Command**: `npm run build` (webpack config in `webpack.config.js`)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Deployment**: Manual deployment via `scripts/deploy.sh`"
+      - description: '**Deployment**: Manual deployment via `scripts/deploy.sh`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Environments**: Dev, Staging, Prod (see `config/environments/`)"
+      - description: '**Environments**: Dev, Staging, Prod (see `config/environments/`)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Unit Tests: 60% coverage (Jest)"
+      - description: 'Unit Tests: 60% coverage (Jest)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Integration Tests: Minimal, in `tests/integration/`"
+      - description: 'Integration Tests: Minimal, in `tests/integration/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "E2E Tests: None"
+      - description: 'E2E Tests: None'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Manual Testing: Primary QA method"
+      - description: 'Manual Testing: Primary QA method'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/services/userService.js` - Add new user fields"
+      - description: '`src/services/userService.js` - Add new user fields'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/models/User.js` - Update schema"
+      - description: '`src/models/User.js` - Update schema'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/routes/userRoutes.js` - New endpoints"
+      - description: '`src/routes/userRoutes.js` - New endpoints'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[etc...]"
+      - description: '[etc...]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/services/newFeatureService.js` - New business logic"
+      - description: '`src/services/newFeatureService.js` - New business logic'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/models/NewFeature.js` - New data model"
+      - description: '`src/models/NewFeature.js` - New data model'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[etc...]"
+      - description: '[etc...]'
         elicit: false
         metadata:
           originalIndent: 0
@@ -558,19 +443,19 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[Other integration points]"
+      - description: '[Other integration points]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Logs**: Check `logs/app.log` for application logs"
+      - description: '**Logs**: Check `logs/app.log` for application logs'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Debug Mode**: Set `DEBUG=app:*` for verbose logging"
+      - description: '**Debug Mode**: Set `DEBUG=app:*` for verbose logging'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Common Issues**: See `docs/troubleshooting.md`]]"
+      - description: '**Common Issues**: See `docs/troubleshooting.md`]]'
         elicit: false
         metadata:
           originalIndent: 0
@@ -582,7 +467,7 @@ steps:
       ### Critical Technical Debt
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Document Delivery
     description: |-
@@ -630,13 +515,13 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "If PRD provided: What needs to change for the enhancement]]"
+      - description: 'If PRD provided: What needs to change for the enhancement]]'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Quality Assurance
     description: |-
@@ -664,7 +549,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "If PRD provided: Clear impact analysis showing what needs to change"
+      - description: 'If PRD provided: Clear impact analysis showing what needs to change'
         elicit: false
         metadata:
           originalIndent: 0
@@ -688,7 +573,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "For brownfield projects with PRD: Provides clear enhancement impact analysis"
+      - description: 'For brownfield projects with PRD: Provides clear enhancement impact analysis'
         elicit: false
         metadata:
           originalIndent: 0
@@ -696,10 +581,10 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-    notes: "CRITICAL: Before finalizing the document:"
+    notes: 'CRITICAL: Before finalizing the document:'
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
 inputs: {}
 outputs: {}
 metadata:

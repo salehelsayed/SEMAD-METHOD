@@ -8,14 +8,14 @@ purpose: |-
 steps:
   - id: step0
     name: Initialize Memory
-    description: "Setup working memory for elicitation session"
+    description: Setup working memory for elicitation session
     actions:
-      - description: "Initialize working memory for elicitation context"
+      - description: Initialize working memory for elicitation context
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve relevant past elicitation patterns if available"
-        elicit: false
+      - description: Retrieve relevant past elicitation patterns if available
+        elicit: true
         metadata:
           originalIndent: 0
   - id: step1
@@ -27,23 +27,23 @@ steps:
       2. **Context-Specific Methods** (choose 4-5):
       3. **Always Include**: "Proceed / No Further Actions" as option 9
     actions:
-      - description: "**Content Type**: Technical specs, user stories, architecture, requirements, etc."
+      - description: '**Content Type**: Technical specs, user stories, architecture, requirements, etc.'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Complexity Level**: Simple, moderate, or complex content"
+      - description: '**Complexity Level**: Simple, moderate, or complex content'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Stakeholder Needs**: Who will use this information"
+      - description: '**Stakeholder Needs**: Who will use this information'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Risk Level**: High-impact decisions vs routine items"
+      - description: '**Risk Level**: High-impact decisions vs routine items'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Creative Potential**: Opportunities for innovation or alternatives"
+      - description: '**Creative Potential**: Opportunities for innovation or alternatives'
         elicit: false
         metadata:
           originalIndent: 0
@@ -63,38 +63,32 @@ steps:
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "**Technical Content**: Tree of Thoughts, ReWOO, Meta-Prompting"
+      - description: '**Technical Content**: Tree of Thoughts, ReWOO, Meta-Prompting'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "**User-Facing Content**: Agile Team Perspective, Stakeholder Roundtable"
+      - description: '**User-Facing Content**: Agile Team Perspective, Stakeholder Roundtable'
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "**Creative Content**: Innovation Tournament, Escape Room Challenge"
+      - description: '**Creative Content**: Innovation Tournament, Escape Room Challenge'
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "**Strategic Content**: Red Team vs Blue Team, Hindsight Reflection"
+      - description: '**Strategic Content**: Red Team vs Blue Team, Hindsight Reflection'
         elicit: false
         metadata:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Section Context and Review
-    description: >-
+    description: |-
       When invoked after outputting a section:
-
-      1. **Provide Context Summary**: Give a brief 1-2 sentence summary of what the user should look for in the section
-      just presented
-
-      2. **Explain Visual Elements**: If the section contains diagrams, explain them briefly before offering elicitation
-      options
-
-      3. **Clarify Scope Options**: If the section contains multiple distinct items, inform the user they can apply
-      elicitation actions to:
+      1. **Provide Context Summary**: Give a brief 1-2 sentence summary of what the user should look for in the section just presented
+      2. **Explain Visual Elements**: If the section contains diagrams, explain them briefly before offering elicitation options
+      3. **Clarify Scope Options**: If the section contains multiple distinct items, inform the user they can apply elicitation actions to:
     actions:
       - description: The entire section as a whole
         elicit: false
@@ -106,7 +100,7 @@ steps:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Present Elicitation Options
     description: |-
@@ -149,21 +143,21 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: "**Numbers 0-8**: Execute the selected method, then re-offer the choice"
+      - description: '**Numbers 0-8**: Execute the selected method, then re-offer the choice'
         elicit: true
         metadata:
           originalIndent: 0
-      - description: "**Number 9**: Proceed to next section or continue conversation"
+      - description: '**Number 9**: Proceed to next section or continue conversation'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Direct Feedback**: Apply user's suggested changes and continue"
+      - description: '**Direct Feedback**: Apply user''s suggested changes and continue'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Method Execution Framework
     description: |-
@@ -174,25 +168,25 @@ steps:
       4. **Re-offer Choice**: Present the same 9 options again until user selects 9 or gives direct feedback
       **Execution Guidelines:**
     actions:
-      - description: "**Be Concise**: Focus on actionable insights, not lengthy explanations"
+      - description: '**Be Concise**: Focus on actionable insights, not lengthy explanations'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Stay Relevant**: Tie all elicitation back to the specific content being analyzed"
+      - description: '**Stay Relevant**: Tie all elicitation back to the specific content being analyzed'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking"
+      - description: '**Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Maintain Flow**: Keep the process moving efficiently"
+      - description: '**Maintain Flow**: Keep the process moving efficiently'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
 inputs: {}
 outputs: {}
 metadata:

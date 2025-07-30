@@ -7,13 +7,13 @@ purpose: |-
 steps:
   - id: step0
     name: Initialize Memory Context
-    description: "Setup working memory and retrieve relevant context"
+    description: Setup working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for sharding task"
+      - description: Initialize working memory for sharding task
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Record document being sharded in memory for future reference"
+      - description: Record document being sharded in memory for future reference
         elicit: false
         metadata:
           originalIndent: 0
@@ -39,21 +39,21 @@ steps:
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "Example: \"## Tech Stack\" → `tech-stack.md`"
+      - description: 'Example: "## Tech Stack" → `tech-stack.md`'
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "The level 2 heading becomes level 1 (# instead of ##) in the sharded new document"
+      - description: 'The level 2 heading becomes level 1 (# instead of ##) in the sharded new document'
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "All subsection levels decrease by 1:"
+      - description: 'All subsection levels decrease by 1:'
         elicit: false
         metadata:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step2
     name: Create Index File
     description: |-
@@ -75,7 +75,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step3
     name: Preserve Special Content
     description: |-
@@ -96,7 +96,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
   - id: step4
     name: Validation
     description: |-
@@ -108,16 +108,16 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "6"
+      originalNumber: '6'
   - id: step5
     name: Update Memory with Results
-    description: "Record sharding results in memory"
+    description: Record sharding results in memory
     actions:
-      - description: "Update working memory with sharded document structure"
+      - description: Update working memory with sharded document structure
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Store document relationships for future reference"
+      - description: Store document relationships for future reference
         elicit: false
         metadata:
           originalIndent: 0
@@ -144,7 +144,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Handle edge cases like sections with code blocks containing ## symbols"
+      - description: 'Handle edge cases like sections with code blocks containing ## symbols'
         elicit: false
         metadata:
           originalIndent: 0
@@ -154,23 +154,21 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "7"
+      originalNumber: '7'
 inputs: {}
 outputs: {}
 metadata:
   originalSections:
     - Purpose
-    - "Primary Method: Automatic with markdown-tree"
+    - 'Primary Method: Automatic with markdown-tree'
     - Manual Method (if @kayvan/markdown-tree-parser is not available or user indicated manual method)
     - Important Notes
   preservedContent:
     - type: special-note
-      content: >-
-        [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the
-        command: `md-tree explode {input file} {output path}`.
+      content: '[[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
       lineNumber: 11
     - type: special-note
-      content: "**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**\""
+      content: '**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"'
       lineNumber: 20
     - type: code-block
       content: |2-
@@ -192,12 +190,10 @@ metadata:
            ```
       lineNumber: 41
     - type: special-note
-      content: "CRITICAL AEGNT SHARDING RULES:"
+      content: 'CRITICAL AEGNT SHARDING RULES:'
       lineNumber: 74
     - type: special-note
-      content: >-
-        CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section
-        header.]]
+      content: 'CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]'
       lineNumber: 87
     - type: section-header
       content: Important Notes
@@ -205,12 +201,8 @@ metadata:
     - type: section-header
       content: Important Notes
       level: 2
-notes: >
-  [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the
-  command: `md-tree explode {input file} {output path}`.
-
+notes: |
+  [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
   **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
-
   CRITICAL AEGNT SHARDING RULES:
-
   CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]

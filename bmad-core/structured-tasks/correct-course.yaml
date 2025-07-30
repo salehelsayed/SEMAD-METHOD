@@ -1,38 +1,30 @@
 id: correct-course
 name: Correct Course Task
-purpose: >-
+purpose: |-
   - Guide a structured response to a change trigger using the `{root}/checklists/change-checklist`.
-
   - Analyze the impacts of the change on epics, project artifacts, and the MVP, guided by the checklist's structure.
-
   - Explore potential solutions (e.g., adjust scope, rollback elements, re-scope features) as prompted by the checklist.
-
-  - Draft specific, actionable proposed updates to any affected project artifacts (e.g., epics, user stories, PRD
-  sections, architecture document sections) based on the analysis.
-
-  - Produce a consolidated "Sprint Change Proposal" document that contains the impact analysis and the clearly drafted
-  proposed edits for user review and approval.
-
-  - Ensure a clear handoff path if the nature of the changes necessitates fundamental replanning by other core agents
-  (like PM or Architect).
+  - Draft specific, actionable proposed updates to any affected project artifacts (e.g., epics, user stories, PRD sections, architecture document sections) based on the analysis.
+  - Produce a consolidated "Sprint Change Proposal" document that contains the impact analysis and the clearly drafted proposed edits for user review and approval.
+  - Ensure a clear handoff path if the nature of the changes necessitates fundamental replanning by other core agents (like PM or Architect).
 steps:
   - id: step0
     name: Initialize Memory Context
-    description: "Retrieve relevant context from previous sessions"
+    description: Retrieve relevant context from previous sessions
     actions:
-      - description: "Call retrieve-context task to get relevant past decisions and changes"
+      - description: Call retrieve-context task to get relevant past decisions and changes
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Update working memory with current change context"
+      - description: Update working memory with current change context
         elicit: false
         metadata:
           originalIndent: 0
   - id: step1
     name: Initial Setup & Mode Selection
-    description: ""
+    description: ''
     actions:
-      - description: "**Acknowledge Task & Inputs:**"
+      - description: '**Acknowledge Task & Inputs:**'
         elicit: true
         metadata:
           originalIndent: 0
@@ -40,61 +32,46 @@ steps:
         elicit: true
         metadata:
           originalIndent: 2
-      - description: >-
-          Verify the change trigger and ensure you have the user's initial explanation of the issue and its perceived
-          impact.
+      - description: Verify the change trigger and ensure you have the user's initial explanation of the issue and its perceived impact.
         elicit: true
         metadata:
           originalIndent: 2
-      - description: >-
-          Confirm access to all relevant project artifacts (e.g., PRD, Epics/Stories, Architecture Documents, UI/UX
-          Specifications) and, critically, the `{root}/checklists/change-checklist`.
+      - description: Confirm access to all relevant project artifacts (e.g., PRD, Epics/Stories, Architecture Documents, UI/UX Specifications) and, critically, the `{root}/checklists/change-checklist`.
         elicit: true
         metadata:
           originalIndent: 2
-      - description: "**Establish Interaction Mode:**"
+      - description: '**Establish Interaction Mode:**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Ask the user their preferred interaction mode for this task:"
+      - description: 'Ask the user their preferred interaction mode for this task:'
         elicit: true
         metadata:
           originalIndent: 2
-      - description: >-
-          **"Incrementally (Default & Recommended):** Shall we work through the change-checklist section by section,
-          discussing findings and collaboratively drafting proposed changes for each relevant part before moving to the
-          next? This allows for detailed, step-by-step refinement."
+      - description: '**"Incrementally (Default & Recommended):** Shall we work through the change-checklist section by section, discussing findings and collaboratively drafting proposed changes for each relevant part before moving to the next? This allows for detailed, step-by-step refinement."'
         elicit: true
         metadata:
           originalIndent: 4
-      - description: >-
-          **"YOLO Mode (Batch Processing):** Or, would you prefer I conduct a more batched analysis based on the
-          checklist and then present a consolidated set of findings and proposed changes for a broader review? This can
-          be quicker for initial assessment but might require more extensive review of the combined proposals."
+      - description: '**"YOLO Mode (Batch Processing):** Or, would you prefer I conduct a more batched analysis based on the checklist and then present a consolidated set of findings and proposed changes for a broader review? This can be quicker for initial assessment but might require more extensive review of the combined proposals."'
         elicit: true
         metadata:
           originalIndent: 4
-      - description: >-
-          Once the user chooses, confirm the selected mode and then inform the user: "We will now use the
-          change-checklist to analyze the change and draft proposed updates. I will guide you through the checklist
-          items based on our chosen interaction mode."
+      - description: 'Once the user chooses, confirm the selected mode and then inform the user: "We will now use the change-checklist to analyze the change and draft proposed updates. I will guide you through the checklist items based on our chosen interaction mode."'
         elicit: true
         metadata:
           originalIndent: 2
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Execute Checklist Analysis (Iteratively or Batched, per Interaction Mode)
-    description: ""
+    description: ''
     actions:
-      - description: >-
-          Systematically work through Sections 1-4 of the change-checklist (typically covering Change Context,
-          Epic/Story Impact Analysis, Artifact Conflict Resolution, and Path Evaluation/Recommendation).
+      - description: Systematically work through Sections 1-4 of the change-checklist (typically covering Change Context, Epic/Story Impact Analysis, Artifact Conflict Resolution, and Path Evaluation/Recommendation).
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "For each checklist item or logical group of items (depending on interaction mode):"
+      - description: 'For each checklist item or logical group of items (depending on interaction mode):'
         elicit: false
         metadata:
           originalIndent: 0
@@ -102,9 +79,7 @@ steps:
         elicit: true
         metadata:
           originalIndent: 2
-      - description: >-
-          Request necessary information and actively analyze the relevant project artifacts (PRD, epics, architecture
-          documents, story history, etc.) to assess the impact.
+      - description: Request necessary information and actively analyze the relevant project artifacts (PRD, epics, architecture documents, story history, etc.) to assess the impact.
         elicit: false
         metadata:
           originalIndent: 2
@@ -112,9 +87,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: >-
-          Record the status of each checklist item (e.g., `[x] Addressed`, `[N/A]`, `[!] Further Action Needed`) and any
-          pertinent notes or decisions.
+      - description: Record the status of each checklist item (e.g., `[x] Addressed`, `[N/A]`, `[!] Further Action Needed`) and any pertinent notes or decisions.
         elicit: false
         metadata:
           originalIndent: 2
@@ -124,24 +97,20 @@ steps:
           originalIndent: 2
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Draft Proposed Changes (Iteratively or Batched)
-    description: ""
+    description: ''
     actions:
-      - description: >-
-          Based on the completed checklist analysis (Sections 1-4) and the agreed "Recommended Path Forward" (excluding
-          scenarios requiring fundamental replans that would necessitate immediate handoff to PM/Architect):
+      - description: 'Based on the completed checklist analysis (Sections 1-4) and the agreed "Recommended Path Forward" (excluding scenarios requiring fundamental replans that would necessitate immediate handoff to PM/Architect):'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: >-
-          Identify the specific project artifacts that require updates (e.g., specific epics, user stories, PRD
-          sections, architecture document components, diagrams).
+      - description: Identify the specific project artifacts that require updates (e.g., specific epics, user stories, PRD sections, architecture document components, diagrams).
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "**Draft the proposed changes directly and explicitly for each identified artifact.** Examples include:"
+      - description: '**Draft the proposed changes directly and explicitly for each identified artifact.** Examples include:'
         elicit: false
         metadata:
           originalIndent: 2
@@ -153,15 +122,11 @@ steps:
         elicit: false
         metadata:
           originalIndent: 4
-      - description: >-
-          Proposing modified architecture diagram snippets (e.g., providing an updated Mermaid diagram block or a clear
-          textual description of the change to an existing diagram).
+      - description: Proposing modified architecture diagram snippets (e.g., providing an updated Mermaid diagram block or a clear textual description of the change to an existing diagram).
         elicit: false
         metadata:
           originalIndent: 4
-      - description: >-
-          Updating technology lists, configuration details, or specific sections within the PRD or architecture
-          documents.
+      - description: Updating technology lists, configuration details, or specific sections within the PRD or architecture documents.
         elicit: false
         metadata:
           originalIndent: 4
@@ -169,9 +134,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 4
-      - description: >-
-          If in "Incremental Mode," discuss and refine these proposed edits for each artifact or small group of related
-          artifacts with the user as they are drafted.
+      - description: If in "Incremental Mode," discuss and refine these proposed edits for each artifact or small group of related artifacts with the user as they are drafted.
         elicit: false
         metadata:
           originalIndent: 2
@@ -181,51 +144,39 @@ steps:
           originalIndent: 2
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Generate "Sprint Change Proposal" with Edits
-    description: ""
+    description: ''
     actions:
-      - description: >-
-          Synthesize the complete change-checklist analysis (covering findings from Sections 1-4) and all the
-          agreed-upon proposed edits (from Instruction 3) into a single document titled "Sprint Change Proposal." This
-          proposal should align with the structure suggested by Section 5 of the change-checklist.
+      - description: Synthesize the complete change-checklist analysis (covering findings from Sections 1-4) and all the agreed-upon proposed edits (from Instruction 3) into a single document titled "Sprint Change Proposal." This proposal should align with the structure suggested by Section 5 of the change-checklist.
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "The proposal must clearly present:"
+      - description: 'The proposal must clearly present:'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: >-
-          **Analysis Summary:** A concise overview of the original issue, its analyzed impact (on epics, artifacts, MVP
-          scope), and the rationale for the chosen path forward.
+      - description: '**Analysis Summary:** A concise overview of the original issue, its analyzed impact (on epics, artifacts, MVP scope), and the rationale for the chosen path forward.'
         elicit: false
         metadata:
           originalIndent: 2
-      - description: >-
-          **Specific Proposed Edits:** For each affected artifact, clearly show or describe the exact changes (e.g.,
-          "Change Story X.Y from: [old text] To: [new text]", "Add new Acceptance Criterion to Story A.B: [new AC]",
-          "Update Section 3.2 of Architecture Document as follows: [new/modified text or diagram description]").
+      - description: '**Specific Proposed Edits:** For each affected artifact, clearly show or describe the exact changes (e.g., "Change Story X.Y from: [old text] To: [new text]", "Add new Acceptance Criterion to Story A.B: [new AC]", "Update Section 3.2 of Architecture Document as follows: [new/modified text or diagram description]").'
         elicit: false
         metadata:
           originalIndent: 2
-      - description: >-
-          Present the complete draft of the "Sprint Change Proposal" to the user for final review and feedback.
-          Incorporate any final adjustments requested by the user.
+      - description: Present the complete draft of the "Sprint Change Proposal" to the user for final review and feedback. Incorporate any final adjustments requested by the user.
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Finalize & Determine Next Steps
-    description: ""
+    description: ''
     actions:
-      - description: >-
-          Obtain explicit user approval for the "Sprint Change Proposal," including all the specific edits documented
-          within it.
+      - description: Obtain explicit user approval for the "Sprint Change Proposal," including all the specific edits documented within it.
         elicit: false
         metadata:
           originalIndent: 0
@@ -233,32 +184,23 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Update working memory with final change decisions and outcomes"
+      - description: Update working memory with final change decisions and outcomes
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Based on the nature of the approved changes:**"
+      - description: '**Based on the nature of the approved changes:**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: >-
-          **If the approved edits sufficiently address the change and can be implemented directly or organized by a
-          PO/SM:** State that the "Correct Course Task" is complete regarding analysis and change proposal, and the user
-          can now proceed with implementing or logging these changes (e.g., updating actual project documents, backlog
-          items). Suggest handoff to a PO/SM agent for backlog organization if appropriate.
+      - description: '**If the approved edits sufficiently address the change and can be implemented directly or organized by a PO/SM:** State that the "Correct Course Task" is complete regarding analysis and change proposal, and the user can now proceed with implementing or logging these changes (e.g., updating actual project documents, backlog items). Suggest handoff to a PO/SM agent for backlog organization if appropriate.'
         elicit: true
         metadata:
           originalIndent: 2
-      - description: >-
-          **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the
-          change requires a more fundamental replan (e.g., significant scope change, major architectural rework):**
-          Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or
-          Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning
-          effort.
+      - description: '**If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.'
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "**Primary:** A \"Sprint Change Proposal\" document (in markdown format). This document will contain:"
+      - description: '**Primary:** A "Sprint Change Proposal" document (in markdown format). This document will contain:'
         elicit: false
         metadata:
           originalIndent: 0
@@ -270,20 +212,14 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: >-
-          **Implicit:** An annotated change-checklist (or the record of its completion) reflecting the discussions,
-          findings, and decisions made during the process.
+      - description: '**Implicit:** An annotated change-checklist (or the record of its completion) reflecting the discussions, findings, and decisions made during the process.'
         elicit: false
         metadata:
           originalIndent: 0
-    notes: >-
-      - **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the
-      change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly
-      state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents,
-      using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
+    notes: '- **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.'
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
 inputs: {}
 outputs: {}
 metadata:

@@ -1,13 +1,10 @@
 id: execute-checklist
 name: Execute Checklist
-purpose: >-
-  Generic task for executing any checklist file systematically. Supports both interactive 
-  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress, 
-  captures findings, and provides structured results.
+purpose: Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
 steps:
   - id: step0
     name: Initialize Working Memory
-    description: "Initialize working memory for checklist execution session"
+    description: Initialize working memory for checklist execution session
     actions:
       - description: Execute task `update-working-memory` with agentName and taskId='execute-checklist'
         elicit: false
@@ -15,146 +12,141 @@ steps:
         elicit: false
       - description: Load checklist content and parse structure
         elicit: false
-  
   - id: step1
     name: Determine Execution Mode
-    description: "Determine how to execute the checklist based on user preference"
+    description: Determine how to execute the checklist based on user preference
     actions:
-      - description: "Check if execution mode was provided in input"
+      - description: Check if execution mode was provided in input
         elicit: false
-      - description: "If mode not specified, ask user for preference:"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**How would you like to work through this checklist?**"
-        elicit: false
-        metadata:
-          originalIndent: 2
-      - description: "1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding"
-        elicit: false
-        metadata:
-          originalIndent: 2
-      - description: "2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end"
-        elicit: false
-        metadata:
-          originalIndent: 2
-      - description: "Select option (1 or 2):"
+      - description: 'If mode not specified, ask user for preference:'
         elicit: true
         metadata:
           originalIndent: 0
-  
+      - description: '**How would you like to work through this checklist?**'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'Select option (1 or 2):'
+        elicit: true
+        metadata:
+          originalIndent: 0
   - id: step2
     name: Parse Checklist Structure
-    description: "Analyze the checklist to identify sections and items"
+    description: Analyze the checklist to identify sections and items
     actions:
-      - description: "Identify main sections in the checklist"
+      - description: Identify main sections in the checklist
         elicit: false
-      - description: "Extract checklist items (lines starting with '- [ ]')"
+      - description: Extract checklist items (lines starting with '- [ ]')
         elicit: false
-      - description: "Parse any LLM instructions embedded in [[LLM: ]] blocks"
+      - description: 'Parse any LLM instructions embedded in [[LLM: ]] blocks'
         elicit: false
-      - description: "Create structured representation of checklist hierarchy"
+      - description: Create structured representation of checklist hierarchy
         elicit: false
-      - description: "Record total items count and section breakdown in memory"
+      - description: Record total items count and section breakdown in memory
         elicit: false
-  
   - id: step3
     name: Execute Checklist Items
-    description: "Work through each checklist item based on selected mode"
+    description: Work through each checklist item based on selected mode
     actions:
-      - description: "For each section in the checklist:"
+      - description: 'For each section in the checklist:'
         elicit: false
-      - description: "Read and understand the section context and any LLM instructions"
-        elicit: false
-        metadata:
-          originalIndent: 2
-      - description: "Evaluate each checklist item in the section"
+      - description: Read and understand the section context and any LLM instructions
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "Mark items as checked [x] or unchecked [ ] based on evaluation"
+      - description: Evaluate each checklist item in the section
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "Document findings, issues, or observations for each item"
+      - description: Mark items as checked [x] or unchecked [ ] based on evaluation
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "If interactive mode: Present section findings and await confirmation"
+      - description: Document findings, issues, or observations for each item
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'If interactive mode: Present section findings and await confirmation'
         elicit: true
         metadata:
           originalIndent: 2
-      - description: "Update progress tracking in working memory"
+      - description: Update progress tracking in working memory
         elicit: false
         metadata:
           originalIndent: 2
-  
   - id: step4
     name: Generate Summary Report
-    description: "Create comprehensive report of checklist execution results"
+    description: Create comprehensive report of checklist execution results
     actions:
-      - description: "Calculate overall completion percentage"
+      - description: Calculate overall completion percentage
         elicit: false
-      - description: "Summarize findings by category/section"
+      - description: Summarize findings by category/section
         elicit: false
-      - description: "Identify critical issues or blockers"
+      - description: Identify critical issues or blockers
         elicit: false
-      - description: "Generate recommendations based on unchecked items"
+      - description: Generate recommendations based on unchecked items
         elicit: false
-      - description: "If checklist includes specific report format (e.g., validation tables), use that format"
+      - description: If checklist includes specific report format (e.g., validation tables), use that format
         elicit: false
-      - description: "Store execution results in working memory for future reference"
+      - description: Store execution results in working memory for future reference
         elicit: false
-  
   - id: step5
     name: Present Results and Next Steps
-    description: "Present the final results and offer follow-up actions"
+    description: Present the final results and offer follow-up actions
     actions:
-      - description: "Display the summary report to the user"
+      - description: Display the summary report to the user
         elicit: false
-      - description: "Highlight any critical issues or blockers found"
+      - description: Highlight any critical issues or blockers found
         elicit: false
-      - description: "Show completion statistics (X of Y items passed)"
+      - description: Show completion statistics (X of Y items passed)
         elicit: false
-      - description: "If unchecked items exist, offer to:"
+      - description: 'If unchecked items exist, offer to:'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "1. Get detailed analysis of failed items"
+      - description: 1. Get detailed analysis of failed items
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "2. Generate action plan to address issues"
+      - description: 2. Generate action plan to address issues
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "3. Re-run specific sections"
+      - description: 3. Re-run specific sections
         elicit: false
         metadata:
           originalIndent: 2
-      - description: "Would you like to perform any follow-up actions?"
+      - description: Would you like to perform any follow-up actions?
         elicit: true
         metadata:
           originalIndent: 0
-
 inputs:
   checklistPath:
-    description: "Path to the checklist file to execute"
+    description: Path to the checklist file to execute
     type: string
     required: true
   mode:
-    description: "Execution mode - 'interactive' or 'comprehensive'"
+    description: Execution mode - 'interactive' or 'comprehensive'
     type: string
     required: false
-    enum: ["interactive", "comprehensive"]
+    enum:
+      - interactive
+      - comprehensive
   context:
-    description: "Additional context for checklist execution (e.g., file paths, project info)"
+    description: Additional context for checklist execution (e.g., file paths, project info)
     type: object
     required: false
-
 outputs:
   results:
-    description: "Detailed results of checklist execution"
+    description: Detailed results of checklist execution
     type: object
     properties:
       totalItems:
@@ -177,10 +169,12 @@ outputs:
       recommendations:
         type: array
   completionStatus:
-    description: "Overall checklist completion status"
+    description: Overall checklist completion status
     type: string
-    enum: ["PASS", "PARTIAL", "FAIL"]
-
+    enum:
+      - PASS
+      - PARTIAL
+      - FAIL
 metadata:
   supportsAdaptation: true
   requiresWorkingMemory: true
@@ -192,6 +186,6 @@ metadata:
     - Checklist items as "- [ ]" lines
     - LLM instructions in [[LLM: ]] blocks
     - Embedded report formats and validation tables
-    
+
     The task adapts to the specific checklist structure and follows any
     embedded instructions for execution and reporting.

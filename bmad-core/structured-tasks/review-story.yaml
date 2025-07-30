@@ -1,10 +1,10 @@
 id: review-story
 name: review-story
-purpose: "Review and validate story implementation with QA perspective, maintaining context through working memory"
+purpose: Review and validate story implementation with QA perspective, maintaining context through working memory
 steps:
   - id: step0
     name: Initialize Memory and Context
-    description: "Initialize working memory for QA review session"
+    description: Initialize working memory for QA review session
     actions:
       - description: Execute task `update-working-memory` with agentName='qa' and taskId='review-story'
         elicit: false
@@ -12,7 +12,7 @@ steps:
         elicit: false
   - id: step1
     name: Record Review Observations
-    description: "Record key findings and patterns for future reviews"
+    description: Record key findings and patterns for future reviews
     actions:
       - description: After completing review, execute `recordObservation` to capture review patterns and common issues found
         elicit: false
@@ -30,15 +30,13 @@ metadata:
     - Completion
   preservedContent:
     - type: special-note
-      content: "   - Note any completion notes from the developer"
+      content: '   - Note any completion notes from the developer'
       lineNumber: 16
     - type: special-note
-      content: "   - Add missing tests if critical coverage is lacking"
+      content: '   - Add missing tests if critical coverage is lacking'
       lineNumber: 64
     - type: special-note
-      content: >-
-        **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any
-        other sections.
+      content: '**CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.'
       lineNumber: 76
     - type: code-block
       content: |-
@@ -84,17 +82,14 @@ metadata:
         ```
       lineNumber: 80
     - type: special-note
-      content: "- Story file is incomplete or missing critical sections"
+      content: '- Story file is incomplete or missing critical sections'
       lineNumber: 133
     - type: special-note
-      content: "- Critical architectural issues that require discussion"
+      content: '- Critical architectural issues that require discussion'
       lineNumber: 137
-notes: >2
+notes: |2
      - Note any completion notes from the developer
      - Add missing tests if critical coverage is lacking
-  **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other
-  sections.
-
+  **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.
   - Story file is incomplete or missing critical sections
-
   - Critical architectural issues that require discussion

@@ -114,6 +114,66 @@ class TaskRunner {
   }
 
   /**
+   * Check if a task has actions requiring user input
+   * @param {Object} task - The task to check
+   * @returns {Array} Array of actions requiring user input
+   */
+  getActionsRequiringInput(task) {
+    const actionsRequiringInput = [];
+    
+    if (task.steps && Array.isArray(task.steps)) {
+      for (const step of task.steps) {
+        if (step.actions && Array.isArray(step.actions)) {
+          const elicitActions = step.actions.filter(action => action.elicit === true);
+          if (elicitActions.length > 0) {
+            actionsRequiringInput.push({
+              stepId: step.id,
+              stepName: step.name,
+              actions: elicitActions
+            });
+          }
+        }
+      }
+    }
+    
+    return actionsRequiringInput;
+  }
+
+  /**
+   * Validate that user input is available for all elicit actions
+   * @param {Object} task - The task to validate
+   * @param {Object} context - The execution context
+   * @returns {Object} Validation result
+   */
+  validateElicitRequirements(task, context) {
+    const requiredInputs = this.getActionsRequiringInput(task);
+    
+    if (requiredInputs.length === 0) {
+      return { valid: true, missingInputs: [] };
+    }
+    
+    // Check if userInputHandler is provided
+    if (!context.userInputHandler) {
+      console.warn('\n⚠️  Task has actions requiring user input but no userInputHandler provided');
+      console.warn('Actions requiring input:');
+      for (const stepInput of requiredInputs) {
+        console.warn(`\nStep: ${stepInput.stepName}`);
+        for (const action of stepInput.actions) {
+          console.warn(`  - ${action.description}`);
+        }
+      }
+      
+      return {
+        valid: false,
+        missingInputs: requiredInputs,
+        error: 'No userInputHandler provided for actions requiring user input'
+      };
+    }
+    
+    return { valid: true, missingInputs: [] };
+  }
+
+  /**
    * Execute a task with dynamic plan adaptation
    * @param {string} agentName - The agent executing the task
    * @param {string} taskPath - Path to the task file
@@ -159,6 +219,19 @@ class TaskRunner {
           name: path.basename(taskPath, path.extname(taskPath)),
           description: taskData.raw.split('\n')[0],
           steps: this.extractStepsFromMarkdown(taskData.raw)
+        };
+      }
+
+      // Validate elicit requirements before proceeding
+      const elicitValidation = this.validateElicitRequirements(task, context);
+      if (!elicitValidation.valid && !context.allowMissingUserInput) {
+        // Return early with information about missing inputs
+        return {
+          success: false,
+          error: 'Task requires user input but no handler provided',
+          missingInputs: elicitValidation.missingInputs,
+          taskName: task.name,
+          requiresUserInput: true
         };
       }
 
@@ -566,13 +639,39 @@ class TaskRunner {
       return result;
     }
     
-    // Execute actions if they exist (old format)
+    // Execute actions if they exist
     if (step.actions && step.actions.length > 0) {
       const { exec } = require('child_process');
       const util = require('util');
       const execAsync = util.promisify(exec);
       
+      // Check if any actions require user input
+      const actionsRequiringInput = step.actions.filter(action => action.elicit === true);
+      if (actionsRequiringInput.length > 0 && context.userInputHandler) {
+        // Pause execution and wait for user input
+        console.log('\n🔔 User input required for the following actions:');
+        for (const action of actionsRequiringInput) {
+          console.log(`  - ${action.description}`);
+        }
+        
+        // Call the user input handler if provided
+        const userResponses = await context.userInputHandler(actionsRequiringInput, step);
+        if (userResponses) {
+          // Store user responses in context for later use
+          context.userResponses = context.userResponses || {};
+          context.userResponses[step.id] = userResponses;
+        }
+      }
+      
       for (const action of step.actions) {
+        // Handle elicit flag - if true and no userInputHandler, log warning
+        if (action.elicit === true && !context.userInputHandler) {
+          console.warn(`⚠️  Action requires user input but no handler provided: "${action.description}"`);
+          // In a real orchestrator, this would pause and wait for user input
+          // For now, we'll continue but log the requirement
+        }
+        
+        // Execute command-based actions (old format)
         if (action.action && typeof action.action === 'string') {
           // Replace template variables in the action
           let command = action.action;

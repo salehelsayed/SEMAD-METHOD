@@ -11,13 +11,13 @@ purpose: |-
 steps:
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for research prompt creation"
+      - description: Initialize working memory for research prompt creation
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve previous research patterns and methodologies"
+      - description: Retrieve previous research patterns and methodologies
         elicit: false
         metadata:
           originalIndent: 0
@@ -177,7 +177,7 @@ steps:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Input Processing
     description: |-
@@ -255,7 +255,7 @@ steps:
       - Note creative directions to explore
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Research Prompt Structure
     description: |-
@@ -383,7 +383,7 @@ steps:
       CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Prompt Generation
     description: |-
@@ -454,7 +454,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Review and Refinement
     description: |-
@@ -508,7 +508,7 @@ steps:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
   - id: step6
     name: Next Steps Guidance
     description: |-
@@ -560,7 +560,7 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "6"
+      originalNumber: '6'
 inputs: {}
 outputs: {}
 metadata:
@@ -571,9 +571,7 @@ metadata:
     - Important Notes
   preservedContent:
     - type: special-note
-      content: >-
-        CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input
-        documents they've provided.
+      content: 'CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents they''ve provided.'
       lineNumber: 17
     - type: section-header
       content: Important Notes
@@ -581,6 +579,5 @@ metadata:
     - type: section-header
       content: Important Notes
       level: 2
-notes: >
-  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents
-  they've provided.
+notes: |
+  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents they've provided.
