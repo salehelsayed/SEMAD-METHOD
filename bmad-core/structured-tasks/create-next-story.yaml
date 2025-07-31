@@ -3,26 +3,34 @@ name: Create Next Story Task
 purpose: To identify the next logical story based on project progress and epic definitions, and then to prepare a comprehensive, self-contained, and actionable story file using the `Story Template`. This task ensures the story is enriched with all necessary technical context, requirements, and acceptance criteria, making it ready for efficient implementation by a Developer Agent with minimal need for additional research or finding its own context.
 steps:
   - id: step0
-    name: Initialize Working Memory
-    description: Initialize working memory for the current agent session
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Execute task `update-working-memory` with agentName='sm' and taskId='create-next-story'
+      - description: Load agent working memory and relevant long-term context
         elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: sm
+          context:
+            taskId: create-next-story
+            taskType: story-creation
         metadata:
-          originalIndent: 0
-      - description: Execute task `retrieve-context` with query='previous story creation context' to load relevant memories
-        elicit: false
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
         metadata:
-          originalIndent: 0
+          memoryAction: true
+          executionOrder: after-load
       - description: Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
   - id: step1
     name: Load Core Configuration and Check Workflow
     description: ''
     actions:
-      - description: Load `{root}/core-config.yaml` from the project root
+      - description: Load `bmad-core/core-config.yaml` from the project root
         elicit: false
         metadata:
           originalIndent: 0
@@ -60,19 +68,19 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: 'Verify status is ''Done''. If not, alert user: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"'
+      - description: 'Verify status is ''Done''. If not, alert user and halt: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status]. Cannot proceed until this story is completed or manually moved to Done status."'
         elicit: true
         metadata:
           originalIndent: 2
-      - description: If proceeding, select next sequential story in the current epic
+      - description: Automatically select next sequential story in the current epic based on epic progress
         elicit: true
         metadata:
           originalIndent: 2
-      - description: 'If epic is complete, prompt user: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Would you like to: 1) Begin Epic {epicNum + 1} with story 1 2) Select a specific story to work on 3) Cancel story creation"'
-        elicit: true
+      - description: 'If epic is complete, automatically proceed to next epic: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Proceeding to Epic {epicNum + 1}, Story 1."'
+        elicit: false
         metadata:
           originalIndent: 2
-      - description: '**CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.'
+      - description: '**CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.'
         elicit: false
         metadata:
           originalIndent: 2
@@ -85,10 +93,10 @@ steps:
         metadata:
           originalIndent: 0
       - description: Execute task `update-working-memory` with currentStep='story-identified' and context containing epicNum, storyNum, and story title
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
-    notes: '- **CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.'
+    notes: '- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.'
     metadata:
       level: 4
       originalNumber: '1.1'
@@ -364,8 +372,16 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: 'Provide summary to user including:'
+      - description: 'MANDATORY VALIDATION: Execute task `validate-next-story` with the newly created story file path'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: If validation fails, halt workflow and surface all validation errors to the user. Story CANNOT proceed until all validation issues are resolved.
         elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Provide summary to user including:'
+        elicit: true
         metadata:
           originalIndent: 0
       - description: 'Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`'
@@ -388,18 +404,29 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: 'Next steps: For Complex stories, suggest the user carefully review the story draft and also optionally have the PO run the task `{root}/tasks/validate-next-story`'
-        elicit: true
+      - description: Validation Results (pass/fail with any issues)
+        elicit: false
         metadata:
           originalIndent: 2
-      - description: Execute task `update-working-memory` to record story completion with plan containing story details and observations about technical context extracted
+      - description: 'Next steps: Story has been validated and is ready for implementation'
         elicit: false
         metadata:
-          originalIndent: 0
-      - description: Store story summary in Qdrant for future retrieval using storeMemorySnippet with story title and key technical elements
-        elicit: false
+          originalIndent: 2
+      - description: Save task completion to working memory and archive significant findings
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: sm
+          taskData:
+            observation: Story creation completed successfully
+            significantFinding: Created story {{STORY_ID}} with complete technical context and validation
+            taskCompleted: true
+            taskId: create-next-story
+            context:
+              taskType: story-creation
         metadata:
-          originalIndent: 0
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:

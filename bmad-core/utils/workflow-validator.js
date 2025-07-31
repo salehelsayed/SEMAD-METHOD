@@ -24,15 +24,7 @@ class WorkflowValidator {
    * Load all available resources (tasks, agents, templates, checklists)
    */
   async loadAvailableResources() {
-    // Load tasks
-    const taskFiles = glob.sync(path.join(this.rootPath, 'bmad-core/tasks/**/*.{yaml,md}'));
-    for (const file of taskFiles) {
-      const ext = path.extname(file);
-      const taskName = path.basename(file, ext);
-      this.availableTasks.add(taskName);
-    }
-
-    // Load structured tasks
+    // Load structured tasks (only source for tasks now)
     const structuredTaskFiles = glob.sync(path.join(this.rootPath, 'bmad-core/structured-tasks/**/*.yaml'));
     for (const file of structuredTaskFiles) {
       const taskName = path.basename(file, '.yaml');

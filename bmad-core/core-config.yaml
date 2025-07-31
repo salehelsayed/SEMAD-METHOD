@@ -29,3 +29,65 @@ validationSchemas:
   checklistSchema: "schemas/checklist-schema.json"
   taskSchema: "schemas/task-schema.json"
   structuredTaskSchema: "schemas/structured-task-schema.json"
+  workflowConfigSchema: "schemas/workflow-config-schema.json"
+memory:
+  enabled: true
+  baseDirectory: ".ai"
+  debug:
+    enabled: false
+    logLevel: "info"
+    logFile: ".ai/memory-debug.log"
+  retentionPolicies:
+    workingMemory:
+      maxAgeDays: 7
+      maxObservations: 100
+      maxDecisions: 50
+      maxKeyFacts: 200
+      maxBlockers: 25
+      autoCleanup: true
+    longTermMemory:
+      maxAgeDays: 90
+      autoArchive: true
+      summarizationThreshold: 1000
+      compressionEnabled: true
+    archiveMemory:
+      maxAgeDays: 365
+      autoDelete: false
+  hygiene:
+    enableAutoSummarization: true
+    enableAutoCleanup: true
+    summarizationInterval: "daily"
+    cleanupSchedule: "0 2 * * *"
+    maxMemorySize: "100MB"
+    workingMemoryLimits:
+      maxObservations: 100
+      maxDecisions: 50
+      maxKeyFacts: 200
+      maxBlockers: 25
+      maxAgeHours: 168  # 7 days
+    cleanupTriggers:
+      runAfterEachAction: true
+      runOnMemoryThreshold: 0.8  # Cleanup when 80% of limits reached
+      runOnAgeThreshold: true
+    archivalRules:
+      summarizeBeforeDelete: true
+      retainCriticalFacts: true
+      preserveActiveBlockers: true
+      minimumEntriesBeforeCleanup: 10
+  tagging:
+    includeStoryId: true
+    includeEpicId: true
+    includeAgentRole: true
+    includeTimestamp: true
+    customTags: []
+  qdrant:
+    enabled: true
+    host: "localhost"
+    port: 6333
+    collection: "bmad_agent_memory"
+    vectorSize: 384
+    healthCheckInterval: 30000
+  delays:
+    memoryLockTimeout: 5000
+    batchTaskDelay: 500
+    retryDelay: 1000

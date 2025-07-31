@@ -1,0 +1,10 @@
+{
+  "flowType": "linear",
+  "storyId": "STORY-001",
+  "lastRun": "2025-07-31T18:22:18.593Z",
+  "lastResult": {
+    "success": false,
+    "iterations": 1
+  },
+  "workflowMode": "single"
+}

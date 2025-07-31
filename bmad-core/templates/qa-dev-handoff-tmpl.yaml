@@ -1,0 +1,133 @@
+template:
+  name: QA to Dev Handoff
+  description: Template for QA agent to hand off review findings to Dev agent for implementation
+  version: "1.0"
+
+sections:
+  - name: Handoff Header
+    content: |
+      ## QA Review Handoff to Dev Agent
+      
+      **From**: Quinn (QA Agent)
+      **To**: Dev Agent
+      **Review Date**: {{review_date}}
+      **Story ID**: {{story_id}}
+      **Review Status**: {{review_status}}
+      
+  - name: Review Summary
+    content: |
+      ### QA Review Summary
+      
+      **Overall Assessment**: {{overall_assessment}}
+      
+      **Test Coverage**: {{test_coverage}}%
+      **Tests Passed**: {{tests_passed}}
+      **Compliance Status**: {{compliance_status}}
+      
+  - name: Required Changes
+    content: |
+      ### Required Changes for Dev Implementation
+      
+      The following items require Dev agent attention and implementation:
+      
+      {{#each required_changes}}
+      #### {{@index}}. {{title}}
+      
+      **File**: `{{file}}`
+      **Issue**: {{issue}}
+      **Recommendation**: {{recommendation}}
+      **Priority**: {{priority}}
+      **Rationale**: {{rationale}}
+      
+      {{#if code_example}}
+      **Suggested Implementation**:
+      ```{{language}}
+      {{code_example}}
+      ```
+      {{/if}}
+      
+      {{/each}}
+      
+  - name: Test Recommendations
+    content: |
+      ### Test Coverage Recommendations
+      
+      {{#if missing_tests}}
+      **Missing Test Cases**:
+      {{#each missing_tests}}
+      - {{description}} ({{test_type}})
+        - File: `{{suggested_file}}`
+        - Coverage area: {{coverage_area}}
+      {{/each}}
+      {{/if}}
+      
+      {{#if test_improvements}}
+      **Test Improvements**:
+      {{#each test_improvements}}
+      - {{description}}
+      {{/each}}
+      {{/if}}
+      
+  - name: Architecture Concerns
+    content: |
+      ### Architecture and Design Concerns
+      
+      {{#if architecture_issues}}
+      {{#each architecture_issues}}
+      - **Concern**: {{concern}}
+        - **Impact**: {{impact}}
+        - **Recommendation**: {{recommendation}}
+      {{/each}}
+      {{else}}
+      No architecture concerns identified.
+      {{/if}}
+      
+  - name: Security and Performance
+    content: |
+      ### Security and Performance Findings
+      
+      {{#if security_issues}}
+      **Security Issues**:
+      {{#each security_issues}}
+      - **Severity**: {{severity}}
+        - **Issue**: {{issue}}
+        - **Fix**: {{recommended_fix}}
+      {{/each}}
+      {{/if}}
+      
+      {{#if performance_issues}}
+      **Performance Concerns**:
+      {{#each performance_issues}}
+      - **Area**: {{area}}
+        - **Issue**: {{issue}}
+        - **Optimization**: {{optimization}}
+      {{/each}}
+      {{/if}}
+      
+  - name: Implementation Notes
+    content: |
+      ### Implementation Notes for Dev Agent
+      
+      **Recommended Implementation Order**:
+      1. Address critical security issues first
+      2. Fix high-priority functional issues
+      3. Implement missing tests
+      4. Address performance optimizations
+      5. Handle low-priority improvements
+      
+      {{#if additional_notes}}
+      **Additional Notes**:
+      {{additional_notes}}
+      {{/if}}
+      
+  - name: Success Criteria
+    content: |
+      ### Success Criteria for Next Review
+      
+      For the implementation to pass the next QA review, ensure:
+      
+      {{#each success_criteria}}
+      - [ ] {{description}}
+      {{/each}}
+      
+      **Note**: All items must be addressed before marking the story as complete.

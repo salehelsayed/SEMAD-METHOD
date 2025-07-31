@@ -1,0 +1,183 @@
+id: check-dependencies-before-commit
+name: check-dependencies-before-commit
+purpose: Analyze dependency impacts of code changes before committing to identify potential issues and required updates
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: dev
+          context:
+            taskId: check-dependencies-before-commit
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step0
+    name: Initialize Memory and Context
+    description: Initialize working memory for dependency impact analysis
+    actions:
+      - description: Execute task `update-working-memory` with agentName='dev' and taskId='check-dependencies-before-commit'
+        elicit: true
+      - description: Execute task `retrieve-context` with query='dependency analysis patterns' to load relevant memories
+        elicit: true
+  - id: step1
+    name: Identify Changed Files
+    description: Determine which files have been modified for the current implementation
+    actions:
+      - description: Review the story's File List to identify files that will be modified
+        elicit: false
+      - description: Check git status to see currently modified files in working directory
+        elicit: false
+      - description: Create a comprehensive list of all files that will be affected by this implementation
+        elicit: false
+      - description: Filter the list to include only files that contain analyzable code (JS, TS, Python, Java)
+        elicit: false
+  - id: step2
+    name: Run Dependency Impact Analysis
+    description: Use dependency analyzer to check what symbols and files will be impacted
+    actions:
+      - description: Load the dependency-impact-checker utility
+        elicit: false
+      - description: For each modified file, call checkFileImpact() to analyze potential impacts
+        elicit: false
+      - description: Use analyzeBatchImpact() to get a comprehensive analysis of all changes
+        elicit: false
+      - description: Generate a dependency impact report using generateImpactReport()
+        elicit: false
+  - id: step3
+    name: Assess Risk Level
+    description: Evaluate the severity of dependency impacts and identify high-risk changes
+    actions:
+      - description: Use quickRiskAssessment() to categorize changes by risk level
+        elicit: false
+      - description: Identify any high-risk files (>20 impacted symbols) or critical symbol changes
+        elicit: false
+      - description: Check for impacts on core system components, configuration files, or shared utilities
+        elicit: false
+      - description: Flag any changes that might affect public APIs or interfaces
+        elicit: false
+  - id: step4
+    name: Review Impacted Files and Symbols
+    description: Examine the symbols and files that will be affected by the changes
+    actions:
+      - description: For each impacted file, review what symbols depend on the changes
+        elicit: false
+      - description: Check if impacted symbols are covered by existing tests
+        elicit: false
+      - description: Identify any impacted symbols that might need updates or refactoring
+        elicit: false
+      - description: Note any breaking changes that might affect dependent code
+        elicit: false
+  - id: step5
+    name: Plan Additional Testing
+    description: Determine what additional tests are needed based on dependency impacts
+    actions:
+      - description: Create a list of impacted functions/classes that need test coverage
+        elicit: false
+      - description: Identify integration points that should be tested due to dependency impacts
+        elicit: false
+      - description: Plan regression tests for high-impact changes
+        elicit: false
+      - description: Consider end-to-end tests for critical dependency chains
+        elicit: false
+  - id: step6
+    name: Document Dependency Warnings
+    description: Record dependency analysis results and warnings in the story
+    actions:
+      - description: Add dependency impact summary to the story's Debug Log
+        elicit: false
+      - description: Document any high-risk changes and mitigation plans
+        elicit: false
+      - description: List all impacted files and the reason for impact
+        elicit: false
+      - description: Record recommended additional testing based on dependency analysis
+        elicit: false
+  - id: step7
+    name: Make Go/No-Go Decision
+    description: Determine if changes can proceed or if additional work is needed
+    actions:
+      - description: Evaluate if dependency impacts are acceptable for the current story scope
+        elicit: false
+      - description: Check if all high-impact changes have adequate test coverage
+        elicit: false
+      - description: Verify that breaking changes are intentional and documented
+        elicit: true
+        prompt: |
+          DEPENDENCY IMPACT ANALYSIS RESULTS:
+
+          {{DEPENDENCY_IMPACT_REPORT}}
+
+          Based on this analysis:
+          1. Are there any concerning dependency impacts that need attention?
+          2. Should any additional files be modified to handle these impacts?
+          3. Is additional testing required beyond the current story scope?
+          4. Are there any breaking changes that need to be communicated?
+
+          Please review and decide:
+          - PROCEED: Continue with implementation as planned
+          - MODIFY: Adjust implementation to address dependency concerns
+          - ESCALATE: Consult with team about high-impact changes
+      - description: Record the decision and rationale in working memory
+        elicit: false
+  - id: step8
+    name: Update Implementation Plan
+    description: Adjust the implementation approach based on dependency analysis
+    actions:
+      - description: If MODIFY was chosen, update the implementation plan to address dependency concerns
+        elicit: false
+      - description: Add any additional files to the story's File List if they need updates
+        elicit: false
+      - description: Update the Tasks/Subtasks with any additional work required
+        elicit: true
+      - description: Document the final implementation approach in the Change Log
+        elicit: false
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: dev
+          taskData:
+            observation: Completed check-dependencies-before-commit task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: check-dependencies-before-commit
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  modified_files:
+    description: List of files that will be modified (optional - will be detected if not provided)
+    type: array
+    required: false
+outputs:
+  impact_report:
+    description: Comprehensive dependency impact analysis report
+    type: string
+  risk_assessment:
+    description: Risk categorization of the changes (high/medium/low)
+    type: string
+  recommended_actions:
+    description: List of recommended actions based on dependency analysis
+    type: array
+notes: |
+  - This task should be run before starting implementation of significant changes
+  - High-impact changes (>20 affected symbols) should trigger additional review
+  - Breaking changes must be explicitly acknowledged and documented
+  - The task will halt for user input if concerning impacts are detected
+  - Consider running this task incrementally for large stories with multiple files

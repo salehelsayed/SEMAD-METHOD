@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -67,6 +67,10 @@ persona:
     - Coordinate resource allocation and dependencies
     - Track workflow progress and milestones
     - Maintain clear communication between agents
+    - CONTEXT CONSOLIDATION PROTOCOL - Before agent handoffs, consolidate all user interactions and context using shared-context-manager. Ensure no user input is lost between agent transitions
+    - USER INTERACTION OVERSIGHT - Monitor all agent-user interactions through handle-user-interaction task. Maintain comprehensive record of user responses across the entire workflow
+    - ANTI-HALLUCINATION ENFORCEMENT - Before allowing agents to proceed, validate they have retrieved relevant user context. Prevent agents from making assumptions when user input exists
+    - CROSS-AGENT CONTEXT SHARING - Ensure agents can access relevant user inputs from other agents when needed. Facilitate context transfer during workflow transitions
 commands:
   - help: Show these listed commands in a numbered list
   - workflow {name}: Execute a specific workflow (no name = list available workflows)
@@ -83,6 +87,8 @@ dependencies:
     - kb-mode-interaction.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+    - handle-user-interaction.yaml
+    - retrieve-user-context.yaml
   templates:
     - workflow-status-tmpl.yaml
     - handoff-context-tmpl.yaml
@@ -98,6 +104,7 @@ dependencies:
     - greenfield-ui.yaml
   utils:
     - workflow-management.md
+    - shared-context-manager.js
 ```
 EOF < /dev/null
 ==================== END: .bmad-core/agents/bmad-orchestrator.md ====================
@@ -114,12 +121,19 @@ EOF < /dev/null
 
 ## Task Execution
 
-### 1. Initialize Memory
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory
 
 Setup working memory for elicitation session
 
-- Initialize working memory for elicitation context
-- Retrieve relevant past elicitation patterns if available
+- **[USER INPUT REQUIRED]** Initialize working memory for elicitation context
+- **[USER INPUT REQUIRED]** Retrieve relevant past elicitation patterns if available
 
 ### 1. Intelligent Method Selection
 
@@ -129,7 +143,7 @@ Setup working memory for elicitation session
 2. **Context-Specific Methods** (choose 4-5):
 3. **Always Include**: "Proceed / No Further Actions" as option 9
 
-- **Content Type**: Technical specs, user stories, architecture, requirements, etc.
+- **[USER INPUT REQUIRED]** **Content Type**: Technical specs, user stories, architecture, requirements, etc.
 - **Complexity Level**: Simple, moderate, or complex content
 - **Stakeholder Needs**: Who will use this information
 - **Risk Level**: High-impact decisions vs routine items
@@ -193,20 +207,33 @@ Choose a number (0-8) or 9 to proceed:
 **Execution Guidelines:**
 
 - **Be Concise**: Focus on actionable insights, not lengthy explanations
-- **Stay Relevant**: Tie all elicitation back to the specific content being analyzed
+- **[USER INPUT REQUIRED]** **Stay Relevant**: Tie all elicitation back to the specific content being analyzed
 - **Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking
 - **Maintain Flow**: Keep the process moving efficiently
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/advanced-elicitation.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/create-doc.yaml ====================
-# Create Document from Template (YAML Driven)
+# Create Document Task
 
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
-- **owner**: Note which agent role initially creates/populates the section
-- Include a note in the generated document indicating the responsible agent
+## Description
 
+Create a structured document from a selected template
 
-## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+## Required Inputs
+
+- **undefined** (undefined)
+- **undefined** (undefined)
+- **undefined** (undefined)
+
+## Outputs
+
+- **undefined** (undefined)
 ==================== END: .bmad-core/structured-tasks/create-doc.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/kb-mode-interaction.yaml ====================
@@ -218,12 +245,19 @@ Provide a user-friendly interface to the BMad knowledge base without overwhelmin
 
 ## Task Execution
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
 - Initialize working memory for KB mode interaction
-- Retrieve previous KB interactions and commonly asked topics
+- **[USER INPUT REQUIRED]** Retrieve previous KB interactions and commonly asked topics
 
 ### 1. Welcome and Guide
 
@@ -246,7 +280,7 @@ Or ask me about anything else related to BMad-Method!
 ### 3. Respond Contextually
 
 - **[USER INPUT REQUIRED]** Wait for user's specific question or topic selection
-- Provide focused, relevant information from the knowledge base
+- **[USER INPUT REQUIRED]** Provide focused, relevant information from the knowledge base
 - Offer to dive deeper or explore related topics
 - **[USER INPUT REQUIRED]** Keep responses concise unless user asks for detailed explanations
 
@@ -278,40 +312,214 @@ Or ask me about anything else related to BMad-Method!
 - Summarize key points discussed if helpful
 - Remind them they can return to KB mode anytime with *kb-mode
 - Suggest next steps based on what was discussed
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/kb-mode-interaction.yaml ====================
 
-==================== START: .bmad-core/tasks/update-working-memory.yaml ====================
-id: update-working-memory
-name: Update Working Memory Task
-description: Task definition for updating agent working memory
-type: task
-structuredTaskReference: ../structured-tasks/update-working-memory.yaml
-category: memory
-priority: high
-requiredInputs:
-  - agentName
-  - taskId (optional)
-  - currentStep (optional)
-  - plan (optional)
-  - context (optional)
-outputs:
-  - memory: Updated memory state
-==================== END: .bmad-core/tasks/update-working-memory.yaml ====================
+==================== START: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+# Update Working Memory
 
-==================== START: .bmad-core/tasks/retrieve-context.yaml ====================
-id: retrieve-context
-name: Retrieve Context Task
-description: Task definition for retrieving context from memory
-type: task
-structuredTaskReference: ../structured-tasks/retrieve-context.yaml
-category: memory
-priority: high
-requiredInputs:
-  - query
-  - topN (optional)
-outputs:
-  - memories
-==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
+## Description
+
+Updates the agent's working memory with current task state
+
+## Execution Steps
+
+1. Update the working memory JSON file for the agent
+2. Merge provided updates with existing memory
+3. Preserve existing data not being updated
+4. Return the updated memory state
+
+## Required Inputs
+
+- **agentName** (string): Name of the agent
+- **taskId** (string) - optional: Current task identifier
+- **currentStep** (string) - optional: Current step in the plan
+- **plan** (array) - optional: Task execution plan
+- **context** (object) - optional: Additional context to store
+
+## Outputs
+
+- **memory** (object): Updated memory state
+
+## Example Usage
+
+```
+await updateWorkingMemory('dev', {
+  taskId: 'TASK-123',
+  currentStep: 'implementing-feature',
+  plan: ['analyze', 'implement', 'test'],
+  context: { feature: 'user-auth' }
+});
+
+```
+==================== END: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+
+==================== START: .bmad-core/structured-tasks/retrieve-context.yaml ====================
+# Retrieve Context from Memory
+
+## Description
+
+Retrieves relevant context from long-term memory using similarity search
+
+## Execution Steps
+
+1. Connect to Qdrant vector database
+2. Generate embedding for the query
+3. Perform similarity search
+4. Return top N matching memories with scores
+
+## Required Inputs
+
+- **query** (string): Query string to search for similar memories
+- **topN** (number) - optional: Number of top results to retrieve
+
+## Outputs
+
+- **memories** (array): Array of retrieved memory snippets with scores
+
+## Example Usage
+
+```
+const memories = await retrieveMemory(
+  'user authentication implementation',
+  5
+);
+// Returns: [
+//   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
+//   ...
+// ]
+
+```
+==================== END: .bmad-core/structured-tasks/retrieve-context.yaml ====================
+
+==================== START: .bmad-core/structured-tasks/handle-user-interaction.yaml ====================
+# Handle User Interaction with Context Persistence
+
+## Description
+
+Manages user interactions with confirmation prompts and context persistence to minimize hallucination
+
+## Execution Steps
+
+1. Initialize SharedContextManager
+2. Record the question and context
+3. Present question to user with proper formatting
+4. Capture user response verbatim
+5. Process and analyze the response
+6. If requireConfirmation is true, present confirmation prompt
+7. Handle confirmation loop (up to maxConfirmationAttempts)
+8. Store confirmed response in shared context
+9. Update agent working memory with interaction summary
+10. Return structured response object
+
+## Required Inputs
+
+- **agentName** (string): Name of the requesting agent
+- **question** (string): Question to ask the user
+- **questionType** (string) - optional: Type of question (open-ended, yes-no, multiple-choice, requirement)
+- **category** (string) - optional: Category of the question (requirement, constraint, preference, clarification)
+- **importance** (string) - optional: Importance level (low, medium, high, critical)
+- **context** (object) - optional: Current workflow context
+- **requireConfirmation** (boolean) - optional: Whether to require explicit confirmation of the response
+- **maxConfirmationAttempts** (number) - optional: Maximum number of confirmation attempts
+
+## Outputs
+
+- **userResponse** (object): User response with confirmation status
+- **interactionId** (string): Unique identifier for this interaction
+- **contextUpdated** (boolean): Whether the shared context was successfully updated
+
+## Example Usage
+
+```
+const result = await executeTask('handle-user-interaction', {
+  agentName: 'po',
+  question: 'What are the key user personas for this feature?',
+  questionType: 'open-ended',
+  category: 'requirement',
+  importance: 'high',
+  context: {
+    currentPhase: 'requirements-gathering',
+    workflowStep: 'persona-definition',
+    storyId: 'STORY-123',
+    epicId: 'EPIC-1'
+  },
+  requireConfirmation: true
+});
+
+// Returns:
+// {
+//   userResponse: {
+//     original: "Primary personas are: Admin users, end customers, and support staff",
+//     processed: { wordCount: 10, hasSpecialRequirements: false, ... },
+//     confirmed: true,
+//     confirmationAttempts: 1
+//   },
+//   interactionId: "po_1643723400000_a1b2",
+//   contextUpdated: true
+// }
+
+```
+==================== END: .bmad-core/structured-tasks/handle-user-interaction.yaml ====================
+
+==================== START: .bmad-core/structured-tasks/retrieve-user-context.yaml ====================
+# Retrieve User Context Before Response
+
+## Description
+
+Retrieves relevant user context and interactions before generating agent responses to prevent hallucination
+
+## Execution Steps
+
+1. Initialize SharedContextManager
+2. Load current shared context
+3. Search for relevant user interactions based on agent and scope
+4. Filter interactions by search terms if provided
+5. Retrieve related context from long-term memory
+6. Analyze relevance and importance of found interactions
+7. Generate context summary for agent use
+8. Provide recommendations for context usage
+9. Return structured context object
+
+## Required Inputs
+
+- **agentName** (string): Name of the requesting agent
+- **currentTask** (string): Current task or question the agent is working on
+- **contextScope** (object) - optional: Scope for context retrieval
+- **searchTerms** (array) - optional: Specific terms or topics to search for in user interactions
+- **maxResults** (number) - optional: Maximum number of relevant interactions to return
+
+## Outputs
+
+- **relevantContext** (object): Relevant user context and interactions
+- **hasRelevantUserInput** (boolean): Whether relevant user input was found
+- **contextSummary** (string): Summary of relevant context for agent use
+- **recommendations** (array): Recommendations for how to use the context
+
+## Example Usage
+
+```
+const context = await executeTask('retrieve-user-context', {
+  agentName: 'dev',
+  currentTask: 'implementing user authentication feature',
+  contextScope: {
+    storyId: 'STORY-123',
+    includeOtherAgents: true
+  },
+  searchTerms: ['authentication', 'login', 'user', 'security'],
+  maxResults: 5
+});
+
+// Returns relevant user interactions and context
+// Agent can then reference actual user inputs instead of making assumptions
+
+```
+==================== END: .bmad-core/structured-tasks/retrieve-user-context.yaml ====================
 
 ==================== START: .bmad-core/templates/workflow-status-tmpl.yaml ====================
 template:
@@ -846,7 +1054,7 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 #### 4. Reusable Resources
 
 - **Templates** (`bmad-core/templates/`): Markdown templates for PRDs, architecture specs, user stories
-- **Tasks** (`bmad-core/tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
+- **Tasks** (`bmad-core/structured-tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
 - **Checklists** (`bmad-core/checklists/`): Quality assurance checklists for validation and review
 - **Data** (`bmad-core/data/`): Core knowledge base and technical preferences
 
@@ -871,8 +1079,8 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 BMad employs a sophisticated template system with three key components:
 
 1. **Template Format** (`utils/bmad-doc-template.md`): Defines markup language for variable substitution and AI processing directives from yaml templates
-2. **Document Creation** (`tasks/create-doc.md`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
-3. **Advanced Elicitation** (`tasks/advanced-elicitation.md`): Provides interactive refinement through structured brainstorming
+2. **Document Creation** (`structured-tasks/create-doc.yaml`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
+3. **Advanced Elicitation** (`structured-tasks/advanced-elicitation.yaml`): Provides interactive refinement through structured brainstorming
 
 ### Technical Preferences Integration
 
@@ -1581,3 +1789,650 @@ parallel:
 - Batch similar operations
 - Minimize context switching overhead
 ==================== END: .bmad-core/utils/workflow-management.md ====================
+
+==================== START: .bmad-core/utils/shared-context-manager.js ====================
+/**
+ * Shared Context Manager - Manages user interactions and responses across agents
+ * This utility provides centralized management of user responses to minimize
+ * hallucination and memory loss during agent interactions.
+ */
+
+const fs = require('fs').promises;
+const path = require('path');
+const crypto = require('crypto');
+
+class SharedContextManager {
+  constructor(baseDirectory = '.ai') {
+    this.baseDirectory = path.resolve(baseDirectory);
+    this.contextFilePath = path.join(this.baseDirectory, 'shared-context.json');
+    this.userInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
+    this.contextCache = null;
+    this.contextCacheTimestamp = null;
+    this.CACHE_TTL = 30000; // 30 seconds
+  }
+
+  /**
+   * Retry utility with exponential backoff for file operations
+   */
+  async retryWithBackoff(operation, maxRetries = 3, baseDelay = 100) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  /**
+   * Initialize the shared context system
+   */
+  async initialize() {
+    try {
+      // Ensure base directory exists
+      await fs.mkdir(this.baseDirectory, { recursive: true });
+      
+      // Initialize context file if it doesn't exist
+      if (!(await this.fileExists(this.contextFilePath))) {
+        await this.resetContext();
+      }
+      
+      // Initialize user interactions file if it doesn't exist
+      if (!(await this.fileExists(this.userInteractionsPath))) {
+        await this.resetUserInteractions();
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize SharedContextManager:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if file exists
+   */
+  async fileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Reset the shared context to initial state
+   */
+  async resetContext() {
+    const initialContext = {
+      sessionId: this.generateSessionId(),
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      currentPhase: 'initialization',
+      activeAgents: [],
+      globalContext: {
+        projectInfo: null,
+        requirements: {},
+        constraints: {},
+        decisions: [],
+        keyFacts: []
+      },
+      agentContext: {},
+      userResponseSummary: {},
+      workflowState: {
+        currentStep: null,
+        completedSteps: [],
+        pendingSteps: []
+      }
+    };
+    
+    await this.retryWithBackoff(() => 
+      fs.writeFile(this.contextFilePath, JSON.stringify(initialContext, null, 2))
+    );
+    this.contextCache = initialContext;
+    this.contextCacheTimestamp = Date.now();
+    
+    return initialContext;
+  }
+
+  /**
+   * Reset user interactions log
+   */
+  async resetUserInteractions() {
+    const initialInteractions = {
+      sessionId: this.generateSessionId(),
+      createdAt: new Date().toISOString(),
+      interactions: [],
+      summary: {
+        totalInteractions: 0,
+        agentBreakdown: {},
+        topicsSummary: []
+      }
+    };
+    
+    await this.retryWithBackoff(() => 
+      fs.writeFile(this.userInteractionsPath, JSON.stringify(initialInteractions, null, 2))
+    );
+    return initialInteractions;
+  }
+
+  /**
+   * Generate a unique session ID
+   */
+  generateSessionId() {
+    return `session_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  }
+
+  /**
+   * Load shared context with caching
+   */
+  async loadContext() {
+    try {
+      const now = Date.now();
+      
+      // Return cached version if still valid
+      if (this.contextCache && this.contextCacheTimestamp && 
+          (now - this.contextCacheTimestamp) < this.CACHE_TTL) {
+        return this.contextCache;
+      }
+      
+      const contextData = await this.retryWithBackoff(() => 
+        fs.readFile(this.contextFilePath, 'utf8')
+      );
+      const context = JSON.parse(contextData);
+      
+      // Update cache
+      this.contextCache = context;
+      this.contextCacheTimestamp = now;
+      
+      return context;
+    } catch (error) {
+      console.error('Failed to load shared context:', error);
+      // Return a minimal context if loading fails
+      return await this.resetContext();
+    }
+  }
+
+  /**
+   * Save shared context and invalidate cache
+   */
+  async saveContext(context) {
+    try {
+      context.lastUpdated = new Date().toISOString();
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.contextFilePath, JSON.stringify(context, null, 2))
+      );
+      
+      // Update cache
+      this.contextCache = context;
+      this.contextCacheTimestamp = Date.now();
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save shared context:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Record a user interaction with comprehensive context
+   */
+  async recordUserInteraction(agentName, question, userResponse, options = {}) {
+    try {
+      const interactionId = `${agentName}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`;
+      
+      const interaction = {
+        id: interactionId,
+        timestamp: new Date().toISOString(),
+        agentName,
+        phase: options.phase || 'unknown',
+        context: {
+          taskId: options.taskId,
+          epicId: options.epicId,
+          storyId: options.storyId,
+          workflowStep: options.workflowStep
+        },
+        question: {
+          text: question,
+          type: options.questionType || 'open-ended',
+          category: options.category || 'general'
+        },
+        userResponse: {
+          original: userResponse,
+          processed: this.processUserResponse(userResponse),
+          confirmed: false,
+          confirmationAttempts: 0
+        },
+        summary: options.summary || null,
+        tags: options.tags || [],
+        importance: options.importance || 'medium'
+      };
+
+      // Load current interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      // Add new interaction
+      interactions.interactions.push(interaction);
+      
+      // Update summary statistics
+      interactions.summary.totalInteractions++;
+      if (!interactions.summary.agentBreakdown[agentName]) {
+        interactions.summary.agentBreakdown[agentName] = 0;
+      }
+      interactions.summary.agentBreakdown[agentName]++;
+      
+      // Save updated interactions
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      // Update shared context with this interaction
+      await this.updateContextWithUserInput(agentName, interaction);
+      
+      return interaction;
+    } catch (error) {
+      console.error('Failed to record user interaction:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Process and clean user response
+   */
+  processUserResponse(response) {
+    if (typeof response !== 'string') {
+      response = String(response);
+    }
+    
+    const cleaned = response.trim();
+    return {
+      cleaned: cleaned,
+      wordCount: cleaned === '' ? 0 : cleaned.split(/\s+/).length,
+      hasSpecialRequirements: /\b(must|should|required|mandatory)\b/i.test(response),
+      hasNegations: /\b(not|don't|doesn't|won't|can't|shouldn't)\b/i.test(response),
+      containsNumbers: /\d+/.test(response),
+      containsUrls: /https?:\/\/[^\s]+/g.test(response),
+      keyPhrases: this.extractKeyPhrases(response)
+    };
+  }
+
+  /**
+   * Extract key phrases from user response
+   */
+  extractKeyPhrases(text) {
+    const phrases = [];
+    const words = text.toLowerCase().split(/\s+/);
+    
+    // Look for common requirement phrases
+    const patterns = [
+      /\b(needs? to|has to|must|should|required to)\s+(\w+(?:\s+\w+){0,3})/g,
+      /\b(will|would|can|could|might)\s+(\w+(?:\s+\w+){0,2})/g,
+      /\b(feature|functionality|requirement|constraint)\s+(\w+(?:\s+\w+){0,2})/g
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        phrases.push(match[0]);
+      }
+    });
+    
+    return phrases.slice(0, 5); // Limit to top 5 phrases
+  }
+
+  /**
+   * Update shared context with user input
+   */
+  async updateContextWithUserInput(agentName, interaction) {
+    try {
+      const context = await this.loadContext();
+      
+      // Ensure agent context exists
+      if (!context.agentContext[agentName]) {
+        context.agentContext[agentName] = {
+          interactions: [],
+          keyFacts: [],
+          decisions: [],
+          lastActivity: null
+        };
+      }
+      
+      // Add interaction reference
+      context.agentContext[agentName].interactions.push(interaction.id);
+      context.agentContext[agentName].lastActivity = interaction.timestamp;
+      
+      // Extract and store key facts from user response
+      const keyFacts = this.extractKeyFactsFromResponse(interaction);
+      if (keyFacts.length > 0) {
+        context.agentContext[agentName].keyFacts.push(...keyFacts);
+        // Also add to global context
+        context.globalContext.keyFacts.push(...keyFacts);
+      }
+      
+      // Update agent activity
+      if (!context.activeAgents.includes(agentName)) {
+        context.activeAgents.push(agentName);
+      }
+      
+      // Update user response summary for quick access
+      if (!context.userResponseSummary[agentName]) {
+        context.userResponseSummary[agentName] = [];
+      }
+      
+      context.userResponseSummary[agentName].push({
+        interactionId: interaction.id,
+        timestamp: interaction.timestamp,
+        question: interaction.question.text.substring(0, 100) + '...',
+        response: interaction.userResponse.original.substring(0, 200) + '...',
+        summary: interaction.summary,
+        importance: interaction.importance
+      });
+      
+      // Keep only last 10 summaries per agent to prevent bloating
+      if (context.userResponseSummary[agentName].length > 10) {
+        context.userResponseSummary[agentName] = context.userResponseSummary[agentName].slice(-10);
+      }
+      
+      await this.saveContext(context);
+      return true;
+    } catch (error) {
+      console.error('Failed to update context with user input:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Extract key facts from user response
+   */
+  extractKeyFactsFromResponse(interaction) {
+    const keyFacts = [];
+    const response = interaction.userResponse;
+    
+    // Create key facts based on response content
+    if (response.processed.hasSpecialRequirements) {
+      keyFacts.push({
+        id: `fact_${interaction.id}_req`,
+        type: 'requirement',
+        content: response.original,
+        source: 'user_input',
+        agentName: interaction.agentName,
+        timestamp: interaction.timestamp,
+        confidence: 'high'
+      });
+    }
+    
+    if (response.processed.keyPhrases.length > 0) {
+      response.processed.keyPhrases.forEach((phrase, index) => {
+        keyFacts.push({
+          id: `fact_${interaction.id}_phrase_${index}`,
+          type: 'key_phrase',
+          content: phrase,
+          source: 'user_input',
+          agentName: interaction.agentName,
+          timestamp: interaction.timestamp,
+          confidence: 'medium'
+        });
+      });
+    }
+    
+    return keyFacts;
+  }
+
+  /**
+   * Confirm user response with agent
+   */
+  async confirmUserResponse(interactionId, agentName, confirmationText) {
+    try {
+      // Load interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      // Find the interaction
+      const interaction = interactions.interactions.find(i => i.id === interactionId);
+      if (!interaction) {
+        throw new Error(`Interaction ${interactionId} not found`);
+      }
+      
+      // Update confirmation status
+      interaction.userResponse.confirmed = true;
+      interaction.userResponse.confirmationAttempts++;
+      interaction.userResponse.confirmationText = confirmationText;
+      interaction.userResponse.confirmedAt = new Date().toISOString();
+      
+      // Save updated interactions
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      return interaction;
+    } catch (error) {
+      console.error('Failed to confirm user response:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get relevant context for an agent
+   */
+  async getContextForAgent(agentName, options = {}) {
+    try {
+      const context = await this.loadContext();
+      
+      // Get agent-specific context
+      const agentContext = context.agentContext[agentName] || {};
+      
+      // Get relevant user interactions
+      const interactions = await this.getRelevantInteractions(agentName, options);
+      
+      // Build comprehensive context
+      const relevantContext = {
+        sessionInfo: {
+          sessionId: context.sessionId,
+          currentPhase: context.currentPhase,
+          workflowState: context.workflowState
+        },
+        globalContext: context.globalContext,
+        agentContext: agentContext,
+        userInteractions: interactions,
+        recentUserResponses: context.userResponseSummary[agentName] || [],
+        lastUpdated: context.lastUpdated
+      };
+      
+      return relevantContext;
+    } catch (error) {
+      console.error('Failed to get context for agent:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get relevant user interactions for an agent
+   */
+  async getRelevantInteractions(agentName, options = {}) {
+    try {
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      let relevantInteractions = interactions.interactions;
+      
+      // Filter by agent if specified
+      if (options.agentSpecific !== false) {
+        relevantInteractions = relevantInteractions.filter(i => i.agentName === agentName);
+      }
+      
+      // Filter by context if specified
+      if (options.storyId) {
+        relevantInteractions = relevantInteractions.filter(i => 
+          i.context.storyId === options.storyId);
+      }
+      
+      if (options.epicId) {
+        relevantInteractions = relevantInteractions.filter(i => 
+          i.context.epicId === options.epicId);
+      }
+      
+      // Sort by timestamp (most recent first)
+      relevantInteractions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Limit results if specified
+      if (options.limit) {
+        relevantInteractions = relevantInteractions.slice(0, options.limit);
+      }
+      
+      return relevantInteractions;
+    } catch (error) {
+      console.error('Failed to get relevant interactions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update workflow state
+   */
+  async updateWorkflowState(currentStep, completedSteps = [], pendingSteps = []) {
+    try {
+      const context = await this.loadContext();
+      
+      context.workflowState = {
+        currentStep,
+        completedSteps: [...new Set([...context.workflowState.completedSteps, ...completedSteps])],
+        pendingSteps: [...new Set(pendingSteps)]
+      };
+      
+      await this.saveContext(context);
+      return true;
+    } catch (error) {
+      console.error('Failed to update workflow state:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Add a global decision or key fact
+   */
+  async addGlobalContext(type, content, source = 'system') {
+    try {
+      const context = await this.loadContext();
+      
+      const item = {
+        id: `${type}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`,
+        content,
+        source,
+        timestamp: new Date().toISOString()
+      };
+      
+      if (type === 'decision') {
+        context.globalContext.decisions.push(item);
+      } else if (type === 'keyFact') {
+        context.globalContext.keyFacts.push(item);
+      }
+      
+      await this.saveContext(context);
+      return item;
+    } catch (error) {
+      console.error('Failed to add global context:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get a summary of all user interactions for handoff between agents
+   */
+  async getUserInteractionsSummary(options = {}) {
+    try {
+      const interactions = await this.getRelevantInteractions('all', { agentSpecific: false, ...options });
+      
+      const summary = {
+        totalInteractions: interactions.length,
+        agentBreakdown: {},
+        importantResponses: [],
+        keyDecisions: [],
+        openQuestions: []
+      };
+      
+      interactions.forEach(interaction => {
+        // Count by agent
+        if (!summary.agentBreakdown[interaction.agentName]) {
+          summary.agentBreakdown[interaction.agentName] = 0;
+        }
+        summary.agentBreakdown[interaction.agentName]++;
+        
+        // Collect important responses
+        if (interaction.importance === 'high' || 
+            interaction.userResponse.processed.hasSpecialRequirements) {
+          summary.importantResponses.push({
+            agent: interaction.agentName,
+            question: interaction.question.text,
+            response: interaction.userResponse.original,
+            timestamp: interaction.timestamp
+          });
+        }
+        
+        // Collect unconfirmed responses as open questions
+        if (!interaction.userResponse.confirmed) {
+          summary.openQuestions.push({
+            agent: interaction.agentName,
+            question: interaction.question.text,
+            response: interaction.userResponse.original,
+            needsConfirmation: true
+          });
+        }
+      });
+      
+      return summary;
+    } catch (error) {
+      console.error('Failed to get user interactions summary:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear old interactions and context (cleanup)
+   */
+  async cleanup(olderThanDays = 7) {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+      
+      // Clean up interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      const filteredInteractions = interactions.interactions.filter(i => 
+        new Date(i.timestamp) > cutoffDate
+      );
+      
+      interactions.interactions = filteredInteractions;
+      interactions.summary.totalInteractions = filteredInteractions.length;
+      
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      console.log(`Cleaned up ${interactions.interactions.length - filteredInteractions.length} old interactions`);
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to cleanup old interactions:', error);
+      return false;
+    }
+  }
+}
+
+module.exports = SharedContextManager;
+==================== END: .bmad-core/utils/shared-context-manager.js ====================

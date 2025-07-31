@@ -8,8 +8,7 @@ class ModuleResolver {
       // First, try to find and load core-config.yaml
       const coreConfigPaths = [
         path.join(baseDir, 'bmad-core', 'core-config.yaml'),
-        path.join(baseDir, 'core-config.yaml'),
-        path.join(baseDir, '.bmad-core', 'core-config.yaml')
+        path.join(baseDir, 'core-config.yaml')
       ];
 
       let coreConfig = null;

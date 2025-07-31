@@ -5,12 +5,48 @@ purpose: |-
   - Create a folder structure to organize the sharded documents
   - Maintain all content integrity including code blocks, diagrams, and markdown formatting
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: analyst
+          context:
+            taskId: shard-doc
+            taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: config-check
+    name: Check Core Configuration
+    description: Check if automatic sharding is enabled in core-config.yaml
+    actions:
+      - description: Load bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: If prdSharded or architectureSharded is true, proceed with automatic sharding
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: If markdownExploder is true, attempt to use md-tree explode command first
+        elicit: false
+        metadata:
+          originalIndent: 0
   - id: step0
     name: Initialize Memory Context
     description: Setup working memory and retrieve relevant context
     actions:
       - description: Initialize working memory for sharding task
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Record document being sharded in memory for future reference
@@ -155,6 +191,25 @@ steps:
     metadata:
       level: 3
       originalNumber: '7'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: analyst
+          taskData:
+            observation: Completed shard-doc task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: shard-doc
+            context:
+              taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -165,7 +220,7 @@ metadata:
     - Important Notes
   preservedContent:
     - type: special-note
-      content: '[[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
+      content: '[[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
       lineNumber: 11
     - type: special-note
       content: '**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"'
@@ -202,7 +257,7 @@ metadata:
       content: Important Notes
       level: 2
 notes: |
-  [[LLM: First, check if markdownExploder is set to true in {root}/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
+  [[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
   **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
   CRITICAL AEGNT SHARDING RULES:
   CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]

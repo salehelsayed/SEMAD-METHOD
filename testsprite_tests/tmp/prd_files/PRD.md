@@ -14,6 +14,11 @@ SEMAD-METHOD is an enhanced fork of BMAD-METHOD that introduces structured, sche
 3. **Hallucination Risk**: Prose-based summaries between PRD and story creation introduce interpretation errors
 4. **Monolithic Task Processing**: Large tasks are processed as single units without systematic decomposition
 5. **Validation Gaps**: No automated validation between planning artifacts and implementation
+6. **Workflow Rigidity**: Fixed linear workflows without options for iterative development
+7. **User Input Loss**: Workflows proceeding without capturing critical user decisions
+8. **Role Confusion**: Agents performing tasks outside their designated responsibilities
+9. **Path Inconsistencies**: Hardcoded paths not matching actual file locations
+10. **Limited Visibility**: Insufficient feedback about system operations
 
 ### Impact
 - Inconsistent code quality
@@ -23,14 +28,24 @@ SEMAD-METHOD is an enhanced fork of BMAD-METHOD that introduces structured, sche
 
 ## 3. Solution Overview
 
-SEMAD-METHOD addresses these challenges through six core improvements:
+SEMAD-METHOD addresses these challenges through comprehensive improvements:
 
+### Core Structural Enhancements
 1. **Structured Task System**: YAML/JSON schemas replace markdown for deterministic execution
-2. **Working Memory Protocol**: Persistent scratchpad and vector-based long-term memory
-3. **Dynamic Plan Adaptation**: Automatic task decomposition using divide-and-conquer strategies
-4. **Search Tool Generation**: Automated discovery of relevant documentation from PRDs
-5. **StoryContract System**: Formal specification replacing prose summaries
-6. **Automated Validation**: Schema-based validation at every handoff point
+2. **Working Memory Protocol**: Persistent scratchpad and vector-based long-term memory with health monitoring
+3. **Dependency Analysis**: Qdrant-based tracking of code dependencies for impact assessment
+4. **Automated Validation**: Schema-based validation at every handoff point with mandatory story validation
+
+### Workflow and Process Improvements
+5. **Flexible Development Flows**: Choice between linear Dev→QA and iterative Dev↔QA workflows
+6. **User Input Elicitation**: Systematic capture of user decisions across all workflows
+7. **Epic Automation**: Complete epic processing through all stories without manual intervention
+8. **Enhanced Transparency**: Verbose orchestrator logging and standardized messaging
+
+### Advanced Features (In Development)
+9. **Dynamic Plan Adaptation**: Automatic task decomposition using divide-and-conquer strategies
+10. **Search Tool Generation**: Automated discovery of relevant documentation from PRDs
+11. **StoryContract System**: Formal specification replacing prose summaries
 
 ## 4. Target Users
 
@@ -38,11 +53,13 @@ SEMAD-METHOD addresses these challenges through six core improvements:
 - **Software Development Teams** using AI assistants for code generation
 - **Technical Leads** managing AI-assisted development workflows
 - **DevOps Engineers** implementing CI/CD with AI agents
+- **Scrum Masters** orchestrating agile workflows with AI agents
 
 ### Secondary Users
 - **Product Managers** defining requirements for AI implementation
-- **QA Engineers** validating AI-generated code
+- **QA Engineers** validating AI-generated code through review-only workflows
 - **Enterprise Teams** requiring traceable, auditable AI workflows
+- **Analysts** working with AI to create comprehensive requirements
 
 ## 5. Core Features
 
@@ -130,11 +147,59 @@ SEMAD-METHOD addresses these challenges through six core improvements:
 - Build-time validation (`npm run validate:contracts`)
 - Test generation from contracts
 - Continuous validation in CI/CD
+- Automatic story validation before creation
 
 **Benefits**:
 - Early error detection
 - Guaranteed schema compliance
 - Automated quality gates
+
+### 5.7 Enhanced Workflow Management
+
+**Description**: Flexible workflow options and improved agent coordination
+
+**Key Components**:
+- User input elicitation for all workflows
+- Choice between linear Dev→QA flow and iterative Dev↔QA loop
+- Epic-level automated processing through all stories
+- Improved orchestrator verbosity and transparency
+- Direct file location knowledge from configuration
+
+**Benefits**:
+- Reduced hallucination through consistent user input
+- Flexible development workflows to match team preferences
+- Automated epic completion without manual oversight
+- Better user visibility into system operations
+
+### 5.8 Agent Role Clarification
+
+**Description**: Clear separation of responsibilities between agents
+
+**Key Components**:
+- QA agent limited to review and feedback only
+- Dev agent handles all code implementations
+- Proper status updates at correct workflow stages
+- "Implement next story" command for efficiency
+
+**Benefits**:
+- Clear accountability and traceability
+- Prevents unauthorized code changes
+- Streamlined developer workflow
+
+### 5.9 Dependency Analysis System
+
+**Description**: Track and analyze code dependencies for impact assessment
+
+**Key Components**:
+- Dependency graph stored in Qdrant vector database
+- Automatic extraction of classes, functions, and imports
+- Impact analysis before code changes
+- Dependency warnings during implementation and review
+
+**Benefits**:
+- Reduced risk of breaking changes
+- Comprehensive impact assessment
+- Proactive dependency management
 
 ## 6. Technical Architecture
 
@@ -177,20 +242,40 @@ SEMAD-METHOD/
 - ✅ Create JSON Schema definitions
 - ✅ Implement validation framework
 - ✅ Set up test infrastructure
+- ✅ Remove duplicated tasks and unify on structured-tasks (Story 3)
+- ✅ Fix incorrect core-config path (Story 4)
+- ✅ Use YAML story template instead of markdown (Story 9)
 
-### Phase 2: Memory System (In Progress)
+### Phase 2: Memory System (Completed)
 - ✅ Working memory implementation
 - ✅ Memory transaction handling
-- ⏳ Qdrant integration for long-term memory
-- ⏳ Context retrieval optimization
+- ✅ Qdrant integration for long-term memory (Story 14)
+- ✅ Context retrieval optimization
+- ✅ Consistent use of short-term and long-term memory across agents (Story 15)
+- ✅ Unified memory utilization and hygiene (Story 16)
+- ✅ Memory health monitoring and reporting (Story 18)
+- ✅ Memory hygiene and maintenance (Story 19)
 
-### Phase 3: Advanced Features (Upcoming)
-- Dynamic plan adaptation rules
-- Search tool generation from PRD
-- StoryContract full implementation
-- Automated test generation
+### Phase 3: Workflow Enhancements (Completed)
+- ✅ Ensure all workflows elicit user input (Story 1)
+- ✅ Dev↔QA iterative loop option (Story 2)
+- ✅ Implement next story command for Dev agent (Story 5)
+- ✅ Prevent QA agent from implementing changes (Story 6)
+- ✅ Correct QA status update location (Story 7)
+- ✅ Automatic story validation (Story 8)
+- ✅ Increased orchestrator verbosity (Story 10)
+- ✅ Standardized output messages (Story 11)
+- ✅ Improved file location knowledge (Story 12)
+- ✅ Epic loop processing (Story 13)
+- ✅ Improved user-agent interaction accuracy (Story 17)
 
-### Phase 4: Production Readiness
+### Phase 4: Advanced Features (In Progress)
+- ⏳ Dynamic plan adaptation rules
+- ⏳ Search tool generation from PRD
+- ⏳ StoryContract full implementation
+- ⏳ Automated test generation
+
+### Phase 5: Production Readiness (Upcoming)
 - Performance optimization
 - Error recovery mechanisms
 - Monitoring and observability
@@ -202,16 +287,21 @@ SEMAD-METHOD/
 - **Hallucination Rate**: <5% interpretation errors (baseline: ~20%)
 - **Implementation Accuracy**: >95% match to StoryContract
 - **Validation Pass Rate**: >98% on first attempt
+- **User Input Capture**: 100% of required inputs elicited
+- **Memory Persistence**: >99% context retention across sessions
 
 ### Efficiency Metrics
 - **Task Completion Time**: 30% reduction
 - **Rework Rate**: <10% (baseline: ~35%)
 - **Context Retrieval Speed**: <100ms average
+- **Epic Completion**: 100% automated story processing
+- **Dev-QA Cycle Time**: 40% reduction with iterative flow
 
 ### Adoption Metrics
 - **Developer Satisfaction**: >4.5/5 rating
 - **Tool Usage**: >80% of eligible workflows
 - **Error Recovery Success**: >90% automatic recovery
+- **Workflow Transparency**: >95% user understanding of system actions
 
 ## 9. Risk Mitigation
 
@@ -225,7 +315,36 @@ SEMAD-METHOD/
 - **Migration Effort**: Automated conversion tools
 - **Tool Resistance**: Gradual rollout with feedback loops
 
-## 10. Conclusion
+## 10. Implemented Enhancements
+
+### 10.1 Workflow and User Interaction Improvements
+- **Story 1**: Universal user input elicitation across all workflows
+- **Story 2**: Optional Dev↔QA iterative loop alongside linear flow
+- **Story 10**: Increased orchestrator verbosity for transparency
+- **Story 11**: Standardized output messages across workflows
+- **Story 13**: Automated epic processing through all stories
+- **Story 17**: Enhanced user-agent interaction accuracy
+
+### 10.2 Technical and Path Corrections
+- **Story 3**: Unified task directory structure (structured-tasks only)
+- **Story 4**: Corrected core-config.yaml path references
+- **Story 9**: Migrated to YAML story templates
+- **Story 12**: Direct file location resolution from config
+
+### 10.3 Agent Role and Process Refinements
+- **Story 5**: "Implement next story" command for Dev agent
+- **Story 6**: QA agent restricted to review-only mode
+- **Story 7**: Proper QA status updates at correct stages
+- **Story 8**: Mandatory automatic story validation
+
+### 10.4 Memory and Dependency Systems
+- **Story 14**: Qdrant-based dependency analysis and impact checking
+- **Story 15**: Consistent memory usage across all agents
+- **Story 16**: Unified memory utilization with hygiene protocols
+- **Story 18**: Memory health monitoring and reporting
+- **Story 19**: Automated memory cleaning to prevent hallucination
+
+## 11. Conclusion
 
 SEMAD-METHOD transforms AI-assisted development from an unpredictable art to a structured engineering discipline. By addressing the root causes of hallucination and context loss, it enables teams to confidently leverage AI for complex software development while maintaining quality, traceability, and control.
 

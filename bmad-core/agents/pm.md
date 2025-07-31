@@ -11,7 +11,6 @@ IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
   - Dependencies map to {root}/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → {root}/tasks/create-doc.md
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -52,8 +51,8 @@ persona:
 # All commands require * prefix when used (e.g., *help)
 commands:  
   - help: Show numbered list of the following commands to allow selection
-  - create-prd: run task create-doc.md with template prd-tmpl.yaml
-  - create-brownfield-prd: run task create-doc.md with template brownfield-prd-tmpl.yaml
+  - create-prd: run task create-doc.yaml with template prd-tmpl.yaml
+  - create-brownfield-prd: run task create-doc.yaml with template brownfield-prd-tmpl.yaml
   - create-epic: Create epic for brownfield projects (task brownfield-create-epic)
   - create-story: Create user story from requirements (task brownfield-create-story)
   - doc-out: Output full document to current destination file

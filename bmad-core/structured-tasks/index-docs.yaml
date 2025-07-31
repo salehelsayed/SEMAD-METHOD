@@ -1,22 +1,58 @@
 id: index-docs
 name: Index Documentation Task
-purpose: >-
-  This task maintains the integrity and completeness of the `docs/index.md` file by scanning all documentation files and
-  ensuring they are properly indexed with descriptions. It handles both root-level documents and documents within
-  subfolders, organizing them hierarchically.
+purpose: This task maintains the integrity and completeness of the `docs/index.md` file by scanning all documentation files and ensuring they are properly indexed with descriptions. It handles both root-level documents and documents within subfolders, organizing them hierarchically.
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: generic
+          context:
+            taskId: index-docs
+            taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory
-    description: "Setup working memory for indexing session"
+    description: Setup working memory for indexing session
     actions:
-      - description: "Initialize working memory for documentation indexing"
+      - description: Initialize working memory for documentation indexing
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Update memory with indexed documentation structure"
+      - description: Update memory with indexed documentation structure
         elicit: false
         metadata:
           originalIndent: 0
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: generic
+          taskData:
+            observation: Completed index-docs task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: index-docs
+            context:
+              taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -26,13 +62,13 @@ metadata:
     - Required Input
   preservedContent:
     - type: special-note
-      content: "   - Note the folder structure for hierarchical organization"
+      content: '   - Note the folder structure for hierarchical organization'
       lineNumber: 18
     - type: special-note
-      content: "   - Note existing file references and descriptions"
+      content: '   - Note existing file references and descriptions'
       lineNumber: 23
     - type: special-note
-      content: "   - Note which folder it belongs to (if in a subfolder)"
+      content: '   - Note which folder it belongs to (if in a subfolder)'
       lineNumber: 34
     - type: code-block
       content: |-
@@ -98,7 +134,7 @@ metadata:
            ```
       lineNumber: 138
     - type: special-note
-      content: "   - Note in the description that this is a multi-part document"
+      content: '   - Note in the description that this is a multi-part document'
       lineNumber: 163
 notes: |2
      - Note the folder structure for hierarchical organization

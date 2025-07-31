@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-2d-phaser-game-dev/personas/analyst.md`, `.bmad-2d-phaser-game-dev/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-2d-phaser-game-dev/personas/analyst.md`, `.bmad-2d-phaser-game-dev/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-2d-phaser-game-dev/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-2d-phaser-game-dev/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-2d-phaser-game-dev/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -90,6 +90,9 @@ persona:
     - Maintaining a Broad Perspective - Stay aware of market trends and dynamics
     - Integrity of Information - Ensure accurate sourcing and representation
     - Numbered Options Protocol - Always use numbered lists for selections
+    - ANTI-HALLUCINATION PROTOCOL - Before making market assumptions or strategic recommendations, ALWAYS retrieve existing user context using retrieve-user-context task. Base analysis on actual user inputs and stated business objectives rather than generic assumptions
+    - USER RESPONSE PERSISTENCE - When conducting research or brainstorming sessions, ALWAYS use handle-user-interaction task to capture user inputs with confirmation. Store all strategic insights and business context in shared memory
+    - CONTEXT VALIDATION - Before generating briefs or recommendations, validate that you have sufficient user input about business context, target market, and strategic objectives. Ask specifically for missing information rather than making broad market assumptions
     - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially.
 commands:
   - help: Show numbered list of the following commands to allow selection
@@ -111,6 +114,8 @@ dependencies:
     - document-project.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+    - handle-user-interaction.yaml
+    - retrieve-user-context.yaml
   templates:
     - project-brief-tmpl.yaml
     - market-research-tmpl.yaml
@@ -119,6 +124,8 @@ dependencies:
   data:
     - bmad-kb.md
     - brainstorming-techniques.md
+  utils:
+    - shared-context-manager.js
 ```
 ==================== END: .bmad-2d-phaser-game-dev/agents/analyst.md ====================
 
@@ -150,6 +157,10 @@ persona:
     - Coordinate resource allocation and dependencies
     - Track workflow progress and milestones
     - Maintain clear communication between agents
+    - CONTEXT CONSOLIDATION PROTOCOL - Before agent handoffs, consolidate all user interactions and context using shared-context-manager. Ensure no user input is lost between agent transitions
+    - USER INTERACTION OVERSIGHT - Monitor all agent-user interactions through handle-user-interaction task. Maintain comprehensive record of user responses across the entire workflow
+    - ANTI-HALLUCINATION ENFORCEMENT - Before allowing agents to proceed, validate they have retrieved relevant user context. Prevent agents from making assumptions when user input exists
+    - CROSS-AGENT CONTEXT SHARING - Ensure agents can access relevant user inputs from other agents when needed. Facilitate context transfer during workflow transitions
 commands:
   - help: Show these listed commands in a numbered list
   - workflow {name}: Execute a specific workflow (no name = list available workflows)
@@ -166,6 +177,8 @@ dependencies:
     - kb-mode-interaction.yaml
     - update-working-memory.yaml
     - retrieve-context.yaml
+    - handle-user-interaction.yaml
+    - retrieve-user-context.yaml
   templates:
     - workflow-status-tmpl.yaml
     - handoff-context-tmpl.yaml
@@ -181,6 +194,7 @@ dependencies:
     - greenfield-ui.yaml
   utils:
     - workflow-management.md
+    - shared-context-manager.js
 ```
 EOF < /dev/null
 ==================== END: .bmad-2d-phaser-game-dev/agents/bmad-orchestrator.md ====================
@@ -226,11 +240,11 @@ commands:
   - '*exit" - Say goodbye as the Game Designer, and then abandon inhabiting this persona'
 dependencies:
   tasks:
-    - create-doc.md
-    - execute-checklist.md
-    - game-design-brainstorming.md
-    - create-deep-research-prompt.md
-    - advanced-elicitation.md
+    - create-doc.yaml
+    - execute-checklist.yaml
+    - game-design-brainstorming.yaml
+    - create-deep-research-prompt.yaml
+    - advanced-elicitation.yaml
   templates:
     - game-design-doc-tmpl.yaml
     - level-design-doc-tmpl.yaml
@@ -292,7 +306,7 @@ task-execution:
   done: Game feature works + Tests pass + 60 FPS + No lint errors + Follows Phaser 3 best practices
 dependencies:
   tasks:
-    - execute-checklist.md
+    - execute-checklist.yaml
   templates:
     - game-architecture-tmpl.yaml
   checklists:
@@ -341,8 +355,8 @@ commands:
   - '*exit" - Say goodbye as the Game Scrum Master, and then abandon inhabiting this persona'
 dependencies:
   tasks:
-    - create-game-story.md
-    - execute-checklist.md
+    - create-game-story.yaml
+    - execute-checklist.yaml
   templates:
     - game-story-tmpl.yaml
   checklists:
@@ -350,11 +364,50 @@ dependencies:
 ```
 ==================== END: .bmad-2d-phaser-game-dev/agents/game-sm.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/facilitate-brainstorming-session.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/facilitate-brainstorming-session.yaml ====================
 id: facilitate-brainstorming-session
 name: Facilitate Brainstorming Session Task
-purpose: ""
-steps: []
+purpose: ''
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: pm
+          context:
+            taskId: facilitate-brainstorming-session
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: pm
+          taskData:
+            observation: Completed facilitate-brainstorming-session task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: facilitate-brainstorming-session
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -363,9 +416,9 @@ metadata:
     - Key Principles
     - Advanced Engagement Strategies
   preservedContent: []
-==================== END: .bmad-2d-phaser-game-dev/tasks/facilitate-brainstorming-session.yaml ====================
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/facilitate-brainstorming-session.yaml ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/create-deep-research-prompt.yaml ====================
 id: create-deep-research-prompt
 name: Create Deep Research Prompt Task
 purpose: |-
@@ -377,15 +430,35 @@ purpose: |-
   - Guide systematic investigation of complex topics
   - Ensure actionable insights are captured
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: generic
+          context:
+            taskId: create-deep-research-prompt
+            taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for research prompt creation"
-        elicit: false
+      - description: Initialize working memory for research prompt creation
+        elicit: true
         metadata:
           originalIndent: 0
-      - description: "Retrieve previous research patterns and methodologies"
+      - description: Retrieve previous research patterns and methodologies
         elicit: false
         metadata:
           originalIndent: 0
@@ -480,7 +553,7 @@ steps:
         metadata:
           originalIndent: 3
       - description: Analyze build vs. buy vs. partner options
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 3
       - description: Map industry value chains and dynamics
@@ -545,7 +618,7 @@ steps:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Input Processing
     description: |-
@@ -563,7 +636,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Note technical constraints and preferences
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Highlight uncertainties and assumptions
@@ -603,7 +676,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Gather essential context through questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Define the problem space
@@ -623,7 +696,7 @@ steps:
       - Note creative directions to explore
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Research Prompt Structure
     description: |-
@@ -658,19 +731,19 @@ steps:
         metadata:
           originalIndent: 0
       - description: Central questions that must be answered
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Priority ranking of questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Dependencies between questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Additional context-building questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Nice-to-have insights
@@ -751,7 +824,7 @@ steps:
       CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Prompt Generation
     description: |-
@@ -822,7 +895,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Review and Refinement
     description: |-
@@ -876,7 +949,7 @@ steps:
           originalIndent: 3
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
   - id: step6
     name: Next Steps Guidance
     description: |-
@@ -891,7 +964,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Which team members should review results
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: How to validate findings
@@ -907,7 +980,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Be specific rather than general in research questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Consider both current state and future implications
@@ -928,7 +1001,26 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "6"
+      originalNumber: '6'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: generic
+          taskData:
+            observation: Completed create-deep-research-prompt task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: create-deep-research-prompt
+            context:
+              taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -939,9 +1031,7 @@ metadata:
     - Important Notes
   preservedContent:
     - type: special-note
-      content: >-
-        CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input
-        documents they've provided.
+      content: 'CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents they''ve provided.'
       lineNumber: 17
     - type: section-header
       content: Important Notes
@@ -949,12 +1039,11 @@ metadata:
     - type: section-header
       content: Important Notes
       level: 2
-notes: >
-  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents
-  they've provided.
-==================== END: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.yaml ====================
+notes: |
+  CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents they've provided.
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/create-deep-research-prompt.yaml ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/create-doc.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/create-doc.yaml ====================
 id: create-doc
 name: Create Document Task
 description: Create a structured document from a selected template
@@ -968,279 +1057,179 @@ requiredInputs:
   - document_context (optional)
 outputs:
   - saved_path: Path where the document was saved
-==================== END: .bmad-2d-phaser-game-dev/tasks/create-doc.yaml ====================
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/create-doc.yaml ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.yaml ====================
-id: advanced-elicitation
-name: Advanced Elicitation Task
-purpose: |-
-  - Provide optional reflective and brainstorming actions to enhance content quality
-  - Enable deeper exploration of ideas through structured elicitation techniques
-  - Support iterative refinement through multiple analytical perspectives
-  - Usable during template-driven document creation or any chat conversation
-steps:
-  - id: step0
-    name: Initialize Memory
-    description: "Setup working memory for elicitation session"
-    actions:
-      - description: "Initialize working memory for elicitation context"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "Retrieve relevant past elicitation patterns if available"
-        elicit: false
-        metadata:
-          originalIndent: 0
-  - id: step1
-    name: Intelligent Method Selection
-    description: |-
-      **Context Analysis**: Before presenting options, analyze:
-      **Method Selection Strategy**:
-      1. **Always Include Core Methods** (choose 3-4):
-      2. **Context-Specific Methods** (choose 4-5):
-      3. **Always Include**: "Proceed / No Further Actions" as option 9
-    actions:
-      - description: "**Content Type**: Technical specs, user stories, architecture, requirements, etc."
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Complexity Level**: Simple, moderate, or complex content"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Stakeholder Needs**: Who will use this information"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Risk Level**: High-impact decisions vs routine items"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Creative Potential**: Opportunities for innovation or alternatives"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: Expand or Contract for Audience
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: Critique and Refine
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: Identify Potential Risks
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: Assess Alignment with Goals
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: "**Technical Content**: Tree of Thoughts, ReWOO, Meta-Prompting"
-        elicit: true
-        metadata:
-          originalIndent: 3
-      - description: "**User-Facing Content**: Agile Team Perspective, Stakeholder Roundtable"
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: "**Creative Content**: Innovation Tournament, Escape Room Challenge"
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: "**Strategic Content**: Red Team vs Blue Team, Hindsight Reflection"
-        elicit: false
-        metadata:
-          originalIndent: 3
-    metadata:
-      level: 3
-      originalNumber: "1"
-  - id: step2
-    name: Section Context and Review
-    description: >-
-      When invoked after outputting a section:
+==================== START: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.md ====================
+# Advanced Game Design Elicitation Task
 
-      1. **Provide Context Summary**: Give a brief 1-2 sentence summary of what the user should look for in the section
-      just presented
+## Purpose
 
-      2. **Explain Visual Elements**: If the section contains diagrams, explain them briefly before offering elicitation
-      options
+- Provide optional reflective and brainstorming actions to enhance game design content quality
+- Enable deeper exploration of game mechanics and player experience through structured elicitation techniques
+- Support iterative refinement through multiple game development perspectives
+- Apply game-specific critical thinking to design decisions
 
-      3. **Clarify Scope Options**: If the section contains multiple distinct items, inform the user they can apply
-      elicitation actions to:
-    actions:
-      - description: The entire section as a whole
-        elicit: false
-        metadata:
-          originalIndent: 3
-      - description: Individual items within the section (specify which item when selecting an action)
-        elicit: true
-        metadata:
-          originalIndent: 3
-    metadata:
-      level: 3
-      originalNumber: "2"
-  - id: step3
-    name: Present Elicitation Options
-    description: |-
-      **Review Request Process:**
-      **Action List Presentation Format:**
-      ```text
-      **Advanced Elicitation Options**
-      Choose a number (0-8) or 9 to proceed:
+## Task Instructions
 
-      0. [Method Name]
-      1. [Method Name]
-      2. [Method Name]
-      3. [Method Name]
-      4. [Method Name]
-      5. [Method Name]
-      6. [Method Name]
-      7. [Method Name]
-      8. [Method Name]
-      9. Proceed / No Further Actions
-      ```
-      **Response Handling:**
-    actions:
-      - description: Ask the user to review the drafted section
-        elicit: true
-        metadata:
-          originalIndent: 0
-      - description: In the SAME message, inform them they can suggest direct changes OR select an elicitation method
-        elicit: true
-        metadata:
-          originalIndent: 0
-      - description: Present 9 intelligently selected methods (0-8) plus "Proceed" (9)
-        elicit: true
-        metadata:
-          originalIndent: 0
-      - description: Keep descriptions short - just the method name
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: Await simple numeric selection
-        elicit: true
-        metadata:
-          originalIndent: 0
-      - description: "**Numbers 0-8**: Execute the selected method, then re-offer the choice"
-        elicit: true
-        metadata:
-          originalIndent: 0
-      - description: "**Number 9**: Proceed to next section or continue conversation"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Direct Feedback**: Apply user's suggested changes and continue"
-        elicit: false
-        metadata:
-          originalIndent: 0
-    metadata:
-      level: 3
-      originalNumber: "3"
-  - id: step4
-    name: Method Execution Framework
-    description: |-
-      **Execution Process:**
-      1. **Retrieve Method**: Access the specific elicitation method from the elicitation-methods data file
-      2. **Apply Context**: Execute the method from your current role's perspective
-      3. **Provide Results**: Deliver insights, critiques, or alternatives relevant to the content
-      4. **Re-offer Choice**: Present the same 9 options again until user selects 9 or gives direct feedback
-      **Execution Guidelines:**
-    actions:
-      - description: "**Be Concise**: Focus on actionable insights, not lengthy explanations"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Stay Relevant**: Tie all elicitation back to the specific content being analyzed"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "**Maintain Flow**: Keep the process moving efficiently"
-        elicit: false
-        metadata:
-          originalIndent: 0
-    metadata:
-      level: 3
-      originalNumber: "4"
-inputs: {}
-outputs: {}
-metadata:
-  originalSections:
-    - Purpose
-    - Usage Scenarios
-    - Task Instructions
-  preservedContent: []
-==================== END: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.yaml ====================
+### 1. Game Design Context and Review
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/document-project.yaml ====================
+[[LLM: When invoked after outputting a game design section:
+
+1. First, provide a brief 1-2 sentence summary of what the user should look for in the section just presented, with game-specific focus (e.g., "Please review the core mechanics for player engagement and implementation feasibility. Pay special attention to how these mechanics create the intended player experience and whether they're technically achievable with Phaser 3.")
+
+2. If the section contains game flow diagrams, level layouts, or system diagrams, explain each diagram briefly with game development context before offering elicitation options (e.g., "The gameplay loop diagram shows how player actions lead to rewards and progression. Notice how each step maintains player engagement and creates opportunities for skill development.")
+
+3. If the section contains multiple game elements (like multiple mechanics, multiple levels, multiple systems, etc.), inform the user they can apply elicitation actions to:
+
+   - The entire section as a whole
+   - Individual game elements within the section (specify which element when selecting an action)
+
+4. Then present the action list as specified below.]]
+
+### 2. Ask for Review and Present Game Design Action List
+
+[[LLM: Ask the user to review the drafted game design section. In the SAME message, inform them that they can suggest additions, removals, or modifications, OR they can select an action by number from the 'Advanced Game Design Elicitation & Brainstorming Actions'. If there are multiple game elements in the section, mention they can specify which element(s) to apply the action to. Then, present ONLY the numbered list (0-9) of these actions. Conclude by stating that selecting 9 will proceed to the next section. Await user selection. If an elicitation action (0-8) is chosen, execute it and then re-offer this combined review/elicitation choice. If option 9 is chosen, or if the user provides direct feedback, proceed accordingly.]]
+
+**Present the numbered list (0-9) with this exact format:**
+
+```text
+**Advanced Game Design Elicitation & Brainstorming Actions**
+Choose an action (0-9 - 9 to bypass - HELP for explanation of these options):
+
+0. Expand or Contract for Target Audience
+1. Explain Game Design Reasoning (Step-by-Step)
+2. Critique and Refine from Player Perspective
+3. Analyze Game Flow and Mechanic Dependencies
+4. Assess Alignment with Player Experience Goals
+5. Identify Potential Player Confusion and Design Risks
+6. Challenge from Critical Game Design Perspective
+7. Explore Alternative Game Design Approaches
+8. Hindsight Postmortem: The 'If Only...' Game Design Reflection
+9. Proceed / No Further Actions
+```
+
+### 2. Processing Guidelines
+
+**Do NOT show:**
+
+- The full protocol text with `[[LLM: ...]]` instructions
+- Detailed explanations of each option unless executing or the user asks, when giving the definition you can modify to tie its game development relevance
+- Any internal template markup
+
+**After user selection from the list:**
+
+- Execute the chosen action according to the game design protocol instructions below
+- Ask if they want to select another action or proceed with option 9 once complete
+- Continue until user selects option 9 or indicates completion
+
+## Game Design Action Definitions
+
+0. Expand or Contract for Target Audience
+   [[LLM: Ask the user whether they want to 'expand' on the game design content (add more detail, elaborate on mechanics, include more examples) or 'contract' it (simplify mechanics, focus on core features, reduce complexity). Also, ask if there's a specific player demographic or experience level they have in mind (casual players, hardcore gamers, children, etc.). Once clarified, perform the expansion or contraction from your current game design role's perspective, tailored to the specified player audience if provided.]]
+
+1. Explain Game Design Reasoning (Step-by-Step)
+   [[LLM: Explain the step-by-step game design thinking process that you used to arrive at the current proposal for this game content. Focus on player psychology, engagement mechanics, technical feasibility, and how design decisions support the overall player experience goals.]]
+
+2. Critique and Refine from Player Perspective
+   [[LLM: From your current game design role's perspective, review your last output or the current section for potential player confusion, engagement issues, balance problems, or areas for improvement. Consider how players will actually interact with and experience these systems, then suggest a refined version that better serves player enjoyment and understanding.]]
+
+3. Analyze Game Flow and Mechanic Dependencies
+   [[LLM: From your game design role's standpoint, examine the content's structure for logical gameplay progression, mechanic interdependencies, and player learning curve. Confirm if game elements are introduced in an effective order that teaches players naturally and maintains engagement throughout the experience.]]
+
+4. Assess Alignment with Player Experience Goals
+   [[LLM: Evaluate how well the current game design content contributes to the stated player experience goals and core game pillars. Consider whether the mechanics actually create the intended emotions and engagement patterns. Identify any misalignments between design intentions and likely player reactions.]]
+
+5. Identify Potential Player Confusion and Design Risks
+   [[LLM: Based on your game design expertise, brainstorm potential sources of player confusion, overlooked edge cases in gameplay, balance issues, technical implementation risks, or unintended player behaviors that could emerge from the current design. Consider both new and experienced players' perspectives.]]
+
+6. Challenge from Critical Game Design Perspective
+   [[LLM: Adopt a critical game design perspective on the current content. If the user specifies another viewpoint (e.g., 'as a casual player', 'as a speedrunner', 'as a mobile player', 'as a technical implementer'), critique the content from that specified perspective. If no other role is specified, play devil's advocate from your game design expertise, arguing against the current design proposal and highlighting potential weaknesses, player experience issues, or implementation challenges. This can include questioning scope creep, unnecessary complexity, or features that don't serve the core player experience.]]
+
+7. Explore Alternative Game Design Approaches
+   [[LLM: From your game design role's perspective, first broadly brainstorm a range of diverse approaches to achieving the same player experience goals or solving the same design challenge. Consider different genres, mechanics, interaction models, or technical approaches. Then, from this wider exploration, select and present 2-3 distinct alternative design approaches, detailing the pros, cons, player experience implications, and technical feasibility you foresee for each.]]
+
+8. Hindsight Postmortem: The 'If Only...' Game Design Reflection
+   [[LLM: In your current game design persona, imagine this is a postmortem for a shipped game based on the current design content. What's the one 'if only we had designed/considered/tested X...' that your role would highlight from a game design perspective? Include the imagined player reactions, review scores, or development consequences. This should be both insightful and somewhat humorous, focusing on common game design pitfalls.]]
+
+9. Proceed / No Further Actions
+   [[LLM: Acknowledge the user's choice to finalize the current game design work, accept the AI's last output as is, or move on to the next step without selecting another action from this list. Prepare to proceed accordingly.]]
+
+## Game Development Context Integration
+
+This elicitation task is specifically designed for game development and should be used in contexts where:
+
+- **Game Mechanics Design**: When defining core gameplay systems and player interactions
+- **Player Experience Planning**: When designing for specific emotional responses and engagement patterns
+- **Technical Game Architecture**: When balancing design ambitions with implementation realities
+- **Game Balance and Progression**: When designing difficulty curves and player advancement systems
+- **Platform Considerations**: When adapting designs for different devices and input methods
+
+The questions and perspectives offered should always consider:
+
+- Player psychology and motivation
+- Technical feasibility with Phaser 3 and TypeScript
+- Performance implications for 60 FPS targets
+- Cross-platform compatibility (desktop and mobile)
+- Game development best practices and common pitfalls
+==================== END: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.md ====================
+
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/document-project.yaml ====================
 id: document-project
-name: "[Project Name] Brownfield Architecture Document"
-purpose: >-
-  Generate comprehensive documentation for existing projects optimized for AI development agents. This task creates
-  structured reference materials that enable AI agents to understand project context, conventions, and patterns for
-  effective contribution to any codebase.
+name: '[Project Name] Brownfield Architecture Document'
+purpose: Generate comprehensive documentation for existing projects optimized for AI development agents. This task creates structured reference materials that enable AI agents to understand project context, conventions, and patterns for effective contribution to any codebase.
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: analyst
+          context:
+            taskId: document-project
+            taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for documentation task"
-        elicit: false
+      - description: Initialize working memory for documentation task
+        elicit: true
         metadata:
           originalIndent: 0
-      - description: "Retrieve any previous project documentation context"
+      - description: Retrieve any previous project documentation context
         elicit: false
         metadata:
           originalIndent: 0
   - id: step1
     name: Initial Project Analysis
-    description: >-
-      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
-      documentation efforts on relevant areas only.
-
+    description: |-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
       **IF PRD EXISTS**:
-
       **IF NO PRD EXISTS**:
-
       Ask the user:
-
-      "I notice you haven't provided a PRD or requirements document. To create more focused and useful documentation, I
-      recommend one of these options:
-
-      1. **Create a PRD first** - Would you like me to help create a brownfield PRD before documenting? This helps focus
-      documentation on relevant areas.
-
-      2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can
-      share?
-
+      "I notice you haven't provided a PRD or requirements document. To create more focused and useful documentation, I recommend one of these options:
+      1. **Create a PRD first** - Would you like me to help create a brownfield PRD before documenting? This helps focus documentation on relevant areas.
+      2. **Provide existing requirements** - Do you have a requirements document, epic, or feature description you can share?
       3. **Describe the focus** - Can you briefly describe what enhancement or feature you're planning? For example:
-
-      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
-      This may create excessive documentation for large projects)
-
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
       Please let me know your preference, or I can proceed with full documentation if you prefer."
-
       Based on their response:
-
       Begin by conducting analysis of the existing project. Use available tools to:
-
-      1. **Project Structure Discovery**: Examine the root directory structure, identify main folders, and understand
-      the overall organization
-
-      2. **Technology Stack Identification**: Look for package.json, requirements.txt, Cargo.toml, pom.xml, etc. to
-      identify languages, frameworks, and dependencies
-
+      1. **Project Structure Discovery**: Examine the root directory structure, identify main folders, and understand the overall organization
+      2. **Technology Stack Identification**: Look for package.json, requirements.txt, Cargo.toml, pom.xml, etc. to identify languages, frameworks, and dependencies
       3. **Build System Analysis**: Find build scripts, CI/CD configurations, and development commands
-
       4. **Existing Documentation Review**: Check for README files, docs folders, and any existing documentation
-
-      5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and
-      architectural approaches
-
+      5. **Code Pattern Analysis**: Sample key files to understand coding patterns, naming conventions, and architectural approaches
       Ask the user these elicitation questions to better understand their needs:
     actions:
       - description: Review the PRD to understand what enhancement/feature is planned
@@ -1259,23 +1248,23 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "'Adding payment processing to the user service'"
+      - description: '''Adding payment processing to the user service'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "'Refactoring the authentication module'"
+      - description: '''Refactoring the authentication module'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "'Integrating with a new third-party API'"
+      - description: '''Integrating with a new third-party API'''
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "If they choose option 1-3: Use that context to focus documentation"
+      - description: 'If they choose option 1-3: Use that context to focus documentation'
         elicit: true
         metadata:
           originalIndent: 0
-      - description: "If they choose option 4 or decline: Proceed with comprehensive analysis below"
+      - description: 'If they choose option 4 or decline: Proceed with comprehensive analysis below'
         elicit: true
         metadata:
           originalIndent: 0
@@ -1283,15 +1272,11 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          Are there any specific areas of the codebase that are particularly complex or important for agents to
-          understand?
+      - description: Are there any specific areas of the codebase that are particularly complex or important for agents to understand?
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          What types of tasks do you expect AI agents to perform on this project? (e.g., bug fixes, feature additions,
-          refactoring, testing)
+      - description: What types of tasks do you expect AI agents to perform on this project? (e.g., bug fixes, feature additions, refactoring, testing)
         elicit: true
         metadata:
           originalIndent: 0
@@ -1299,9 +1284,7 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-      - description: >-
-          What level of technical detail should the documentation target? (junior developers, senior developers, mixed
-          team)
+      - description: What level of technical detail should the documentation target? (junior developers, senior developers, mixed team)
         elicit: true
         metadata:
           originalIndent: 0
@@ -1309,18 +1292,13 @@ steps:
         elicit: true
         metadata:
           originalIndent: 0
-    notes: >-
-      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your
-      documentation efforts on relevant areas only.
-
-      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note:
-      This may create excessive documentation for large projects)
-
-      - Are there any specific areas of the codebase that are particularly complex or important for agents to
-      understand?
+    notes: |-
+      **CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
+      4. **Document everything** - Or should I proceed with comprehensive documentation of the entire codebase? (Note: This may create excessive documentation for large projects)
+      - Are there any specific areas of the codebase that are particularly complex or important for agents to understand?
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Deep Codebase Analysis
     description: |-
@@ -1350,23 +1328,23 @@ steps:
         elicit: false
         metadata:
           originalIndent: 3
-      - description: "\"I see you're using [technology X]. Are there any custom patterns or conventions I should document?\""
+      - description: '"I see you''re using [technology X]. Are there any custom patterns or conventions I should document?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"What are the most critical/complex parts of this system that developers struggle with?\""
+      - description: '"What are the most critical/complex parts of this system that developers struggle with?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"Are there any undocumented 'tribal knowledge' areas I should capture?\""
+      - description: '"Are there any undocumented ''tribal knowledge'' areas I should capture?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"What technical debt or known issues should I document?\""
+      - description: '"What technical debt or known issues should I document?"'
         elicit: true
         metadata:
           originalIndent: 3
-      - description: "\"Which parts of the codebase change most frequently?\""
+      - description: '"Which parts of the codebase change most frequently?"'
         elicit: true
         metadata:
           originalIndent: 3
@@ -1396,161 +1374,85 @@ steps:
          - Note areas that differ from standard patterns
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Core Documentation Generation
-    description: >-
+    description: |-
       [[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
-
       **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
-
       **Document Structure**:
-
-      This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds,
-      and real-world patterns. It serves as a reference for AI agents working on enhancements.
-
+      This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds, and real-world patterns. It serves as a reference for AI agents working on enhancements.
       ### Document Scope
-
       [If PRD provided: "Focused on areas relevant to: {enhancement description}"]
-
       [If no PRD: "Comprehensive documentation of entire system"]
-
       ### Change Log
-
       | Date | Version | Description | Author |
-
       |------|---------|-------------|--------|
-
       | [Date] | 1.0 | Initial brownfield analysis | [Analyst] |
-
       ### Critical Files for Understanding the System
-
       ### If PRD Provided - Enhancement Impact Areas
-
       [Highlight which files/modules will be affected by the planned enhancement]
-
       ### Technical Summary
-
       ### Actual Tech Stack (from package.json/requirements.txt)
-
       | Category | Technology | Version | Notes |
-
       |----------|------------|---------|--------|
-
       | Runtime | Node.js | 16.x | [Any constraints] |
-
       | Framework | Express | 4.18.2 | [Custom middleware?] |
-
       | Database | PostgreSQL | 13 | [Connection pooling setup] |
-
       etc...
-
       ### Repository Structure Reality Check
-
       ### Project Structure (Actual)
-
       ```text
-
       project-root/
-
       ├── src/
-
       │   ├── controllers/     # HTTP request handlers
-
       │   ├── services/        # Business logic (NOTE: inconsistent patterns between user and payment services)
-
       │   ├── models/          # Database models (Sequelize)
-
       │   ├── utils/           # Mixed bag - needs refactoring
-
       │   └── legacy/          # DO NOT MODIFY - old payment system still in use
-
       ├── tests/               # Jest tests (60% coverage)
-
       ├── scripts/             # Build and deployment scripts
-
       └── config/              # Environment configs
-
       ```
-
       ### Key Modules and Their Purpose
-
       ### Data Models
-
       Instead of duplicating, reference actual model files:
-
       ### API Specifications
-
       ### Critical Technical Debt
-
       1. **Payment Service**: Legacy code in `src/legacy/payment.js` - tightly coupled, no tests
-
       2. **User Service**: Different pattern than other services, uses callbacks instead of promises
-
       3. **Database Migrations**: Manually tracked, no proper migration tool
-
       4. **[Other significant debt]**
-
       ### Workarounds and Gotchas
-
       ### External Services
-
       | Service | Purpose | Integration Type | Key Files |
-
       |---------|---------|------------------|-----------|
-
       | Stripe | Payments | REST API | `src/integrations/stripe/` |
-
       | SendGrid | Emails | SDK | `src/services/emailService.js` |
-
       etc...
-
       ### Internal Integration Points
-
       ### Local Development Setup
-
       1. Actual steps that work (not ideal steps)
-
       2. Known issues with setup
-
       3. Required environment variables (see `.env.example`)
-
       ### Build and Deployment Process
-
       ### Current Test Coverage
-
       ### Running Tests
-
       ```bash
-
       npm test           # Runs unit tests
-
       npm run test:integration  # Runs integration tests (requires local DB)
-
       ```
-
       ### Files That Will Need Modification
-
       Based on the enhancement requirements, these files will be affected:
-
       ### New Files/Modules Needed
-
       ### Integration Considerations
-
       ### Frequently Used Commands
-
       ```bash
-
       npm run dev         # Start development server
-
       npm run build       # Production build
-
       npm run migrate     # Run database migrations
-
       npm run seed        # Seed test data
-
       ```
-
       ### Debugging and Troubleshooting
     actions:
       - description: Technical debt and workarounds
@@ -1573,159 +1475,159 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Main Entry**: `src/index.js` (or actual entry point)"
+      - description: '**Main Entry**: `src/index.js` (or actual entry point)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Configuration**: `config/app.config.js`, `.env.example`"
+      - description: '**Configuration**: `config/app.config.js`, `.env.example`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Core Business Logic**: `src/services/`, `src/domain/`"
+      - description: '**Core Business Logic**: `src/services/`, `src/domain/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**API Definitions**: `src/routes/` or link to OpenAPI spec"
+      - description: '**API Definitions**: `src/routes/` or link to OpenAPI spec'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Database Models**: `src/models/` or link to schema files"
+      - description: '**Database Models**: `src/models/` or link to schema files'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Key Algorithms**: [List specific files with complex logic]"
+      - description: '**Key Algorithms**: [List specific files with complex logic]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Type: [Monorepo/Polyrepo/Hybrid]"
+      - description: 'Type: [Monorepo/Polyrepo/Hybrid]'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: 'Package Manager: [npm/yarn/pnpm]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Package Manager: [npm/yarn/pnpm]"
+      - description: 'Notable: [Any unusual structure decisions]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Notable: [Any unusual structure decisions]"
+      - description: '**User Management**: `src/services/userService.js` - Handles all user operations'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**User Management**: `src/services/userService.js` - Handles all user operations"
+      - description: '**Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation"
+      - description: '**Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled"
+      - description: '**[List other key modules with their actual files]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[List other key modules with their actual files]**"
+      - description: '**User Model**: See `src/models/User.js`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**User Model**: See `src/models/User.js`"
+      - description: '**Order Model**: See `src/models/Order.js`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Order Model**: See `src/models/Order.js`"
+      - description: '**Related Types**: TypeScript definitions in `src/types/`'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Related Types**: TypeScript definitions in `src/types/`"
+      - description: '**Postman Collection**: `docs/api/postman-collection.json`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)"
+      - description: '**Manual Endpoints**: [List any undocumented endpoints discovered]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Postman Collection**: `docs/api/postman-collection.json`"
+      - description: '**Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Manual Endpoints**: [List any undocumented endpoints discovered]"
+      - description: '**Database Connections**: Connection pool hardcoded to 10, changing breaks payment service'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)"
+      - description: '**[Other workarounds developers need to know]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Database Connections**: Connection pool hardcoded to 10, changing breaks payment service"
+      - description: '**Frontend Communication**: REST API on port 3000, expects specific headers'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[Other workarounds developers need to know]**"
+      - description: '**Background Jobs**: Redis queue, see `src/workers/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Frontend Communication**: REST API on port 3000, expects specific headers"
+      - description: '**[Other integrations]**'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Background Jobs**: Redis queue, see `src/workers/`"
+      - description: '**Build Command**: `npm run build` (webpack config in `webpack.config.js`)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**[Other integrations]**"
+      - description: '**Deployment**: Manual deployment via `scripts/deploy.sh`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Build Command**: `npm run build` (webpack config in `webpack.config.js`)"
+      - description: '**Environments**: Dev, Staging, Prod (see `config/environments/`)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Deployment**: Manual deployment via `scripts/deploy.sh`"
+      - description: 'Unit Tests: 60% coverage (Jest)'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Environments**: Dev, Staging, Prod (see `config/environments/`)"
+      - description: 'Integration Tests: Minimal, in `tests/integration/`'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Unit Tests: 60% coverage (Jest)"
+      - description: 'E2E Tests: None'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Integration Tests: Minimal, in `tests/integration/`"
+      - description: 'Manual Testing: Primary QA method'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "E2E Tests: None"
+      - description: '`src/services/userService.js` - Add new user fields'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Manual Testing: Primary QA method"
+      - description: '`src/models/User.js` - Update schema'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/services/userService.js` - Add new user fields"
+      - description: '`src/routes/userRoutes.js` - New endpoints'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/models/User.js` - Update schema"
+      - description: '[etc...]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/routes/userRoutes.js` - New endpoints"
+      - description: '`src/services/newFeatureService.js` - New business logic'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[etc...]"
+      - description: '`src/models/NewFeature.js` - New data model'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "`src/services/newFeatureService.js` - New business logic"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "`src/models/NewFeature.js` - New data model"
-        elicit: false
-        metadata:
-          originalIndent: 0
-      - description: "[etc...]"
+      - description: '[etc...]'
         elicit: false
         metadata:
           originalIndent: 0
@@ -1737,19 +1639,19 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[Other integration points]"
+      - description: '[Other integration points]'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Logs**: Check `logs/app.log` for application logs"
+      - description: '**Logs**: Check `logs/app.log` for application logs'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Debug Mode**: Set `DEBUG=app:*` for verbose logging"
+      - description: '**Debug Mode**: Set `DEBUG=app:*` for verbose logging'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Common Issues**: See `docs/troubleshooting.md`]]"
+      - description: '**Common Issues**: See `docs/troubleshooting.md`]]'
         elicit: false
         metadata:
           originalIndent: 0
@@ -1761,7 +1663,7 @@ steps:
       ### Critical Technical Debt
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Document Delivery
     description: |-
@@ -1809,13 +1711,13 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "If PRD provided: What needs to change for the enhancement]]"
-        elicit: false
+      - description: 'If PRD provided: What needs to change for the enhancement]]'
+        elicit: true
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Quality Assurance
     description: |-
@@ -1843,8 +1745,8 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "If PRD provided: Clear impact analysis showing what needs to change"
-        elicit: false
+      - description: 'If PRD provided: Clear impact analysis showing what needs to change'
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Document enables AI agents to navigate and understand the actual codebase
@@ -1867,18 +1769,37 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "For brownfield projects with PRD: Provides clear enhancement impact analysis"
-        elicit: false
+      - description: 'For brownfield projects with PRD: Provides clear enhancement impact analysis'
+        elicit: true
         metadata:
           originalIndent: 0
       - description: The goal is PRACTICAL documentation for AI agents doing real work
         elicit: false
         metadata:
           originalIndent: 0
-    notes: "CRITICAL: Before finalizing the document:"
+    notes: 'CRITICAL: Before finalizing the document:'
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: analyst
+          taskData:
+            observation: Completed document-project task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: document-project
+            context:
+              taskType: documentation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -1899,40 +1820,376 @@ metadata:
     - Success Criteria
     - Notes
   preservedContent: []
-==================== END: .bmad-2d-phaser-game-dev/tasks/document-project.yaml ====================
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/document-project.yaml ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/update-working-memory.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/update-working-memory.yaml ====================
 id: update-working-memory
-name: Update Working Memory Task
-description: Task definition for updating agent working memory
-type: task
-structuredTaskReference: ../structured-tasks/update-working-memory.yaml
+name: Update Working Memory
 category: memory
+description: Updates the agent's working memory with current task state
 priority: high
+tags:
+  - memory
+  - state-management
+  - context
 requiredInputs:
-  - agentName
-  - taskId (optional)
-  - currentStep (optional)
-  - plan (optional)
-  - context (optional)
+  - name: agentName
+    type: string
+    description: Name of the agent
+  - name: taskId
+    type: string
+    description: Current task identifier
+    optional: true
+  - name: currentStep
+    type: string
+    description: Current step in the plan
+    optional: true
+  - name: plan
+    type: array
+    description: Task execution plan
+    optional: true
+  - name: context
+    type: object
+    description: Additional context to store
+    optional: true
 outputs:
-  - memory: Updated memory state
-==================== END: .bmad-2d-phaser-game-dev/tasks/update-working-memory.yaml ====================
+  - name: memory
+    type: object
+    description: Updated memory state
+dependencies: []
+executionSteps:
+  - Update the working memory JSON file for the agent
+  - Merge provided updates with existing memory
+  - Preserve existing data not being updated
+  - Return the updated memory state
+validationCriteria:
+  - Memory file exists and is valid JSON
+  - Updates are properly merged
+  - No data loss occurs
+exampleUsage: |
+  await updateWorkingMemory('dev', {
+    taskId: 'TASK-123',
+    currentStep: 'implementing-feature',
+    plan: ['analyze', 'implement', 'test'],
+    context: { feature: 'user-auth' }
+  });
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/update-working-memory.yaml ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/retrieve-context.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/retrieve-context.yaml ====================
 id: retrieve-context
-name: Retrieve Context Task
-description: Task definition for retrieving context from memory
-type: task
-structuredTaskReference: ../structured-tasks/retrieve-context.yaml
+name: Retrieve Context from Memory
 category: memory
+description: Retrieves relevant context from long-term memory using similarity search
 priority: high
+tags:
+  - memory
+  - context-retrieval
+  - qdrant
 requiredInputs:
-  - query
-  - topN (optional)
+  - name: query
+    type: string
+    description: Query string to search for similar memories
+  - name: topN
+    type: number
+    description: Number of top results to retrieve
+    optional: true
+    default: 5
 outputs:
-  - memories
-==================== END: .bmad-2d-phaser-game-dev/tasks/retrieve-context.yaml ====================
+  - name: memories
+    type: array
+    description: Array of retrieved memory snippets with scores
+dependencies: []
+executionSteps:
+  - Connect to Qdrant vector database
+  - Generate embedding for the query
+  - Perform similarity search
+  - Return top N matching memories with scores
+validationCriteria:
+  - Query is a non-empty string
+  - Returns array of memory objects
+  - Each memory has score and content
+exampleUsage: |
+  const memories = await retrieveMemory(
+    'user authentication implementation',
+    5
+  );
+  // Returns: [
+  //   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
+  //   ...
+  // ]
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/retrieve-context.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/handle-user-interaction.yaml ====================
+id: handle-user-interaction
+name: Handle User Interaction with Context Persistence
+category: interaction
+description: Manages user interactions with confirmation prompts and context persistence to minimize hallucination
+priority: high
+tags:
+  - user-interaction
+  - memory
+  - context
+  - confirmation
+  - anti-hallucination
+elicit: true
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the requesting agent
+  - name: question
+    type: string
+    description: Question to ask the user
+  - name: questionType
+    type: string
+    description: Type of question (open-ended, yes-no, multiple-choice, requirement)
+    optional: true
+    default: open-ended
+  - name: category
+    type: string
+    description: Category of the question (requirement, constraint, preference, clarification)
+    optional: true
+    default: general
+  - name: importance
+    type: string
+    description: Importance level (low, medium, high, critical)
+    optional: true
+    default: medium
+  - name: context
+    type: object
+    description: Current workflow context
+    optional: true
+  - name: requireConfirmation
+    type: boolean
+    description: Whether to require explicit confirmation of the response
+    optional: true
+    default: true
+  - name: maxConfirmationAttempts
+    type: number
+    description: Maximum number of confirmation attempts
+    optional: true
+    default: 3
+outputs:
+  - name: userResponse
+    type: object
+    description: User response with confirmation status
+  - name: interactionId
+    type: string
+    description: Unique identifier for this interaction
+  - name: contextUpdated
+    type: boolean
+    description: Whether the shared context was successfully updated
+dependencies:
+  - shared-context-manager.js
+executionSteps:
+  - Initialize SharedContextManager
+  - Record the question and context
+  - Present question to user with proper formatting
+  - Capture user response verbatim
+  - Process and analyze the response
+  - If requireConfirmation is true, present confirmation prompt
+  - Handle confirmation loop (up to maxConfirmationAttempts)
+  - Store confirmed response in shared context
+  - Update agent working memory with interaction summary
+  - Return structured response object
+elicitationFlow:
+  - step: present_question
+    prompt: |
+      **{agentName} Agent Question ({category})**
+      
+      Context: {context.currentPhase} - {context.workflowStep}
+      Priority: {importance}
+      
+      {question}
+      
+      Please provide your response:
+  - step: confirmation_prompt
+    condition: requireConfirmation == true
+    prompt: |
+      **Confirmation Required**
+      
+      You said: "{userResponse}"
+      
+      Is this correct and complete? Please confirm:
+      - Type "YES" to confirm this response
+      - Type "NO" to provide a different response
+      - Type "CLARIFY" to add more details
+      
+      Your confirmation:
+  - step: clarification_prompt
+    condition: confirmationResponse == "CLARIFY"
+    prompt: |
+      **Additional Clarification**
+      
+      Your original response: "{userResponse}"
+      
+      Please provide additional details or clarification:
+  - step: retry_prompt
+    condition: confirmationResponse == "NO"
+    prompt: |
+      Please provide your corrected response to the original question:
+      
+      {question}
+      
+      Your response:
+validationCriteria:
+  - User response is captured verbatim
+  - Confirmation process completed if required
+  - Interaction is stored in shared context
+  - Agent working memory is updated
+  - No information is lost or fabricated
+errorHandling:
+  - If SharedContextManager fails to initialize, use fallback memory storage
+  - If confirmation fails after max attempts, proceed with last response and mark as unconfirmed
+  - If context update fails, log error but continue with interaction
+  - Always preserve the original user response regardless of processing errors
+exampleUsage: |
+  const result = await executeTask('handle-user-interaction', {
+    agentName: 'po',
+    question: 'What are the key user personas for this feature?',
+    questionType: 'open-ended',
+    category: 'requirement',
+    importance: 'high',
+    context: {
+      currentPhase: 'requirements-gathering',
+      workflowStep: 'persona-definition',
+      storyId: 'STORY-123',
+      epicId: 'EPIC-1'
+    },
+    requireConfirmation: true
+  });
+  
+  // Returns:
+  // {
+  //   userResponse: {
+  //     original: "Primary personas are: Admin users, end customers, and support staff",
+  //     processed: { wordCount: 10, hasSpecialRequirements: false, ... },
+  //     confirmed: true,
+  //     confirmationAttempts: 1
+  //   },
+  //   interactionId: "po_1643723400000_a1b2",
+  //   contextUpdated: true
+  // }
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/handle-user-interaction.yaml ====================
+
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/retrieve-user-context.yaml ====================
+id: retrieve-user-context
+name: Retrieve User Context Before Response
+category: context
+description: Retrieves relevant user context and interactions before generating agent responses to prevent hallucination
+priority: high
+tags:
+  - context-retrieval
+  - anti-hallucination
+  - user-interactions
+  - memory
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the requesting agent
+  - name: currentTask
+    type: string
+    description: Current task or question the agent is working on
+  - name: contextScope
+    type: object
+    description: Scope for context retrieval
+    optional: true
+    properties:
+      storyId: string
+      epicId: string
+      workflowPhase: string
+      includeOtherAgents: boolean
+  - name: searchTerms
+    type: array
+    description: Specific terms or topics to search for in user interactions
+    optional: true
+  - name: maxResults
+    type: number
+    description: Maximum number of relevant interactions to return
+    optional: true
+    default: 10
+outputs:
+  - name: relevantContext
+    type: object
+    description: Relevant user context and interactions
+  - name: hasRelevantUserInput
+    type: boolean
+    description: Whether relevant user input was found
+  - name: contextSummary
+    type: string
+    description: Summary of relevant context for agent use
+  - name: recommendations
+    type: array
+    description: Recommendations for how to use the context
+dependencies:
+  - shared-context-manager.js
+  - retrieve-context.yaml
+executionSteps:
+  - Initialize SharedContextManager
+  - Load current shared context
+  - Search for relevant user interactions based on agent and scope
+  - Filter interactions by search terms if provided
+  - Retrieve related context from long-term memory
+  - Analyze relevance and importance of found interactions
+  - Generate context summary for agent use
+  - Provide recommendations for context usage
+  - Return structured context object
+searchStrategy:
+  - agent_specific: Search interactions specific to the requesting agent
+  - cross_agent: Include interactions from other agents if scope allows
+  - temporal: Prioritize recent interactions over older ones
+  - topical: Match search terms against interaction content
+  - workflow: Include interactions from the current workflow phase
+validationCriteria:
+  - Context retrieval completes successfully
+  - Relevant interactions are properly filtered and ranked
+  - Context summary accurately reflects user inputs
+  - No fabricated information is included
+  - Recommendations are actionable and specific
+contextAnalysis:
+  - importance_scoring: Rate interactions by importance level
+  - relevance_matching: Match interactions to current task
+  - confirmation_status: Identify confirmed vs unconfirmed responses
+  - conflict_detection: Identify potentially conflicting user inputs
+  - completeness_check: Identify gaps in user-provided information
+outputFormat:
+  relevantContext:
+    userInteractions:
+      - interactionId: string
+        agentName: string
+        timestamp: string
+        question: string
+        userResponse: string
+        confirmed: boolean
+        importance: string
+        relevanceScore: number
+    keyFacts: array
+    decisions: array
+    openQuestions: array
+  contextSummary: |
+    Based on user interactions, the following has been established:
+    - [Key point from user input]
+    - [Another key point]
+    
+    Areas where user input is needed:
+    - [Gap or unclear area]
+    
+    Confirmed requirements:
+    - [User confirmed requirement]
+exampleUsage: |
+  const context = await executeTask('retrieve-user-context', {
+    agentName: 'dev',
+    currentTask: 'implementing user authentication feature',
+    contextScope: {
+      storyId: 'STORY-123',
+      includeOtherAgents: true
+    },
+    searchTerms: ['authentication', 'login', 'user', 'security'],
+    maxResults: 5
+  });
+  
+  // Returns relevant user interactions and context
+  // Agent can then reference actual user inputs instead of making assumptions
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/retrieve-user-context.yaml ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/templates/project-brief-tmpl.yaml ====================
 template:
@@ -3164,21 +3421,688 @@ This knowledge base provides the foundation for effective game development using
 20. **Question Storming**: Generate questions instead of answers first
 ==================== END: .bmad-2d-phaser-game-dev/data/brainstorming-techniques.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/kb-mode-interaction.yaml ====================
+==================== START: .bmad-2d-phaser-game-dev/utils/shared-context-manager.js ====================
+/**
+ * Shared Context Manager - Manages user interactions and responses across agents
+ * This utility provides centralized management of user responses to minimize
+ * hallucination and memory loss during agent interactions.
+ */
+
+const fs = require('fs').promises;
+const path = require('path');
+const crypto = require('crypto');
+
+class SharedContextManager {
+  constructor(baseDirectory = '.ai') {
+    this.baseDirectory = path.resolve(baseDirectory);
+    this.contextFilePath = path.join(this.baseDirectory, 'shared-context.json');
+    this.userInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
+    this.contextCache = null;
+    this.contextCacheTimestamp = null;
+    this.CACHE_TTL = 30000; // 30 seconds
+  }
+
+  /**
+   * Retry utility with exponential backoff for file operations
+   */
+  async retryWithBackoff(operation, maxRetries = 3, baseDelay = 100) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  /**
+   * Initialize the shared context system
+   */
+  async initialize() {
+    try {
+      // Ensure base directory exists
+      await fs.mkdir(this.baseDirectory, { recursive: true });
+      
+      // Initialize context file if it doesn't exist
+      if (!(await this.fileExists(this.contextFilePath))) {
+        await this.resetContext();
+      }
+      
+      // Initialize user interactions file if it doesn't exist
+      if (!(await this.fileExists(this.userInteractionsPath))) {
+        await this.resetUserInteractions();
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize SharedContextManager:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if file exists
+   */
+  async fileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Reset the shared context to initial state
+   */
+  async resetContext() {
+    const initialContext = {
+      sessionId: this.generateSessionId(),
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      currentPhase: 'initialization',
+      activeAgents: [],
+      globalContext: {
+        projectInfo: null,
+        requirements: {},
+        constraints: {},
+        decisions: [],
+        keyFacts: []
+      },
+      agentContext: {},
+      userResponseSummary: {},
+      workflowState: {
+        currentStep: null,
+        completedSteps: [],
+        pendingSteps: []
+      }
+    };
+    
+    await this.retryWithBackoff(() => 
+      fs.writeFile(this.contextFilePath, JSON.stringify(initialContext, null, 2))
+    );
+    this.contextCache = initialContext;
+    this.contextCacheTimestamp = Date.now();
+    
+    return initialContext;
+  }
+
+  /**
+   * Reset user interactions log
+   */
+  async resetUserInteractions() {
+    const initialInteractions = {
+      sessionId: this.generateSessionId(),
+      createdAt: new Date().toISOString(),
+      interactions: [],
+      summary: {
+        totalInteractions: 0,
+        agentBreakdown: {},
+        topicsSummary: []
+      }
+    };
+    
+    await this.retryWithBackoff(() => 
+      fs.writeFile(this.userInteractionsPath, JSON.stringify(initialInteractions, null, 2))
+    );
+    return initialInteractions;
+  }
+
+  /**
+   * Generate a unique session ID
+   */
+  generateSessionId() {
+    return `session_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  }
+
+  /**
+   * Load shared context with caching
+   */
+  async loadContext() {
+    try {
+      const now = Date.now();
+      
+      // Return cached version if still valid
+      if (this.contextCache && this.contextCacheTimestamp && 
+          (now - this.contextCacheTimestamp) < this.CACHE_TTL) {
+        return this.contextCache;
+      }
+      
+      const contextData = await this.retryWithBackoff(() => 
+        fs.readFile(this.contextFilePath, 'utf8')
+      );
+      const context = JSON.parse(contextData);
+      
+      // Update cache
+      this.contextCache = context;
+      this.contextCacheTimestamp = now;
+      
+      return context;
+    } catch (error) {
+      console.error('Failed to load shared context:', error);
+      // Return a minimal context if loading fails
+      return await this.resetContext();
+    }
+  }
+
+  /**
+   * Save shared context and invalidate cache
+   */
+  async saveContext(context) {
+    try {
+      context.lastUpdated = new Date().toISOString();
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.contextFilePath, JSON.stringify(context, null, 2))
+      );
+      
+      // Update cache
+      this.contextCache = context;
+      this.contextCacheTimestamp = Date.now();
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save shared context:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Record a user interaction with comprehensive context
+   */
+  async recordUserInteraction(agentName, question, userResponse, options = {}) {
+    try {
+      const interactionId = `${agentName}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`;
+      
+      const interaction = {
+        id: interactionId,
+        timestamp: new Date().toISOString(),
+        agentName,
+        phase: options.phase || 'unknown',
+        context: {
+          taskId: options.taskId,
+          epicId: options.epicId,
+          storyId: options.storyId,
+          workflowStep: options.workflowStep
+        },
+        question: {
+          text: question,
+          type: options.questionType || 'open-ended',
+          category: options.category || 'general'
+        },
+        userResponse: {
+          original: userResponse,
+          processed: this.processUserResponse(userResponse),
+          confirmed: false,
+          confirmationAttempts: 0
+        },
+        summary: options.summary || null,
+        tags: options.tags || [],
+        importance: options.importance || 'medium'
+      };
+
+      // Load current interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      // Add new interaction
+      interactions.interactions.push(interaction);
+      
+      // Update summary statistics
+      interactions.summary.totalInteractions++;
+      if (!interactions.summary.agentBreakdown[agentName]) {
+        interactions.summary.agentBreakdown[agentName] = 0;
+      }
+      interactions.summary.agentBreakdown[agentName]++;
+      
+      // Save updated interactions
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      // Update shared context with this interaction
+      await this.updateContextWithUserInput(agentName, interaction);
+      
+      return interaction;
+    } catch (error) {
+      console.error('Failed to record user interaction:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Process and clean user response
+   */
+  processUserResponse(response) {
+    if (typeof response !== 'string') {
+      response = String(response);
+    }
+    
+    const cleaned = response.trim();
+    return {
+      cleaned: cleaned,
+      wordCount: cleaned === '' ? 0 : cleaned.split(/\s+/).length,
+      hasSpecialRequirements: /\b(must|should|required|mandatory)\b/i.test(response),
+      hasNegations: /\b(not|don't|doesn't|won't|can't|shouldn't)\b/i.test(response),
+      containsNumbers: /\d+/.test(response),
+      containsUrls: /https?:\/\/[^\s]+/g.test(response),
+      keyPhrases: this.extractKeyPhrases(response)
+    };
+  }
+
+  /**
+   * Extract key phrases from user response
+   */
+  extractKeyPhrases(text) {
+    const phrases = [];
+    const words = text.toLowerCase().split(/\s+/);
+    
+    // Look for common requirement phrases
+    const patterns = [
+      /\b(needs? to|has to|must|should|required to)\s+(\w+(?:\s+\w+){0,3})/g,
+      /\b(will|would|can|could|might)\s+(\w+(?:\s+\w+){0,2})/g,
+      /\b(feature|functionality|requirement|constraint)\s+(\w+(?:\s+\w+){0,2})/g
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        phrases.push(match[0]);
+      }
+    });
+    
+    return phrases.slice(0, 5); // Limit to top 5 phrases
+  }
+
+  /**
+   * Update shared context with user input
+   */
+  async updateContextWithUserInput(agentName, interaction) {
+    try {
+      const context = await this.loadContext();
+      
+      // Ensure agent context exists
+      if (!context.agentContext[agentName]) {
+        context.agentContext[agentName] = {
+          interactions: [],
+          keyFacts: [],
+          decisions: [],
+          lastActivity: null
+        };
+      }
+      
+      // Add interaction reference
+      context.agentContext[agentName].interactions.push(interaction.id);
+      context.agentContext[agentName].lastActivity = interaction.timestamp;
+      
+      // Extract and store key facts from user response
+      const keyFacts = this.extractKeyFactsFromResponse(interaction);
+      if (keyFacts.length > 0) {
+        context.agentContext[agentName].keyFacts.push(...keyFacts);
+        // Also add to global context
+        context.globalContext.keyFacts.push(...keyFacts);
+      }
+      
+      // Update agent activity
+      if (!context.activeAgents.includes(agentName)) {
+        context.activeAgents.push(agentName);
+      }
+      
+      // Update user response summary for quick access
+      if (!context.userResponseSummary[agentName]) {
+        context.userResponseSummary[agentName] = [];
+      }
+      
+      context.userResponseSummary[agentName].push({
+        interactionId: interaction.id,
+        timestamp: interaction.timestamp,
+        question: interaction.question.text.substring(0, 100) + '...',
+        response: interaction.userResponse.original.substring(0, 200) + '...',
+        summary: interaction.summary,
+        importance: interaction.importance
+      });
+      
+      // Keep only last 10 summaries per agent to prevent bloating
+      if (context.userResponseSummary[agentName].length > 10) {
+        context.userResponseSummary[agentName] = context.userResponseSummary[agentName].slice(-10);
+      }
+      
+      await this.saveContext(context);
+      return true;
+    } catch (error) {
+      console.error('Failed to update context with user input:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Extract key facts from user response
+   */
+  extractKeyFactsFromResponse(interaction) {
+    const keyFacts = [];
+    const response = interaction.userResponse;
+    
+    // Create key facts based on response content
+    if (response.processed.hasSpecialRequirements) {
+      keyFacts.push({
+        id: `fact_${interaction.id}_req`,
+        type: 'requirement',
+        content: response.original,
+        source: 'user_input',
+        agentName: interaction.agentName,
+        timestamp: interaction.timestamp,
+        confidence: 'high'
+      });
+    }
+    
+    if (response.processed.keyPhrases.length > 0) {
+      response.processed.keyPhrases.forEach((phrase, index) => {
+        keyFacts.push({
+          id: `fact_${interaction.id}_phrase_${index}`,
+          type: 'key_phrase',
+          content: phrase,
+          source: 'user_input',
+          agentName: interaction.agentName,
+          timestamp: interaction.timestamp,
+          confidence: 'medium'
+        });
+      });
+    }
+    
+    return keyFacts;
+  }
+
+  /**
+   * Confirm user response with agent
+   */
+  async confirmUserResponse(interactionId, agentName, confirmationText) {
+    try {
+      // Load interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      // Find the interaction
+      const interaction = interactions.interactions.find(i => i.id === interactionId);
+      if (!interaction) {
+        throw new Error(`Interaction ${interactionId} not found`);
+      }
+      
+      // Update confirmation status
+      interaction.userResponse.confirmed = true;
+      interaction.userResponse.confirmationAttempts++;
+      interaction.userResponse.confirmationText = confirmationText;
+      interaction.userResponse.confirmedAt = new Date().toISOString();
+      
+      // Save updated interactions
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      return interaction;
+    } catch (error) {
+      console.error('Failed to confirm user response:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get relevant context for an agent
+   */
+  async getContextForAgent(agentName, options = {}) {
+    try {
+      const context = await this.loadContext();
+      
+      // Get agent-specific context
+      const agentContext = context.agentContext[agentName] || {};
+      
+      // Get relevant user interactions
+      const interactions = await this.getRelevantInteractions(agentName, options);
+      
+      // Build comprehensive context
+      const relevantContext = {
+        sessionInfo: {
+          sessionId: context.sessionId,
+          currentPhase: context.currentPhase,
+          workflowState: context.workflowState
+        },
+        globalContext: context.globalContext,
+        agentContext: agentContext,
+        userInteractions: interactions,
+        recentUserResponses: context.userResponseSummary[agentName] || [],
+        lastUpdated: context.lastUpdated
+      };
+      
+      return relevantContext;
+    } catch (error) {
+      console.error('Failed to get context for agent:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get relevant user interactions for an agent
+   */
+  async getRelevantInteractions(agentName, options = {}) {
+    try {
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      let relevantInteractions = interactions.interactions;
+      
+      // Filter by agent if specified
+      if (options.agentSpecific !== false) {
+        relevantInteractions = relevantInteractions.filter(i => i.agentName === agentName);
+      }
+      
+      // Filter by context if specified
+      if (options.storyId) {
+        relevantInteractions = relevantInteractions.filter(i => 
+          i.context.storyId === options.storyId);
+      }
+      
+      if (options.epicId) {
+        relevantInteractions = relevantInteractions.filter(i => 
+          i.context.epicId === options.epicId);
+      }
+      
+      // Sort by timestamp (most recent first)
+      relevantInteractions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Limit results if specified
+      if (options.limit) {
+        relevantInteractions = relevantInteractions.slice(0, options.limit);
+      }
+      
+      return relevantInteractions;
+    } catch (error) {
+      console.error('Failed to get relevant interactions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update workflow state
+   */
+  async updateWorkflowState(currentStep, completedSteps = [], pendingSteps = []) {
+    try {
+      const context = await this.loadContext();
+      
+      context.workflowState = {
+        currentStep,
+        completedSteps: [...new Set([...context.workflowState.completedSteps, ...completedSteps])],
+        pendingSteps: [...new Set(pendingSteps)]
+      };
+      
+      await this.saveContext(context);
+      return true;
+    } catch (error) {
+      console.error('Failed to update workflow state:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Add a global decision or key fact
+   */
+  async addGlobalContext(type, content, source = 'system') {
+    try {
+      const context = await this.loadContext();
+      
+      const item = {
+        id: `${type}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`,
+        content,
+        source,
+        timestamp: new Date().toISOString()
+      };
+      
+      if (type === 'decision') {
+        context.globalContext.decisions.push(item);
+      } else if (type === 'keyFact') {
+        context.globalContext.keyFacts.push(item);
+      }
+      
+      await this.saveContext(context);
+      return item;
+    } catch (error) {
+      console.error('Failed to add global context:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get a summary of all user interactions for handoff between agents
+   */
+  async getUserInteractionsSummary(options = {}) {
+    try {
+      const interactions = await this.getRelevantInteractions('all', { agentSpecific: false, ...options });
+      
+      const summary = {
+        totalInteractions: interactions.length,
+        agentBreakdown: {},
+        importantResponses: [],
+        keyDecisions: [],
+        openQuestions: []
+      };
+      
+      interactions.forEach(interaction => {
+        // Count by agent
+        if (!summary.agentBreakdown[interaction.agentName]) {
+          summary.agentBreakdown[interaction.agentName] = 0;
+        }
+        summary.agentBreakdown[interaction.agentName]++;
+        
+        // Collect important responses
+        if (interaction.importance === 'high' || 
+            interaction.userResponse.processed.hasSpecialRequirements) {
+          summary.importantResponses.push({
+            agent: interaction.agentName,
+            question: interaction.question.text,
+            response: interaction.userResponse.original,
+            timestamp: interaction.timestamp
+          });
+        }
+        
+        // Collect unconfirmed responses as open questions
+        if (!interaction.userResponse.confirmed) {
+          summary.openQuestions.push({
+            agent: interaction.agentName,
+            question: interaction.question.text,
+            response: interaction.userResponse.original,
+            needsConfirmation: true
+          });
+        }
+      });
+      
+      return summary;
+    } catch (error) {
+      console.error('Failed to get user interactions summary:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear old interactions and context (cleanup)
+   */
+  async cleanup(olderThanDays = 7) {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+      
+      // Clean up interactions
+      const interactionsData = await this.retryWithBackoff(() => 
+        fs.readFile(this.userInteractionsPath, 'utf8')
+      );
+      const interactions = JSON.parse(interactionsData);
+      
+      const filteredInteractions = interactions.interactions.filter(i => 
+        new Date(i.timestamp) > cutoffDate
+      );
+      
+      interactions.interactions = filteredInteractions;
+      interactions.summary.totalInteractions = filteredInteractions.length;
+      
+      await this.retryWithBackoff(() => 
+        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
+      );
+      
+      console.log(`Cleaned up ${interactions.interactions.length - filteredInteractions.length} old interactions`);
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to cleanup old interactions:', error);
+      return false;
+    }
+  }
+}
+
+module.exports = SharedContextManager;
+==================== END: .bmad-2d-phaser-game-dev/utils/shared-context-manager.js ====================
+
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/kb-mode-interaction.yaml ====================
 id: kb-mode-interaction
 name: KB Mode Interaction Task
 purpose: Provide a user-friendly interface to the BMad knowledge base without overwhelming users with information upfront.
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: generic
+          context:
+            taskId: kb-mode-interaction
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory and Context
-    description: "Set up working memory and retrieve relevant context"
+    description: Set up working memory and retrieve relevant context
     actions:
-      - description: "Initialize working memory for KB mode interaction"
+      - description: Initialize working memory for KB mode interaction
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve previous KB interactions and commonly asked topics"
-        elicit: false
+      - description: Retrieve previous KB interactions and commonly asked topics
+        elicit: true
         metadata:
           originalIndent: 0
   - id: step1
@@ -3187,7 +4111,7 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Present Topic Areas
     description: |-
@@ -3205,17 +4129,17 @@ steps:
     actions: []
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Respond Contextually
-    description: ""
+    description: ''
     actions:
       - description: Wait for user's specific question or topic selection
         elicit: true
         metadata:
           originalIndent: 0
       - description: Provide focused, relevant information from the knowledge base
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Offer to dive deeper or explore related topics
@@ -3228,10 +4152,10 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Interactive Exploration
-    description: ""
+    description: ''
     actions:
       - description: After answering, suggest related topics they might find helpful
         elicit: false
@@ -3251,41 +4175,25 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
   - id: step5
     name: Exit Gracefully
-    description: >-
+    description: |-
       When user is done or wants to exit KB mode:
-
       **User**: *kb-mode
-
-      **Assistant**: I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed
-      information about any aspect of BMad-Method.
-
+      **Assistant**: I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed information about any aspect of BMad-Method.
       **What would you like to know more about?**
-
       1. **Setup & Installation** - Getting started with BMad
-
       2. **Workflows** - Choosing the right workflow for your project
-
       3. **Web vs IDE** - When to use each environment
-
       4. **Agents** - Understanding specialized agents and their roles
-
       5. **Documents** - PRDs, Architecture, Stories, and more
-
       6. **Agile Process** - How BMad implements Agile methodologies
-
       7. **Configuration** - Customizing BMad for your needs
-
       8. **Best Practices** - Tips for effective BMad usage
-
       Or ask me about anything else related to BMad-Method!
-
       **User**: Tell me about workflows
-
-      **Assistant**: [Provides focused information about workflows from the KB, then offers to explore specific workflow
-      types or related topics]
+      **Assistant**: [Provides focused information about workflows from the KB, then offers to explore specific workflow types or related topics]
     actions:
       - description: Summarize key points discussed if helpful
         elicit: false
@@ -3301,7 +4209,26 @@ steps:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "5"
+      originalNumber: '5'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: generic
+          taskData:
+            observation: Completed kb-mode-interaction task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: kb-mode-interaction
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -3310,7 +4237,7 @@ metadata:
     - Instructions
     - Example Interaction
   preservedContent: []
-==================== END: .bmad-2d-phaser-game-dev/tasks/kb-mode-interaction.yaml ====================
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/kb-mode-interaction.yaml ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/templates/workflow-status-tmpl.yaml ====================
 template:
@@ -3789,10 +4716,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -4059,10 +4985,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -4281,10 +5206,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -4528,10 +5452,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -4769,10 +5692,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -5022,10 +5944,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story
@@ -5293,205 +6214,238 @@ parallel:
 - Minimize context switching overhead
 ==================== END: .bmad-2d-phaser-game-dev/utils/workflow-management.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/create-doc.md ====================
-# Create Document from Template (YAML Driven)
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/execute-checklist.yaml ====================
+id: execute-checklist
+name: Execute Checklist
+purpose: Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: execute-checklist
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step0
+    name: Initialize Working Memory
+    description: Initialize working memory for checklist execution session
+    actions:
+      - description: Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+        elicit: true
+      - description: Verify checklist file exists at specified path
+        elicit: true
+      - description: Load checklist content and parse structure
+        elicit: false
+  - id: step1
+    name: Determine Execution Mode
+    description: Determine how to execute the checklist based on user preference
+    actions:
+      - description: Check if execution mode was provided in input
+        elicit: false
+      - description: 'If mode not specified, ask user for preference:'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**How would you like to work through this checklist?**'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'Select option (1 or 2):'
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: step2
+    name: Parse Checklist Structure
+    description: Analyze the checklist to identify sections and items
+    actions:
+      - description: Identify main sections in the checklist
+        elicit: false
+      - description: Extract checklist items (lines starting with '- [ ]')
+        elicit: false
+      - description: 'Parse any LLM instructions embedded in [[LLM: ]] blocks'
+        elicit: false
+      - description: Create structured representation of checklist hierarchy
+        elicit: false
+      - description: Record total items count and section breakdown in memory
+        elicit: false
+  - id: step3
+    name: Execute Checklist Items
+    description: Work through each checklist item based on selected mode
+    actions:
+      - description: 'For each section in the checklist:'
+        elicit: false
+      - description: Read and understand the section context and any LLM instructions
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Evaluate each checklist item in the section
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Mark items as checked [x] or unchecked [ ] based on evaluation
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Document findings, issues, or observations for each item
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'If interactive mode: Present section findings and await confirmation'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Update progress tracking in working memory
+        elicit: false
+        metadata:
+          originalIndent: 2
+  - id: step4
+    name: Generate Summary Report
+    description: Create comprehensive report of checklist execution results
+    actions:
+      - description: Calculate overall completion percentage
+        elicit: false
+      - description: Summarize findings by category/section
+        elicit: false
+      - description: Identify critical issues or blockers
+        elicit: false
+      - description: Generate recommendations based on unchecked items
+        elicit: false
+      - description: If checklist includes specific report format (e.g., validation tables), use that format
+        elicit: false
+      - description: Store execution results in working memory for future reference
+        elicit: false
+  - id: step5
+    name: Present Results and Next Steps
+    description: Present the final results and offer follow-up actions
+    actions:
+      - description: Display the summary report to the user
+        elicit: false
+      - description: Highlight any critical issues or blockers found
+        elicit: false
+      - description: Show completion statistics (X of Y items passed)
+        elicit: false
+      - description: 'If unchecked items exist, offer to:'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 1. Get detailed analysis of failed items
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 2. Generate action plan to address issues
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 3. Re-run specific sections
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Would you like to perform any follow-up actions?
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed execute-checklist task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: execute-checklist
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  checklistPath:
+    description: Path to the checklist file to execute
+    type: string
+    required: true
+  mode:
+    description: Execution mode - 'interactive' or 'comprehensive'
+    type: string
+    required: false
+    enum:
+      - interactive
+      - comprehensive
+  context:
+    description: Additional context for checklist execution (e.g., file paths, project info)
+    type: object
+    required: false
+outputs:
+  results:
+    description: Detailed results of checklist execution
+    type: object
+    properties:
+      totalItems:
+        type: number
+      checkedItems:
+        type: number
+      completionPercentage:
+        type: number
+      sectionResults:
+        type: array
+        items:
+          type: object
+          properties:
+            section: string
+            passed: number
+            failed: number
+            findings: array
+      criticalIssues:
+        type: array
+      recommendations:
+        type: array
+  completionStatus:
+    description: Overall checklist completion status
+    type: string
+    enum:
+      - PASS
+      - PARTIAL
+      - FAIL
+metadata:
+  supportsAdaptation: true
+  requiresWorkingMemory: true
+  executionMode: SEQUENTIAL
+  notes: |
+    This is a generic checklist executor that can work with any checklist format.
+    It supports the BMad checklist format with:
+    - Markdown structure with sections and subsections
+    - Checklist items as "- [ ]" lines
+    - LLM instructions in [[LLM: ]] blocks
+    - Embedded report formats and validation tables
 
-## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
-
-**THIS IS AN EXECUTABLE WORKFLOW - NOT REFERENCE MATERIAL**
-
-When this task is invoked:
-
-1. **DISABLE ALL EFFICIENCY OPTIMIZATIONS** - This workflow requires full user interaction
-2. **MANDATORY STEP-BY-STEP EXECUTION** - Each section must be processed sequentially with user feedback
-3. **ELICITATION IS REQUIRED** - When `elicit: true`, you MUST use the 1-9 format and wait for user response
-4. **NO SHORTCUTS ALLOWED** - Complete documents cannot be created without following this workflow
-
-**VIOLATION INDICATOR:** If you create a complete document without user interaction, you have violated this workflow.
-
-## Critical: Template Discovery
-
-If a YAML Template has not been provided, list all templates from .bmad-core/templates or ask the user to provide another.
-
-## CRITICAL: Mandatory Elicitation Format
-
-**When `elicit: true`, this is a HARD STOP requiring user interaction:**
-
-**YOU MUST:**
-
-1. Present section content
-2. Provide detailed rationale (explain trade-offs, assumptions, decisions made)
-3. **STOP and present numbered options 1-9:**
-   - **Option 1:** Always "Proceed to next section"
-   - **Options 2-9:** Select 8 methods from data/elicitation-methods
-   - End with: "Select 1-9 or just type your question/feedback:"
-4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
-
-**WORKFLOW VIOLATION:** Creating content for elicit=true sections without user interaction violates this task.
-
-**NEVER ask yes/no questions or use any other format.**
-
-## Processing Flow
-
-1. **Parse YAML template** - Load template metadata and sections
-2. **Set preferences** - Show current mode (Interactive), confirm output file
-3. **Process each section:**
-   - Skip if condition unmet
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
-   - Draft content using section instruction
-   - Present content + detailed rationale
-   - **IF elicit: true** → MANDATORY 1-9 options format
-   - Save to file if possible
-4. **Continue until complete**
-
-## Detailed Rationale Requirements
-
-When presenting section content, ALWAYS include rationale that explains:
-
-- Trade-offs and choices made (what was chosen over alternatives and why)
-- Key assumptions made during drafting
-- Interesting or questionable decisions that need user attention
-- Areas that might need validation
-
-## Elicitation Results Flow
-
-After user selects elicitation method (2-9):
-
-1. Execute method from data/elicitation-methods
-2. Present results with insights
-3. Offer options:
-   - **1. Apply changes and update section**
-   - **2. Return to elicitation menu**
-   - **3. Ask any questions or engage further with this elicitation**
-
-## Agent Permissions
-
-When processing sections with agent permission fields:
-
-- **owner**: Note which agent role initially creates/populates the section
-- **editors**: List agent roles allowed to modify the section
-- **readonly**: Mark sections that cannot be modified after creation
-
-**For sections with restricted access:**
-
-- Include a note in the generated document indicating the responsible agent
-- Example: "_(This section is owned by dev-agent and can only be modified by dev-agent)_"
-
-## YOLO Mode
-
-User can type `#yolo` to toggle to YOLO mode (process all sections at once).
-
-## CRITICAL REMINDERS
-
-**❌ NEVER:**
-
-- Ask yes/no questions for elicitation
-- Use any format other than 1-9 numbered options
-- Create new elicitation methods
-
-**✅ ALWAYS:**
-
-- Use exact 1-9 format when elicit: true
-- Select options 2-9 from data/elicitation-methods only
-- Provide detailed rationale explaining decisions
-- End with "Select 1-9 or just type your question/feedback:"
-==================== END: .bmad-2d-phaser-game-dev/tasks/create-doc.md ====================
-
-==================== START: .bmad-2d-phaser-game-dev/tasks/execute-checklist.md ====================
-# Checklist Validation Task
-
-This task provides instructions for validating documentation against checklists. The agent MUST follow these instructions to ensure thorough and systematic validation of documents.
-
-## Available Checklists
-
-If the user asks or does not specify a specific checklist, list the checklists available to the agent persona. If the task is being run not with a specific agent, tell the user to check the .bmad-2d-phaser-game-dev/checklists folder to select the appropriate one to run.
-
-## Instructions
-
-1. **Initial Assessment**
-
-   - If user or the task being run provides a checklist name:
-     - Try fuzzy matching (e.g. "architecture checklist" -> "architect-checklist")
-     - If multiple matches found, ask user to clarify
-     - Load the appropriate checklist from .bmad-2d-phaser-game-dev/checklists/
-   - If no checklist specified:
-     - Ask the user which checklist they want to use
-     - Present the available options from the files in the checklists folder
-   - Confirm if they want to work through the checklist:
-     - Section by section (interactive mode - very time consuming)
-     - All at once (YOLO mode - recommended for checklists, there will be a summary of sections at the end to discuss)
-
-2. **Document and Artifact Gathering**
-
-   - Each checklist will specify its required documents/artifacts at the beginning
-   - Follow the checklist's specific instructions for what to gather, generally a file can be resolved in the docs folder, if not or unsure, halt and ask or confirm with the user.
-
-3. **Checklist Processing**
-
-   If in interactive mode:
-
-   - Work through each section of the checklist one at a time
-   - For each section:
-     - Review all items in the section following instructions for that section embedded in the checklist
-     - Check each item against the relevant documentation or artifacts as appropriate
-     - Present summary of findings for that section, highlighting warnings, errors and non applicable items (rationale for non-applicability).
-     - Get user confirmation before proceeding to next section or if any thing major do we need to halt and take corrective action
-
-   If in YOLO mode:
-
-   - Process all sections at once
-   - Create a comprehensive report of all findings
-   - Present the complete analysis to the user
-
-4. **Validation Approach**
-
-   For each checklist item:
-
-   - Read and understand the requirement
-   - Look for evidence in the documentation that satisfies the requirement
-   - Consider both explicit mentions and implicit coverage
-   - Aside from this, follow all checklist llm instructions
-   - Mark items as:
-     - ✅ PASS: Requirement clearly met
-     - ❌ FAIL: Requirement not met or insufficient coverage
-     - ⚠️ PARTIAL: Some aspects covered but needs improvement
-     - N/A: Not applicable to this case
-
-5. **Section Analysis**
-
-   For each section:
-
-   - think step by step to calculate pass rate
-   - Identify common themes in failed items
-   - Provide specific recommendations for improvement
-   - In interactive mode, discuss findings with user
-   - Document any user decisions or explanations
-
-6. **Final Report**
-
-   Prepare a summary that includes:
-
-   - Overall checklist completion status
-   - Pass rates by section
-   - List of failed items with context
-   - Specific recommendations for improvement
-   - Any sections or items marked as N/A with justification
-
-## Checklist Execution Methodology
-
-Each checklist now contains embedded LLM prompts and instructions that will:
-
-1. **Guide thorough thinking** - Prompts ensure deep analysis of each section
-2. **Request specific artifacts** - Clear instructions on what documents/access is needed
-3. **Provide contextual guidance** - Section-specific prompts for better validation
-4. **Generate comprehensive reports** - Final summary with detailed findings
-
-The LLM will:
-
-- Execute the complete checklist validation
-- Present a final report with pass/fail rates and key findings
-- Offer to provide detailed analysis of any section, especially those with warnings or failures
-==================== END: .bmad-2d-phaser-game-dev/tasks/execute-checklist.md ====================
+    The task adapts to the specific checklist structure and follows any
+    embedded instructions for execution and reporting.
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/execute-checklist.yaml ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/tasks/game-design-brainstorming.md ====================
 # Game Design Brainstorming Techniques Task
@@ -5804,412 +6758,6 @@ This task provides a comprehensive toolkit of creative brainstorming techniques 
 - Plan for iteration based on player feedback
 ==================== END: .bmad-2d-phaser-game-dev/tasks/game-design-brainstorming.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.md ====================
-# Create Deep Research Prompt Task
-
-This task helps create comprehensive research prompts for various types of deep analysis. It can process inputs from brainstorming sessions, project briefs, market research, or specific research questions to generate targeted prompts for deeper investigation.
-
-## Purpose
-
-Generate well-structured research prompts that:
-
-- Define clear research objectives and scope
-- Specify appropriate research methodologies
-- Outline expected deliverables and formats
-- Guide systematic investigation of complex topics
-- Ensure actionable insights are captured
-
-## Research Type Selection
-
-CRITICAL: First, help the user select the most appropriate research focus based on their needs and any input documents they've provided.
-
-### 1. Research Focus Options
-
-Present these numbered options to the user:
-
-1. **Product Validation Research**
-
-   - Validate product hypotheses and market fit
-   - Test assumptions about user needs and solutions
-   - Assess technical and business feasibility
-   - Identify risks and mitigation strategies
-
-2. **Market Opportunity Research**
-
-   - Analyze market size and growth potential
-   - Identify market segments and dynamics
-   - Assess market entry strategies
-   - Evaluate timing and market readiness
-
-3. **User & Customer Research**
-
-   - Deep dive into user personas and behaviors
-   - Understand jobs-to-be-done and pain points
-   - Map customer journeys and touchpoints
-   - Analyze willingness to pay and value perception
-
-4. **Competitive Intelligence Research**
-
-   - Detailed competitor analysis and positioning
-   - Feature and capability comparisons
-   - Business model and strategy analysis
-   - Identify competitive advantages and gaps
-
-5. **Technology & Innovation Research**
-
-   - Assess technology trends and possibilities
-   - Evaluate technical approaches and architectures
-   - Identify emerging technologies and disruptions
-   - Analyze build vs. buy vs. partner options
-
-6. **Industry & Ecosystem Research**
-
-   - Map industry value chains and dynamics
-   - Identify key players and relationships
-   - Analyze regulatory and compliance factors
-   - Understand partnership opportunities
-
-7. **Strategic Options Research**
-
-   - Evaluate different strategic directions
-   - Assess business model alternatives
-   - Analyze go-to-market strategies
-   - Consider expansion and scaling paths
-
-8. **Risk & Feasibility Research**
-
-   - Identify and assess various risk factors
-   - Evaluate implementation challenges
-   - Analyze resource requirements
-   - Consider regulatory and legal implications
-
-9. **Custom Research Focus**
-
-   - User-defined research objectives
-   - Specialized domain investigation
-   - Cross-functional research needs
-
-### 2. Input Processing
-
-**If Project Brief provided:**
-
-- Extract key product concepts and goals
-- Identify target users and use cases
-- Note technical constraints and preferences
-- Highlight uncertainties and assumptions
-
-**If Brainstorming Results provided:**
-
-- Synthesize main ideas and themes
-- Identify areas needing validation
-- Extract hypotheses to test
-- Note creative directions to explore
-
-**If Market Research provided:**
-
-- Build on identified opportunities
-- Deepen specific market insights
-- Validate initial findings
-- Explore adjacent possibilities
-
-**If Starting Fresh:**
-
-- Gather essential context through questions
-- Define the problem space
-- Clarify research objectives
-- Establish success criteria
-
-## Process
-
-### 3. Research Prompt Structure
-
-CRITICAL: collaboratively develop a comprehensive research prompt with these components.
-
-#### A. Research Objectives
-
-CRITICAL: collaborate with the user to articulate clear, specific objectives for the research.
-
-- Primary research goal and purpose
-- Key decisions the research will inform
-- Success criteria for the research
-- Constraints and boundaries
-
-#### B. Research Questions
-
-CRITICAL: collaborate with the user to develop specific, actionable research questions organized by theme.
-
-**Core Questions:**
-
-- Central questions that must be answered
-- Priority ranking of questions
-- Dependencies between questions
-
-**Supporting Questions:**
-
-- Additional context-building questions
-- Nice-to-have insights
-- Future-looking considerations
-
-#### C. Research Methodology
-
-**Data Collection Methods:**
-
-- Secondary research sources
-- Primary research approaches (if applicable)
-- Data quality requirements
-- Source credibility criteria
-
-**Analysis Frameworks:**
-
-- Specific frameworks to apply
-- Comparison criteria
-- Evaluation methodologies
-- Synthesis approaches
-
-#### D. Output Requirements
-
-**Format Specifications:**
-
-- Executive summary requirements
-- Detailed findings structure
-- Visual/tabular presentations
-- Supporting documentation
-
-**Key Deliverables:**
-
-- Must-have sections and insights
-- Decision-support elements
-- Action-oriented recommendations
-- Risk and uncertainty documentation
-
-### 4. Prompt Generation
-
-**Research Prompt Template:**
-
-```markdown
-## Research Objective
-
-[Clear statement of what this research aims to achieve]
-
-## Background Context
-
-[Relevant information from project brief, brainstorming, or other inputs]
-
-## Research Questions
-
-### Primary Questions (Must Answer)
-
-1. [Specific, actionable question]
-2. [Specific, actionable question]
-   ...
-
-### Secondary Questions (Nice to Have)
-
-1. [Supporting question]
-2. [Supporting question]
-   ...
-
-## Research Methodology
-
-### Information Sources
-
-- [Specific source types and priorities]
-
-### Analysis Frameworks
-
-- [Specific frameworks to apply]
-
-### Data Requirements
-
-- [Quality, recency, credibility needs]
-
-## Expected Deliverables
-
-### Executive Summary
-
-- Key findings and insights
-- Critical implications
-- Recommended actions
-
-### Detailed Analysis
-
-[Specific sections needed based on research type]
-
-### Supporting Materials
-
-- Data tables
-- Comparison matrices
-- Source documentation
-
-## Success Criteria
-
-[How to evaluate if research achieved its objectives]
-
-## Timeline and Priority
-
-[If applicable, any time constraints or phasing]
-```
-
-### 5. Review and Refinement
-
-1. **Present Complete Prompt**
-
-   - Show the full research prompt
-   - Explain key elements and rationale
-   - Highlight any assumptions made
-
-2. **Gather Feedback**
-
-   - Are the objectives clear and correct?
-   - Do the questions address all concerns?
-   - Is the scope appropriate?
-   - Are output requirements sufficient?
-
-3. **Refine as Needed**
-   - Incorporate user feedback
-   - Adjust scope or focus
-   - Add missing elements
-   - Clarify ambiguities
-
-### 6. Next Steps Guidance
-
-**Execution Options:**
-
-1. **Use with AI Research Assistant**: Provide this prompt to an AI model with research capabilities
-2. **Guide Human Research**: Use as a framework for manual research efforts
-3. **Hybrid Approach**: Combine AI and human research using this structure
-
-**Integration Points:**
-
-- How findings will feed into next phases
-- Which team members should review results
-- How to validate findings
-- When to revisit or expand research
-
-## Important Notes
-
-- The quality of the research prompt directly impacts the quality of insights gathered
-- Be specific rather than general in research questions
-- Consider both current state and future implications
-- Balance comprehensiveness with focus
-- Document assumptions and limitations clearly
-- Plan for iterative refinement based on initial findings
-==================== END: .bmad-2d-phaser-game-dev/tasks/create-deep-research-prompt.md ====================
-
-==================== START: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.md ====================
-# Advanced Game Design Elicitation Task
-
-## Purpose
-
-- Provide optional reflective and brainstorming actions to enhance game design content quality
-- Enable deeper exploration of game mechanics and player experience through structured elicitation techniques
-- Support iterative refinement through multiple game development perspectives
-- Apply game-specific critical thinking to design decisions
-
-## Task Instructions
-
-### 1. Game Design Context and Review
-
-[[LLM: When invoked after outputting a game design section:
-
-1. First, provide a brief 1-2 sentence summary of what the user should look for in the section just presented, with game-specific focus (e.g., "Please review the core mechanics for player engagement and implementation feasibility. Pay special attention to how these mechanics create the intended player experience and whether they're technically achievable with Phaser 3.")
-
-2. If the section contains game flow diagrams, level layouts, or system diagrams, explain each diagram briefly with game development context before offering elicitation options (e.g., "The gameplay loop diagram shows how player actions lead to rewards and progression. Notice how each step maintains player engagement and creates opportunities for skill development.")
-
-3. If the section contains multiple game elements (like multiple mechanics, multiple levels, multiple systems, etc.), inform the user they can apply elicitation actions to:
-
-   - The entire section as a whole
-   - Individual game elements within the section (specify which element when selecting an action)
-
-4. Then present the action list as specified below.]]
-
-### 2. Ask for Review and Present Game Design Action List
-
-[[LLM: Ask the user to review the drafted game design section. In the SAME message, inform them that they can suggest additions, removals, or modifications, OR they can select an action by number from the 'Advanced Game Design Elicitation & Brainstorming Actions'. If there are multiple game elements in the section, mention they can specify which element(s) to apply the action to. Then, present ONLY the numbered list (0-9) of these actions. Conclude by stating that selecting 9 will proceed to the next section. Await user selection. If an elicitation action (0-8) is chosen, execute it and then re-offer this combined review/elicitation choice. If option 9 is chosen, or if the user provides direct feedback, proceed accordingly.]]
-
-**Present the numbered list (0-9) with this exact format:**
-
-```text
-**Advanced Game Design Elicitation & Brainstorming Actions**
-Choose an action (0-9 - 9 to bypass - HELP for explanation of these options):
-
-0. Expand or Contract for Target Audience
-1. Explain Game Design Reasoning (Step-by-Step)
-2. Critique and Refine from Player Perspective
-3. Analyze Game Flow and Mechanic Dependencies
-4. Assess Alignment with Player Experience Goals
-5. Identify Potential Player Confusion and Design Risks
-6. Challenge from Critical Game Design Perspective
-7. Explore Alternative Game Design Approaches
-8. Hindsight Postmortem: The 'If Only...' Game Design Reflection
-9. Proceed / No Further Actions
-```
-
-### 2. Processing Guidelines
-
-**Do NOT show:**
-
-- The full protocol text with `[[LLM: ...]]` instructions
-- Detailed explanations of each option unless executing or the user asks, when giving the definition you can modify to tie its game development relevance
-- Any internal template markup
-
-**After user selection from the list:**
-
-- Execute the chosen action according to the game design protocol instructions below
-- Ask if they want to select another action or proceed with option 9 once complete
-- Continue until user selects option 9 or indicates completion
-
-## Game Design Action Definitions
-
-0. Expand or Contract for Target Audience
-   [[LLM: Ask the user whether they want to 'expand' on the game design content (add more detail, elaborate on mechanics, include more examples) or 'contract' it (simplify mechanics, focus on core features, reduce complexity). Also, ask if there's a specific player demographic or experience level they have in mind (casual players, hardcore gamers, children, etc.). Once clarified, perform the expansion or contraction from your current game design role's perspective, tailored to the specified player audience if provided.]]
-
-1. Explain Game Design Reasoning (Step-by-Step)
-   [[LLM: Explain the step-by-step game design thinking process that you used to arrive at the current proposal for this game content. Focus on player psychology, engagement mechanics, technical feasibility, and how design decisions support the overall player experience goals.]]
-
-2. Critique and Refine from Player Perspective
-   [[LLM: From your current game design role's perspective, review your last output or the current section for potential player confusion, engagement issues, balance problems, or areas for improvement. Consider how players will actually interact with and experience these systems, then suggest a refined version that better serves player enjoyment and understanding.]]
-
-3. Analyze Game Flow and Mechanic Dependencies
-   [[LLM: From your game design role's standpoint, examine the content's structure for logical gameplay progression, mechanic interdependencies, and player learning curve. Confirm if game elements are introduced in an effective order that teaches players naturally and maintains engagement throughout the experience.]]
-
-4. Assess Alignment with Player Experience Goals
-   [[LLM: Evaluate how well the current game design content contributes to the stated player experience goals and core game pillars. Consider whether the mechanics actually create the intended emotions and engagement patterns. Identify any misalignments between design intentions and likely player reactions.]]
-
-5. Identify Potential Player Confusion and Design Risks
-   [[LLM: Based on your game design expertise, brainstorm potential sources of player confusion, overlooked edge cases in gameplay, balance issues, technical implementation risks, or unintended player behaviors that could emerge from the current design. Consider both new and experienced players' perspectives.]]
-
-6. Challenge from Critical Game Design Perspective
-   [[LLM: Adopt a critical game design perspective on the current content. If the user specifies another viewpoint (e.g., 'as a casual player', 'as a speedrunner', 'as a mobile player', 'as a technical implementer'), critique the content from that specified perspective. If no other role is specified, play devil's advocate from your game design expertise, arguing against the current design proposal and highlighting potential weaknesses, player experience issues, or implementation challenges. This can include questioning scope creep, unnecessary complexity, or features that don't serve the core player experience.]]
-
-7. Explore Alternative Game Design Approaches
-   [[LLM: From your game design role's perspective, first broadly brainstorm a range of diverse approaches to achieving the same player experience goals or solving the same design challenge. Consider different genres, mechanics, interaction models, or technical approaches. Then, from this wider exploration, select and present 2-3 distinct alternative design approaches, detailing the pros, cons, player experience implications, and technical feasibility you foresee for each.]]
-
-8. Hindsight Postmortem: The 'If Only...' Game Design Reflection
-   [[LLM: In your current game design persona, imagine this is a postmortem for a shipped game based on the current design content. What's the one 'if only we had designed/considered/tested X...' that your role would highlight from a game design perspective? Include the imagined player reactions, review scores, or development consequences. This should be both insightful and somewhat humorous, focusing on common game design pitfalls.]]
-
-9. Proceed / No Further Actions
-   [[LLM: Acknowledge the user's choice to finalize the current game design work, accept the AI's last output as is, or move on to the next step without selecting another action from this list. Prepare to proceed accordingly.]]
-
-## Game Development Context Integration
-
-This elicitation task is specifically designed for game development and should be used in contexts where:
-
-- **Game Mechanics Design**: When defining core gameplay systems and player interactions
-- **Player Experience Planning**: When designing for specific emotional responses and engagement patterns
-- **Technical Game Architecture**: When balancing design ambitions with implementation realities
-- **Game Balance and Progression**: When designing difficulty curves and player advancement systems
-- **Platform Considerations**: When adapting designs for different devices and input methods
-
-The questions and perspectives offered should always consider:
-
-- Player psychology and motivation
-- Technical feasibility with Phaser 3 and TypeScript
-- Performance implications for 60 FPS targets
-- Cross-platform compatibility (desktop and mobile)
-- Game development best practices and common pitfalls
-==================== END: .bmad-2d-phaser-game-dev/tasks/advanced-elicitation.md ====================
-
 ==================== START: .bmad-2d-phaser-game-dev/templates/game-design-doc-tmpl.yaml ====================
 template:
   id: game-design-doc-template-v2
@@ -6259,7 +6807,7 @@ sections:
 
   - id: core-gameplay
     title: Core Gameplay
-    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `tasks#advanced-elicitation` protocol to ensure completeness.
+    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `structured-tasks#advanced-elicitation` protocol to ensure completeness.
     sections:
       - id: game-pillars
         title: Game Pillars
@@ -6594,7 +7142,7 @@ sections:
 
   - id: level-design-philosophy
     title: Level Design Philosophy
-    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: design-principles
         title: Design Principles
@@ -7081,7 +7629,7 @@ sections:
 
   - id: target-market
     title: Target Market
-    instruction: Define the audience and market context. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Define the audience and market context. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: primary-audience
         title: Primary Audience
@@ -7131,7 +7679,7 @@ sections:
 
   - id: scope-constraints
     title: Scope and Constraints
-    instruction: Define the boundaries and limitations that will shape development. Apply `tasks#advanced-elicitation` to clarify any constraints.
+    instruction: Define the boundaries and limitations that will shape development. Apply `structured-tasks#advanced-elicitation` to clarify any constraints.
     sections:
       - id: project-scope
         title: Project Scope
@@ -7644,7 +8192,7 @@ sections:
 
   - id: technical-overview
     title: Technical Overview
-    instruction: Present all subsections together, then apply `tasks#advanced-elicitation` protocol to the complete section.
+    instruction: Present all subsections together, then apply `structured-tasks#advanced-elicitation` protocol to the complete section.
     sections:
       - id: architecture-summary
         title: Architecture Summary
@@ -9552,7 +10100,7 @@ sections:
 
   - id: technical-overview
     title: Technical Overview
-    instruction: Present all subsections together, then apply `tasks#advanced-elicitation` protocol to the complete section.
+    instruction: Present all subsections together, then apply `structured-tasks#advanced-elicitation` protocol to the complete section.
     sections:
       - id: architecture-summary
         title: Architecture Summary
@@ -10168,7 +10716,7 @@ sections:
 
   - id: target-market
     title: Target Market
-    instruction: Define the audience and market context. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Define the audience and market context. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: primary-audience
         title: Primary Audience
@@ -10218,7 +10766,7 @@ sections:
 
   - id: scope-constraints
     title: Scope and Constraints
-    instruction: Define the boundaries and limitations that will shape development. Apply `tasks#advanced-elicitation` to clarify any constraints.
+    instruction: Define the boundaries and limitations that will shape development. Apply `structured-tasks#advanced-elicitation` to clarify any constraints.
     sections:
       - id: project-scope
         title: Project Scope
@@ -10538,7 +11086,7 @@ sections:
 
   - id: core-gameplay
     title: Core Gameplay
-    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `tasks#advanced-elicitation` protocol to ensure completeness.
+    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `structured-tasks#advanced-elicitation` protocol to ensure completeness.
     sections:
       - id: game-pillars
         title: Game Pillars
@@ -11129,7 +11677,7 @@ sections:
 
   - id: level-design-philosophy
     title: Level Design Philosophy
-    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: design-principles
         title: Design Principles

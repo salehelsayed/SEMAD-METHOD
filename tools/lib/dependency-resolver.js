@@ -173,7 +173,9 @@ class DependencyResolver {
         
         // First try structured directories in bmad-core
         try {
-          filePath = path.join(this.bmadCore, structuredType, id);
+          // Add .yaml extension if not present for structured tasks
+          const fileName = id.endsWith('.yaml') || id.endsWith('.md') ? id : `${id}.yaml`;
+          filePath = path.join(this.bmadCore, structuredType, fileName);
           if (type === 'tasks') {
             const taskData = await this.taskLoader.loadTask(filePath);
             content = taskData.type === 'structured' ? 
@@ -188,9 +190,12 @@ class DependencyResolver {
             structuredData = checklistData.data;
           }
         } catch (e) {
+          // console.debug(`Failed to load from bmad-core structured: ${e.message}`);
           // Try structured directories in common
           try {
-            filePath = path.join(this.common, structuredType, id);
+            // Add .yaml extension if not present for structured tasks
+            const fileName = id.endsWith('.yaml') || id.endsWith('.md') ? id : `${id}.yaml`;
+            filePath = path.join(this.common, structuredType, fileName);
             if (type === 'tasks') {
               const taskData = await this.taskLoader.loadTask(filePath);
               content = taskData.type === 'structured' ? 
@@ -230,8 +235,11 @@ class DependencyResolver {
       }
 
       if (!content) {
+        const structuredEnabled = await this.taskLoader.isStructuredTasksEnabled();
+        const actualType = (structuredEnabled && (type === 'tasks' || type === 'checklists')) ? 
+          (type === 'tasks' ? 'structured-tasks' : 'structured-checklists') : type;
         console.warn(`⚠️  Resource not found: ${type}/${id}`);
-        console.warn(`   Searched in: bmad-core/${type} and common/${type}`);
+        console.warn(`   Searched in: bmad-core/${actualType} and common/${actualType}`);
         return null;
       }
 

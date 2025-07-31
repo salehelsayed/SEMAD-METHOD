@@ -60,18 +60,23 @@ function extractStoryContract(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
     
-    // Look for YAML front matter containing StoryContract
-    const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    // Look for YAML front matter containing StoryContract (at beginning of file)
+    let yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
     
     if (!yamlMatch) {
-      throw new Error('No YAML front matter found in story file');
+      // Also check for StoryContract section in the middle of the file
+      yamlMatch = content.match(/## Story Contract\s*\n\s*---\n([\s\S]*?)\n---/);
+      
+      if (!yamlMatch) {
+        throw new Error('No YAML front matter or Story Contract section found in story file');
+      }
     }
     
     const yamlContent = yamlMatch[1];
     const parsed = yaml.load(yamlContent);
     
     if (!parsed || !parsed.StoryContract) {
-      throw new Error('No StoryContract found in YAML front matter');
+      throw new Error('No StoryContract found in YAML');
     }
     
     return parsed.StoryContract;
@@ -101,12 +106,37 @@ function formatErrors(errors) {
   }).join('\n');
 }
 
+// Check if a value contains template placeholders
+function hasTemplatePlaceholders(obj) {
+  const checkValue = (val) => {
+    if (typeof val === 'string') {
+      return val.includes('{{') && val.includes('}}');
+    }
+    if (Array.isArray(val)) {
+      return val.some(checkValue);
+    }
+    if (typeof val === 'object' && val !== null) {
+      return Object.values(val).some(checkValue);
+    }
+    return false;
+  };
+  
+  return checkValue(obj);
+}
+
 // Validate a single story file
 function validateStoryFile(filePath, schema) {
   console.log(`\nValidating: ${filePath}`);
   
   try {
     const contract = extractStoryContract(filePath);
+    
+    // Check if contract has template placeholders
+    if (hasTemplatePlaceholders(contract)) {
+      console.log('  ⚠ Template (contains placeholders - skipping validation)');
+      return true; // Don't fail the overall validation for templates
+    }
+    
     const result = validateContract(contract, schema);
     
     if (result.valid) {

@@ -1,0 +1,43 @@
+# BMad Workflow Configuration Example
+# Copy this file to .bmad-workflow.yaml to customize your workflow settings
+
+# Workflow flow type
+# - linear: Single-pass Dev→QA flow
+# - iterative: Dev↔QA loop until approved
+flowType: linear
+
+# Maximum iterations for iterative flow
+maxIterations: 5
+
+# Automatically approve story when QA finds no issues
+autoApproveOnNoIssues: true
+
+# Save detailed history of each Dev↔QA iteration
+persistIterationHistory: true
+
+# Send notifications when each iteration completes
+notifyOnIterationComplete: false
+
+# QA review criteria
+qaReviewCriteria:
+  checkCodeStyle: true
+  checkTestCoverage: true
+  checkDocumentation: true
+  checkPerformance: false
+  checkSecurity: false
+
+# Strategy for Dev to address QA findings
+# - fix-all: Address all issues
+# - fix-critical: Only fix critical issues
+# - fix-by-priority: Fix issues based on priority
+devFixStrategy: fix-all
+
+# Verbosity settings for orchestrator and agent logging
+# Enable/disable verbose logging
+verbosity: true
+
+# Verbosity level controls how much detail is logged
+# - minimal: Only critical messages (errors, warnings, major milestones)
+# - normal: Major tasks and agent actions (default)
+# - detailed: All activities including context and internal operations
+verbosityLevel: normal

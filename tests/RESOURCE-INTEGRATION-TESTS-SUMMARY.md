@@ -65,8 +65,8 @@ This test file verifies resources work together as an integrated system:
 ## Resources Tested
 
 1. **Tasks**
-   - `bmad-core/tasks/update-working-memory.yaml`
-   - `bmad-core/tasks/retrieve-context.yaml`
+   - `bmad-core/structured-tasks/update-working-memory.yaml`
+   - `bmad-core/structured-tasks/retrieve-context.yaml`
 
 2. **Utilities**
    - `bmad-core/utils/update-working-memory.yaml`

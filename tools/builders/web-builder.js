@@ -44,9 +44,9 @@ class WebBuilder {
     const rootExample = packName ? `.${packName}` : '.bmad-core';
     const examplePath = packName ? `.${packName}/folder/filename.md` : '.bmad-core/folder/filename.md';
     const personasExample = packName ? `.${packName}/personas/analyst.md` : '.bmad-core/personas/analyst.md';
-    const tasksExample = packName ? `.${packName}/tasks/create-story.md` : '.bmad-core/tasks/create-story.md';
+    const tasksExample = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.bmad-core/structured-tasks/create-story.yaml';
     const utilsExample = packName ? `.${packName}/utils/template-format.md` : '.bmad-core/utils/template-format.md';
-    const tasksRef = packName ? `.${packName}/tasks/create-story.md` : '.bmad-core/tasks/create-story.md';
+    const tasksRef = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.bmad-core/structured-tasks/create-story.yaml';
 
     return `# Web Agent Bundle Instructions
 
@@ -65,7 +65,7 @@ When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
 - The format is always the full path with dot prefix (e.g., \`${personasExample}\`, \`${tasksExample}\`)
-- If a section is specified (e.g., \`{root}/tasks/create-story.md#section-name\`), navigate to that section within the file
+- If a section is specified (e.g., \`{root}/structured-tasks/create-story.yaml#section-name\`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -427,35 +427,86 @@ These references map directly to bundle sections:
                 let found = false;
 
                 // Try expansion pack first
-                const resourcePath = path.join(packDir, resourceType, resourceName);
-                try {
-                  const resourceContent = await fs.readFile(resourcePath, "utf8");
-                  const resourceWebPath = this.convertToWebPath(resourcePath, packName);
-                  sections.push(
-                    this.formatSection(resourceWebPath, resourceContent, packName)
-                  );
-                  found = true;
-                } catch (error) {
-                  // Not in expansion pack, continue
+                let resourcePath = path.join(packDir, resourceType, resourceName);
+                
+                // For tasks with .yaml extension, check structured-tasks directory
+                if (resourceType === 'tasks' && resourceName.endsWith('.yaml')) {
+                  const baseTaskName = resourceName.replace('.yaml', '');
+                  // First try structured-tasks with .yaml
+                  const structuredPath = path.join(packDir, 'structured-tasks', resourceName);
+                  try {
+                    const resourceContent = await fs.readFile(structuredPath, "utf8");
+                    const resourceWebPath = this.convertToWebPath(structuredPath, packName);
+                    sections.push(
+                      this.formatSection(resourceWebPath, resourceContent, packName)
+                    );
+                    found = true;
+                  } catch (error) {
+                    // Try regular tasks directory with .md extension
+                    const mdPath = path.join(packDir, 'tasks', baseTaskName + '.md');
+                    try {
+                      const resourceContent = await fs.readFile(mdPath, "utf8");
+                      const resourceWebPath = this.convertToWebPath(mdPath, packName);
+                      sections.push(
+                        this.formatSection(resourceWebPath, resourceContent, packName)
+                      );
+                      found = true;
+                    } catch (error2) {
+                      // Not found in expansion pack
+                    }
+                  }
+                } else {
+                  // Regular resource lookup
+                  try {
+                    const resourceContent = await fs.readFile(resourcePath, "utf8");
+                    const resourceWebPath = this.convertToWebPath(resourcePath, packName);
+                    sections.push(
+                      this.formatSection(resourceWebPath, resourceContent, packName)
+                    );
+                    found = true;
+                  } catch (error) {
+                    // Not in expansion pack, continue
+                  }
                 }
 
                 // If not found in expansion pack, try core
                 if (!found) {
-                  const corePath = path.join(
-                    this.rootDir,
-                    "bmad-core",
-                    resourceType,
-                    resourceName
-                  );
-                  try {
-                    const coreContent = await fs.readFile(corePath, "utf8");
-                    const coreWebPath = this.convertToWebPath(corePath, packName);
-                    sections.push(
-                      this.formatSection(coreWebPath, coreContent, packName)
+                  // For tasks with .yaml extension, check structured-tasks directory in core
+                  if (resourceType === 'tasks' && resourceName.endsWith('.yaml')) {
+                    const structuredCorePath = path.join(
+                      this.rootDir,
+                      "bmad-core",
+                      "structured-tasks",
+                      resourceName
                     );
-                    found = true;
-                  } catch (error) {
-                    // Not in core either, continue
+                    try {
+                      const coreContent = await fs.readFile(structuredCorePath, "utf8");
+                      const coreWebPath = this.convertToWebPath(structuredCorePath, packName);
+                      sections.push(
+                        this.formatSection(coreWebPath, coreContent, packName)
+                      );
+                      found = true;
+                    } catch (error) {
+                      // Not in structured-tasks either
+                    }
+                  } else {
+                    // Regular core lookup
+                    const corePath = path.join(
+                      this.rootDir,
+                      "bmad-core",
+                      resourceType,
+                      resourceName
+                    );
+                    try {
+                      const coreContent = await fs.readFile(corePath, "utf8");
+                      const coreWebPath = this.convertToWebPath(corePath, packName);
+                      sections.push(
+                        this.formatSection(coreWebPath, coreContent, packName)
+                      );
+                      found = true;
+                    } catch (error) {
+                      // Not in core either, continue
+                    }
                   }
                 }
 
@@ -700,30 +751,73 @@ These references map directly to bundle sections:
       let found = false;
 
       // Always check expansion pack first, even if the dependency came from a core agent
-      if (expansionResources.has(key)) {
-        // We know it exists in expansion pack, find and load it
-        const expansionPath = path.join(packDir, dep.type, dep.name);
-        try {
-          const content = await fs.readFile(expansionPath, "utf8");
-          const expansionWebPath = this.convertToWebPath(expansionPath, packName);
-          sections.push(this.formatSection(expansionWebPath, content, packName));
-          console.log(`      ✓ Using expansion override for ${key}`);
-          found = true;
-        } catch (error) {
-          // Try next extension
+      // Check both the exact key and potential .yaml to .md conversions
+      let expansionResourceExists = expansionResources.has(key);
+      
+      // For tasks with .yaml extension, also check if .md version exists
+      if (!expansionResourceExists && dep.type === 'tasks' && dep.name.endsWith('.yaml')) {
+        const mdKey = `${dep.type}#${dep.name.replace('.yaml', '.md')}`;
+        expansionResourceExists = expansionResources.has(mdKey);
+      }
+      
+      if (expansionResourceExists) {
+        // Try to load the expansion pack resource
+        let loaded = false;
+        
+        // For tasks with .yaml extension, try .md first
+        if (dep.type === 'tasks' && dep.name.endsWith('.yaml')) {
+          const mdPath = path.join(packDir, dep.type, dep.name.replace('.yaml', '.md'));
+          try {
+            const content = await fs.readFile(mdPath, "utf8");
+            const expansionWebPath = this.convertToWebPath(mdPath, packName);
+            sections.push(this.formatSection(expansionWebPath, content, packName));
+            console.log(`      ✓ Using expansion override for ${key}`);
+            found = true;
+            loaded = true;
+          } catch (error) {
+            // .md not found, try exact name
+          }
+        }
+        
+        // If not loaded yet, try exact name
+        if (!loaded) {
+          const expansionPath = path.join(packDir, dep.type, dep.name);
+          try {
+            const content = await fs.readFile(expansionPath, "utf8");
+            const expansionWebPath = this.convertToWebPath(expansionPath, packName);
+            sections.push(this.formatSection(expansionWebPath, content, packName));
+            console.log(`      ✓ Using expansion override for ${key}`);
+            found = true;
+          } catch (error) {
+            // Try next extension
+          }
         }
       }
 
       // If not found in expansion pack (or doesn't exist there), try core
       if (!found) {
-        const corePath = path.join(this.rootDir, "bmad-core", dep.type, dep.name);
-        try {
-          const content = await fs.readFile(corePath, "utf8");
-          const coreWebPath = this.convertToWebPath(corePath, packName);
-          sections.push(this.formatSection(coreWebPath, content, packName));
-          found = true;
-        } catch (error) {
-          // Not in core either, continue
+        // For tasks with .yaml extension, check structured-tasks directory in core
+        if (dep.type === 'tasks' && dep.name.endsWith('.yaml')) {
+          const structuredCorePath = path.join(this.rootDir, "bmad-core", "structured-tasks", dep.name);
+          try {
+            const content = await fs.readFile(structuredCorePath, "utf8");
+            const coreWebPath = this.convertToWebPath(structuredCorePath, packName);
+            sections.push(this.formatSection(coreWebPath, content, packName));
+            found = true;
+          } catch (error) {
+            // Not in structured-tasks either
+          }
+        } else {
+          // Regular core lookup
+          const corePath = path.join(this.rootDir, "bmad-core", dep.type, dep.name);
+          try {
+            const content = await fs.readFile(corePath, "utf8");
+            const coreWebPath = this.convertToWebPath(corePath, packName);
+            sections.push(this.formatSection(coreWebPath, content, packName));
+            found = true;
+          } catch (error) {
+            // Not in core either, continue
+          }
         }
       }
 

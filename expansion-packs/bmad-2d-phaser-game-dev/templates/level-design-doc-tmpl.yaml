@@ -35,7 +35,7 @@ sections:
 
   - id: level-design-philosophy
     title: Level Design Philosophy
-    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Establish the overall approach to level design based on the game's core pillars and mechanics. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: design-principles
         title: Design Principles

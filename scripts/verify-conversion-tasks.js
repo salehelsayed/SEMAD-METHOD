@@ -69,7 +69,7 @@ async function verifyFile(mdPath, yamlPath) {
 
 /**
  * Main entry point. If two arguments are provided, verifies that specific file pair.
- * Otherwise, automatically verifies all Markdown files in bmad-core/tasks against their
+ * Otherwise, automatically verifies all Markdown files in bmad-core/structured-tasks against their
  * corresponding YAML files in bmad-core/structured-tasks.
  */
 async function main() {
@@ -85,7 +85,7 @@ async function main() {
 
   // Auto mode: scan tasks and structured-tasks directories relative to script location
   const scriptsDir = __dirname;
-  const tasksDir = path.resolve(scriptsDir, '..', 'bmad-core', 'tasks');
+  const tasksDir = path.resolve(scriptsDir, '..', 'bmad-core', 'structured-tasks');
   const structuredDir = path.resolve(scriptsDir, '..', 'bmad-core', 'structured-tasks');
   let overallPass = true;
   try {

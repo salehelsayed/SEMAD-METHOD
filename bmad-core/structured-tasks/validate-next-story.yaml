@@ -2,11 +2,31 @@ id: validate-next-story
 name: Validate Next Story Task
 purpose: To comprehensively validate a story draft before implementation begins, ensuring it is complete, accurate, and provides sufficient context for successful development. This task identifies issues and gaps that need to be addressed, preventing hallucinations and ensuring implementation readiness.
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: validate-next-story
+            taskType: story-management
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step1
     name: Load Core Configuration and Inputs
     description: ''
     actions:
-      - description: Load `.bmad-core/core-config.yaml`
+      - description: Load `bmad-core/core-config.yaml`
         elicit: false
         metadata:
           originalIndent: 0
@@ -34,7 +54,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: '**Story template**: `bmad-core/templates/story-tmpl.md` for completeness validation'
+      - description: '**Story template**: `bmad-core/templates/story-tmpl.yaml` for completeness validation'
         elicit: false
         metadata:
           originalIndent: 2
@@ -45,7 +65,7 @@ steps:
     name: Template Completeness Validation
     description: ''
     actions:
-      - description: Load `bmad-core/templates/story-tmpl.md` and extract all section headings from the template
+      - description: Load `bmad-core/templates/story-tmpl.yaml` and extract all section headings from the template
         elicit: false
         metadata:
           originalIndent: 0
@@ -390,6 +410,25 @@ steps:
     metadata:
       level: 3
       originalNumber: '10'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed validate-next-story task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: validate-next-story
+            context:
+              taskType: story-management
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:

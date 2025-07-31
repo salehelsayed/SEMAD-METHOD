@@ -35,7 +35,7 @@ sections:
 
   - id: target-market
     title: Target Market
-    instruction: Define the audience and market context. Apply `tasks#advanced-elicitation` after presenting this section.
+    instruction: Define the audience and market context. Apply `structured-tasks#advanced-elicitation` after presenting this section.
     sections:
       - id: primary-audience
         title: Primary Audience
@@ -85,7 +85,7 @@ sections:
 
   - id: scope-constraints
     title: Scope and Constraints
-    instruction: Define the boundaries and limitations that will shape development. Apply `tasks#advanced-elicitation` to clarify any constraints.
+    instruction: Define the boundaries and limitations that will shape development. Apply `structured-tasks#advanced-elicitation` to clarify any constraints.
     sections:
       - id: project-scope
         title: Project Scope

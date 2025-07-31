@@ -1,0 +1,110 @@
+id: qa-dev-handoff
+name: qa-dev-handoff
+purpose: Hand off QA review findings to Dev agent for implementation
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: qa-dev-handoff
+            taskType: development
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step1
+    name: Prepare Handoff Document
+    description: Create structured handoff document with QA findings
+    actions:
+      - description: Compile all review findings into qa-dev-handoff template
+        elicit: false
+      - description: Prioritize issues by severity (critical, high, medium, low)
+        elicit: false
+      - description: Include specific implementation recommendations for each issue
+        elicit: false
+  - id: step2
+    name: Update Story Status
+    description: Update story file with QA review status
+    actions:
+      - description: Update QA Results section in story file with review findings
+        elicit: false
+      - description: Ensure story status is set to "Needs Fixes" since this handoff indicates issues were found
+        elicit: false
+      - description: Add entry to Change Log documenting QA review with timestamp
+        elicit: false
+  - id: step3
+    name: Create Dev Task List
+    description: Generate actionable task list for Dev agent
+    actions:
+      - description: Create numbered list of specific fixes needed
+        elicit: false
+      - description: Map each fix to relevant acceptance criteria
+        elicit: false
+      - description: Include file paths and line numbers where applicable
+        elicit: false
+  - id: step4
+    name: Handoff Notification
+    description: Notify Dev agent of pending work
+    actions:
+      - description: Generate handoff summary for Dev agent
+        elicit: false
+      - description: Include link to updated story file
+        elicit: false
+      - description: Specify expected turnaround time if applicable
+        elicit: true
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed qa-dev-handoff task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: qa-dev-handoff
+            context:
+              taskType: development
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  story_id:
+    type: string
+    description: The story ID being reviewed
+  review_findings:
+    type: object
+    description: Structured findings from QA review
+outputs:
+  handoff_document:
+    type: string
+    description: Path to generated handoff document
+  updated_story:
+    type: string
+    description: Path to updated story file
+  task_count:
+    type: number
+    description: Number of tasks for Dev agent
+metadata:
+  owner: qa-agent
+  collaborators:
+    - dev-agent
+  importance: high
+  notes: |
+    - This task ensures clear communication between QA and Dev agents
+    - All findings must be actionable and specific
+    - No code modifications should be made by QA agent
+    - This task assumes that review-story has already been run to set the story status to "In Review"

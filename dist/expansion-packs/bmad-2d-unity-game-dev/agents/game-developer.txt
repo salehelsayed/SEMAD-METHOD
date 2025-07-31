@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-2d-unity-game-dev/personas/analyst.md`, `.bmad-2d-unity-game-dev/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-2d-unity-game-dev/personas/analyst.md`, `.bmad-2d-unity-game-dev/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-2d-unity-game-dev/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-2d-unity-game-dev/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-2d-unity-game-dev/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -89,245 +89,690 @@ develop-story:
   completion: 'All Tasks and Subtasks marked [x] and have tests→Validations and full regression passes (DON''T BE LAZY, EXECUTE ALL TESTS and CONFIRM)→Ensure File List is Complete→run the task execute-checklist for the checklist game-story-dod-checklist→set story status: ''Ready for Review''→HALT'
 dependencies:
   tasks:
-    - execute-checklist.md
-    - validate-next-story.md
+    - execute-checklist.yaml
+    - validate-next-story.yaml
   checklists:
     - game-story-dod-checklist.md
 ```
 ==================== END: .bmad-2d-unity-game-dev/agents/game-developer.md ====================
 
-==================== START: .bmad-2d-unity-game-dev/tasks/execute-checklist.md ====================
-# Checklist Validation Task
-
-This task provides instructions for validating documentation against checklists. The agent MUST follow these instructions to ensure thorough and systematic validation of documents.
-
-## Available Checklists
-
-If the user asks or does not specify a specific checklist, list the checklists available to the agent persona. If the task is being run not with a specific agent, tell the user to check the .bmad-2d-unity-game-dev/checklists folder to select the appropriate one to run.
-
-## Instructions
-
-1. **Initial Assessment**
-
-   - If user or the task being run provides a checklist name:
-     - Try fuzzy matching (e.g. "architecture checklist" -> "architect-checklist")
-     - If multiple matches found, ask user to clarify
-     - Load the appropriate checklist from .bmad-2d-unity-game-dev/checklists/
-   - If no checklist specified:
-     - Ask the user which checklist they want to use
-     - Present the available options from the files in the checklists folder
-   - Confirm if they want to work through the checklist:
-     - Section by section (interactive mode - very time consuming)
-     - All at once (YOLO mode - recommended for checklists, there will be a summary of sections at the end to discuss)
-
-2. **Document and Artifact Gathering**
-
-   - Each checklist will specify its required documents/artifacts at the beginning
-   - Follow the checklist's specific instructions for what to gather, generally a file can be resolved in the docs folder, if not or unsure, halt and ask or confirm with the user.
-
-3. **Checklist Processing**
-
-   If in interactive mode:
-
-   - Work through each section of the checklist one at a time
-   - For each section:
-     - Review all items in the section following instructions for that section embedded in the checklist
-     - Check each item against the relevant documentation or artifacts as appropriate
-     - Present summary of findings for that section, highlighting warnings, errors and non applicable items (rationale for non-applicability).
-     - Get user confirmation before proceeding to next section or if any thing major do we need to halt and take corrective action
-
-   If in YOLO mode:
-
-   - Process all sections at once
-   - Create a comprehensive report of all findings
-   - Present the complete analysis to the user
-
-4. **Validation Approach**
-
-   For each checklist item:
-
-   - Read and understand the requirement
-   - Look for evidence in the documentation that satisfies the requirement
-   - Consider both explicit mentions and implicit coverage
-   - Aside from this, follow all checklist llm instructions
-   - Mark items as:
-     - ✅ PASS: Requirement clearly met
-     - ❌ FAIL: Requirement not met or insufficient coverage
-     - ⚠️ PARTIAL: Some aspects covered but needs improvement
-     - N/A: Not applicable to this case
-
-5. **Section Analysis**
-
-   For each section:
-
-   - think step by step to calculate pass rate
-   - Identify common themes in failed items
-   - Provide specific recommendations for improvement
-   - In interactive mode, discuss findings with user
-   - Document any user decisions or explanations
-
-6. **Final Report**
-
-   Prepare a summary that includes:
-
-   - Overall checklist completion status
-   - Pass rates by section
-   - List of failed items with context
-   - Specific recommendations for improvement
-   - Any sections or items marked as N/A with justification
-
-## Checklist Execution Methodology
-
-Each checklist now contains embedded LLM prompts and instructions that will:
-
-1. **Guide thorough thinking** - Prompts ensure deep analysis of each section
-2. **Request specific artifacts** - Clear instructions on what documents/access is needed
-3. **Provide contextual guidance** - Section-specific prompts for better validation
-4. **Generate comprehensive reports** - Final summary with detailed findings
-
-The LLM will:
-
-- Execute the complete checklist validation
-- Present a final report with pass/fail rates and key findings
-- Offer to provide detailed analysis of any section, especially those with warnings or failures
-==================== END: .bmad-2d-unity-game-dev/tasks/execute-checklist.md ====================
-
-==================== START: .bmad-2d-unity-game-dev/tasks/validate-next-story.md ====================
-# Validate Next Story Task
-
-## Purpose
-
-To comprehensively validate a story draft before implementation begins, ensuring it is complete, accurate, and provides sufficient context for successful development. This task identifies issues and gaps that need to be addressed, preventing hallucinations and ensuring implementation readiness.
-
-## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
-
-### 0. Load Core Configuration and Inputs
-
-- Load `.bmad-core/core-config.yaml`
-- If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for story validation."
-- Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`
-- Identify and load the following inputs:
-  - **Story file**: The drafted story to validate (provided by user or discovered in `devStoryLocation`)
-  - **Parent epic**: The epic containing this story's requirements
-  - **Architecture documents**: Based on configuration (sharded or monolithic)
-  - **Story template**: `bmad-core/templates/story-tmpl.md` for completeness validation
-
-### 1. Template Completeness Validation
-
-- Load `bmad-core/templates/story-tmpl.md` and extract all section headings from the template
-- **Missing sections check**: Compare story sections against template sections to verify all required sections are present
-- **Placeholder validation**: Ensure no template placeholders remain unfilled (e.g., `{{EpicNum}}`, `{{role}}`, `_TBD_`)
-- **Agent section verification**: Confirm all sections from template exist for future agent use
-- **Structure compliance**: Verify story follows template structure and formatting
-
-### 2. File Structure and Source Tree Validation
-
-- **File paths clarity**: Are new/existing files to be created/modified clearly specified?
-- **Source tree relevance**: Is relevant project structure included in Dev Notes?
-- **Directory structure**: Are new directories/components properly located according to project structure?
-- **File creation sequence**: Do tasks specify where files should be created in logical order?
-- **Path accuracy**: Are file paths consistent with project structure from architecture docs?
-
-### 3. UI/Frontend Completeness Validation (if applicable)
-
-- **Component specifications**: Are UI components sufficiently detailed for implementation?
-- **Styling/design guidance**: Is visual implementation guidance clear?
-- **User interaction flows**: Are UX patterns and behaviors specified?
-- **Responsive/accessibility**: Are these considerations addressed if required?
-- **Integration points**: Are frontend-backend integration points clear?
-
-### 4. Acceptance Criteria Satisfaction Assessment
-
-- **AC coverage**: Will all acceptance criteria be satisfied by the listed tasks?
-- **AC testability**: Are acceptance criteria measurable and verifiable?
-- **Missing scenarios**: Are edge cases or error conditions covered?
-- **Success definition**: Is "done" clearly defined for each AC?
-- **Task-AC mapping**: Are tasks properly linked to specific acceptance criteria?
-
-### 5. Validation and Testing Instructions Review
-
-- **Test approach clarity**: Are testing methods clearly specified?
-- **Test scenarios**: Are key test cases identified?
-- **Validation steps**: Are acceptance criteria validation steps clear?
-- **Testing tools/frameworks**: Are required testing tools specified?
-- **Test data requirements**: Are test data needs identified?
-
-### 6. Security Considerations Assessment (if applicable)
-
-- **Security requirements**: Are security needs identified and addressed?
-- **Authentication/authorization**: Are access controls specified?
-- **Data protection**: Are sensitive data handling requirements clear?
-- **Vulnerability prevention**: Are common security issues addressed?
-- **Compliance requirements**: Are regulatory/compliance needs addressed?
-
-### 7. Tasks/Subtasks Sequence Validation
-
-- **Logical order**: Do tasks follow proper implementation sequence?
-- **Dependencies**: Are task dependencies clear and correct?
-- **Granularity**: Are tasks appropriately sized and actionable?
-- **Completeness**: Do tasks cover all requirements and acceptance criteria?
-- **Blocking issues**: Are there any tasks that would block others?
-
-### 8. Anti-Hallucination Verification
-
-- **Source verification**: Every technical claim must be traceable to source documents
-- **Architecture alignment**: Dev Notes content matches architecture specifications
-- **No invented details**: Flag any technical decisions not supported by source documents
-- **Reference accuracy**: Verify all source references are correct and accessible
-- **Fact checking**: Cross-reference claims against epic and architecture documents
-
-### 9. Dev Agent Implementation Readiness
-
-- **Self-contained context**: Can the story be implemented without reading external docs?
-- **Clear instructions**: Are implementation steps unambiguous?
-- **Complete technical context**: Are all required technical details present in Dev Notes?
-- **Missing information**: Identify any critical information gaps
-- **Actionability**: Are all tasks actionable by a development agent?
-
-### 10. Generate Validation Report
-
-Provide a structured validation report including:
-
-#### Template Compliance Issues
-
-- Missing sections from story template
-- Unfilled placeholders or template variables
-- Structural formatting issues
-
-#### Critical Issues (Must Fix - Story Blocked)
-
-- Missing essential information for implementation
-- Inaccurate or unverifiable technical claims
-- Incomplete acceptance criteria coverage
-- Missing required sections
-
-#### Should-Fix Issues (Important Quality Improvements)
-
-- Unclear implementation guidance
-- Missing security considerations
-- Task sequencing problems
-- Incomplete testing instructions
-
-#### Nice-to-Have Improvements (Optional Enhancements)
-
-- Additional context that would help implementation
-- Clarifications that would improve efficiency
-- Documentation improvements
-
-#### Anti-Hallucination Findings
-
-- Unverifiable technical claims
-- Missing source references
-- Inconsistencies with architecture documents
-- Invented libraries, patterns, or standards
-
-#### Final Assessment
-
-- **GO**: Story is ready for implementation
-- **NO-GO**: Story requires fixes before implementation
-- **Implementation Readiness Score**: 1-10 scale
-- **Confidence Level**: High/Medium/Low for successful implementation
-==================== END: .bmad-2d-unity-game-dev/tasks/validate-next-story.md ====================
+==================== START: .bmad-2d-unity-game-dev/structured-tasks/execute-checklist.yaml ====================
+id: execute-checklist
+name: Execute Checklist
+purpose: Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: execute-checklist
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step0
+    name: Initialize Working Memory
+    description: Initialize working memory for checklist execution session
+    actions:
+      - description: Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+        elicit: true
+      - description: Verify checklist file exists at specified path
+        elicit: true
+      - description: Load checklist content and parse structure
+        elicit: false
+  - id: step1
+    name: Determine Execution Mode
+    description: Determine how to execute the checklist based on user preference
+    actions:
+      - description: Check if execution mode was provided in input
+        elicit: false
+      - description: 'If mode not specified, ask user for preference:'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**How would you like to work through this checklist?**'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'Select option (1 or 2):'
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: step2
+    name: Parse Checklist Structure
+    description: Analyze the checklist to identify sections and items
+    actions:
+      - description: Identify main sections in the checklist
+        elicit: false
+      - description: Extract checklist items (lines starting with '- [ ]')
+        elicit: false
+      - description: 'Parse any LLM instructions embedded in [[LLM: ]] blocks'
+        elicit: false
+      - description: Create structured representation of checklist hierarchy
+        elicit: false
+      - description: Record total items count and section breakdown in memory
+        elicit: false
+  - id: step3
+    name: Execute Checklist Items
+    description: Work through each checklist item based on selected mode
+    actions:
+      - description: 'For each section in the checklist:'
+        elicit: false
+      - description: Read and understand the section context and any LLM instructions
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Evaluate each checklist item in the section
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Mark items as checked [x] or unchecked [ ] based on evaluation
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Document findings, issues, or observations for each item
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'If interactive mode: Present section findings and await confirmation'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Update progress tracking in working memory
+        elicit: false
+        metadata:
+          originalIndent: 2
+  - id: step4
+    name: Generate Summary Report
+    description: Create comprehensive report of checklist execution results
+    actions:
+      - description: Calculate overall completion percentage
+        elicit: false
+      - description: Summarize findings by category/section
+        elicit: false
+      - description: Identify critical issues or blockers
+        elicit: false
+      - description: Generate recommendations based on unchecked items
+        elicit: false
+      - description: If checklist includes specific report format (e.g., validation tables), use that format
+        elicit: false
+      - description: Store execution results in working memory for future reference
+        elicit: false
+  - id: step5
+    name: Present Results and Next Steps
+    description: Present the final results and offer follow-up actions
+    actions:
+      - description: Display the summary report to the user
+        elicit: false
+      - description: Highlight any critical issues or blockers found
+        elicit: false
+      - description: Show completion statistics (X of Y items passed)
+        elicit: false
+      - description: 'If unchecked items exist, offer to:'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 1. Get detailed analysis of failed items
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 2. Generate action plan to address issues
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 3. Re-run specific sections
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Would you like to perform any follow-up actions?
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed execute-checklist task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: execute-checklist
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  checklistPath:
+    description: Path to the checklist file to execute
+    type: string
+    required: true
+  mode:
+    description: Execution mode - 'interactive' or 'comprehensive'
+    type: string
+    required: false
+    enum:
+      - interactive
+      - comprehensive
+  context:
+    description: Additional context for checklist execution (e.g., file paths, project info)
+    type: object
+    required: false
+outputs:
+  results:
+    description: Detailed results of checklist execution
+    type: object
+    properties:
+      totalItems:
+        type: number
+      checkedItems:
+        type: number
+      completionPercentage:
+        type: number
+      sectionResults:
+        type: array
+        items:
+          type: object
+          properties:
+            section: string
+            passed: number
+            failed: number
+            findings: array
+      criticalIssues:
+        type: array
+      recommendations:
+        type: array
+  completionStatus:
+    description: Overall checklist completion status
+    type: string
+    enum:
+      - PASS
+      - PARTIAL
+      - FAIL
+metadata:
+  supportsAdaptation: true
+  requiresWorkingMemory: true
+  executionMode: SEQUENTIAL
+  notes: |
+    This is a generic checklist executor that can work with any checklist format.
+    It supports the BMad checklist format with:
+    - Markdown structure with sections and subsections
+    - Checklist items as "- [ ]" lines
+    - LLM instructions in [[LLM: ]] blocks
+    - Embedded report formats and validation tables
+
+    The task adapts to the specific checklist structure and follows any
+    embedded instructions for execution and reporting.
+==================== END: .bmad-2d-unity-game-dev/structured-tasks/execute-checklist.yaml ====================
+
+==================== START: .bmad-2d-unity-game-dev/structured-tasks/validate-next-story.yaml ====================
+id: validate-next-story
+name: Validate Next Story Task
+purpose: To comprehensively validate a story draft before implementation begins, ensuring it is complete, accurate, and provides sufficient context for successful development. This task identifies issues and gaps that need to be addressed, preventing hallucinations and ensuring implementation readiness.
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: validate-next-story
+            taskType: story-management
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step1
+    name: Load Core Configuration and Inputs
+    description: ''
+    actions:
+      - description: Load `bmad-core/core-config.yaml`
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for story validation."'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Identify and load the following inputs:'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Story file**: The drafted story to validate (provided by user or discovered in `devStoryLocation`)'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: '**Parent epic**: The epic containing this story''s requirements'
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: '**Architecture documents**: Based on configuration (sharded or monolithic)'
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: '**Story template**: `bmad-core/templates/story-tmpl.yaml` for completeness validation'
+        elicit: false
+        metadata:
+          originalIndent: 2
+    metadata:
+      level: 3
+      originalNumber: '0'
+  - id: step2
+    name: Template Completeness Validation
+    description: ''
+    actions:
+      - description: Load `bmad-core/templates/story-tmpl.yaml` and extract all section headings from the template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Missing sections check**: Compare story sections against template sections to verify all required sections are present'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Placeholder validation**: Ensure no template placeholders remain unfilled (e.g., `{{EpicNum}}`, `{{role}}`, `_TBD_`)'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Agent section verification**: Confirm all sections from template exist for future agent use'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Structure compliance**: Verify story follows template structure and formatting'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '1'
+  - id: step3
+    name: File Structure and Source Tree Validation
+    description: ''
+    actions:
+      - description: '**File paths clarity**: Are new/existing files to be created/modified clearly specified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Source tree relevance**: Is relevant project structure included in Dev Notes?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Directory structure**: Are new directories/components properly located according to project structure?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**File creation sequence**: Do tasks specify where files should be created in logical order?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Path accuracy**: Are file paths consistent with project structure from architecture docs?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '2'
+  - id: step4
+    name: UI/Frontend Completeness Validation (if applicable)
+    description: ''
+    actions:
+      - description: '**Component specifications**: Are UI components sufficiently detailed for implementation?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Styling/design guidance**: Is visual implementation guidance clear?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**User interaction flows**: Are UX patterns and behaviors specified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Responsive/accessibility**: Are these considerations addressed if required?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Integration points**: Are frontend-backend integration points clear?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '3'
+  - id: step5
+    name: Acceptance Criteria Satisfaction Assessment
+    description: ''
+    actions:
+      - description: '**AC coverage**: Will all acceptance criteria be satisfied by the listed tasks?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**AC testability**: Are acceptance criteria measurable and verifiable?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Missing scenarios**: Are edge cases or error conditions covered?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Success definition**: Is "done" clearly defined for each AC?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Task-AC mapping**: Are tasks properly linked to specific acceptance criteria?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '4'
+  - id: step6
+    name: Validation and Testing Instructions Review
+    description: ''
+    actions:
+      - description: '**Test approach clarity**: Are testing methods clearly specified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Test scenarios**: Are key test cases identified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Validation steps**: Are acceptance criteria validation steps clear?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Testing tools/frameworks**: Are required testing tools specified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Test data requirements**: Are test data needs identified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '5'
+  - id: step7
+    name: Security Considerations Assessment (if applicable)
+    description: ''
+    actions:
+      - description: '**Security requirements**: Are security needs identified and addressed?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Authentication/authorization**: Are access controls specified?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Data protection**: Are sensitive data handling requirements clear?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Vulnerability prevention**: Are common security issues addressed?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Compliance requirements**: Are regulatory/compliance needs addressed?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '6'
+  - id: step8
+    name: Tasks/Subtasks Sequence Validation
+    description: ''
+    actions:
+      - description: '**Logical order**: Do tasks follow proper implementation sequence?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Dependencies**: Are task dependencies clear and correct?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Granularity**: Are tasks appropriately sized and actionable?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Completeness**: Do tasks cover all requirements and acceptance criteria?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Blocking issues**: Are there any tasks that would block others?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '7'
+  - id: step9
+    name: Anti-Hallucination Verification
+    description: ''
+    actions:
+      - description: '**Source verification**: Every technical claim must be traceable to source documents'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Architecture alignment**: Dev Notes content matches architecture specifications'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**No invented details**: Flag any technical decisions not supported by source documents'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Reference accuracy**: Verify all source references are correct and accessible'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Fact checking**: Cross-reference claims against epic and architecture documents'
+        elicit: false
+        metadata:
+          originalIndent: 0
+    metadata:
+      level: 3
+      originalNumber: '8'
+  - id: step10
+    name: Dev Agent Implementation Readiness
+    description: ''
+    actions:
+      - description: '**Self-contained context**: Can the story be implemented without reading external docs?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Clear instructions**: Are implementation steps unambiguous?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Complete technical context**: Are all required technical details present in Dev Notes?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**Missing information**: Identify any critical information gaps'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Actionability**: Are all tasks actionable by a development agent?'
+        elicit: true
+        metadata:
+          originalIndent: 0
+    notes: '- **Missing information**: Identify any critical information gaps'
+    metadata:
+      level: 3
+      originalNumber: '9'
+  - id: step11
+    name: Generate Validation Report
+    description: |-
+      Provide a structured validation report including:
+      #### Template Compliance Issues
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+      #### Nice-to-Have Improvements (Optional Enhancements)
+      #### Anti-Hallucination Findings
+      #### Final Assessment
+    actions:
+      - description: Missing sections from story template
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unfilled placeholders or template variables
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Structural formatting issues
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing essential information for implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inaccurate or unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Incomplete acceptance criteria coverage
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing required sections
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unclear implementation guidance
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing security considerations
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Task sequencing problems
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Incomplete testing instructions
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Additional context that would help implementation
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Clarifications that would improve efficiency
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Documentation improvements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Unverifiable technical claims
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Missing source references
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Inconsistencies with architecture documents
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Invented libraries, patterns, or standards
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**GO**: Story is ready for implementation'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**NO-GO**: Story requires fixes before implementation'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Implementation Readiness Score**: 1-10 scale'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: '**Confidence Level**: High/Medium/Low for successful implementation'
+        elicit: false
+        metadata:
+          originalIndent: 0
+    notes: |-
+      #### Critical Issues (Must Fix - Story Blocked)
+      #### Should-Fix Issues (Important Quality Improvements)
+    metadata:
+      level: 3
+      originalNumber: '10'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed validate-next-story task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: validate-next-story
+            context:
+              taskType: story-management
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+  preservedContent:
+    - type: section-header
+      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+      level: 2
+  executionMode: SEQUENTIAL
+==================== END: .bmad-2d-unity-game-dev/structured-tasks/validate-next-story.yaml ====================
 
 ==================== START: .bmad-2d-unity-game-dev/checklists/game-story-dod-checklist.md ====================
 # Game Development Story Definition of Done (DoD) Checklist

@@ -35,7 +35,7 @@ sections:
 
   - id: technical-overview
     title: Technical Overview
-    instruction: Present all subsections together, then apply `tasks#advanced-elicitation` protocol to the complete section.
+    instruction: Present all subsections together, then apply `structured-tasks#advanced-elicitation` protocol to the complete section.
     sections:
       - id: architecture-summary
         title: Architecture Summary

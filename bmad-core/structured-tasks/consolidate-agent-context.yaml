@@ -1,0 +1,130 @@
+id: consolidate-agent-context
+name: Consolidate Agent Context for Handoff
+category: orchestration
+description: Consolidates user interactions and context from one agent to prepare for handoff to another agent
+priority: high
+tags:
+  - context-consolidation
+  - agent-handoff
+  - orchestration
+  - anti-hallucination
+requiredInputs:
+  - name: sourceAgent
+    type: string
+    description: Agent transferring context
+  - name: targetAgent
+    type: string
+    description: Agent receiving context
+  - name: workflowPhase
+    type: string
+    description: Current phase of the workflow
+  - name: contextScope
+    type: object
+    description: Scope of context to consolidate
+    optional: true
+    properties:
+      storyId: string
+      epicId: string
+      includeAllAgents: boolean
+  - name: handoffReason
+    type: string
+    description: Reason for the agent handoff
+    optional: true
+outputs:
+  - name: consolidatedContext
+    type: object
+    description: Consolidated context ready for target agent
+  - name: handoffSummary
+    type: string
+    description: Summary of context being transferred
+  - name: contextValidation
+    type: object
+    description: Validation results of context completeness
+  - name: recommendations
+    type: array
+    description: Recommendations for the target agent
+dependencies:
+  - shared-context-manager.js
+  - retrieve-user-context.yaml
+executionSteps:
+  - Initialize SharedContextManager
+  - Retrieve all relevant user interactions from source agent
+  - Gather cross-agent context if includeAllAgents is true
+  - Consolidate user responses and key decisions
+  - Identify any unconfirmed user responses that need attention
+  - Check for conflicting user inputs that need resolution
+  - Generate handoff summary with key context points
+  - Validate context completeness for target agent needs
+  - Create recommendations for target agent based on context
+  - Update shared context with handoff information
+  - Return consolidated context package
+consolidationStrategy:
+  userInteractions:
+    - Group interactions by topic/category
+    - Prioritize confirmed responses over unconfirmed
+    - Identify conflicting or contradictory user inputs
+    - Extract key requirements and constraints
+  contextValidation:
+    - Check for missing critical information
+    - Identify areas where user clarification is needed
+    - Validate consistency across user responses
+    - Ensure all requirements are captured
+  handoffOptimization:
+    - Provide context in format most useful for target agent
+    - Include relevant background from other agents if applicable
+    - Highlight any open questions or unresolved issues
+    - Suggest next steps based on accumulated context
+validationCriteria:
+  - All relevant user interactions are included
+  - Context is properly organized and categorized
+  - Conflicting information is identified and flagged
+  - Missing information is clearly noted
+  - Handoff summary accurately represents user inputs
+  - Target agent has sufficient context to proceed
+outputFormat:
+  consolidatedContext:
+    userInteractions:
+      confirmed: array
+      unconfirmed: array
+      conflicting: array
+    keyDecisions: array
+    requirements: array
+    constraints: array
+    openQuestions: array
+    crossAgentContext: object
+  handoffSummary: |
+    ## Context Handoff: {sourceAgent} → {targetAgent}
+    
+    **Workflow Phase:** {workflowPhase}
+    **Handoff Reason:** {handoffReason}
+    
+    ### User-Confirmed Information:
+    - [List of confirmed user inputs]
+    
+    ### Key Requirements Gathered:
+    - [Requirements from user interactions]
+    
+    ### Open Questions:
+    - [Areas needing user clarification]
+    
+    ### Recommendations for {targetAgent}:
+    - [Specific recommendations based on context]
+  contextValidation:
+    completeness: percentage
+    missingCriticalInfo: array
+    conflictResolutionNeeded: array
+    readinessForHandoff: boolean
+exampleUsage: |
+  const handoff = await executeTask('consolidate-agent-context', {
+    sourceAgent: 'analyst',
+    targetAgent: 'po',
+    workflowPhase: 'requirements-to-planning',
+    contextScope: {
+      storyId: 'STORY-123',
+      includeAllAgents: false
+    },
+    handoffReason: 'Moving from business analysis to product planning'
+  });
+  
+  // Provides complete context package for the target agent
+  // Ensures no user input is lost in the transition

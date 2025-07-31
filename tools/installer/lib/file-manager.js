@@ -314,7 +314,7 @@ class FileManager {
   }
 
   async modifyCoreConfig(installDir, config) {
-    const coreConfigPath = path.join(installDir, '.bmad-core', 'core-config.yaml');
+    const coreConfigPath = path.join(installDir, 'bmad-core', 'core-config.yaml');
     
     try {
       // Read the existing core-config.yaml

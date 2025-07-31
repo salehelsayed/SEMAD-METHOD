@@ -1,288 +1,235 @@
 {
-  "tech_stack": [
-    "Node.js",
-    "JavaScript", 
-    "YAML",
-    "JSON Schema",
-    "Jest",
-    "Commander.js",
-    "AJV",
-    "Qdrant Vector Database",
-    "Markdown",
-    "CLI"
-  ],
-  "agent_connectivity_status": "PERFECT - 100% (16/16 tests passing)",
-  "total_dependencies": 135,
-  "production_ready": true,
+  "tech_stack": ["JavaScript", "Node.js", "Commander.js", "Qdrant Vector Database", "YAML", "Jest", "OpenAI"],
   "features": [
     {
-      "name": "CLI Management",
-      "description": "Main CLI interface for bmad-method with build, validate, and list commands",
-      "files": [
-        "tools/cli.js",
-        "tools/bmad-npx-wrapper.js"
-      ],
+      "name": "Structured Task Validation",
+      "description": "Validates all structured tasks in bmad-core/structured-tasks/ comply with YAML schema format",
+      "files": ["scripts/validate-all.js", "bmad-core/schemas/task-schema.json", "bmad-core/structured-tasks/*.yaml"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "BMAD CLI API",
-          "version": "4.31.0"
-        },
-        "paths": {
-          "/build": {
-            "description": "Build agents and teams with dependency resolution"
-          },
-          "/validate": {
-            "description": "Validate schemas, tasks, and configurations"
-          },
-          "/list:agents": {
-            "description": "List available agents and their capabilities"
-          }
-        }
+        "command": "npm run validate:structured-tasks",
+        "parameters": [],
+        "output": "Validation results for all structured task YAML files"
       }
     },
     {
-      "name": "Agent Management System",
-      "description": "Load, validate, and manage AI agents with role-based capabilities and dependencies",
-      "files": [
-        "bmad-core/agents/",
-        "bmad-core/agent-teams/",
-        "tools/lib/dependency-resolver.js"
-      ],
+      "name": "Structured Checklist Validation",
+      "description": "Validates all structured checklists comply with YAML schema format",
+      "files": ["scripts/validate-all.js", "bmad-core/schemas/checklist-schema.json", "bmad-core/structured-checklists/*.yaml"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Agent Management API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/agents/load": {
-            "description": "Load agent configurations from markdown files"
-          },
-          "/agents/validate": {
-            "description": "Validate agent dependencies and configurations"
-          },
-          "/teams/build": {
-            "description": "Build agent teams with bundled dependencies"
-          }
-        }
+        "command": "npm run validate:checklists",
+        "parameters": [],
+        "output": "Validation results for all checklist YAML files"
       }
     },
     {
-      "name": "Task Execution Engine", 
-      "description": "Execute structured tasks with YAML/JSON schemas, dynamic planning, and validation",
-      "files": [
-        "tools/task-runner.js",
-        "bmad-core/structured-tasks/",
-        "bmad-core/tools/dynamic-planner.js"
-      ],
+      "name": "Working Memory Initialization",
+      "description": "Initializes working memory system and creates JSON files in .ai/ directory",
+      "files": ["bmad-core/scripts/init-memory.js"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Task Execution API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/tasks/execute": {
-            "description": "Execute structured tasks with schema validation"
-          },
-          "/tasks/plan": {
-            "description": "Dynamic task planning and decomposition"
-          },
-          "/tasks/validate": {
-            "description": "Validate task schemas and dependencies"
-          }
-        }
+        "command": "npm run init:memory",
+        "parameters": [],
+        "output": "Creates working memory files in .ai/working_memory_*.json"
       }
     },
     {
-      "name": "Schema Validation System",
-      "description": "Comprehensive validation for tasks, checklists, story contracts, and configurations using JSON Schema",
-      "files": [
-        "scripts/validate-schemas.js",
-        "scripts/validate-all.js",
-        "bmad-core/schemas/",
-        "bmad-core/utils/story-contract-validator.js"
-      ],
+      "name": "Qdrant Integration",
+      "description": "Ingests search results into Qdrant vector database for long-term memory",
+      "files": ["scripts/ingest-to-qdrant.js"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Schema Validation API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/validate/schemas": {
-            "description": "Validate JSON schemas for tasks and checklists"
-          },
-          "/validate/contracts": {
-            "description": "Validate story contracts against schema"
-          },
-          "/validate/all": {
-            "description": "Run comprehensive validation across all components"
-          }
-        }
+        "command": "npm run ingest:search-results",
+        "parameters": [],
+        "output": "Data ingested into Qdrant database"
       }
     },
     {
-      "name": "Memory Management System",
-      "description": "Working memory and long-term memory management with Qdrant vector database integration",
-      "files": [
-        "bmad-core/utils/memory-lifecycle.js",
-        "bmad-core/utils/memory-transaction.js",
-        "bmad-core/utils/qdrant.js",
-        "bmad-core/scripts/init-memory.js"
-      ],
+      "name": "Search Tool Generation",
+      "description": "Generates search tools from PRD content using keyword extraction",
+      "files": ["scripts/generate-search-tools.js", "bmad-core/data/tool-mappings.yaml"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Memory Management API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/memory/working": {
-            "description": "Manage working memory for active tasks"
-          },
-          "/memory/longterm": {
-            "description": "Store and retrieve from vector database"
-          },
-          "/memory/init": {
-            "description": "Initialize memory systems"
-          }
-        }
+        "command": "npm run generate:search-tools",
+        "parameters": ["--prd", "--output"],
+        "output": "Generated search-tools.yaml file"
       }
     },
     {
-      "name": "Search Tools Generation",
-      "description": "Automated generation of search tools from PRD documents for context discovery",
-      "files": [
-        "scripts/generate-search-tools.js",
-        "scripts/validate-search-tools.js",
-        "scripts/ingest-to-qdrant.js"
-      ],
+      "name": "Search Tool Validation",
+      "description": "Validates generated search tool configurations",
+      "files": ["scripts/validate-search-tools.js"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Search Tools API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/search/generate": {
-            "description": "Generate search tools from PRD documents"
-          },
-          "/search/validate": {
-            "description": "Validate generated search tools"
-          },
-          "/search/ingest": {
-            "description": "Ingest search results to vector database"
-          }
-        }
+        "command": "npm run validate:search-tools",
+        "parameters": [],
+        "output": "Validation results for search tools"
       }
     },
     {
-      "name": "Story Contract System",
-      "description": "Formal contract system between planning and implementation phases to prevent drift",
-      "files": [
-        "scripts/validate-story-contract.js",
-        "bmad-core/utils/story-contract-validator.js",
-        "bmad-core/schemas/story-contract-schema.json"
-      ],
+      "name": "Story Contract Validation",
+      "description": "Validates story contracts with required fields using JSON Schema",
+      "files": ["scripts/validate-story-contract.js", "bmad-core/schemas/story-contract-schema.json"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Story Contract API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/story/validate": {
-            "description": "Validate individual story contracts"
-          },
-          "/story/validate-all": {
-            "description": "Validate all story contracts in bulk"
-          },
-          "/story/contract": {
-            "description": "Generate and manage story contracts"
-          }
-        }
+        "command": "npm run validate:contracts",
+        "parameters": ["--all"],
+        "output": "Story contract validation results"
       }
     },
     {
-      "name": "Template Management",
-      "description": "Manage and process YAML templates for PRDs, architecture, stories, and workflows",
-      "files": [
-        "bmad-core/templates/",
-        "bmad-core/workflows/"
-      ],
+      "name": "Workflow Orchestration",
+      "description": "Manages Dev-QA workflow with linear and iterative options",
+      "files": ["tools/workflow-orchestrator.js"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Template Management API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/templates/load": {
-            "description": "Load and process YAML templates"
-          },
-          "/templates/validate": {
-            "description": "Validate template schemas"
-          },
-          "/workflows/execute": {
-            "description": "Execute predefined workflows"
-          }
-        }
+        "command": "npm run orchestrate",
+        "parameters": ["--flow-type", "--story-file"],
+        "output": "Orchestrated workflow execution"
       }
     },
     {
-      "name": "Datamodel Test Generator",
-      "description": "Generate comprehensive test suites for data models with multiple framework support",
-      "files": [
-        "bmad-core/utils/datamodel-test-generator.js",
-        "bmad-core/templates/datamodel-test-example.md"
-      ],
+      "name": "Agent Building",
+      "description": "Builds agent bundles and resolves dependencies",
+      "files": ["tools/cli.js", "tools/builders/web-builder.js"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Datamodel Test API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/datamodel/generate": {
-            "description": "Generate test suites for data models"
-          },
-          "/datamodel/validate": {
-            "description": "Validate generated tests"
-          },
-          "/datamodel/frameworks": {
-            "description": "Support for Jest, Mocha, and other frameworks"
-          }
-        }
+        "command": "npm run build:agents",
+        "parameters": [],
+        "output": "Built agent bundles in dist/agents/"
       }
     },
     {
-      "name": "Installation and Setup System",
-      "description": "Automated installation and configuration system for different IDE environments",
-      "files": [
-        "tools/installer/",
-        "tools/installer/bin/bmad.js",
-        "tools/installer/lib/"
-      ],
+      "name": "Team Building",
+      "description": "Builds team configurations from YAML files",
+      "files": ["tools/cli.js", "tools/builders/web-builder.js", "bmad-core/agent-teams/*.yaml"],
       "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Installation API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/install": {
-            "description": "Install BMAD method in IDE environments"
-          },
-          "/configure": {
-            "description": "Configure agent settings and dependencies"
-          },
-          "/setup": {
-            "description": "Setup project-specific configurations"
-          }
-        }
+        "command": "npm run build:teams",
+        "parameters": [],
+        "output": "Built team bundles in dist/teams/"
+      }
+    },
+    {
+      "name": "Schema Validation Suite",
+      "description": "Comprehensive validation of all YAML/JSON artifacts",
+      "files": ["scripts/validate-schemas.js", "scripts/validate-all.js", "bmad-core/schemas/*.json"],
+      "api_doc": {
+        "command": "npm run validate:all",
+        "parameters": [],
+        "output": "Complete schema validation results"
+      }
+    },
+    {
+      "name": "Elicitation Check",
+      "description": "Ensures user interaction points are marked with elicit: true",
+      "files": ["scripts/audit-elicit-flags.js"],
+      "api_doc": {
+        "command": "npm run check:elicitation",
+        "parameters": [],
+        "output": "Elicitation flag audit results"
+      }
+    },
+    {
+      "name": "Task Scanner",
+      "description": "Scans for deprecated task usage and ensures structured tasks are used",
+      "files": ["scripts/scan-task-usage.js"],
+      "api_doc": {
+        "command": "npm run scan:tasks",
+        "parameters": [],
+        "output": "Task usage scan results"
+      }
+    },
+    {
+      "name": "Config Validation",
+      "description": "Validates core-config.yaml path references",
+      "files": ["scripts/validate-config-path.js", "bmad-core/core-config.yaml"],
+      "api_doc": {
+        "command": "npm run validate:config",
+        "parameters": [],
+        "output": "Configuration path validation results"
+      }
+    },
+    {
+      "name": "Dev Next Story",
+      "description": "Automatically implements the next approved story",
+      "files": ["scripts/dev-next-story.js"],
+      "api_doc": {
+        "command": "npm run dev:next-story",
+        "parameters": [],
+        "output": "Story implementation results"
+      }
+    },
+    {
+      "name": "QA Review",
+      "description": "QA agent reviews code without modification",
+      "files": ["scripts/qa-review.js"],
+      "api_doc": {
+        "command": "npm run qa:review",
+        "parameters": [],
+        "output": "QA review feedback"
+      }
+    },
+    {
+      "name": "Story Generation",
+      "description": "Generates stories using YAML template",
+      "files": ["scripts/generate-story.js", "bmad-core/templates/story-tmpl.yaml"],
+      "api_doc": {
+        "command": "npm run generate:story",
+        "parameters": [],
+        "output": "Generated story file"
+      }
+    },
+    {
+      "name": "Greenfield Orchestration",
+      "description": "Manages greenfield workflow with consistent prompts",
+      "files": ["tools/workflow-orchestrator.js"],
+      "api_doc": {
+        "command": "npm run orchestrate:greenfield",
+        "parameters": [],
+        "output": "Greenfield workflow execution"
+      }
+    },
+    {
+      "name": "Path Resolution",
+      "description": "Resolves file paths from core-config.yaml",
+      "files": ["tools/workflow-orchestrator.js", "bmad-core/core-config.yaml"],
+      "api_doc": {
+        "command": "npm run orchestrate:path-resolve",
+        "parameters": [],
+        "output": "Path resolution results"
+      }
+    },
+    {
+      "name": "Dependency Analysis",
+      "description": "Analyzes code dependencies and stores in Qdrant",
+      "files": ["scripts/analyze-dependencies.js"],
+      "api_doc": {
+        "command": "npm run analyze:dependencies",
+        "parameters": [],
+        "output": "Dependency graph stored in Qdrant"
+      }
+    },
+    {
+      "name": "Impact Checking",
+      "description": "Checks impact of changes based on dependency analysis",
+      "files": ["scripts/check-impacts.js"],
+      "api_doc": {
+        "command": "npm run check:impacts",
+        "parameters": [],
+        "output": "Impact analysis report"
+      }
+    },
+    {
+      "name": "Memory Persistence Test",
+      "description": "Tests memory persistence across agent invocations",
+      "files": ["tests/memory-persistence.test.js"],
+      "api_doc": {
+        "command": "npm run test:memory-persistence",
+        "parameters": [],
+        "output": "Memory persistence test results"
+      }
+    },
+    {
+      "name": "Interaction Analysis",
+      "description": "Analyzes and captures user-agent interactions",
+      "files": ["scripts/interact-analysis.js"],
+      "api_doc": {
+        "command": "npm run interact:analysis",
+        "parameters": [],
+        "output": "Interaction analysis results"
       }
     }
   ]
-} 
+}

@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -141,12 +141,19 @@ dependencies:
 
 ## Task Execution
 
-### 1. Initialize Memory
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory
 
 Setup working memory for elicitation session
 
-- Initialize working memory for elicitation context
-- Retrieve relevant past elicitation patterns if available
+- **[USER INPUT REQUIRED]** Initialize working memory for elicitation context
+- **[USER INPUT REQUIRED]** Retrieve relevant past elicitation patterns if available
 
 ### 1. Intelligent Method Selection
 
@@ -156,7 +163,7 @@ Setup working memory for elicitation session
 2. **Context-Specific Methods** (choose 4-5):
 3. **Always Include**: "Proceed / No Further Actions" as option 9
 
-- **Content Type**: Technical specs, user stories, architecture, requirements, etc.
+- **[USER INPUT REQUIRED]** **Content Type**: Technical specs, user stories, architecture, requirements, etc.
 - **Complexity Level**: Simple, moderate, or complex content
 - **Stakeholder Needs**: Who will use this information
 - **Risk Level**: High-impact decisions vs routine items
@@ -220,15 +227,34 @@ Choose a number (0-8) or 9 to proceed:
 **Execution Guidelines:**
 
 - **Be Concise**: Focus on actionable insights, not lengthy explanations
-- **Stay Relevant**: Tie all elicitation back to the specific content being analyzed
+- **[USER INPUT REQUIRED]** **Stay Relevant**: Tie all elicitation back to the specific content being analyzed
 - **Identify Personas**: For multi-persona methods, clearly identify which viewpoint is speaking
 - **Maintain Flow**: Keep the process moving efficiently
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/advanced-elicitation.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/facilitate-brainstorming-session.yaml ====================
 # Facilitate Brainstorming Session Task
 
 ## Task Execution
+
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/facilitate-brainstorming-session.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/brownfield-create-epic.yaml ====================
@@ -240,7 +266,14 @@ Create a single epic for smaller brownfield enhancements that don't require the 
 
 ## Important Notes
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory Context
 
 Set up working memory and retrieve project context
 
@@ -349,6 +382,12 @@ The epic creation is successful when:
 - When in doubt about scope or complexity, escalate to full brownfield planning
 
 - Critical compatibility requirements: {{key requirements}}
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/brownfield-create-epic.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/brownfield-create-story.yaml ====================
@@ -360,7 +399,14 @@ Create a single user story for very small brownfield enhancements that can be co
 
 ## Important Notes
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
@@ -456,6 +502,12 @@ The story creation is successful when:
 - Always prioritize existing system integrity
 - When in doubt about integration complexity, use brownfield-create-epic instead
 - Stories should take no more than 4 hours of focused development work
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/brownfield-create-story.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/correct-course.yaml ====================
@@ -472,11 +524,18 @@ The story creation is successful when:
 
 ## Task Execution
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory Context
 
 Retrieve relevant context from previous sessions
 
-- Call retrieve-context task to get relevant past decisions and changes
+- **[USER INPUT REQUIRED]** Call retrieve-context task to get relevant past decisions and changes
 - Update working memory with current change context
 
 ### 1. Initial Setup & Mode Selection
@@ -525,17 +584,23 @@ Retrieve relevant context from previous sessions
 ### 5. Finalize & Determine Next Steps
 
 - Obtain explicit user approval for the "Sprint Change Proposal," including all the specific edits documented within it.
-- Provide the finalized "Sprint Change Proposal" document to the user.
+- **[USER INPUT REQUIRED]** Provide the finalized "Sprint Change Proposal" document to the user.
 - Update working memory with final change decisions and outcomes
 - **Based on the nature of the approved changes:**
 - **[USER INPUT REQUIRED]** **If the approved edits sufficiently address the change and can be implemented directly or organized by a PO/SM:** State that the "Correct Course Task" is complete regarding analysis and change proposal, and the user can now proceed with implementing or logging these changes (e.g., updating actual project documents, backlog items). Suggest handoff to a PO/SM agent for backlog organization if appropriate.
-- **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
+- **[USER INPUT REQUIRED]** **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
 - **Primary:** A "Sprint Change Proposal" document (in markdown format). This document will contain:
 - A summary of the change-checklist analysis (issue, impact, rationale for the chosen path).
 - Specific, clearly drafted proposed edits for all affected project artifacts.
 - **Implicit:** An annotated change-checklist (or the record of its completion) reflecting the discussions, findings, and decisions made during the process.
 
 - **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/correct-course.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/create-deep-research-prompt.yaml ====================
@@ -556,11 +621,18 @@ CRITICAL: First, help the user select the most appropriate research focus based 
 
 ## Important Notes
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
-- Initialize working memory for research prompt creation
+- **[USER INPUT REQUIRED]** Initialize working memory for research prompt creation
 - Retrieve previous research patterns and methodologies
 
 ### 1. Research Focus Options
@@ -595,7 +667,7 @@ Present these numbered options to the user:
 - Assess technology trends and possibilities
 - Evaluate technical approaches and architectures
 - Identify emerging technologies and disruptions
-- Analyze build vs. buy vs. partner options
+- **[USER INPUT REQUIRED]** Analyze build vs. buy vs. partner options
 - Map industry value chains and dynamics
 - Identify key players and relationships
 - Analyze regulatory and compliance factors
@@ -621,7 +693,7 @@ Present these numbered options to the user:
 
 - Extract key product concepts and goals
 - Identify target users and use cases
-- Note technical constraints and preferences
+- **[USER INPUT REQUIRED]** Note technical constraints and preferences
 - Highlight uncertainties and assumptions
 - Synthesize main ideas and themes
 - Identify areas needing validation
@@ -631,7 +703,7 @@ Present these numbered options to the user:
 - Deepen specific market insights
 - Validate initial findings
 - Explore adjacent possibilities
-- Gather essential context through questions
+- **[USER INPUT REQUIRED]** Gather essential context through questions
 - Define the problem space
 - Clarify research objectives
 - Establish success criteria
@@ -659,10 +731,10 @@ CRITICAL: collaborate with the user to develop specific, actionable research que
 - Key decisions the research will inform
 - Success criteria for the research
 - Constraints and boundaries
-- Central questions that must be answered
-- Priority ranking of questions
-- Dependencies between questions
-- Additional context-building questions
+- **[USER INPUT REQUIRED]** Central questions that must be answered
+- **[USER INPUT REQUIRED]** Priority ranking of questions
+- **[USER INPUT REQUIRED]** Dependencies between questions
+- **[USER INPUT REQUIRED]** Additional context-building questions
 - Nice-to-have insights
 - Future-looking considerations
 - Secondary research sources
@@ -780,26 +852,39 @@ CRITICAL: collaborate with the user to develop specific, actionable research que
 **Integration Points:**
 
 - How findings will feed into next phases
-- Which team members should review results
+- **[USER INPUT REQUIRED]** Which team members should review results
 - How to validate findings
 - When to revisit or expand research
 - **[USER INPUT REQUIRED]** The quality of the research prompt directly impacts the quality of insights gathered
-- Be specific rather than general in research questions
+- **[USER INPUT REQUIRED]** Be specific rather than general in research questions
 - Consider both current state and future implications
 - Balance comprehensiveness with focus
 - Document assumptions and limitations clearly
 - Plan for iterative refinement based on initial findings
+
+### 9. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/create-deep-research-prompt.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/create-doc.yaml ====================
-# Create Document from Template (YAML Driven)
+# Create Document Task
 
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
-- **owner**: Note which agent role initially creates/populates the section
-- Include a note in the generated document indicating the responsible agent
+## Description
 
+Create a structured document from a selected template
 
-## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+## Required Inputs
+
+- **undefined** (undefined)
+- **undefined** (undefined)
+- **undefined** (undefined)
+
+## Outputs
+
+- **undefined** (undefined)
 ==================== END: .bmad-core/structured-tasks/create-doc.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/document-project.yaml ====================
@@ -811,11 +896,18 @@ Generate comprehensive documentation for existing projects optimized for AI deve
 
 ## Task Execution
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
-- Initialize working memory for documentation task
+- **[USER INPUT REQUIRED]** Initialize working memory for documentation task
 - Retrieve any previous project documentation context
 
 ### 1. Initial Project Analysis
@@ -977,7 +1069,7 @@ npm run seed        # Seed test data
 - **API Definitions**: `src/routes/` or link to OpenAPI spec
 - **Database Models**: `src/models/` or link to schema files
 - **Key Algorithms**: [List specific files with complex logic]
-- Type: [Monorepo/Polyrepo/Hybrid]
+- **[USER INPUT REQUIRED]** Type: [Monorepo/Polyrepo/Hybrid]
 - Package Manager: [npm/yarn/pnpm]
 - Notable: [Any unusual structure decisions]
 - **User Management**: `src/services/userService.js` - Handles all user operations
@@ -986,7 +1078,7 @@ npm run seed        # Seed test data
 - **[List other key modules with their actual files]**
 - **User Model**: See `src/models/User.js`
 - **Order Model**: See `src/models/Order.js`
-- **Related Types**: TypeScript definitions in `src/types/`
+- **[USER INPUT REQUIRED]** **Related Types**: TypeScript definitions in `src/types/`
 - **OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)
 - **Postman Collection**: `docs/api/postman-collection.json`
 - **Manual Endpoints**: [List any undocumented endpoints discovered]
@@ -1039,7 +1131,7 @@ The document should be comprehensive enough that future agents can understand:
 - Where to find key files and logic
 - What technical debt exists
 - What constraints must be respected
-- If PRD provided: What needs to change for the enhancement]]
+- **[USER INPUT REQUIRED]** If PRD provided: What needs to change for the enhancement]]
 
 ### 5. Quality Assurance
 
@@ -1055,16 +1147,22 @@ Apply the advanced elicitation task after major sections to refine based on user
 - Document reflects REALITY including technical debt and workarounds
 - Key files and modules are referenced with actual paths
 - Models/APIs reference source files rather than duplicating content
-- If PRD provided: Clear impact analysis showing what needs to change
+- **[USER INPUT REQUIRED]** If PRD provided: Clear impact analysis showing what needs to change
 - Document enables AI agents to navigate and understand the actual codebase
 - Technical constraints and "gotchas" are clearly documented
 - **[USER INPUT REQUIRED]** This task creates ONE document that captures the TRUE state of the system
 - References actual files rather than duplicating content when possible
 - Documents technical debt, workarounds, and constraints honestly
-- For brownfield projects with PRD: Provides clear enhancement impact analysis
+- **[USER INPUT REQUIRED]** For brownfield projects with PRD: Provides clear enhancement impact analysis
 - The goal is PRACTICAL documentation for AI agents doing real work
 
 CRITICAL: Before finalizing the document:
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/document-project.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/create-next-story.yaml ====================
@@ -1076,17 +1174,17 @@ To identify the next logical story based on project progress and epic definition
 
 ## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
 
-### 1. Initialize Working Memory
+### 1. Load Memory and Initialize Context
 
-Initialize working memory for the current agent session
+Load agent working memory and relevant long-term context using unified memory system
 
-- Execute task `update-working-memory` with agentName='sm' and taskId='create-next-story'
-- Execute task `retrieve-context` with query='previous story creation context' to load relevant memories
-- Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+- **[USER INPUT REQUIRED]** Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
 
 ### 0. Load Core Configuration and Check Workflow
 
-- Load `.bmad-core/core-config.yaml` from the project root
+- Load `bmad-core/core-config.yaml` from the project root
 - If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for story creation. You can either: 1) Copy it from GITHUB bmad-core/core-config.yaml and configure it for your project OR 2) Run the BMad installer against your project to upgrade and add the file automatically. Please add and configure core-config.yaml before proceeding."
 - Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`, `workflow.*`
 
@@ -1097,15 +1195,15 @@ Initialize working memory for the current agent session
 - Based on `prdSharded` from config, locate epic files (sharded location/pattern or monolithic PRD sections)
 - If `devStoryLocation` has story files, load the highest `{epicNum}.{storyNum}.story.md` file
 - **If highest story exists:**
-- **[USER INPUT REQUIRED]** Verify status is 'Done'. If not, alert user: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"
-- **[USER INPUT REQUIRED]** If proceeding, select next sequential story in the current epic
-- **[USER INPUT REQUIRED]** If epic is complete, prompt user: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Would you like to: 1) Begin Epic {epicNum + 1} with story 1 2) Select a specific story to work on 3) Cancel story creation"
-- **CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.
+- **[USER INPUT REQUIRED]** Verify status is 'Done'. If not, alert user and halt: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status]. Cannot proceed until this story is completed or manually moved to Done status."
+- **[USER INPUT REQUIRED]** Automatically select next sequential story in the current epic based on epic progress
+- If epic is complete, automatically proceed to next epic: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Proceeding to Epic {epicNum + 1}, Story 1."
+- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.
 - **If no story files exist:** The next story is ALWAYS 1.1 (first story of first epic)
 - Announce the identified story to the user: "Identified next story for preparation: {epicNum}.{storyNum} - {Story Title}"
-- Execute task `update-working-memory` with currentStep='story-identified' and context containing epicNum, storyNum, and story title
+- **[USER INPUT REQUIRED]** Execute task `update-working-memory` with currentStep='story-identified' and context containing epicNum, storyNum, and story title
 
-- **CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.
+- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.
 
 ### 2. Gather Story Requirements and Previous Story Context
 
@@ -1163,7 +1261,7 @@ From the sharded PRD and architecture docs, extract endpoints, data models, file
 
 - Create new story file: `{devStoryLocation}/{epicNum}.{storyNum}.story.md` using Story Template
 - Embed the StoryContract YAML block at the top of the story file between --- markers
-- Execute task `validate-story-contract` with storyFilePath set to the newly created story file path
+- **[USER INPUT REQUIRED]** Execute task `validate-story-contract` with storyFilePath set to the newly created story file path
 - If validation fails, halt the workflow and inform the user of the specific validation errors so corrections can be made
 - Fill in basic story information: Title, Status (Draft), Story statement, Acceptance Criteria from Epic
 - **`Dev Notes` section (CRITICAL):**
@@ -1195,15 +1293,17 @@ From the sharded PRD and architecture docs, extract endpoints, data models, file
 - **[USER INPUT REQUIRED]** Ensure tasks align with both epic requirements and architecture constraints
 - Update status to "Draft" and save the story file
 - **[USER INPUT REQUIRED]** Execute `.bmad-core/tasks/execute-checklist` `.bmad-core/checklists/story-draft-checklist`
-- Provide summary to user including:
+- **[USER INPUT REQUIRED]** MANDATORY VALIDATION: Execute task `validate-next-story` with the newly created story file path
+- If validation fails, halt workflow and surface all validation errors to the user. Story CANNOT proceed until all validation issues are resolved.
+- **[USER INPUT REQUIRED]** Provide summary to user including:
 - Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`
 - Status: Draft
 - Key technical components included from architecture docs
 - Any deviations or conflicts noted between epic and architecture
 - Checklist Results
-- **[USER INPUT REQUIRED]** Next steps: For Complex stories, suggest the user carefully review the story draft and also optionally have the PO run the task `.bmad-core/tasks/validate-next-story`
-- Execute task `update-working-memory` to record story completion with plan containing story details and observations about technical context extracted
-- Store story summary in Qdrant for future retrieval using storeMemorySnippet with story title and key technical elements
+- Validation Results (pass/fail with any issues)
+- Next steps: Story has been validated and is ready for implementation
+- **[USER INPUT REQUIRED]** Save task completion to working memory and archive significant findings
 ==================== END: .bmad-core/structured-tasks/create-next-story.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/execute-checklist.yaml ====================
@@ -1215,26 +1315,33 @@ Generic task for executing any checklist file systematically. Supports both inte
 
 ## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
 
-### 1. Initialize Working Memory
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Working Memory
 
 Initialize working memory for checklist execution session
 
-- Execute task `update-working-memory` with agentName and taskId='execute-checklist'
-- Verify checklist file exists at specified path
+- **[USER INPUT REQUIRED]** Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+- **[USER INPUT REQUIRED]** Verify checklist file exists at specified path
 - Load checklist content and parse structure
 
-### 2. Determine Execution Mode
+### 3. Determine Execution Mode
 
 Determine how to execute the checklist based on user preference
 
 - Check if execution mode was provided in input
-- If mode not specified, ask user for preference:
-- **How would you like to work through this checklist?**
-- 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+- **[USER INPUT REQUIRED]** If mode not specified, ask user for preference:
+- **[USER INPUT REQUIRED]** **How would you like to work through this checklist?**
+- **[USER INPUT REQUIRED]** 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
 - 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
 - **[USER INPUT REQUIRED]** Select option (1 or 2):
 
-### 3. Parse Checklist Structure
+### 4. Parse Checklist Structure
 
 Analyze the checklist to identify sections and items
 
@@ -1244,7 +1351,7 @@ Analyze the checklist to identify sections and items
 - Create structured representation of checklist hierarchy
 - Record total items count and section breakdown in memory
 
-### 4. Execute Checklist Items
+### 5. Execute Checklist Items
 
 Work through each checklist item based on selected mode
 
@@ -1256,7 +1363,7 @@ Work through each checklist item based on selected mode
 - **[USER INPUT REQUIRED]** If interactive mode: Present section findings and await confirmation
 - Update progress tracking in working memory
 
-### 5. Generate Summary Report
+### 6. Generate Summary Report
 
 Create comprehensive report of checklist execution results
 
@@ -1267,7 +1374,7 @@ Create comprehensive report of checklist execution results
 - If checklist includes specific report format (e.g., validation tables), use that format
 - Store execution results in working memory for future reference
 
-### 6. Present Results and Next Steps
+### 7. Present Results and Next Steps
 
 Present the final results and offer follow-up actions
 
@@ -1279,6 +1386,12 @@ Present the final results and offer follow-up actions
 - 2. Generate action plan to address issues
 - 3. Re-run specific sections
 - **[USER INPUT REQUIRED]** Would you like to perform any follow-up actions?
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/execute-checklist.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml ====================
@@ -1290,21 +1403,28 @@ To generate a masterful, comprehensive, and optimized prompt that can be used wi
 
 ## Task Execution
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Setup working memory for prompt generation
 
-- Initialize working memory for frontend prompt generation
+- **[USER INPUT REQUIRED]** Initialize working memory for frontend prompt generation
 - Retrieve relevant frontend patterns from memory
 
 ### 1. Core Prompting Principles
 
 Before generating the prompt, you must understand these core principles for interacting with a generative AI for code.
 
-- **Be Explicit and Detailed**: The AI cannot read your mind. Provide as much detail and context as possible. Vague requests lead to generic or incorrect outputs.
+- **[USER INPUT REQUIRED]** **Be Explicit and Detailed**: The AI cannot read your mind. Provide as much detail and context as possible. Vague requests lead to generic or incorrect outputs.
 - **[USER INPUT REQUIRED]** **Iterate, Don't Expect Perfection**: Generating an entire complex application in one go is rare. The most effective method is to prompt for one component or one section at a time, then build upon the results.
-- **Provide Context First**: Always start by providing the AI with the necessary context, such as the tech stack, existing code snippets, and overall project goals.
-- **Mobile-First Approach**: Frame all UI generation requests with a mobile-first design mindset. Describe the mobile layout first, then provide separate instructions for how it should adapt for tablet and desktop.
+- **[USER INPUT REQUIRED]** **Provide Context First**: Always start by providing the AI with the necessary context, such as the tech stack, existing code snippets, and overall project goals.
+- **[USER INPUT REQUIRED]** **Mobile-First Approach**: Frame all UI generation requests with a mobile-first design mindset. Describe the mobile layout first, then provide separate instructions for how it should adapt for tablet and desktop.
 
 ### 2. The Structured Prompting Framework
 
@@ -1315,7 +1435,7 @@ To ensure the highest quality output, you MUST structure every prompt using the 
 4. **Define a Strict Scope**: Explicitly define the boundaries of the task. Tell the AI which files it can modify and, more importantly, which files to leave untouched to prevent unintended changes across the codebase.
 
 - _Example: "Create a responsive user registration form with client-side validation and API integration."_
-- _Example: "1. Create a new file named `RegistrationForm.js`. 2. Use React hooks for state management. 3. Add styled input fields for 'Name', 'Email', and 'Password'. 4. For the email field, ensure it is a valid email format. 5. On submission, call the API endpoint defined below."_
+- **[USER INPUT REQUIRED]** _Example: "1. Create a new file named `RegistrationForm.js`. 2. Use React hooks for state management. 3. Add styled input fields for 'Name', 'Email', and 'Password'. 4. For the email field, ensure it is a valid email format. 5. On submission, call the API endpoint defined below."_
 - **[USER INPUT REQUIRED]** _Example: "Use this API endpoint: `POST /api/register`. The expected JSON payload is `{ "name": "string", "email": "string", "password": "string" }`. Do NOT include a 'confirm password' field. Use Tailwind CSS for all styling."_
 - _Example: "You should only create the `RegistrationForm.js` component and add it to the `pages/register.js` file. Do NOT alter the `Navbar.js` component or any other existing page or component."_
 
@@ -1330,12 +1450,18 @@ You will now synthesize the inputs and the above principles into a final, compre
 4. **Present and Refine**:
 
 - **[USER INPUT REQUIRED]** Start the prompt with a preamble describing the overall project purpose, the full tech stack (e.g., Next.js, TypeScript, Tailwind CSS), and the primary UI component library being used.
-- If the user has design files (Figma, etc.), instruct them to provide links or screenshots.
+- **[USER INPUT REQUIRED]** If the user has design files (Figma, etc.), instruct them to provide links or screenshots.
 - If not, describe the visual style: color palette, typography, spacing, and overall aesthetic (e.g., "minimalist", "corporate", "playful").
 - Follow the four-part framework from Section 2 to build out the core request, whether it's for a single component or a full page.
 - **[USER INPUT REQUIRED]** Output the complete, generated prompt in a clear, copy-pasteable format (e.g., a large code block).
 - **[USER INPUT REQUIRED]** Explain the structure of the prompt and why certain information was included, referencing the principles above.
 - <important_note>Conclude by reminding the user that all AI-generated code will require careful human review, testing, and refinement to be considered production-ready.</important_note>
+
+### 6. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/index-docs.yaml ====================
@@ -1353,12 +1479,25 @@ This task maintains the integrity and completeness of the `docs/index.md` file b
 
 ## Task Execution
 
-### 1. Initialize Memory
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory
 
 Setup working memory for indexing session
 
 - Initialize working memory for documentation indexing
 - Update memory with indexed documentation structure
+
+### 3. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/index-docs.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/shard-doc.yaml ====================
@@ -1370,7 +1509,7 @@ Setup working memory for indexing session
 - Create a folder structure to organize the sharded documents
 - Maintain all content integrity including code blocks, diagrams, and markdown formatting
 
-[[LLM: First, check if markdownExploder is set to true in .bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
+[[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
 **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
 CRITICAL AEGNT SHARDING RULES:
 CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]
@@ -1378,11 +1517,26 @@ CRITICAL: Use proper parsing that understands markdown context. A ## inside a co
 
 ## Important Notes
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Check Core Configuration
+
+Check if automatic sharding is enabled in core-config.yaml
+
+- Load bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+- If prdSharded or architectureSharded is true, proceed with automatic sharding
+- If markdownExploder is true, attempt to use md-tree explode command first
+
+### 3. Initialize Memory Context
 
 Setup working memory and retrieve relevant context
 
-- Initialize working memory for sharding task
+- **[USER INPUT REQUIRED]** Initialize working memory for sharding task
 - Record document being sharded in memory for future reference
 
 ### 3. Create Individual Files
@@ -1447,7 +1601,7 @@ After sharding:
 3. Ensure heading levels were properly adjusted
 4. Confirm all files were created successfully
 
-### 6. Update Memory with Results
+### 8. Update Memory with Results
 
 Record sharding results in memory
 
@@ -1472,40 +1626,90 @@ Document sharded successfully:
 - Preserve ALL formatting, including whitespace where significant
 - Handle edge cases like sections with code blocks containing ## symbols
 - Ensure the sharding is reversible (could reconstruct the original from shards)
+
+### 10. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/shard-doc.yaml ====================
 
-==================== START: .bmad-core/tasks/update-working-memory.yaml ====================
-id: update-working-memory
-name: Update Working Memory Task
-description: Task definition for updating agent working memory
-type: task
-structuredTaskReference: ../structured-tasks/update-working-memory.yaml
-category: memory
-priority: high
-requiredInputs:
-  - agentName
-  - taskId (optional)
-  - currentStep (optional)
-  - plan (optional)
-  - context (optional)
-outputs:
-  - memory: Updated memory state
-==================== END: .bmad-core/tasks/update-working-memory.yaml ====================
+==================== START: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+# Update Working Memory
 
-==================== START: .bmad-core/tasks/retrieve-context.yaml ====================
-id: retrieve-context
-name: Retrieve Context Task
-description: Task definition for retrieving context from memory
-type: task
-structuredTaskReference: ../structured-tasks/retrieve-context.yaml
-category: memory
-priority: high
-requiredInputs:
-  - query
-  - topN (optional)
-outputs:
-  - memories
-==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
+## Description
+
+Updates the agent's working memory with current task state
+
+## Execution Steps
+
+1. Update the working memory JSON file for the agent
+2. Merge provided updates with existing memory
+3. Preserve existing data not being updated
+4. Return the updated memory state
+
+## Required Inputs
+
+- **agentName** (string): Name of the agent
+- **taskId** (string) - optional: Current task identifier
+- **currentStep** (string) - optional: Current step in the plan
+- **plan** (array) - optional: Task execution plan
+- **context** (object) - optional: Additional context to store
+
+## Outputs
+
+- **memory** (object): Updated memory state
+
+## Example Usage
+
+```
+await updateWorkingMemory('dev', {
+  taskId: 'TASK-123',
+  currentStep: 'implementing-feature',
+  plan: ['analyze', 'implement', 'test'],
+  context: { feature: 'user-auth' }
+});
+
+```
+==================== END: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+
+==================== START: .bmad-core/structured-tasks/retrieve-context.yaml ====================
+# Retrieve Context from Memory
+
+## Description
+
+Retrieves relevant context from long-term memory using similarity search
+
+## Execution Steps
+
+1. Connect to Qdrant vector database
+2. Generate embedding for the query
+3. Perform similarity search
+4. Return top N matching memories with scores
+
+## Required Inputs
+
+- **query** (string): Query string to search for similar memories
+- **topN** (number) - optional: Number of top results to retrieve
+
+## Outputs
+
+- **memories** (array): Array of retrieved memory snippets with scores
+
+## Example Usage
+
+```
+const memories = await retrieveMemory(
+  'user authentication implementation',
+  5
+);
+// Returns: [
+//   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
+//   ...
+// ]
+
+```
+==================== END: .bmad-core/structured-tasks/retrieve-context.yaml ====================
 
 ==================== START: .bmad-core/templates/architecture-tmpl.yaml ====================
 template:
@@ -5317,10 +5521,10 @@ sections:
   - id: status
     title: Status
     type: choice
-    choices: [Draft, Approved, InProgress, Review, Done]
+    choices: [Draft, Approved, InProgress, In Review, Done, Needs Fixes]
     instruction: Select the current status of the story
     owner: scrum-master
-    editors: [scrum-master, dev-agent]
+    editors: [scrum-master, dev-agent, qa-agent]
     
   - id: story
     title: Story
@@ -7005,7 +7209,7 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 #### 4. Reusable Resources
 
 - **Templates** (`bmad-core/templates/`): Markdown templates for PRDs, architecture specs, user stories
-- **Tasks** (`bmad-core/tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
+- **Tasks** (`bmad-core/structured-tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
 - **Checklists** (`bmad-core/checklists/`): Quality assurance checklists for validation and review
 - **Data** (`bmad-core/data/`): Core knowledge base and technical preferences
 
@@ -7030,8 +7234,8 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 BMad employs a sophisticated template system with three key components:
 
 1. **Template Format** (`utils/bmad-doc-template.md`): Defines markup language for variable substitution and AI processing directives from yaml templates
-2. **Document Creation** (`tasks/create-doc.md`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
-3. **Advanced Elicitation** (`tasks/advanced-elicitation.md`): Provides interactive refinement through structured brainstorming
+2. **Document Creation** (`structured-tasks/create-doc.yaml`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
+3. **Advanced Elicitation** (`structured-tasks/advanced-elicitation.yaml`): Provides interactive refinement through structured brainstorming
 
 ### Technical Preferences Integration
 

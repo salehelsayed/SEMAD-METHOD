@@ -1,0 +1,53 @@
+id: save-and-clean-memory-action
+name: Save and Clean Memory Action
+purpose: Standard memory saving and cleanup action for structured tasks
+description: Saves task observations to short-term memory, archives to long-term memory, and performs hygiene cleanup
+actions:
+  - description: "Save task observations and decisions to working memory"
+    elicit: false
+    function: "saveAndCleanMemory"
+    parameters:
+      agentName: "{{AGENT_NAME}}"
+      taskData:
+        observation: "{{TASK_OBSERVATION}}"
+        decision: "{{TASK_DECISION}}"
+        reasoning: "{{TASK_REASONING}}"
+        keyFact: "{{KEY_FACT}}"
+        significantFinding: "{{SIGNIFICANT_FINDING}}"
+        taskCompleted: "{{TASK_COMPLETED}}"
+        taskId: "{{TASK_ID}}"
+        context:
+          storyId: "{{STORY_ID}}"
+          epicId: "{{EPIC_ID}}"
+          taskType: "{{TASK_TYPE}}"
+    metadata:
+      memoryAction: true
+      executionOrder: "last"
+  - description: "Perform memory hygiene cleanup based on retention policies"
+    elicit: false
+    metadata:
+      memoryAction: true
+      executionOrder: "cleanup"
+  - description: "Store significant findings in long-term memory (Qdrant) with proper tagging"  
+    elicit: false
+    metadata:
+      memoryAction: true
+      executionOrder: "archive"
+outputs:
+  memoryResult:
+    description: Result of memory save and cleanup operations
+    type: object
+    properties:
+      success:
+        type: boolean
+        description: Whether memory operations succeeded
+      operations:
+        type: array
+        description: List of memory operations performed
+      warnings:
+        type: array
+        description: Any warnings during memory operations
+metadata:
+  reusableAction: true
+  category: memory-management
+  requiredFor: all-structured-tasks

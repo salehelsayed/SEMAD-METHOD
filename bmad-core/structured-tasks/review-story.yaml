@@ -1,23 +1,116 @@
 id: review-story
 name: review-story
-purpose: Review and validate story implementation with QA perspective, maintaining context through working memory
+purpose: Review story implementation and provide advisory feedback for Dev agent, maintaining context through working memory
 steps:
   - id: step0
-    name: Initialize Memory and Context
-    description: Initialize working memory for QA review session
+    name: Load Memory and Initialize Context
+    description: Load QA agent working memory and relevant long-term review context
     actions:
-      - description: Execute task `update-working-memory` with agentName='qa' and taskId='review-story'
+      - description: Load agent working memory and relevant long-term context
         elicit: false
-      - description: Execute task `retrieve-context` with query='story implementation review patterns' to load relevant QA memories
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: review-story
+            taskType: story-review
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to review planning
         elicit: false
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step1
-    name: Record Review Observations
-    description: Record key findings and patterns for future reviews
+    name: Update Status and Load Story Details
+    description: Set story status to 'In Review' and gather implementation details
     actions:
-      - description: After completing review, execute `recordObservation` to capture review patterns and common issues found
+      - description: Read the story file to understand current status and content
         elicit: false
-      - description: Store review summary in Qdrant including story type, issues found, and refactoring patterns applied
+      - description: Update the Status section to "In Review" to indicate QA review has started
         elicit: false
+      - description: Understand requirements, acceptance criteria, and dev completion notes
+        elicit: false
+      - description: Identify all files mentioned in the implementation section
+        elicit: false
+      - description: Create a list of files to review based on the story implementation details
+        elicit: false
+  - id: step2
+    name: Review Code Implementation
+    description: Perform comprehensive code quality review without modifying files
+    actions:
+      - description: Read each implemented file to understand the code structure and logic
+        elicit: false
+      - description: Check code against acceptance criteria to verify all requirements are met
+        elicit: true
+      - description: Evaluate code quality including readability, maintainability, and adherence to project standards
+        elicit: false
+      - description: Identify potential bugs, edge cases, or error handling issues
+        elicit: false
+      - description: Assess test coverage and identify missing test scenarios
+        elicit: false
+  - id: step3
+    name: Security and Performance Analysis
+    description: Review implementation for security vulnerabilities and performance concerns
+    actions:
+      - description: Check for common security issues like SQL injection, XSS, or authentication bypasses
+        elicit: false
+      - description: Review data validation and sanitization practices
+        elicit: false
+      - description: Analyze performance implications of the implementation
+        elicit: false
+      - description: Identify potential bottlenecks or resource-intensive operations
+        elicit: false
+  - id: step4
+    name: Generate QA Report
+    description: Create comprehensive QA report with recommendations for Dev agent
+    actions:
+      - description: Compile all findings into structured QA Results format
+        elicit: false
+      - description: Prioritize issues by severity and impact
+        elicit: false
+      - description: Write clear, actionable recommendations for each issue found
+        elicit: false
+      - description: Include specific file names and line numbers where applicable
+        elicit: false
+  - id: step5
+    name: Update Story File QA Section and Final Status
+    description: Update the QA Results section and set final story status
+    actions:
+      - description: Read the current story file to preserve all existing content
+        elicit: false
+      - description: Update ONLY the QA Results section with the review findings
+        elicit: false
+      - description: Determine if implementation is approved based on review findings
+        elicit: false
+      - description: Update Status section to "Done" if approved with no issues found
+        elicit: false
+      - description: Update Status section to "Needs Fixes" if any recommendations or issues found
+        elicit: false
+      - description: Ensure no other sections of the story file are modified except Status and QA Results
+        elicit: false
+  - id: step6
+    name: Save Review Results and Clean Memory
+    description: Save review findings to memory and perform hygiene cleanup
+    actions:
+      - description: Save review completion and findings to working memory
+        elicit: false
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed story review with {{REVIEW_STATUS}} status
+            significantFinding: 'Review findings: {{REVIEW_SUMMARY}}'
+            decision: Story {{APPROVAL_STATUS}} based on quality review
+            reasoning: '{{REVIEW_REASONING}}'
+            taskCompleted: true
+            taskId: review-story
+            context:
+              taskType: story-review
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:
@@ -33,7 +126,7 @@ metadata:
       content: '   - Note any completion notes from the developer'
       lineNumber: 16
     - type: special-note
-      content: '   - Add missing tests if critical coverage is lacking'
+      content: '   - Identify and recommend missing tests if critical coverage is lacking'
       lineNumber: 64
     - type: special-note
       content: '**CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.'
@@ -49,12 +142,12 @@ metadata:
         ### Code Quality Assessment
         [Overall assessment of implementation quality]
 
-        ### Refactoring Performed
-        [List any refactoring you performed with explanations]
+        ### Recommended Refactoring
+        [List refactoring recommendations for Dev agent to implement]
         - **File**: [filename]
-          - **Change**: [what was changed]
+          - **Recommendation**: [what should be changed]
           - **Why**: [reason for change]
-          - **How**: [how it improves the code]
+          - **How**: [how it would improve the code]
 
         ### Compliance Check
         - Coding Standards: [✓/✗] [notes if any]
@@ -63,22 +156,22 @@ metadata:
         - All ACs Met: [✓/✗] [notes if any]
 
         ### Improvements Checklist
-        [Check off items you handled yourself, leave unchecked for dev to address]
+        [All items remain unchecked - these are recommendations for Dev agent to implement]
 
-        - [x] Refactored user service for better error handling (services/user.service.ts)
-        - [x] Added missing edge case tests (services/user.service.test.ts)
+        - [ ] Refactor user service for better error handling (services/user.service.ts)
+        - [ ] Add missing edge case tests (services/user.service.test.ts)
         - [ ] Consider extracting validation logic to separate validator class
         - [ ] Add integration test for error scenarios
         - [ ] Update API documentation for new error codes
 
         ### Security Review
-        [Any security concerns found and whether addressed]
+        [Any security concerns found - recommendations for Dev agent]
 
         ### Performance Considerations
-        [Any performance issues found and whether addressed]
+        [Any performance issues found - recommendations for Dev agent]
 
         ### Final Status
-        [✓ Approved - Ready for Done] / [✗ Changes Required - See unchecked items above]
+        [✓ Approved - Ready for Done] / [✗ Needs Fixes - Dev agent should address items above]
         ```
       lineNumber: 80
     - type: special-note
@@ -89,7 +182,9 @@ metadata:
       lineNumber: 137
 notes: |2
      - Note any completion notes from the developer
-     - Add missing tests if critical coverage is lacking
-  **CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.
+     - Identify and recommend missing tests if critical coverage is lacking
+  **CRITICAL**: You are authorized to update ONLY the "Status" and "QA Results" sections of the story file. DO NOT modify any other sections.
+  **Status Updates**: Set to "In Review" at start, then "Done" (if approved) or "Needs Fixes" (if issues found) at completion.
   - Story file is incomplete or missing critical sections
   - Critical architectural issues that require discussion
+  - Note: Concurrent access to story files is expected to be handled at the orchestrator level to prevent conflicts

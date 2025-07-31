@@ -1,15 +1,20 @@
 /**
  * Memory Transaction Manager for atomic memory operations
- * Supports both synchronous and asynchronous memory interfaces
+ * Supports both synchronous and asynchronous memory interfaces with story/epic context
  */
 
 const { MemoryStateError } = require('../errors/task-errors');
+const { persistObservation, persistDecision } = require('./agent-memory-persistence');
 
 class MemoryTransaction {
-  constructor(memory) {
+  constructor(memory, agentName = null, context = {}) {
     this.memory = memory;
+    this.agentName = agentName;
+    this.context = context; // Story/epic context
     this.originalState = null;
     this.updates = [];
+    this.observations = []; // Track observations during transaction
+    this.decisions = []; // Track decisions during transaction
     this.isActive = false;
     this.isAsync = this._detectAsyncMemory();
   }
@@ -58,6 +63,48 @@ class MemoryTransaction {
   }
 
   /**
+   * Add an observation to be persisted with the transaction
+   * @param {string} observation - Observation text
+   * @param {Object} options - Additional options
+   */
+  addObservation(observation, options = {}) {
+    if (!this.isActive) {
+      throw new MemoryStateError('No active transaction', 'ADD_OBSERVATION');
+    }
+    
+    this.observations.push({
+      observation,
+      actionType: options.actionType || 'transaction-update',
+      isSignificant: options.isSignificant !== false,
+      metadata: {
+        ...options.metadata,
+        transactionId: Date.now()
+      }
+    });
+  }
+
+  /**
+   * Add a decision to be persisted with the transaction
+   * @param {string} decision - Decision made
+   * @param {string} reasoning - Reasoning behind decision
+   * @param {Object} options - Additional options
+   */
+  addDecision(decision, reasoning, options = {}) {
+    if (!this.isActive) {
+      throw new MemoryStateError('No active transaction', 'ADD_DECISION');
+    }
+    
+    this.decisions.push({
+      decision,
+      reasoning,
+      metadata: {
+        ...options.metadata,
+        transactionId: Date.now()
+      }
+    });
+  }
+
+  /**
    * Commit all updates to memory
    */
   async commit() {
@@ -75,9 +122,36 @@ class MemoryTransaction {
         }
       }
       
+      // Persist observations and decisions if agent name is provided
+      if (this.agentName) {
+        // Persist observations
+        for (const obs of this.observations) {
+          await persistObservation(this.agentName, obs.observation, {
+            actionType: obs.actionType,
+            isSignificant: obs.isSignificant,
+            metadata: {
+              ...obs.metadata,
+              context: this.context
+            }
+          });
+        }
+        
+        // Persist decisions
+        for (const dec of this.decisions) {
+          await persistDecision(this.agentName, dec.decision, dec.reasoning, {
+            metadata: {
+              ...dec.metadata,
+              context: this.context
+            }
+          });
+        }
+      }
+      
       // Clear transaction state
       this.originalState = null;
       this.updates = [];
+      this.observations = [];
+      this.decisions = [];
       this.isActive = false;
     } catch (error) {
       // If any update fails, rollback
@@ -132,6 +206,8 @@ class MemoryTransaction {
       // Clear transaction state
       this.originalState = null;
       this.updates = [];
+      this.observations = [];
+      this.decisions = [];
       this.isActive = false;
     }
   }

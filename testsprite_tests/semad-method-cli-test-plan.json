@@ -1,0 +1,148 @@
+[
+  {
+    "id": "TC001",
+    "title": "Validate Structured Task System Schema Compliance",
+    "description": "Test that all structured tasks in bmad-core/structured-tasks/ comply with the YAML schema format.",
+    "category": "Structured Task System",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:structured-tasks"],
+    "expected_files": ["bmad-core/structured-tasks/*.yaml"],
+    "validation_criteria": "All YAML files pass schema validation with no errors"
+  },
+  {
+    "id": "TC002",
+    "title": "Validate Structured Checklist System Schema Compliance",
+    "description": "Test that all structured checklists in bmad-core/structured-checklists/ comply with the YAML schema format.",
+    "category": "Structured Task System",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:checklists"],
+    "expected_files": ["bmad-core/structured-checklists/*.yaml"],
+    "validation_criteria": "All checklist YAML files pass schema validation"
+  },
+  {
+    "id": "TC003",
+    "title": "Working Memory Initialization and File Creation",
+    "description": "Verify that init:memory creates proper working memory files in .ai/ with the correct structure.",
+    "category": "Working Memory System",
+    "test_type": "CLI_execution",
+    "commands": ["npm run init:memory"],
+    "expected_files": [".ai/working_memory_*.json"],
+    "validation_criteria": "Working memory files created with proper JSON structure"
+  },
+  {
+    "id": "TC005",
+    "title": "Search Tool Generation from PRD Content",
+    "description": "Verify that search tools are generated from PRD content using keyword extraction and domain-to-tool mapping.",
+    "category": "Search Tool Generation",
+    "test_type": "CLI_execution",
+    "commands": ["npm run generate:search-tools"],
+    "expected_files": ["search-tools.yaml", "bmad-core/data/tool-mappings.yaml"],
+    "validation_criteria": "Search tools successfully generated with proper structure"
+  },
+  {
+    "id": "TC006",
+    "title": "Search Tools Validation Framework",
+    "description": "Verify that the validate:search-tools command properly validates generated search tool configurations.",
+    "category": "Search Tool Generation",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:search-tools"],
+    "expected_files": ["search-tools.yaml"],
+    "validation_criteria": "Search tools pass validation with proper structure and mappings"
+  },
+  {
+    "id": "TC007",
+    "title": "Story Contract Validation System",
+    "description": "Verify that story contracts are properly validated using JSON Schema.",
+    "category": "StoryContract System",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:contracts"],
+    "expected_files": ["bmad-core/schemas/story-contract-schema.json"],
+    "validation_criteria": "Story contracts pass validation with required structured fields"
+  },
+  {
+    "id": "TC008",
+    "title": "Automatic Story Validation Before Creation",
+    "description": "Verify that stories are automatically validated before creation.",
+    "category": "Automated Validation Framework",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:story"],
+    "validation_criteria": "Stories automatically validated with proper schema compliance"
+  },
+  {
+    "id": "TC012",
+    "title": "Agent Dependency Resolution and Team Building",
+    "description": "Verify that all agent dependencies are resolved and teams are built successfully.",
+    "category": "Agent Role Clarification",
+    "test_type": "CLI_validation",
+    "commands": ["npm run build:agents", "npm run build:teams"],
+    "expected_files": ["bmad-core/agents/*.md", "bmad-core/agent-teams/*.yaml"],
+    "validation_criteria": "All agent dependencies resolved and teams built successfully"
+  },
+  {
+    "id": "TC015",
+    "title": "Comprehensive Schema Validation Suite",
+    "description": "Validate all YAML/JSON artifacts across the framework using validate:schemas and validate:all.",
+    "category": "Automated Validation Framework",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:schemas", "npm run validate:all"],
+    "expected_files": ["bmad-core/schemas/*.json"],
+    "validation_criteria": "All schemas validate successfully across entire framework"
+  },
+  {
+    "id": "TC016",
+    "title": "User Interaction Elicitation Across Workflows",
+    "description": "Ensure that all actions requiring user input are marked with elicit:true and that the orchestrator pauses for input.",
+    "category": "Workflow Interaction",
+    "test_type": "CLI_execution",
+    "commands": ["npm run check:elicitation"],
+    "validation_criteria": "All elicit-required steps prompt the user and wait for input"
+  },
+  {
+    "id": "TC017",
+    "title": "Exclusive Use of Structured Tasks",
+    "description": "Verify that the deprecated bmad-core/tasks directory is not referenced and that only bmad-core/structured-tasks are used.",
+    "category": "Project Structure",
+    "test_type": "CLI_validation",
+    "commands": ["npm run scan:tasks"],
+    "expected_files": ["bmad-core/tasks/"],
+    "validation_criteria": "No files loaded from bmad-core/tasks; only structured-tasks are referenced"
+  },
+  {
+    "id": "TC018",
+    "title": "Core-Config Path Correction",
+    "description": "Verify that tasks and validation scripts load core-config.yaml from bmad-core/core-config.yaml.",
+    "category": "Configuration Management",
+    "test_type": "CLI_validation",
+    "commands": ["npm run validate:config"],
+    "expected_files": ["bmad-core/core-config.yaml"],
+    "validation_criteria": "All references point to the correct core-config.yaml path"
+  },
+  {
+    "id": "TC022",
+    "title": "YAML Story Template Usage",
+    "description": "Verify that story creation and validation use the YAML story template (story-tmpl.yaml) instead of the old markdown template.",
+    "category": "Story Template",
+    "test_type": "CLI_validation",
+    "commands": ["npm run generate:story"],
+    "expected_files": ["bmad-core/templates/story-tmpl.yaml"],
+    "validation_criteria": "All references to story templates use the YAML file"
+  },
+  {
+    "id": "TC024",
+    "title": "Orchestrator File Path Resolution",
+    "description": "Verify that the orchestrator reads file locations from core-config.yaml instead of performing broad repository searches.",
+    "category": "Configuration Management",
+    "test_type": "CLI_execution",
+    "commands": ["npm run orchestrate:path-resolve"],
+    "validation_criteria": "Files are opened directly from configured paths without search"
+  },
+  {
+    "id": "TC026",
+    "title": "Memory Persistence Across Agents",
+    "description": "Verify that SM, Dev and QA agents persist short-term memory and query long-term memory across invocations.",
+    "category": "Working Memory System",
+    "test_type": "CLI_execution",
+    "commands": ["npm run test:memory-persistence"],
+    "validation_criteria": "Agents recall previous context and do not re-ask for known information"
+  }
+]

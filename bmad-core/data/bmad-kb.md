@@ -379,7 +379,7 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 #### 4. Reusable Resources
 
 - **Templates** (`bmad-core/templates/`): Markdown templates for PRDs, architecture specs, user stories
-- **Tasks** (`bmad-core/tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
+- **Tasks** (`bmad-core/structured-tasks/`): Instructions for specific repeatable actions like "shard-doc" or "create-next-story"
 - **Checklists** (`bmad-core/checklists/`): Quality assurance checklists for validation and review
 - **Data** (`bmad-core/data/`): Core knowledge base and technical preferences
 
@@ -404,8 +404,8 @@ The BMad-Method is built around a modular architecture centered on the `bmad-cor
 BMad employs a sophisticated template system with three key components:
 
 1. **Template Format** (`utils/bmad-doc-template.md`): Defines markup language for variable substitution and AI processing directives from yaml templates
-2. **Document Creation** (`tasks/create-doc.md`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
-3. **Advanced Elicitation** (`tasks/advanced-elicitation.md`): Provides interactive refinement through structured brainstorming
+2. **Document Creation** (`structured-tasks/create-doc.yaml`): Orchestrates template selection and user interaction to transform yaml spec to final markdown output
+3. **Advanced Elicitation** (`structured-tasks/advanced-elicitation.yaml`): Provides interactive refinement through structured brainstorming
 
 ### Technical Preferences Integration
 

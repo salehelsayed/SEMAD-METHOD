@@ -69,10 +69,9 @@ workflow:
       creates: sharded_docs
       requires: all_artifacts_in_project
       notes: |
-        Shard documents for IDE development:
-        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
-        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
+        - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
       action: create_story

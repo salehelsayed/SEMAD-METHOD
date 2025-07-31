@@ -1,0 +1,149 @@
+id: handle-user-interaction
+name: Handle User Interaction with Context Persistence
+category: interaction
+description: Manages user interactions with confirmation prompts and context persistence to minimize hallucination
+priority: high
+tags:
+  - user-interaction
+  - memory
+  - context
+  - confirmation
+  - anti-hallucination
+elicit: true
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the requesting agent
+  - name: question
+    type: string
+    description: Question to ask the user
+  - name: questionType
+    type: string
+    description: Type of question (open-ended, yes-no, multiple-choice, requirement)
+    optional: true
+    default: open-ended
+  - name: category
+    type: string
+    description: Category of the question (requirement, constraint, preference, clarification)
+    optional: true
+    default: general
+  - name: importance
+    type: string
+    description: Importance level (low, medium, high, critical)
+    optional: true
+    default: medium
+  - name: context
+    type: object
+    description: Current workflow context
+    optional: true
+  - name: requireConfirmation
+    type: boolean
+    description: Whether to require explicit confirmation of the response
+    optional: true
+    default: true
+  - name: maxConfirmationAttempts
+    type: number
+    description: Maximum number of confirmation attempts
+    optional: true
+    default: 3
+outputs:
+  - name: userResponse
+    type: object
+    description: User response with confirmation status
+  - name: interactionId
+    type: string
+    description: Unique identifier for this interaction
+  - name: contextUpdated
+    type: boolean
+    description: Whether the shared context was successfully updated
+dependencies:
+  - shared-context-manager.js
+executionSteps:
+  - Initialize SharedContextManager
+  - Record the question and context
+  - Present question to user with proper formatting
+  - Capture user response verbatim
+  - Process and analyze the response
+  - If requireConfirmation is true, present confirmation prompt
+  - Handle confirmation loop (up to maxConfirmationAttempts)
+  - Store confirmed response in shared context
+  - Update agent working memory with interaction summary
+  - Return structured response object
+elicitationFlow:
+  - step: present_question
+    prompt: |
+      **{agentName} Agent Question ({category})**
+      
+      Context: {context.currentPhase} - {context.workflowStep}
+      Priority: {importance}
+      
+      {question}
+      
+      Please provide your response:
+  - step: confirmation_prompt
+    condition: requireConfirmation == true
+    prompt: |
+      **Confirmation Required**
+      
+      You said: "{userResponse}"
+      
+      Is this correct and complete? Please confirm:
+      - Type "YES" to confirm this response
+      - Type "NO" to provide a different response
+      - Type "CLARIFY" to add more details
+      
+      Your confirmation:
+  - step: clarification_prompt
+    condition: confirmationResponse == "CLARIFY"
+    prompt: |
+      **Additional Clarification**
+      
+      Your original response: "{userResponse}"
+      
+      Please provide additional details or clarification:
+  - step: retry_prompt
+    condition: confirmationResponse == "NO"
+    prompt: |
+      Please provide your corrected response to the original question:
+      
+      {question}
+      
+      Your response:
+validationCriteria:
+  - User response is captured verbatim
+  - Confirmation process completed if required
+  - Interaction is stored in shared context
+  - Agent working memory is updated
+  - No information is lost or fabricated
+errorHandling:
+  - If SharedContextManager fails to initialize, use fallback memory storage
+  - If confirmation fails after max attempts, proceed with last response and mark as unconfirmed
+  - If context update fails, log error but continue with interaction
+  - Always preserve the original user response regardless of processing errors
+exampleUsage: |
+  const result = await executeTask('handle-user-interaction', {
+    agentName: 'po',
+    question: 'What are the key user personas for this feature?',
+    questionType: 'open-ended',
+    category: 'requirement',
+    importance: 'high',
+    context: {
+      currentPhase: 'requirements-gathering',
+      workflowStep: 'persona-definition',
+      storyId: 'STORY-123',
+      epicId: 'EPIC-1'
+    },
+    requireConfirmation: true
+  });
+  
+  // Returns:
+  // {
+  //   userResponse: {
+  //     original: "Primary personas are: Admin users, end customers, and support staff",
+  //     processed: { wordCount: 10, hasSpecialRequirements: false, ... },
+  //     confirmed: true,
+  //     confirmationAttempts: 1
+  //   },
+  //   interactionId: "po_1643723400000_a1b2",
+  //   contextUpdated: true
+  // }

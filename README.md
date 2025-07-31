@@ -60,6 +60,12 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **Impact**: Production-ready system with deterministic behavior
 - **Status**: 100% test pass rate achieved
 
+### 9. **Dev↔QA Iterative Flow Option** *(New)*
+- **What Changed**: Added choice between linear Dev→QA flow and iterative Dev↔QA loop
+- **Why**: Different projects need different quality assurance approaches
+- **Impact**: Teams can choose immediate iteration on QA findings or batch processing
+- **Usage**: `npm run orchestrate` or configure in `.bmad-workflow.yaml`
+
 ## 📊 Results
 
 These improvements have transformed BMad-Method into a production-ready system:
@@ -238,6 +244,7 @@ dynamicPlanAdaptation: true   # Enable automatic task decomposition
 - 📖 **[User Guide](bmad-core/user-guide.md)** - Complete walkthrough from project inception to completion
 - 🏗️ **[Core Architecture](docs/core-architecture.md)** - Technical deep dive and system design
 - 🚀 **[Expansion Packs Guide](docs/expansion-packs.md)** - Extend BMad to any domain beyond software development
+- 🔄 **[Dev↔QA Flow Options](docs/dev-qa-flow-options.md)** - Choose between linear and iterative development flows
 
 ## Support
 

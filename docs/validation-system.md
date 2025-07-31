@@ -96,7 +96,7 @@ When validation fails, the system provides:
 
 Example error output:
 ```
-File: bmad-core/tasks/example.yaml
+File: bmad-core/structured-tasks/example.yaml
 Type: task
 Errors:
   • must have required property 'id'

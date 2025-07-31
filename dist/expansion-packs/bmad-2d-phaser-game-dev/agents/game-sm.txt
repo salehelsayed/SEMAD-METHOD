@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-2d-phaser-game-dev/personas/analyst.md`, `.bmad-2d-phaser-game-dev/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-2d-phaser-game-dev/personas/analyst.md`, `.bmad-2d-phaser-game-dev/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-2d-phaser-game-dev/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-2d-phaser-game-dev/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-2d-phaser-game-dev/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -78,8 +78,8 @@ commands:
   - '*exit" - Say goodbye as the Game Scrum Master, and then abandon inhabiting this persona'
 dependencies:
   tasks:
-    - create-game-story.md
-    - execute-checklist.md
+    - create-game-story.yaml
+    - execute-checklist.yaml
   templates:
     - game-story-tmpl.yaml
   checklists:
@@ -306,101 +306,238 @@ Execute `.bmad-2d-phaser-game-dev/checklists/game-story-dod-checklist.md` agains
 This task ensures game development stories are immediately actionable and enable efficient AI-driven development of game features.
 ==================== END: .bmad-2d-phaser-game-dev/tasks/create-game-story.md ====================
 
-==================== START: .bmad-2d-phaser-game-dev/tasks/execute-checklist.md ====================
-# Checklist Validation Task
+==================== START: .bmad-2d-phaser-game-dev/structured-tasks/execute-checklist.yaml ====================
+id: execute-checklist
+name: Execute Checklist
+purpose: Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: execute-checklist
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step0
+    name: Initialize Working Memory
+    description: Initialize working memory for checklist execution session
+    actions:
+      - description: Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+        elicit: true
+      - description: Verify checklist file exists at specified path
+        elicit: true
+      - description: Load checklist content and parse structure
+        elicit: false
+  - id: step1
+    name: Determine Execution Mode
+    description: Determine how to execute the checklist based on user preference
+    actions:
+      - description: Check if execution mode was provided in input
+        elicit: false
+      - description: 'If mode not specified, ask user for preference:'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: '**How would you like to work through this checklist?**'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'Select option (1 or 2):'
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: step2
+    name: Parse Checklist Structure
+    description: Analyze the checklist to identify sections and items
+    actions:
+      - description: Identify main sections in the checklist
+        elicit: false
+      - description: Extract checklist items (lines starting with '- [ ]')
+        elicit: false
+      - description: 'Parse any LLM instructions embedded in [[LLM: ]] blocks'
+        elicit: false
+      - description: Create structured representation of checklist hierarchy
+        elicit: false
+      - description: Record total items count and section breakdown in memory
+        elicit: false
+  - id: step3
+    name: Execute Checklist Items
+    description: Work through each checklist item based on selected mode
+    actions:
+      - description: 'For each section in the checklist:'
+        elicit: false
+      - description: Read and understand the section context and any LLM instructions
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Evaluate each checklist item in the section
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Mark items as checked [x] or unchecked [ ] based on evaluation
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Document findings, issues, or observations for each item
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 'If interactive mode: Present section findings and await confirmation'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Update progress tracking in working memory
+        elicit: false
+        metadata:
+          originalIndent: 2
+  - id: step4
+    name: Generate Summary Report
+    description: Create comprehensive report of checklist execution results
+    actions:
+      - description: Calculate overall completion percentage
+        elicit: false
+      - description: Summarize findings by category/section
+        elicit: false
+      - description: Identify critical issues or blockers
+        elicit: false
+      - description: Generate recommendations based on unchecked items
+        elicit: false
+      - description: If checklist includes specific report format (e.g., validation tables), use that format
+        elicit: false
+      - description: Store execution results in working memory for future reference
+        elicit: false
+  - id: step5
+    name: Present Results and Next Steps
+    description: Present the final results and offer follow-up actions
+    actions:
+      - description: Display the summary report to the user
+        elicit: false
+      - description: Highlight any critical issues or blockers found
+        elicit: false
+      - description: Show completion statistics (X of Y items passed)
+        elicit: false
+      - description: 'If unchecked items exist, offer to:'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 1. Get detailed analysis of failed items
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 2. Generate action plan to address issues
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: 3. Re-run specific sections
+        elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Would you like to perform any follow-up actions?
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed execute-checklist task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: execute-checklist
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  checklistPath:
+    description: Path to the checklist file to execute
+    type: string
+    required: true
+  mode:
+    description: Execution mode - 'interactive' or 'comprehensive'
+    type: string
+    required: false
+    enum:
+      - interactive
+      - comprehensive
+  context:
+    description: Additional context for checklist execution (e.g., file paths, project info)
+    type: object
+    required: false
+outputs:
+  results:
+    description: Detailed results of checklist execution
+    type: object
+    properties:
+      totalItems:
+        type: number
+      checkedItems:
+        type: number
+      completionPercentage:
+        type: number
+      sectionResults:
+        type: array
+        items:
+          type: object
+          properties:
+            section: string
+            passed: number
+            failed: number
+            findings: array
+      criticalIssues:
+        type: array
+      recommendations:
+        type: array
+  completionStatus:
+    description: Overall checklist completion status
+    type: string
+    enum:
+      - PASS
+      - PARTIAL
+      - FAIL
+metadata:
+  supportsAdaptation: true
+  requiresWorkingMemory: true
+  executionMode: SEQUENTIAL
+  notes: |
+    This is a generic checklist executor that can work with any checklist format.
+    It supports the BMad checklist format with:
+    - Markdown structure with sections and subsections
+    - Checklist items as "- [ ]" lines
+    - LLM instructions in [[LLM: ]] blocks
+    - Embedded report formats and validation tables
 
-This task provides instructions for validating documentation against checklists. The agent MUST follow these instructions to ensure thorough and systematic validation of documents.
-
-## Available Checklists
-
-If the user asks or does not specify a specific checklist, list the checklists available to the agent persona. If the task is being run not with a specific agent, tell the user to check the .bmad-2d-phaser-game-dev/checklists folder to select the appropriate one to run.
-
-## Instructions
-
-1. **Initial Assessment**
-
-   - If user or the task being run provides a checklist name:
-     - Try fuzzy matching (e.g. "architecture checklist" -> "architect-checklist")
-     - If multiple matches found, ask user to clarify
-     - Load the appropriate checklist from .bmad-2d-phaser-game-dev/checklists/
-   - If no checklist specified:
-     - Ask the user which checklist they want to use
-     - Present the available options from the files in the checklists folder
-   - Confirm if they want to work through the checklist:
-     - Section by section (interactive mode - very time consuming)
-     - All at once (YOLO mode - recommended for checklists, there will be a summary of sections at the end to discuss)
-
-2. **Document and Artifact Gathering**
-
-   - Each checklist will specify its required documents/artifacts at the beginning
-   - Follow the checklist's specific instructions for what to gather, generally a file can be resolved in the docs folder, if not or unsure, halt and ask or confirm with the user.
-
-3. **Checklist Processing**
-
-   If in interactive mode:
-
-   - Work through each section of the checklist one at a time
-   - For each section:
-     - Review all items in the section following instructions for that section embedded in the checklist
-     - Check each item against the relevant documentation or artifacts as appropriate
-     - Present summary of findings for that section, highlighting warnings, errors and non applicable items (rationale for non-applicability).
-     - Get user confirmation before proceeding to next section or if any thing major do we need to halt and take corrective action
-
-   If in YOLO mode:
-
-   - Process all sections at once
-   - Create a comprehensive report of all findings
-   - Present the complete analysis to the user
-
-4. **Validation Approach**
-
-   For each checklist item:
-
-   - Read and understand the requirement
-   - Look for evidence in the documentation that satisfies the requirement
-   - Consider both explicit mentions and implicit coverage
-   - Aside from this, follow all checklist llm instructions
-   - Mark items as:
-     - ✅ PASS: Requirement clearly met
-     - ❌ FAIL: Requirement not met or insufficient coverage
-     - ⚠️ PARTIAL: Some aspects covered but needs improvement
-     - N/A: Not applicable to this case
-
-5. **Section Analysis**
-
-   For each section:
-
-   - think step by step to calculate pass rate
-   - Identify common themes in failed items
-   - Provide specific recommendations for improvement
-   - In interactive mode, discuss findings with user
-   - Document any user decisions or explanations
-
-6. **Final Report**
-
-   Prepare a summary that includes:
-
-   - Overall checklist completion status
-   - Pass rates by section
-   - List of failed items with context
-   - Specific recommendations for improvement
-   - Any sections or items marked as N/A with justification
-
-## Checklist Execution Methodology
-
-Each checklist now contains embedded LLM prompts and instructions that will:
-
-1. **Guide thorough thinking** - Prompts ensure deep analysis of each section
-2. **Request specific artifacts** - Clear instructions on what documents/access is needed
-3. **Provide contextual guidance** - Section-specific prompts for better validation
-4. **Generate comprehensive reports** - Final summary with detailed findings
-
-The LLM will:
-
-- Execute the complete checklist validation
-- Present a final report with pass/fail rates and key findings
-- Offer to provide detailed analysis of any section, especially those with warnings or failures
-==================== END: .bmad-2d-phaser-game-dev/tasks/execute-checklist.md ====================
+    The task adapts to the specific checklist structure and follows any
+    embedded instructions for execution and reporting.
+==================== END: .bmad-2d-phaser-game-dev/structured-tasks/execute-checklist.yaml ====================
 
 ==================== START: .bmad-2d-phaser-game-dev/templates/game-story-tmpl.yaml ====================
 template:

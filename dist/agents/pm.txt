@@ -14,8 +14,8 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/tasks/create-story.md`)
-- If a section is specified (e.g., `{root}/tasks/create-story.md#section-name`), navigate to that section within the file
+- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
 
@@ -30,7 +30,7 @@ dependencies:
 These references map directly to bundle sections:
 
 - `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/tasks/create-story.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
@@ -73,8 +73,8 @@ persona:
     - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks, record them in working memory and execute them sequentially.
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - create-prd: run task create-doc.md with template prd-tmpl.yaml
-  - create-brownfield-prd: run task create-doc.md with template brownfield-prd-tmpl.yaml
+  - create-prd: run task create-doc.yaml with template prd-tmpl.yaml
+  - create-brownfield-prd: run task create-doc.yaml with template brownfield-prd-tmpl.yaml
   - create-epic: Create epic for brownfield projects (task brownfield-create-epic)
   - create-story: Create user story from requirements (task brownfield-create-story)
   - doc-out: Output full document to current destination file
@@ -105,14 +105,21 @@ dependencies:
 ==================== END: .bmad-core/agents/pm.md ====================
 
 ==================== START: .bmad-core/structured-tasks/create-doc.yaml ====================
-# Create Document from Template (YAML Driven)
+# Create Document Task
 
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
-- **owner**: Note which agent role initially creates/populates the section
-- Include a note in the generated document indicating the responsible agent
+## Description
 
+Create a structured document from a selected template
 
-## ⚠️ CRITICAL EXECUTION NOTICE ⚠️
+## Required Inputs
+
+- **undefined** (undefined)
+- **undefined** (undefined)
+- **undefined** (undefined)
+
+## Outputs
+
+- **undefined** (undefined)
 ==================== END: .bmad-core/structured-tasks/create-doc.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/correct-course.yaml ====================
@@ -129,11 +136,18 @@ dependencies:
 
 ## Task Execution
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory Context
 
 Retrieve relevant context from previous sessions
 
-- Call retrieve-context task to get relevant past decisions and changes
+- **[USER INPUT REQUIRED]** Call retrieve-context task to get relevant past decisions and changes
 - Update working memory with current change context
 
 ### 1. Initial Setup & Mode Selection
@@ -182,17 +196,23 @@ Retrieve relevant context from previous sessions
 ### 5. Finalize & Determine Next Steps
 
 - Obtain explicit user approval for the "Sprint Change Proposal," including all the specific edits documented within it.
-- Provide the finalized "Sprint Change Proposal" document to the user.
+- **[USER INPUT REQUIRED]** Provide the finalized "Sprint Change Proposal" document to the user.
 - Update working memory with final change decisions and outcomes
 - **Based on the nature of the approved changes:**
 - **[USER INPUT REQUIRED]** **If the approved edits sufficiently address the change and can be implemented directly or organized by a PO/SM:** State that the "Correct Course Task" is complete regarding analysis and change proposal, and the user can now proceed with implementing or logging these changes (e.g., updating actual project documents, backlog items). Suggest handoff to a PO/SM agent for backlog organization if appropriate.
-- **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
+- **[USER INPUT REQUIRED]** **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
 - **Primary:** A "Sprint Change Proposal" document (in markdown format). This document will contain:
 - A summary of the change-checklist analysis (issue, impact, rationale for the chosen path).
 - Specific, clearly drafted proposed edits for all affected project artifacts.
 - **Implicit:** An annotated change-checklist (or the record of its completion) reflecting the discussions, findings, and decisions made during the process.
 
 - **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/correct-course.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/create-deep-research-prompt.yaml ====================
@@ -213,11 +233,18 @@ CRITICAL: First, help the user select the most appropriate research focus based 
 
 ## Important Notes
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
-- Initialize working memory for research prompt creation
+- **[USER INPUT REQUIRED]** Initialize working memory for research prompt creation
 - Retrieve previous research patterns and methodologies
 
 ### 1. Research Focus Options
@@ -252,7 +279,7 @@ Present these numbered options to the user:
 - Assess technology trends and possibilities
 - Evaluate technical approaches and architectures
 - Identify emerging technologies and disruptions
-- Analyze build vs. buy vs. partner options
+- **[USER INPUT REQUIRED]** Analyze build vs. buy vs. partner options
 - Map industry value chains and dynamics
 - Identify key players and relationships
 - Analyze regulatory and compliance factors
@@ -278,7 +305,7 @@ Present these numbered options to the user:
 
 - Extract key product concepts and goals
 - Identify target users and use cases
-- Note technical constraints and preferences
+- **[USER INPUT REQUIRED]** Note technical constraints and preferences
 - Highlight uncertainties and assumptions
 - Synthesize main ideas and themes
 - Identify areas needing validation
@@ -288,7 +315,7 @@ Present these numbered options to the user:
 - Deepen specific market insights
 - Validate initial findings
 - Explore adjacent possibilities
-- Gather essential context through questions
+- **[USER INPUT REQUIRED]** Gather essential context through questions
 - Define the problem space
 - Clarify research objectives
 - Establish success criteria
@@ -316,10 +343,10 @@ CRITICAL: collaborate with the user to develop specific, actionable research que
 - Key decisions the research will inform
 - Success criteria for the research
 - Constraints and boundaries
-- Central questions that must be answered
-- Priority ranking of questions
-- Dependencies between questions
-- Additional context-building questions
+- **[USER INPUT REQUIRED]** Central questions that must be answered
+- **[USER INPUT REQUIRED]** Priority ranking of questions
+- **[USER INPUT REQUIRED]** Dependencies between questions
+- **[USER INPUT REQUIRED]** Additional context-building questions
 - Nice-to-have insights
 - Future-looking considerations
 - Secondary research sources
@@ -437,15 +464,21 @@ CRITICAL: collaborate with the user to develop specific, actionable research que
 **Integration Points:**
 
 - How findings will feed into next phases
-- Which team members should review results
+- **[USER INPUT REQUIRED]** Which team members should review results
 - How to validate findings
 - When to revisit or expand research
 - **[USER INPUT REQUIRED]** The quality of the research prompt directly impacts the quality of insights gathered
-- Be specific rather than general in research questions
+- **[USER INPUT REQUIRED]** Be specific rather than general in research questions
 - Consider both current state and future implications
 - Balance comprehensiveness with focus
 - Document assumptions and limitations clearly
 - Plan for iterative refinement based on initial findings
+
+### 9. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/create-deep-research-prompt.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/brownfield-create-epic.yaml ====================
@@ -457,7 +490,14 @@ Create a single epic for smaller brownfield enhancements that don't require the 
 
 ## Important Notes
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory Context
 
 Set up working memory and retrieve project context
 
@@ -566,6 +606,12 @@ The epic creation is successful when:
 - When in doubt about scope or complexity, escalate to full brownfield planning
 
 - Critical compatibility requirements: {{key requirements}}
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/brownfield-create-epic.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/brownfield-create-story.yaml ====================
@@ -577,7 +623,14 @@ Create a single user story for very small brownfield enhancements that can be co
 
 ## Important Notes
 
-### 1. Initialize Memory and Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Memory and Context
 
 Set up working memory and retrieve relevant context
 
@@ -673,6 +726,12 @@ The story creation is successful when:
 - Always prioritize existing system integrity
 - When in doubt about integration complexity, use brownfield-create-epic instead
 - Stories should take no more than 4 hours of focused development work
+
+### 7. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/brownfield-create-story.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/execute-checklist.yaml ====================
@@ -684,26 +743,33 @@ Generic task for executing any checklist file systematically. Supports both inte
 
 ## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
 
-### 1. Initialize Working Memory
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Initialize Working Memory
 
 Initialize working memory for checklist execution session
 
-- Execute task `update-working-memory` with agentName and taskId='execute-checklist'
-- Verify checklist file exists at specified path
+- **[USER INPUT REQUIRED]** Execute task `update-working-memory` with agentName and taskId='execute-checklist'
+- **[USER INPUT REQUIRED]** Verify checklist file exists at specified path
 - Load checklist content and parse structure
 
-### 2. Determine Execution Mode
+### 3. Determine Execution Mode
 
 Determine how to execute the checklist based on user preference
 
 - Check if execution mode was provided in input
-- If mode not specified, ask user for preference:
-- **How would you like to work through this checklist?**
-- 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
+- **[USER INPUT REQUIRED]** If mode not specified, ask user for preference:
+- **[USER INPUT REQUIRED]** **How would you like to work through this checklist?**
+- **[USER INPUT REQUIRED]** 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
 - 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
 - **[USER INPUT REQUIRED]** Select option (1 or 2):
 
-### 3. Parse Checklist Structure
+### 4. Parse Checklist Structure
 
 Analyze the checklist to identify sections and items
 
@@ -713,7 +779,7 @@ Analyze the checklist to identify sections and items
 - Create structured representation of checklist hierarchy
 - Record total items count and section breakdown in memory
 
-### 4. Execute Checklist Items
+### 5. Execute Checklist Items
 
 Work through each checklist item based on selected mode
 
@@ -725,7 +791,7 @@ Work through each checklist item based on selected mode
 - **[USER INPUT REQUIRED]** If interactive mode: Present section findings and await confirmation
 - Update progress tracking in working memory
 
-### 5. Generate Summary Report
+### 6. Generate Summary Report
 
 Create comprehensive report of checklist execution results
 
@@ -736,7 +802,7 @@ Create comprehensive report of checklist execution results
 - If checklist includes specific report format (e.g., validation tables), use that format
 - Store execution results in working memory for future reference
 
-### 6. Present Results and Next Steps
+### 7. Present Results and Next Steps
 
 Present the final results and offer follow-up actions
 
@@ -748,6 +814,12 @@ Present the final results and offer follow-up actions
 - 2. Generate action plan to address issues
 - 3. Re-run specific sections
 - **[USER INPUT REQUIRED]** Would you like to perform any follow-up actions?
+
+### 8. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/execute-checklist.yaml ====================
 
 ==================== START: .bmad-core/structured-tasks/shard-doc.yaml ====================
@@ -759,7 +831,7 @@ Present the final results and offer follow-up actions
 - Create a folder structure to organize the sharded documents
 - Maintain all content integrity including code blocks, diagrams, and markdown formatting
 
-[[LLM: First, check if markdownExploder is set to true in .bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
+[[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
 **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
 CRITICAL AEGNT SHARDING RULES:
 CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]
@@ -767,11 +839,26 @@ CRITICAL: Use proper parsing that understands markdown context. A ## inside a co
 
 ## Important Notes
 
-### 1. Initialize Memory Context
+### 1. Load Memory and Initialize Context
+
+Load agent working memory and relevant long-term context using unified memory system
+
+- Load agent working memory and relevant long-term context
+- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
+
+### 2. Check Core Configuration
+
+Check if automatic sharding is enabled in core-config.yaml
+
+- Load bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+- If prdSharded or architectureSharded is true, proceed with automatic sharding
+- If markdownExploder is true, attempt to use md-tree explode command first
+
+### 3. Initialize Memory Context
 
 Setup working memory and retrieve relevant context
 
-- Initialize working memory for sharding task
+- **[USER INPUT REQUIRED]** Initialize working memory for sharding task
 - Record document being sharded in memory for future reference
 
 ### 3. Create Individual Files
@@ -836,7 +923,7 @@ After sharding:
 3. Ensure heading levels were properly adjusted
 4. Confirm all files were created successfully
 
-### 6. Update Memory with Results
+### 8. Update Memory with Results
 
 Record sharding results in memory
 
@@ -861,40 +948,90 @@ Document sharded successfully:
 - Preserve ALL formatting, including whitespace where significant
 - Handle edge cases like sections with code blocks containing ## symbols
 - Ensure the sharding is reversible (could reconstruct the original from shards)
+
+### 10. Save Task Results and Clean Memory
+
+Save task completion and findings to memory with hygiene cleanup
+
+- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
 ==================== END: .bmad-core/structured-tasks/shard-doc.yaml ====================
 
-==================== START: .bmad-core/tasks/update-working-memory.yaml ====================
-id: update-working-memory
-name: Update Working Memory Task
-description: Task definition for updating agent working memory
-type: task
-structuredTaskReference: ../structured-tasks/update-working-memory.yaml
-category: memory
-priority: high
-requiredInputs:
-  - agentName
-  - taskId (optional)
-  - currentStep (optional)
-  - plan (optional)
-  - context (optional)
-outputs:
-  - memory: Updated memory state
-==================== END: .bmad-core/tasks/update-working-memory.yaml ====================
+==================== START: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+# Update Working Memory
 
-==================== START: .bmad-core/tasks/retrieve-context.yaml ====================
-id: retrieve-context
-name: Retrieve Context Task
-description: Task definition for retrieving context from memory
-type: task
-structuredTaskReference: ../structured-tasks/retrieve-context.yaml
-category: memory
-priority: high
-requiredInputs:
-  - query
-  - topN (optional)
-outputs:
-  - memories
-==================== END: .bmad-core/tasks/retrieve-context.yaml ====================
+## Description
+
+Updates the agent's working memory with current task state
+
+## Execution Steps
+
+1. Update the working memory JSON file for the agent
+2. Merge provided updates with existing memory
+3. Preserve existing data not being updated
+4. Return the updated memory state
+
+## Required Inputs
+
+- **agentName** (string): Name of the agent
+- **taskId** (string) - optional: Current task identifier
+- **currentStep** (string) - optional: Current step in the plan
+- **plan** (array) - optional: Task execution plan
+- **context** (object) - optional: Additional context to store
+
+## Outputs
+
+- **memory** (object): Updated memory state
+
+## Example Usage
+
+```
+await updateWorkingMemory('dev', {
+  taskId: 'TASK-123',
+  currentStep: 'implementing-feature',
+  plan: ['analyze', 'implement', 'test'],
+  context: { feature: 'user-auth' }
+});
+
+```
+==================== END: .bmad-core/structured-tasks/update-working-memory.yaml ====================
+
+==================== START: .bmad-core/structured-tasks/retrieve-context.yaml ====================
+# Retrieve Context from Memory
+
+## Description
+
+Retrieves relevant context from long-term memory using similarity search
+
+## Execution Steps
+
+1. Connect to Qdrant vector database
+2. Generate embedding for the query
+3. Perform similarity search
+4. Return top N matching memories with scores
+
+## Required Inputs
+
+- **query** (string): Query string to search for similar memories
+- **topN** (number) - optional: Number of top results to retrieve
+
+## Outputs
+
+- **memories** (array): Array of retrieved memory snippets with scores
+
+## Example Usage
+
+```
+const memories = await retrieveMemory(
+  'user authentication implementation',
+  5
+);
+// Returns: [
+//   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
+//   ...
+// ]
+
+```
+==================== END: .bmad-core/structured-tasks/retrieve-context.yaml ====================
 
 ==================== START: .bmad-core/templates/prd-tmpl.yaml ====================
 template:

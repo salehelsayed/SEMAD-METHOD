@@ -68,7 +68,6 @@ class TaskRunner {
       // Try multiple possible config locations
       const configPaths = [
         path.join(this.rootDir, 'bmad-core', 'core-config.yaml'),
-        path.join(this.rootDir, '.bmad-core', 'core-config.yaml'),
         path.join(this.rootDir, 'core-config.yaml')
       ];
       
@@ -666,7 +665,13 @@ class TaskRunner {
       for (const action of step.actions) {
         // Handle elicit flag - if true and no userInputHandler, log warning
         if (action.elicit === true && !context.userInputHandler) {
-          console.warn(`⚠️  Action requires user input but no handler provided: "${action.description}"`);
+          console.warn(`⚠️  Action requires user input but no handler provided:
+  Step: ${step.name} (ID: ${step.id})
+  Action: "${action.description}"
+  
+  To resolve this, either:
+  - Provide a userInputHandler in the context when calling runTask()
+  - Set allowMissingUserInput: true in the context to suppress this warning`);
           // In a real orchestrator, this would pause and wait for user input
           // For now, we'll continue but log the requirement
         }

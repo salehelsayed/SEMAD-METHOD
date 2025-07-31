@@ -160,17 +160,8 @@ function printSummary() {
 function validateAll() {
   console.log(chalk.bold('BMad Method - Comprehensive Validation\n'));
   
-  // Define validation targets
+  // Define validation targets (structured tasks only - legacy tasks deprecated)
   const validationTargets = [
-    {
-      name: 'Regular Tasks',
-      dirs: [
-        path.join(baseDir, 'bmad-core', 'tasks'),
-        path.join(baseDir, 'common', 'tasks')
-      ],
-      validator: validators.task,
-      type: 'task'
-    },
     {
       name: 'Structured Tasks',
       dirs: [
@@ -222,22 +213,18 @@ module.exports = {
 if (require.main === module) {
   const args = process.argv.slice(2);
   
-  if (args.includes('--tasks-only')) {
-    console.log(chalk.bold('BMad Method - Tasks Validation\n'));
+  if (args.includes('--tasks-only') || args.includes('--structured-tasks-only')) {
+    console.log(chalk.bold('BMad Method - Structured Tasks Validation\n'));
     
+    // Only validate structured tasks (legacy tasks deprecated)
     const taskDirs = [
-      { path: path.join(baseDir, 'bmad-core', 'tasks'), type: 'Regular Tasks' },
-      { path: path.join(baseDir, 'common', 'tasks'), type: 'Regular Tasks' },
       { path: path.join(baseDir, 'bmad-core', 'structured-tasks'), type: 'Structured Tasks' },
       { path: path.join(baseDir, 'common', 'structured-tasks'), type: 'Structured Tasks' }
     ];
     
-    taskDirs.forEach(({ path: dir, type }, index) => {
-      if (index === 0 || index === 2) {
-        console.log(chalk.blue.bold(`\nValidating ${type}:`));
-      }
-      const validator = type === 'Regular Tasks' ? validators.task : validators.structuredTask;
-      validateDirectory(dir, validator, type.toLowerCase());
+    console.log(chalk.blue.bold('\nValidating Structured Tasks:'));
+    taskDirs.forEach(({ path: dir, type }) => {
+      validateDirectory(dir, validators.structuredTask, 'structured-task');
     });
     
     printSummary();

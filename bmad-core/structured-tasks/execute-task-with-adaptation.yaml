@@ -1,0 +1,61 @@
+id: execute-task-with-adaptation
+name: Execute Task with Dynamic Plan Adaptation
+purpose: Execute a task file with automatic complexity analysis and sub-task creation
+notes: This task demonstrates how to use the task runner to execute tasks with dynamic plan adaptation
+steps:
+  - id: step0
+    name: Initialize working memory and Task Runner
+    description: Set up the task execution environment with working memory and task runner
+    actions:
+      - description: Import the TaskRunner from tools/task-runner.js
+        elicit: true
+      - description: Create a new TaskRunner instance with the project root directory
+        elicit: true
+      - description: Verify agent has working memory initialized
+        elicit: true
+  - id: step1
+    name: Load and Analyze Task
+    description: Execute task with automatic complexity analysis
+    actions:
+      - description: Use taskRunner.executeTask() with the agent name and task path
+        elicit: true
+      - description: The runner will automatically apply planAdaptation() to check complexity
+        elicit: false
+      - description: Log whether the task was split into sub-tasks
+        elicit: true
+  - id: step2
+    name: Process Sub-tasks (if created)
+    description: Handle dynamically created sub-tasks
+    actions:
+      - description: Iterate through each sub-task in the adapted plan
+        elicit: true
+      - description: Use taskRunner.executeSubTask() to start each sub-task
+        elicit: true
+      - description: Execute the sub-task steps
+        elicit: true
+      - description: Use taskRunner.completeSubTask() when done
+        elicit: true
+  - id: step3
+    name: Update Progress in working memory
+    description: Record execution progress and maintain context
+    actions:
+      - description: Record observations for each completed step
+        elicit: false
+      - description: Update the current step pointer
+        elicit: false
+      - description: Maintain context for future reference
+        elicit: false
+  - id: step4
+    name: Handle Dynamic Complexity
+    description: Manage unexpected complexity during execution
+    actions:
+      - description: If encountering unexpected complexity, use insertSubTask()
+        elicit: true
+      - description: Provide clear title and steps for the new sub-task
+        elicit: true
+      - description: Continue execution with the updated plan
+        elicit: false
+metadata:
+  executionMode: SEQUENTIAL
+  requiresWorkingMemory: true
+  supportsAdaptation: true

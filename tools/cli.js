@@ -215,4 +215,92 @@ program
     });
   });
 
+program
+  .command('scan-dependencies')
+  .description('Scan repository for code dependencies and populate Qdrant database')
+  .option('-r, --root <path>', 'Repository root directory (defaults to current directory)')
+  .option('--include-tests', 'Include test files in the analysis')
+  .option('--max-size <bytes>', 'Maximum file size to process in bytes', '1048576')
+  .option('--watch', 'Watch for file changes and update dependencies incrementally')
+  .option('--stats', 'Show dependency database statistics after scan')
+  .action(async (options) => {
+    try {
+      const { scanRepository, watchRepository, getDependencyStats } = require('../bmad-core/utils/dependency-scanner');
+      
+      const config = {
+        rootDir: options.root || process.cwd(),
+        includeTests: options.includeTests,
+        maxFileSize: parseInt(options.maxSize),
+        showProgress: true
+      };
+      
+      if (options.watch) {
+        console.log(chalk.blue('Starting dependency watch mode...'));
+        console.log(chalk.dim('Press Ctrl+C to stop watching'));
+        
+        const watcher = watchRepository(config);
+        
+        // Handle graceful shutdown
+        process.on('SIGINT', () => {
+          console.log(chalk.yellow('\nStopping dependency watcher...'));
+          watcher.close();
+          process.exit(0);
+        });
+        
+      } else {
+        console.log(chalk.blue('Starting repository dependency scan...'));
+        const result = await scanRepository(config);
+        
+        if (result.success) {
+          console.log(chalk.green('\n✓ Dependency scan completed successfully!'));
+          
+          if (options.stats || result.stats) {
+            console.log(chalk.bold('\nDependency Database Statistics:'));
+            console.log(`  Total symbols: ${result.stats.totalSymbols}`);
+            console.log('  Symbol types:');
+            Object.entries(result.stats.typeDistribution).forEach(([type, count]) => {
+              console.log(`    ${type}: ${count}`);
+            });
+          }
+        } else {
+          console.error(chalk.red('✗ Dependency scan failed:'), result.error);
+          process.exit(1);
+        }
+      }
+    } catch (error) {
+      console.error(chalk.red('✗ Dependency scan failed:'), error.message);
+      console.error(chalk.dim('Ensure Qdrant is running on localhost:6333'));
+      process.exit(1);
+    }
+  });
+
+program
+  .command('dependency-stats')
+  .description('Show dependency database statistics')
+  .action(async () => {
+    try {
+      const { getDependencyStats } = require('../bmad-core/utils/dependency-analyzer');
+      
+      console.log(chalk.blue('Fetching dependency statistics...'));
+      const stats = await getDependencyStats();
+      
+      console.log(chalk.bold('\nDependency Database Statistics:'));
+      console.log(`  Total symbols: ${stats.totalSymbols}`);
+      
+      if (Object.keys(stats.typeDistribution).length > 0) {
+        console.log('  Symbol types:');
+        Object.entries(stats.typeDistribution).forEach(([type, count]) => {
+          console.log(`    ${type}: ${count}`);
+        });
+      } else {
+        console.log(chalk.yellow('  No symbols found in database'));
+        console.log(chalk.dim('  Run "bmad-build scan-dependencies" to populate the database'));
+      }
+    } catch (error) {
+      console.error(chalk.red('✗ Failed to get dependency stats:'), error.message);
+      console.error(chalk.dim('Ensure Qdrant is running on localhost:6333'));
+      process.exit(1);
+    }
+  });
+
 program.parse();

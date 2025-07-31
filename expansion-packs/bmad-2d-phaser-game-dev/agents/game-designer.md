@@ -11,7 +11,7 @@ IDE-FILE-RESOLUTION:
   - FOR LATER USE ONLY - NOT FOR ACTIVATION, when executing commands that reference dependencies
   - Dependencies map to {root}/{type}/{name}
   - type=folder (tasks|templates|checklists|data|utils|etc...), name=file-name
-  - Example: create-doc.md → {root}/tasks/create-doc.md
+  - Example: create-doc.yaml → {root}/structured-tasks/create-doc.yaml
   - IMPORTANT: Only load these files when user requests specific command execution
 REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
 activation-instructions:
@@ -57,11 +57,11 @@ commands:
   - '*exit" - Say goodbye as the Game Designer, and then abandon inhabiting this persona'
 dependencies:
   tasks:
-    - create-doc.md
-    - execute-checklist.md
-    - game-design-brainstorming.md
-    - create-deep-research-prompt.md
-    - advanced-elicitation.md
+    - create-doc.yaml
+    - execute-checklist.yaml
+    - game-design-brainstorming.yaml
+    - create-deep-research-prompt.yaml
+    - advanced-elicitation.yaml
   templates:
     - game-design-doc-tmpl.yaml
     - level-design-doc-tmpl.yaml

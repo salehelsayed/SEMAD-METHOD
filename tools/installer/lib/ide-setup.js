@@ -523,6 +523,11 @@ class IdeSetup extends BaseIdeSetup {
         return "BMad"; // fallback
       }
       
+      // Deprecation warning for old path
+      console.warn('\n⚠️  DEPRECATION WARNING: Configuration found at deprecated path ".bmad-core/core-config.yaml"');
+      console.warn('   Please move your configuration to "bmad-core/core-config.yaml" (without the leading dot)');
+      console.warn('   The old path will be removed in a future version.\n');
+      
       const configContent = await fileManager.readFile(coreConfigPath);
       const config = yaml.load(configContent);
       return config.slashPrefix || "BMad";

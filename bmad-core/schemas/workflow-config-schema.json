@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workflow Configuration Schema",
+  "description": "Schema for BMad workflow configuration including Dev↔QA flow settings",
+  "type": "object",
+  "properties": {
+    "flowType": {
+      "type": "string",
+      "enum": ["linear", "iterative"],
+      "default": "linear",
+      "description": "The Dev↔QA workflow flow type: 'linear' for single-pass Dev→QA, 'iterative' for Dev↔QA loop until approved"
+    },
+    "maxIterations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "default": 5,
+      "description": "Maximum number of Dev↔QA iterations before requiring user intervention"
+    },
+    "autoApproveOnNoIssues": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically approve story when QA finds no issues"
+    },
+    "persistIterationHistory": {
+      "type": "boolean",
+      "default": true,
+      "description": "Save detailed history of each Dev↔QA iteration"
+    },
+    "notifyOnIterationComplete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Send notifications when each iteration completes"
+    },
+    "qaReviewCriteria": {
+      "type": "object",
+      "properties": {
+        "checkCodeStyle": {
+          "type": "boolean",
+          "default": true
+        },
+        "checkTestCoverage": {
+          "type": "boolean",
+          "default": true
+        },
+        "checkDocumentation": {
+          "type": "boolean",
+          "default": true
+        },
+        "checkPerformance": {
+          "type": "boolean",
+          "default": false
+        },
+        "checkSecurity": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "devFixStrategy": {
+      "type": "string",
+      "enum": ["fix-all", "fix-critical", "fix-by-priority"],
+      "default": "fix-all",
+      "description": "Strategy for Dev to address QA findings"
+    },
+    "verbosity": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable verbose logging of orchestrator and agent activities for better transparency"
+    },
+    "verbosityLevel": {
+      "type": "string",
+      "enum": ["minimal", "normal", "detailed"],
+      "default": "normal",
+      "description": "Level of verbosity for logging (minimal: critical only, normal: major tasks, detailed: all activities)"
+    },
+    "workflowMode": {
+      "type": "string",
+      "enum": ["single", "epic-loop"],
+      "default": "single",
+      "description": "Workflow execution mode: 'single' for processing one story, 'epic-loop' for processing all stories in an epic sequentially"
+    },
+    "epicId": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Epic ID to process when workflowMode is 'epic-loop'. Must be a numeric string matching the epic prefix in story filenames."
+    },
+    "maxEpicIterations": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 100,
+      "default": 50,
+      "description": "Maximum number of epic loop iterations to prevent infinite loops"
+    },
+    "maxAttemptsPerStory": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 3,
+      "description": "Maximum retry attempts per story before skipping it"
+    },
+    "maxConsecutiveFailures": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 20,
+      "default": 5,
+      "description": "Maximum consecutive story processing failures before terminating epic loop"
+    },
+    "enableAtomicStatusUpdates": {
+      "type": "boolean",
+      "default": true,
+      "description": "Use atomic file operations for story status updates to prevent race conditions"
+    },
+    "enableSMValidation": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Scrum Master validation step in epic loop processing"
+    },
+    "smValidationMode": {
+      "type": "string",
+      "enum": ["advisory", "blocking"],
+      "default": "advisory",
+      "description": "SM validation mode: 'advisory' continues processing with warnings, 'blocking' stops processing on validation failure"
+    }
+  },
+  "required": ["flowType"],
+  "additionalProperties": false,
+  "if": {
+    "properties": {
+      "workflowMode": {
+        "const": "epic-loop"
+      }
+    }
+  },
+  "then": {
+    "required": ["flowType", "epicId"]
+  }
+}

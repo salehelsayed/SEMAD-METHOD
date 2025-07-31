@@ -1,0 +1,117 @@
+id: retrieve-user-context
+name: Retrieve User Context Before Response
+category: context
+description: Retrieves relevant user context and interactions before generating agent responses to prevent hallucination
+priority: high
+tags:
+  - context-retrieval
+  - anti-hallucination
+  - user-interactions
+  - memory
+requiredInputs:
+  - name: agentName
+    type: string
+    description: Name of the requesting agent
+  - name: currentTask
+    type: string
+    description: Current task or question the agent is working on
+  - name: contextScope
+    type: object
+    description: Scope for context retrieval
+    optional: true
+    properties:
+      storyId: string
+      epicId: string
+      workflowPhase: string
+      includeOtherAgents: boolean
+  - name: searchTerms
+    type: array
+    description: Specific terms or topics to search for in user interactions
+    optional: true
+  - name: maxResults
+    type: number
+    description: Maximum number of relevant interactions to return
+    optional: true
+    default: 10
+outputs:
+  - name: relevantContext
+    type: object
+    description: Relevant user context and interactions
+  - name: hasRelevantUserInput
+    type: boolean
+    description: Whether relevant user input was found
+  - name: contextSummary
+    type: string
+    description: Summary of relevant context for agent use
+  - name: recommendations
+    type: array
+    description: Recommendations for how to use the context
+dependencies:
+  - shared-context-manager.js
+  - retrieve-context.yaml
+executionSteps:
+  - Initialize SharedContextManager
+  - Load current shared context
+  - Search for relevant user interactions based on agent and scope
+  - Filter interactions by search terms if provided
+  - Retrieve related context from long-term memory
+  - Analyze relevance and importance of found interactions
+  - Generate context summary for agent use
+  - Provide recommendations for context usage
+  - Return structured context object
+searchStrategy:
+  - agent_specific: Search interactions specific to the requesting agent
+  - cross_agent: Include interactions from other agents if scope allows
+  - temporal: Prioritize recent interactions over older ones
+  - topical: Match search terms against interaction content
+  - workflow: Include interactions from the current workflow phase
+validationCriteria:
+  - Context retrieval completes successfully
+  - Relevant interactions are properly filtered and ranked
+  - Context summary accurately reflects user inputs
+  - No fabricated information is included
+  - Recommendations are actionable and specific
+contextAnalysis:
+  - importance_scoring: Rate interactions by importance level
+  - relevance_matching: Match interactions to current task
+  - confirmation_status: Identify confirmed vs unconfirmed responses
+  - conflict_detection: Identify potentially conflicting user inputs
+  - completeness_check: Identify gaps in user-provided information
+outputFormat:
+  relevantContext:
+    userInteractions:
+      - interactionId: string
+        agentName: string
+        timestamp: string
+        question: string
+        userResponse: string
+        confirmed: boolean
+        importance: string
+        relevanceScore: number
+    keyFacts: array
+    decisions: array
+    openQuestions: array
+  contextSummary: |
+    Based on user interactions, the following has been established:
+    - [Key point from user input]
+    - [Another key point]
+    
+    Areas where user input is needed:
+    - [Gap or unclear area]
+    
+    Confirmed requirements:
+    - [User confirmed requirement]
+exampleUsage: |
+  const context = await executeTask('retrieve-user-context', {
+    agentName: 'dev',
+    currentTask: 'implementing user authentication feature',
+    contextScope: {
+      storyId: 'STORY-123',
+      includeOtherAgents: true
+    },
+    searchTerms: ['authentication', 'login', 'user', 'security'],
+    maxResults: 5
+  });
+  
+  // Returns relevant user interactions and context
+  // Agent can then reference actual user inputs instead of making assumptions

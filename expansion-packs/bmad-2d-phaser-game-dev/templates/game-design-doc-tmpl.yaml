@@ -46,7 +46,7 @@ sections:
 
   - id: core-gameplay
     title: Core Gameplay
-    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `tasks#advanced-elicitation` protocol to ensure completeness.
+    instruction: This section defines the fundamental game mechanics. After presenting each subsection, apply `structured-tasks#advanced-elicitation` protocol to ensure completeness.
     sections:
       - id: game-pillars
         title: Game Pillars

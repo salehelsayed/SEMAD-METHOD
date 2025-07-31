@@ -68,10 +68,54 @@ class StructuredTaskLoader {
       markdown += `## Purpose\n\n${task.purpose}\n\n`;
     }
     
+    if (task.description) {
+      markdown += `## Description\n\n${task.description}\n\n`;
+    }
+    
     if (task.notes) {
       markdown += `${task.notes}\n\n`;
     }
     
+    // Handle different task formats
+    if (!task.steps) {
+      // Handle workflow-style tasks without steps
+      if (task.executionSteps) {
+        markdown += `## Execution Steps\n\n`;
+        task.executionSteps.forEach((step, index) => {
+          markdown += `${index + 1}. ${step}\n`;
+        });
+        markdown += '\n';
+      }
+      
+      if (task.requiredInputs) {
+        markdown += `## Required Inputs\n\n`;
+        task.requiredInputs.forEach(input => {
+          markdown += `- **${input.name}** (${input.type})`;
+          if (input.optional) markdown += ' - optional';
+          if (input.description) markdown += `: ${input.description}`;
+          markdown += '\n';
+        });
+        markdown += '\n';
+      }
+      
+      if (task.outputs) {
+        markdown += `## Outputs\n\n`;
+        task.outputs.forEach(output => {
+          markdown += `- **${output.name}** (${output.type})`;
+          if (output.description) markdown += `: ${output.description}`;
+          markdown += '\n';
+        });
+        markdown += '\n';
+      }
+      
+      if (task.exampleUsage) {
+        markdown += `## Example Usage\n\n\`\`\`\n${task.exampleUsage}\n\`\`\`\n\n`;
+      }
+      
+      return markdown;
+    }
+    
+    // Original code for tasks with steps
     // Restore preserved metadata
     if (task.metadata && task.metadata.executionMode === 'SEQUENTIAL') {
       markdown += `## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)\n\n`;

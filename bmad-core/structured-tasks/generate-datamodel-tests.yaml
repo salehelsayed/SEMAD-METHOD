@@ -32,30 +32,49 @@ outputs:
     type: boolean
     description: Whether test generation was successful
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: dev
+          context:
+            taskId: generate-datamodel-tests
+            taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory and Context
     description: Set up working memory and retrieve relevant context
     action: update-working-memory
     inputs:
-      agentName: "dev"
-      taskId: "generate-datamodel-tests"
-      context: 
-        description: "Initialize working memory for datamodel test generation"
-        patterns: "Retrieve previous test generation patterns and conventions"
+      agentName: dev
+      taskId: generate-datamodel-tests
+      context:
+        description: Initialize working memory for datamodel test generation
+        patterns: Retrieve previous test generation patterns and conventions
   - id: validate-contract
     name: Validate StoryContract
     description: Ensure the story has a valid StoryContract before proceeding
     action: validate-story-contract
     inputs:
-      storyFilePath: "{{storyFilePath}}"
+      storyFilePath: '{{storyFilePath}}'
     outputs:
       validationResult: boolean
       contract: object
       errors: array
     errorHandling:
       onError: halt
-      message: "Story contract validation failed. Cannot generate tests without valid contract."
-
+      message: Story contract validation failed. Cannot generate tests without valid contract.
   - id: check-datamodels
     name: Check for DataModels
     description: Verify that the StoryContract contains dataModels section
@@ -73,21 +92,20 @@ steps:
         console.log(`Found ${outputs.modelCount} data models: ${outputs.modelNames.join(', ')}`);
       }
     inputs:
-      contract: "{{outputs.validate-contract.contract}}"
+      contract: '{{outputs.validate-contract.contract}}'
     outputs:
       hasDataModels: boolean
       modelCount: number
       modelNames: array
-
   - id: generate-tests
     name: Generate Test Files
     description: Generate unit tests for each data model
-    condition: "{{outputs.check-datamodels.hasDataModels}} === true"
+    condition: '{{outputs.check-datamodels.hasDataModels}} === true'
     action: script
     script: |
       const DataModelTestGenerator = require('../../utils/datamodel-test-generator');
       const path = require('path');
-      
+
       try {
         const generator = new DataModelTestGenerator();
         const contract = inputs.contract;
@@ -109,23 +127,22 @@ steps:
         console.error('Test generation failed:', error.message);
       }
     inputs:
-      contract: "{{outputs.validate-contract.contract}}"
-      testFramework: "{{testFramework}}"
+      contract: '{{outputs.validate-contract.contract}}'
+      testFramework: '{{testFramework}}'
     outputs:
       generatedTests: object
       testFileNames: array
       success: boolean
       error: string
-
   - id: write-test-files
     name: Write Tests to Files
     description: Write generated test content to files in the output directory
-    condition: "{{outputs.generate-tests.success}} === true"
+    condition: '{{outputs.generate-tests.success}} === true'
     action: script
     script: |
       const fs = require('fs');
       const path = require('path');
-      
+
       try {
         const outputDir = inputs.outputDir || 'tests/models';
         const generatedTests = inputs.generatedTests;
@@ -154,14 +171,13 @@ steps:
         console.error('Failed to write test files:', error.message);
       }
     inputs:
-      outputDir: "{{outputDir}}"
-      generatedTests: "{{outputs.generate-tests.generatedTests}}"
+      outputDir: '{{outputDir}}'
+      generatedTests: '{{outputs.generate-tests.generatedTests}}'
     outputs:
       testFilePaths: array
       success: boolean
       outputDir: string
       error: string
-
   - id: report-results
     name: Report Generation Results
     description: Provide summary of test generation
@@ -171,7 +187,7 @@ steps:
       const modelCount = inputs.modelCount;
       const testFilePaths = inputs.testFilePaths || [];
       const success = inputs.writeSuccess;
-      
+
       if (!hasDataModels) {
         console.log('\n📊 Test Generation Summary:');
         console.log('No dataModels found in StoryContract - no tests generated.');
@@ -189,37 +205,54 @@ steps:
         console.log(`Error: ${inputs.error || 'Unknown error'}`);
         outputs.summary = 'Test generation failed';
       }
-      
+
       outputs.success = success || !hasDataModels;
     inputs:
-      hasDataModels: "{{outputs.check-datamodels.hasDataModels}}"
-      modelCount: "{{outputs.check-datamodels.modelCount}}"
-      testFilePaths: "{{outputs.write-test-files.testFilePaths}}"
-      writeSuccess: "{{outputs.write-test-files.success}}"
-      outputDir: "{{outputs.write-test-files.outputDir}}"
-      error: "{{outputs.write-test-files.error || outputs.generate-tests.error}}"
+      hasDataModels: '{{outputs.check-datamodels.hasDataModels}}'
+      modelCount: '{{outputs.check-datamodels.modelCount}}'
+      testFilePaths: '{{outputs.write-test-files.testFilePaths}}'
+      writeSuccess: '{{outputs.write-test-files.success}}'
+      outputDir: '{{outputs.write-test-files.outputDir}}'
+      error: '{{outputs.write-test-files.error || outputs.generate-tests.error}}'
     outputs:
       summary: string
       success: boolean
-
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: dev
+          taskData:
+            observation: Completed generate-datamodel-tests task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: generate-datamodel-tests
+            context:
+              taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 validation:
   requiredOutputs:
     - generatedTests
     - success
   conditions:
     - description: Task should complete successfully or report no models
-      condition: "outputs.success === true"
-  
+      condition: outputs.success === true
 example:
   inputs:
-    storyFilePath: "stories/user-management.md"
-    testFramework: "jest"
-    outputDir: "tests/models"
+    storyFilePath: stories/user-management.md
+    testFramework: jest
+    outputDir: tests/models
   expectedOutputs:
     generatedTests:
-      user.test.js: "// Jest test content for User model..."
-      role.test.js: "// Jest test content for Role model..."
+      user.test.js: // Jest test content for User model...
+      role.test.js: // Jest test content for Role model...
     testFilePaths:
-      - "tests/models/user.test.js"
-      - "tests/models/role.test.js"
+      - tests/models/user.test.js
+      - tests/models/role.test.js
     success: true

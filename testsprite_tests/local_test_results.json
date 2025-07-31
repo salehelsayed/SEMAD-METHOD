@@ -1,0 +1,228 @@
+{
+  "timestamp": "2025-07-31T18:33:20.041218",
+  "summary": {
+    "total": 27,
+    "passed": 8,
+    "failed": 19,
+    "errors": 0,
+    "timeouts": 0
+  },
+  "results": [
+    {
+      "test_id": "TC001",
+      "test_name": "TC001_Validate_Structured_Task_System_Schema_Compliance",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC001_Validate_Structured_Task_System_Schema_Compliance.py\", line 33, in test_validate_structured_task_system_schema_compliance\n    assert any(indicator.lower() in output_lower for indicator in success_indicators), \\\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Validation output does not indicate success. Output: \n> bmad-method@4.31.0 validate:structured-tasks\n> node scripts/validate-all.js --structured-tasks-only\n\nBMad Method - Comprehensive Validation\n\n\nValidating Regular Tasks:\n  Directory not found: /Users/I560101/Project-Sat/SEMAD-METHOD/bmad-core/tasks\n  Directory not found: /Users/I560101/Project-Sat/SEMAD-METHOD/common/tasks\n\nValidating Structured Tasks:\n  \u2713 bmad-core/structured-tasks/address-qa-feedback.yaml\n  \u2713 bmad-core/structured-tasks/advanced-elicitation.yaml\n  \u2713 bmad-core/structured-tasks/analyze-dependency-impacts-qa.yaml\n  \u2713 bmad-core/structured-tasks/brownfield-create-epic.yaml\n  \u2713 bmad-core/structured-tasks/brownfield-create-story.yaml\n  \u2713 bmad-core/structured-tasks/check-dependencies-before-commit.yaml\n  \u2713 bmad-core/structured-tasks/consolidate-agent-context.yaml\n  \u2713 bmad-core/structured-tasks/correct-course.yaml\n  \u2713 bmad-core/structured-tasks/create-brownfield-story.yaml\n  \u2713 bmad-core/structured-tasks/create-deep-research-prompt.yaml\n  \u2713 bmad-core/structured-tasks/create-doc.yaml\n  \u2713 bmad-core/structured-tasks/create-next-story.yaml\n  \u2713 bmad-core/structured-tasks/document-project.yaml\n  \u2713 bmad-core/structured-tasks/dynamic-plan-rules.yaml\n  \u2713 bmad-core/structured-tasks/execute-checklist.yaml\n  \u2713 bmad-core/structured-tasks/execute-task-with-adaptation.yaml\n  \u2713 bmad-core/structured-tasks/facilitate-brainstorming-session.yaml\n  \u2713 bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml\n  \u2713 bmad-core/structured-tasks/generate-datamodel-tests.yaml\n  \u2713 bmad-core/structured-tasks/generate-search-tools.yaml\n  \u2713 bmad-core/structured-tasks/handle-user-interaction.yaml\n  \u2713 bmad-core/structured-tasks/index-docs.yaml\n  \u2713 bmad-core/structured-tasks/kb-mode-interaction.yaml\n  \u2713 bmad-core/structured-tasks/load-memory-action.yaml\n  \u2713 bmad-core/structured-tasks/manage-memory.yaml\n  \u2713 bmad-core/structured-tasks/qa-dev-handoff.yaml\n  \u2713 bmad-core/structured-tasks/retrieve-context.yaml\n  \u2713 bmad-core/structured-tasks/retrieve-user-context.yaml\n  \u2713 bmad-core/structured-tasks/review-story.yaml\n  \u2713 bmad-core/structured-tasks/save-and-clean-memory-action.yaml\n  \u2713 bmad-core/structured-tasks/shard-doc.yaml\n  \u2713 bmad-core/structured-tasks/update-working-memory.yaml\n  \u2713 bmad-core/structured-tasks/validate-next-story.yaml\n  \u2713 bmad-core/structured-tasks/validate-story-contract.yaml\n  \u2713 common/structured-tasks/create-doc.yaml\n  \u2713 common/structured-tasks/execute-checklist.yaml\n\nValidating Checklists:\n  \u2713 bmad-core/structured-checklists/architect-checklist.yaml\n  \u2713 bmad-core/structured-checklists/change-checklist.yaml\n  \u2713 bmad-core/structured-checklists/pm-checklist.yaml\n  \u2713 bmad-core/structured-checklists/po-master-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-dod-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-draft-checklist.yaml\n  No YAML files found in common/structured-checklists\n\nValidation Summary:\n==================================================\nTotal files:    42\nValid files:    42\nInvalid files:  0\n\n\u2713 All files are valid!\n\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC001_Validate_Structured_Task_System_Schema_Compliance.py\", line 41, in <module>\n    test_validate_structured_task_system_schema_compliance()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC001_Validate_Structured_Task_System_Schema_Compliance.py\", line 39, in test_validate_structured_task_system_schema_compliance\n    assert False, f\"Unexpected error during validation command execution: {e}\"\n           ^^^^^\nAssertionError: Unexpected error during validation command execution: Validation output does not indicate success. Output: \n> bmad-method@4.31.0 validate:structured-tasks\n> node scripts/validate-all.js --structured-tasks-only\n\nBMad Method - Comprehensive Validation\n\n\nValidating Regular Tasks:\n  Directory not found: /Users/I560101/Project-Sat/SEMAD-METHOD/bmad-core/tasks\n  Directory not found: /Users/I560101/Project-Sat/SEMAD-METHOD/common/tasks\n\nValidating Structured Tasks:\n  \u2713 bmad-core/structured-tasks/address-qa-feedback.yaml\n  \u2713 bmad-core/structured-tasks/advanced-elicitation.yaml\n  \u2713 bmad-core/structured-tasks/analyze-dependency-impacts-qa.yaml\n  \u2713 bmad-core/structured-tasks/brownfield-create-epic.yaml\n  \u2713 bmad-core/structured-tasks/brownfield-create-story.yaml\n  \u2713 bmad-core/structured-tasks/check-dependencies-before-commit.yaml\n  \u2713 bmad-core/structured-tasks/consolidate-agent-context.yaml\n  \u2713 bmad-core/structured-tasks/correct-course.yaml\n  \u2713 bmad-core/structured-tasks/create-brownfield-story.yaml\n  \u2713 bmad-core/structured-tasks/create-deep-research-prompt.yaml\n  \u2713 bmad-core/structured-tasks/create-doc.yaml\n  \u2713 bmad-core/structured-tasks/create-next-story.yaml\n  \u2713 bmad-core/structured-tasks/document-project.yaml\n  \u2713 bmad-core/structured-tasks/dynamic-plan-rules.yaml\n  \u2713 bmad-core/structured-tasks/execute-checklist.yaml\n  \u2713 bmad-core/structured-tasks/execute-task-with-adaptation.yaml\n  \u2713 bmad-core/structured-tasks/facilitate-brainstorming-session.yaml\n  \u2713 bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml\n  \u2713 bmad-core/structured-tasks/generate-datamodel-tests.yaml\n  \u2713 bmad-core/structured-tasks/generate-search-tools.yaml\n  \u2713 bmad-core/structured-tasks/handle-user-interaction.yaml\n  \u2713 bmad-core/structured-tasks/index-docs.yaml\n  \u2713 bmad-core/structured-tasks/kb-mode-interaction.yaml\n  \u2713 bmad-core/structured-tasks/load-memory-action.yaml\n  \u2713 bmad-core/structured-tasks/manage-memory.yaml\n  \u2713 bmad-core/structured-tasks/qa-dev-handoff.yaml\n  \u2713 bmad-core/structured-tasks/retrieve-context.yaml\n  \u2713 bmad-core/structured-tasks/retrieve-user-context.yaml\n  \u2713 bmad-core/structured-tasks/review-story.yaml\n  \u2713 bmad-core/structured-tasks/save-and-clean-memory-action.yaml\n  \u2713 bmad-core/structured-tasks/shard-doc.yaml\n  \u2713 bmad-core/structured-tasks/update-working-memory.yaml\n  \u2713 bmad-core/structured-tasks/validate-next-story.yaml\n  \u2713 bmad-core/structured-tasks/validate-story-contract.yaml\n  \u2713 common/structured-tasks/create-doc.yaml\n  \u2713 common/structured-tasks/execute-checklist.yaml\n\nValidating Checklists:\n  \u2713 bmad-core/structured-checklists/architect-checklist.yaml\n  \u2713 bmad-core/structured-checklists/change-checklist.yaml\n  \u2713 bmad-core/structured-checklists/pm-checklist.yaml\n  \u2713 bmad-core/structured-checklists/po-master-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-dod-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-draft-checklist.yaml\n  No YAML files found in common/structured-checklists\n\nValidation Summary:\n==================================================\nTotal files:    42\nValid files:    42\nInvalid files:  0\n\n\u2713 All files are valid!\n\n",
+      "duration": 0.29394
+    },
+    {
+      "test_id": "TC002",
+      "test_name": "TC002_Validate_Structured_Checklist_System_Schema_Compliance",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC002_Validate_Structured_Checklist_System_Schema_Compliance.py\", line 48, in <module>\n    test_validate_structured_checklist_system_schema_compliance()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC002_Validate_Structured_Checklist_System_Schema_Compliance.py\", line 43, in test_validate_structured_checklist_system_schema_compliance\n    assert any(indicator in output_lower for indicator in success_indicators), (\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Validation output does not contain success confirmation.\nStdout: \n> bmad-method@4.31.0 validate:checklists\n> node scripts/validate-all.js --checklists-only\n\nBMad Method - Checklists Validation\n\nValidating Checklists:\n  \u2713 bmad-core/structured-checklists/architect-checklist.yaml\n  \u2713 bmad-core/structured-checklists/change-checklist.yaml\n  \u2713 bmad-core/structured-checklists/pm-checklist.yaml\n  \u2713 bmad-core/structured-checklists/po-master-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-dod-checklist.yaml\n  \u2713 bmad-core/structured-checklists/story-draft-checklist.yaml\n  No YAML files found in common/structured-checklists\n\nValidation Summary:\n==================================================\nTotal files:    6\nValid files:    6\nInvalid files:  0\n\n\u2713 All files are valid!\n\nStderr: \n",
+      "duration": 0.211457
+    },
+    {
+      "test_id": "TC003",
+      "test_name": "TC003_Working_Memory_Initialization_and_File_Creation",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC003_Working_Memory_Initialization_and_File_Creation.py\", line 29, in test_working_memory_initialization_and_file_creation\n    assert os.path.isdir(ai_dir), \".ai directory does not exist after init:memory\"\n           ~~~~~~~~~~~~~^^^^^^^^\nAssertionError: .ai directory does not exist after init:memory\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC003_Working_Memory_Initialization_and_File_Creation.py\", line 60, in <module>\n    test_working_memory_initialization_and_file_creation()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC003_Working_Memory_Initialization_and_File_Creation.py\", line 58, in test_working_memory_initialization_and_file_creation\n    assert False, f\"Unexpected error during test: {e}\"\n           ^^^^^\nAssertionError: Unexpected error during test: .ai directory does not exist after init:memory\n",
+      "duration": 1.16299
+    },
+    {
+      "test_id": "TC004",
+      "test_name": "TC004_Qdrant_Vector_Database_Integration_for_Long_term_Memory",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC004_Qdrant_Vector_Database_Integration_for_Long_term_Memory.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.033365
+    },
+    {
+      "test_id": "TC005",
+      "test_name": "TC005_Search_Tool_Generation_from_PRD_Content",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC005_Search_Tool_Generation_from_PRD_Content.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.025299
+    },
+    {
+      "test_id": "TC006",
+      "test_name": "TC006_Search_Tools_Validation_Framework",
+      "status": "PASSED",
+      "output": "",
+      "error": "",
+      "duration": 0.224576
+    },
+    {
+      "test_id": "TC007",
+      "test_name": "TC007_Story_Contract_Validation_System",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC007_Story_Contract_Validation_System.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.022105
+    },
+    {
+      "test_id": "TC008",
+      "test_name": "TC008_Automatic_Story_Validation_Before_Creation",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC008_Automatic_Story_Validation_Before_Creation.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.020121
+    },
+    {
+      "test_id": "TC009",
+      "test_name": "TC009_Enhanced_Workflow_Orchestrator_with_Verbosity",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC009_Enhanced_Workflow_Orchestrator_with_Verbosity.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.020815
+    },
+    {
+      "test_id": "TC010",
+      "test_name": "TC010_Dev_QA_Iterative_Workflow_Option",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC010_Dev_QA_Iterative_Workflow_Option.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.020448
+    },
+    {
+      "test_id": "TC011",
+      "test_name": "TC011_Epic_Loop_Automated_Processing",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC011_Epic_Loop_Automated_Processing.py\", line 33, in <module>\n    test_epic_loop_automated_processing()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC011_Epic_Loop_Automated_Processing.py\", line 26, in test_epic_loop_automated_processing\n    assert result.returncode == 0, f\"Epic loop CLI command failed with exit code {result.returncode}\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Epic loop CLI command failed with exit code 1\n",
+      "duration": 0.041742
+    },
+    {
+      "test_id": "TC012",
+      "test_name": "TC012_Agent_Dependency_Resolution_and_Team_Building",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC012_Agent_Dependency_Resolution_and_Team_Building.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.020173
+    },
+    {
+      "test_id": "TC013",
+      "test_name": "TC013_Memory_Health_Monitoring_and_Reporting",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC013_Memory_Health_Monitoring_and_Reporting.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.021805
+    },
+    {
+      "test_id": "TC014",
+      "test_name": "TC014_Memory_Hygiene_and_Automated_Cleaning",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC014_Memory_Hygiene_and_Automated_Cleaning.py\", line 1, in <module>\n    import requests\nModuleNotFoundError: No module named 'requests'\n",
+      "duration": 0.020701
+    },
+    {
+      "test_id": "TC015",
+      "test_name": "TC015_Comprehensive_Schema_Validation_Suite",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC015_Comprehensive_Schema_Validation_Suite.py\", line 42, in <module>\n    test_comprehensive_schema_validation_suite()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC015_Comprehensive_Schema_Validation_Suite.py\", line 37, in test_comprehensive_schema_validation_suite\n    assert any(indicator.lower() in output_combined for indicator in success_indicators), (\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Schema validation output does not indicate success.\nOutput:\n\n> bmad-method@4.31.0 validate:schemas\n> node scripts/validate-schemas.js\n\nValidating structured task and checklist files...\n\nValidating regular tasks in bmad-core/tasks...\n  \u2713 All files valid\n\nValidating structured tasks in bmad-core/structured-tasks...\n  \u2713 All files valid\n\nValidating checklists in bmad-core/structured-checklists...\n  \u2713 All files valid\n\nValidating regular tasks in common/tasks...\n  \u2713 All files valid\n\nValidating structured tasks in common/structured-tasks...\n  \u2713 All files valid\n\nValidating checklists in common/structured-checklists...\n  \u2713 All files valid\n\n\n\u2713 All structured files are valid!\n\nErrors:\n\n",
+      "duration": 0.197118
+    },
+    {
+      "test_id": "TC016",
+      "test_name": "TC016_User_Interaction_Elicitation_Across_Workflows",
+      "status": "FAILED",
+      "output": "Note: Command 'check:elicitation' not found in package.json\n",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC016_User_Interaction_Elicitation_Across_Workflows.py\", line 53, in <module>\n    test_user_interaction_elicitation_across_workflows()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC016_User_Interaction_Elicitation_Across_Workflows.py\", line 31, in test_user_interaction_elicitation_across_workflows\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+      "duration": 0.144307
+    },
+    {
+      "test_id": "TC017",
+      "test_name": "TC017_Exclusive_Use_of_Structured_Tasks",
+      "status": "PASSED",
+      "output": "\u2713 Verified exclusive use of structured tasks (34 files found)\n\u2713 No files in deprecated bmad-core/tasks directory\n",
+      "error": "",
+      "duration": 0.107929
+    },
+    {
+      "test_id": "TC018",
+      "test_name": "TC018_Core_Config_Path_Correction",
+      "status": "PASSED",
+      "output": "\u2713 Core config is at correct path: bmad-core/core-config.yaml\n\u2713 No references to deprecated .bmad-core path found\n",
+      "error": "",
+      "duration": 0.218701
+    },
+    {
+      "test_id": "TC019",
+      "test_name": "TC019_Dev_Agent_Implement_Next_Story_Command",
+      "status": "PASSED",
+      "output": "Note: Command 'dev:next-story' not found in package.json\n\u2713 Dev agent implement next story test file exists\n",
+      "error": "",
+      "duration": 0.111143
+    },
+    {
+      "test_id": "TC020",
+      "test_name": "TC020_QA_Agent_Write_Only_Review",
+      "status": "PASSED",
+      "output": "Note: Command 'qa:review' not found in package.json\n\u2713 QA workflow test file exists\n",
+      "error": "",
+      "duration": 0.195973
+    },
+    {
+      "test_id": "TC021",
+      "test_name": "TC021_QA_Status_Update_Timing",
+      "status": "PASSED",
+      "output": "Note: Command 'qa:review' not found in package.json\n\u2713 QA status handling verified in task definitions\n",
+      "error": "",
+      "duration": 0.111085
+    },
+    {
+      "test_id": "TC022",
+      "test_name": "TC022_YAML_Story_Template_Usage",
+      "status": "FAILED",
+      "output": "Note: Command 'generate:story' not found in package.json\n",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC022_YAML_Story_Template_Usage.py\", line 46, in test_yaml_story_template_usage\n    assert \"story-tmpl.yaml\" in content or \"yaml\" in content.lower(), f\"{task_file} doesn't reference YAML template\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: brownfield-create-story.yaml doesn't reference YAML template\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC022_YAML_Story_Template_Usage.py\", line 60, in <module>\n    test_yaml_story_template_usage()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC022_YAML_Story_Template_Usage.py\", line 57, in test_yaml_story_template_usage\n    assert False, f\"Unexpected error: {e}\"\n           ^^^^^\nAssertionError: Unexpected error: brownfield-create-story.yaml doesn't reference YAML template\n",
+      "duration": 0.115467
+    },
+    {
+      "test_id": "TC023",
+      "test_name": "TC023_Consistent_Output_Messages_in_Greenfield_Workflow",
+      "status": "FAILED",
+      "output": "Note: Command 'orchestrate:greenfield' not found in package.json\n",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC023_Consistent_Output_Messages_in_Greenfield_Workflow.py\", line 34, in test_consistent_output_messages_in_greenfield_workflow\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC023_Consistent_Output_Messages_in_Greenfield_Workflow.py\", line 53, in <module>\n    test_consistent_output_messages_in_greenfield_workflow()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC023_Consistent_Output_Messages_in_Greenfield_Workflow.py\", line 50, in test_consistent_output_messages_in_greenfield_workflow\n    assert False, f\"Unexpected error: {e}\"\n           ^^^^^\nAssertionError: Unexpected error: No module named 'yaml'\n",
+      "duration": 0.103934
+    },
+    {
+      "test_id": "TC024",
+      "test_name": "TC024_Orchestrator_File_Path_Resolution",
+      "status": "FAILED",
+      "output": "",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC024_Orchestrator_File_Path_Resolution.py\", line 17, in test_orchestrator_file_path_resolution\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC024_Orchestrator_File_Path_Resolution.py\", line 62, in <module>\n    test_orchestrator_file_path_resolution()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC024_Orchestrator_File_Path_Resolution.py\", line 59, in test_orchestrator_file_path_resolution\n    assert False, f\"Unexpected error: {e}\"\n           ^^^^^\nAssertionError: Unexpected error: No module named 'yaml'\n",
+      "duration": 0.024215
+    },
+    {
+      "test_id": "TC025",
+      "test_name": "TC025_Dependency_Analysis_and_Impact_Checking",
+      "status": "PASSED",
+      "output": "Note: Dependency analysis commands not found in package.json\n\u2713 Dependency analysis implementation found\n\u2713 Qdrant integration verified\n",
+      "error": "",
+      "duration": 0.195739
+    },
+    {
+      "test_id": "TC026",
+      "test_name": "TC026_Memory_Persistence_Across_Agents",
+      "status": "PASSED",
+      "output": "Note: Command 'test:memory-persistence' not found\n\u2713 Memory persistence verified for SM, Dev, and QA agents\n",
+      "error": "",
+      "duration": 0.124558
+    },
+    {
+      "test_id": "TC027",
+      "test_name": "TC027_User_Agent_Interaction_Capture_and_Summarization",
+      "status": "FAILED",
+      "output": "Note: Command 'interact:analysis' not found\n",
+      "error": "Traceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC027_User_Agent_Interaction_Capture_and_Summarization.py\", line 32, in test_user_agent_interaction_capture_and_summarization\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC027_User_Agent_Interaction_Capture_and_Summarization.py\", line 57, in <module>\n    test_user_agent_interaction_capture_and_summarization()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/I560101/Project-Sat/SEMAD-METHOD/testsprite_tests/TC027_User_Agent_Interaction_Capture_and_Summarization.py\", line 54, in test_user_agent_interaction_capture_and_summarization\n    assert False, f\"Unexpected error: {e}\"\n           ^^^^^\nAssertionError: Unexpected error: No module named 'yaml'\n",
+      "duration": 0.102641
+    }
+  ]
+}

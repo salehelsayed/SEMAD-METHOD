@@ -1,0 +1,524 @@
+{
+  "summary": {
+    "totalTests": 17,
+    "passed": 17,
+    "failed": 0,
+    "timeout": 0,
+    "skipped": 0,
+    "pending": 0,
+    "executionTime": "2025-07-31T19:19:48.531Z"
+  },
+  "results": [
+    {
+      "testId": "TC001",
+      "title": "Validate Structured Task System Schema Compliance",
+      "category": "Structured Task System",
+      "command": "npm run validate:structured-tasks",
+      "status": "passed",
+      "duration": 212,
+      "output": "\n> bmad-method@4.31.0 validate:structured-tasks\n> node scripts/validate-all.js --structured-tasks-only\n\nBMad Method - Structured Tasks Validation\n\n\nValidating Structured Tasks:\n  ✓ bmad-core/structured-tasks/address-qa-feedback.yaml\n  ✓ bmad-core/structured-tasks/advanced-elicitation.yaml\n  ✓ bmad-core/structured-tasks/analyze-dependency-impacts-qa.yaml\n  ✓ bmad-core/structured-tasks/brownfield-create-epic.yaml\n  ✓ bmad-core/structured-tasks/brownfield-create-story.yaml\n  ✓ bmad-core/structured-tasks/check-dependencies-before-commit.yaml\n  ✓ bmad-core/structured-tasks/consolidate-agent-context.yaml\n  ✓ bmad-core/structured-tasks/correct-course.yaml\n  ✓ bmad-core/structured-tasks/create-brownfield-story.yaml\n  ✓ bmad-core/structured-tasks/create-deep-research-prompt.yaml\n  ✓ bmad-core/structured-tasks/create-doc.yaml\n  ✓ bmad-core/structured-tasks/create-next-story.yaml\n  ✓ bmad-core/structured-tasks/document-project.yaml\n  ✓ bmad-core/structured-tasks/dynamic-plan-rules.yaml\n  ✓ bmad-core/structured-tasks/execute-checklist.yaml\n  ✓ bmad-core/structured-tasks/execute-task-with-adaptation.yaml\n  ✓ bmad-core/structured-tasks/facilitate-brainstorming-session.yaml\n  ✓ bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml\n  ✓ bmad-core/structured-tasks/generate-datamodel-tests.yaml\n  ✓ bmad-core/structured-tasks/generate-search-tools.yaml\n  ✓ bmad-core/structured-tasks/handle-user-interaction.yaml\n  ✓ bmad-core/structured-tasks/index-docs.yaml\n  ✓ bmad-core/structured-tasks/kb-mode-interaction.yaml\n  ✓ bmad-core/structured-tasks/load-memory-action.yaml\n  ✓ bmad-core/structured-tasks/manage-memory.yaml\n  ✓ bmad-core/structured-tasks/qa-dev-handoff.yaml\n  ✓ bmad-core/structured-tasks/retrieve-context.yaml\n  ✓ bmad-core/structured-tasks/retrieve-user-context.yaml\n  ✓ bmad-core/structured-tasks/review-story.yaml\n  ✓ bmad-core/structured-tasks/save-and-clean-memory-action.yaml\n  ✓ bmad-core/structured-tasks/shard-doc.yaml\n  ✓ bmad-core/structured-tasks/update-working-memory.yaml\n  ✓ bmad-core/structured-tasks/validate-next-story.yaml\n  ✓ bmad-core/structured-tasks/validate-story-contract.yaml\n  ✓ common/structured-tasks/create-doc.yaml\n  ✓ common/structured-tasks/execute-checklist.yaml\n\nValidation Summary:\n==================================================\nTotal files:    36\nValid files:    36\nInvalid files:  0\n\n✓ All files are valid!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/structured-tasks/*.yaml",
+          "exists": true,
+          "count": 34
+        }
+      ],
+      "validationCriteria": "All YAML files pass schema validation with no errors",
+      "timestamp": "2025-07-31T19:19:45.057Z"
+    },
+    {
+      "testId": "TC002",
+      "title": "Validate Structured Checklist System Schema Compliance",
+      "category": "Structured Task System",
+      "command": "npm run validate:checklists",
+      "status": "passed",
+      "duration": 157,
+      "output": "\n> bmad-method@4.31.0 validate:checklists\n> node scripts/validate-all.js --checklists-only\n\nBMad Method - Checklists Validation\n\nValidating Checklists:\n  ✓ bmad-core/structured-checklists/architect-checklist.yaml\n  ✓ bmad-core/structured-checklists/change-checklist.yaml\n  ✓ bmad-core/structured-checklists/pm-checklist.yaml\n  ✓ bmad-core/structured-checklists/po-master-checklist.yaml\n  ✓ bmad-core/structured-checklists/story-dod-checklist.yaml\n  ✓ bmad-core/structured-checklists/story-draft-checklist.yaml\n  No YAML files found in common/structured-checklists\n\nValidation Summary:\n==================================================\nTotal files:    6\nValid files:    6\nInvalid files:  0\n\n✓ All files are valid!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/structured-checklists/*.yaml",
+          "exists": true,
+          "count": 6
+        }
+      ],
+      "validationCriteria": "All checklist YAML files pass schema validation",
+      "timestamp": "2025-07-31T19:19:45.216Z"
+    },
+    {
+      "testId": "TC003",
+      "title": "Working Memory Initialization and File Creation",
+      "category": "Working Memory System",
+      "command": "npm run init:memory",
+      "status": "passed",
+      "duration": 162,
+      "output": "\n> bmad-method@4.31.0 init:memory\n> node bmad-core/scripts/init-memory.js\n\nInitializing working memory for all agents...\n\n✓ Initialized memory for analyst\n✓ Initialized memory for pm\n✓ Initialized memory for architect\n✓ Initialized memory for ux-expert\n✓ Initialized memory for dev\n✓ Initialized memory for qa\n✓ Initialized memory for sm\n✓ Initialized memory for po\n✓ Initialized memory for bmad-master\n✓ Initialized memory for bmad-orchestrator\n\nMemory initialization complete!\nMemory files created in: /Users/I560101/Project-Sat/SEMAD-METHOD/bmad-core/ai/\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": ".ai/working_memory_*.json",
+          "exists": true,
+          "count": 22
+        }
+      ],
+      "validationCriteria": "Working memory files created with proper JSON structure",
+      "timestamp": "2025-07-31T19:19:45.378Z"
+    },
+    {
+      "testId": "TC005",
+      "title": "Search Tool Generation from PRD Content",
+      "category": "Search Tool Generation",
+      "command": "npm run generate:search-tools",
+      "status": "passed",
+      "duration": 121,
+      "output": "\n> bmad-method@4.31.0 generate:search-tools\n> node scripts/generate-search-tools.js\n\nReading sharded PRDs from directory: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/prd\n  Reading: PRD.md\n✅ Generated search tools file: /Users/I560101/Project-Sat/SEMAD-METHOD/search-tools.yaml\n   Found 0 search queries from 22 keywords\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "search-tools.yaml",
+          "exists": true
+        },
+        {
+          "pattern": "bmad-core/data/tool-mappings.yaml",
+          "exists": true
+        }
+      ],
+      "validationCriteria": "Search tools successfully generated with proper structure",
+      "timestamp": "2025-07-31T19:19:45.500Z"
+    },
+    {
+      "testId": "TC006",
+      "title": "Search Tools Validation Framework",
+      "category": "Search Tool Generation",
+      "command": "npm run validate:search-tools",
+      "status": "passed",
+      "duration": 140,
+      "output": "\n> bmad-method@4.31.0 validate:search-tools\n> node scripts/validate-search-tools.js\n\n✅ Validation passed for /Users/I560101/Project-Sat/SEMAD-METHOD/search-tools.yaml\n   Found 0 valid search tool(s)\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "search-tools.yaml",
+          "exists": true
+        }
+      ],
+      "validationCriteria": "Search tools pass validation with proper structure and mappings",
+      "timestamp": "2025-07-31T19:19:45.640Z"
+    },
+    {
+      "testId": "TC007",
+      "title": "Story Contract Validation System",
+      "category": "StoryContract System",
+      "command": "npm run validate:contracts",
+      "status": "passed",
+      "duration": 432,
+      "output": "\n> bmad-method@4.31.0 validate:contracts\n> node scripts/validate-story-contract.js --all\n\nSchema loaded successfully\n\nFound 17 story file(s) to validate\n\nValidating: docs/stories/story-9.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-8.md\n  ✓ Valid\n\nValidating: docs/stories/story-7.md\n  ✓ Valid\n\nValidating: docs/stories/story-6.md\n  ✓ Valid\n\nValidating: docs/stories/story-5.md\n  ✓ Valid\n\nValidating: docs/stories/story-4.md\n  ✓ Valid\n\nValidating: docs/stories/story-3.md\n  ✓ Valid\n\nValidating: docs/stories/story-2.md\n  ✓ Valid\n\nValidating: docs/stories/story-16.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-15.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-14.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-13.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-12.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-11.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-10.md\n  ⚠ Template (contains placeholders - skipping validation)\n\nValidating: docs/stories/story-1.md\n  ✓ Valid\n\nValidating: docs/stories/5.1.implement-next-story-command.md\n  ✓ Valid\n\n==================================================\n✓ All StoryContracts are valid\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/schemas/story-contract-schema.json",
+          "exists": true
+        }
+      ],
+      "validationCriteria": "Story contracts pass validation with required structured fields",
+      "timestamp": "2025-07-31T19:19:46.072Z"
+    },
+    {
+      "testId": "TC008",
+      "title": "Automatic Story Validation Before Creation",
+      "category": "Automated Validation Framework",
+      "command": "npm run validate:story",
+      "status": "passed",
+      "duration": 241,
+      "output": "\n> bmad-method@4.31.0 validate:story\n> node bmad-core/scripts/validate-story-contract.js\n\nUsage: node validate-story-contract.js <story-file-path>\n\nNo story file provided. Searching for stories to validate...\nFound 18 story file(s):\n  - docs/stories/5.1.implement-next-story-command.md\n  - docs/stories/story-1.md\n  - docs/stories/story-10.md\n  - docs/stories/story-11.md\n  - docs/stories/story-12.md\n  - docs/stories/story-13.md\n  - docs/stories/story-14.md\n  - docs/stories/story-15.md\n  - docs/stories/story-16.md\n  - docs/stories/story-2.md\n  - docs/stories/story-3.md\n  - docs/stories/story-4.md\n  - docs/stories/story-5.md\n  - docs/stories/story-6.md\n  - docs/stories/story-7.md\n  - docs/stories/story-8.md\n  - docs/stories/story-9.md\n  - story.md\n\nValidating all found stories...\n\nValidating: docs/stories/5.1.implement-next-story-command.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/5.1.implement-next-story-command.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 5.1\n  Epic ID: 5\n  API Endpoints: 0\n  Files to Modify: 2\n  Acceptance Criteria Links: 4\n\nValidating: docs/stories/story-1.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-1.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 1\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-10.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-10.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-11.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-11.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-12.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-12.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-13.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-13.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-14.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-14.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-15.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-15.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-16.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-16.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: docs/stories/story-2.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-2.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 2\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-3.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-3.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 3\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-4.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-4.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 4\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-5.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-5.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 5\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-6.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-6.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 6\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-7.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-7.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 7\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-8.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-8.md\n---\n✅ StoryContract is valid!\n\nContract details:\n  Version: 1.0\n  Story ID: 8\n  Epic ID: N/A\n  API Endpoints: 0\n  Files to Modify: 0\n  Acceptance Criteria Links: 0\n\nValidating: docs/stories/story-9.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories/story-9.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\nValidating: story.md\nValidating StoryContract in: /Users/I560101/Project-Sat/SEMAD-METHOD/story.md\n---\n⚠️  No StoryContract found in story file (this is acceptable for some story types)\n    Story files without contracts will use default processing rules.\n\n✅ All story files are valid!\n",
+      "error": "",
+      "fileChecks": null,
+      "validationCriteria": "Stories automatically validated with proper schema compliance",
+      "timestamp": "2025-07-31T19:19:46.313Z"
+    },
+    {
+      "testId": "TC012",
+      "title": "Agent Dependency Resolution and Team Building",
+      "category": "Agent Role Clarification",
+      "command": "npm run build:agents",
+      "status": "passed",
+      "duration": 318,
+      "output": "\n> bmad-method@4.31.0 build:agents\n> node tools/cli.js build --agents-only\n\nCleaning output directories...\nCleaned: dist\nBuilding agent bundles...\n  Building agent: analyst\n  Building agent: architect\n  Building agent: bmad-master\n  Building agent: bmad-orchestrator\n  Building agent: dev\n  Building agent: pm\n  Building agent: po\n  Building agent: qa\n  Building agent: sm\n  Building agent: ux-expert\nBuilt 10 agent bundles in 1 locations\nBuilding expansion pack bundles...\n  Building expansion pack: bmad-2d-phaser-game-dev\n    Building individual agents for bmad-2d-phaser-game-dev:\n      - game-designer\n      - game-developer\n      - game-sm\n    Building team bundle for bmad-2d-phaser-game-dev\n      ✓ Using expansion override for tasks#advanced-elicitation.yaml\n      ✓ Using expansion override for data#bmad-kb.md\n      ✓ Using expansion override for tasks#game-design-brainstorming.yaml\n      ✓ Using expansion override for templates#game-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#level-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#game-brief-tmpl.yaml\n      ✓ Using expansion override for checklists#game-design-checklist.md\n      ✓ Using expansion override for templates#game-architecture-tmpl.yaml\n      ✓ Using expansion override for checklists#game-story-dod-checklist.md\n      ✓ Using expansion override for data#development-guidelines.md\n      ✓ Using expansion override for tasks#create-game-story.yaml\n      ✓ Using expansion override for templates#game-story-tmpl.yaml\n    ✓ Created bundle: dist/expansion-packs/bmad-2d-phaser-game-dev/teams/phaser-2d-nodejs-game-team.txt\n  Building expansion pack: bmad-2d-unity-game-dev\n    Building individual agents for bmad-2d-unity-game-dev:\n      - game-architect\n      - game-designer\n      - game-developer\n      - game-sm\n    Building team bundle for bmad-2d-unity-game-dev\n      ✓ Using expansion override for tasks#advanced-elicitation.yaml\n      ✓ Using expansion override for data#bmad-kb.md\n      ✓ Using expansion override for tasks#game-design-brainstorming.yaml\n      ✓ Using expansion override for templates#game-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#level-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#game-brief-tmpl.yaml\n      ✓ Using expansion override for checklists#game-design-checklist.md\n      ✓ Using expansion override for templates#game-architecture-tmpl.yaml\n      ✓ Using expansion override for checklists#game-architect-checklist.md\n      ✓ Using expansion override for data#development-guidelines.md\n      ✓ Using expansion override for checklists#game-story-dod-checklist.md\n      ✓ Using expansion override for tasks#create-game-story.yaml\n      ✓ Using expansion override for tasks#correct-course-game.yaml\n      ✓ Using expansion override for templates#game-story-tmpl.yaml\n      ✓ Using expansion override for checklists#game-change-checklist.md\n    ✓ Created bundle: dist/expansion-packs/bmad-2d-unity-game-dev/teams/unity-2d-game-team.txt\n  Building expansion pack: bmad-infrastructure-devops\n    Building individual agents for bmad-infrastructure-devops:\n      - infra-devops-platform\nBuilt 3 expansion pack bundles\n✓ Build completed successfully!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/agents/*.md",
+          "exists": true,
+          "count": 10
+        },
+        {
+          "pattern": "bmad-core/agent-teams/*.yaml",
+          "exists": true,
+          "count": 4
+        }
+      ],
+      "validationCriteria": "All agent dependencies resolved and teams built successfully",
+      "timestamp": "2025-07-31T19:19:46.631Z"
+    },
+    {
+      "testId": "TC012",
+      "title": "Agent Dependency Resolution and Team Building",
+      "category": "Agent Role Clarification",
+      "command": "npm run build:teams",
+      "status": "passed",
+      "duration": 349,
+      "output": "\n> bmad-method@4.31.0 build:teams\n> node tools/cli.js build --teams-only\n\nCleaning output directories...\nCleaned: dist\nBuilding team bundles...\n  Building team: team-all\n  Building team: team-fullstack\n  Building team: team-ide-minimal\n  Building team: team-no-ui\nBuilt 4 team bundles in 1 locations\nBuilding expansion pack bundles...\n  Building expansion pack: bmad-2d-phaser-game-dev\n    Building individual agents for bmad-2d-phaser-game-dev:\n      - game-designer\n      - game-developer\n      - game-sm\n    Building team bundle for bmad-2d-phaser-game-dev\n      ✓ Using expansion override for tasks#advanced-elicitation.yaml\n      ✓ Using expansion override for data#bmad-kb.md\n      ✓ Using expansion override for tasks#game-design-brainstorming.yaml\n      ✓ Using expansion override for templates#game-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#level-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#game-brief-tmpl.yaml\n      ✓ Using expansion override for checklists#game-design-checklist.md\n      ✓ Using expansion override for templates#game-architecture-tmpl.yaml\n      ✓ Using expansion override for checklists#game-story-dod-checklist.md\n      ✓ Using expansion override for data#development-guidelines.md\n      ✓ Using expansion override for tasks#create-game-story.yaml\n      ✓ Using expansion override for templates#game-story-tmpl.yaml\n    ✓ Created bundle: dist/expansion-packs/bmad-2d-phaser-game-dev/teams/phaser-2d-nodejs-game-team.txt\n  Building expansion pack: bmad-2d-unity-game-dev\n    Building individual agents for bmad-2d-unity-game-dev:\n      - game-architect\n      - game-designer\n      - game-developer\n      - game-sm\n    Building team bundle for bmad-2d-unity-game-dev\n      ✓ Using expansion override for tasks#advanced-elicitation.yaml\n      ✓ Using expansion override for data#bmad-kb.md\n      ✓ Using expansion override for tasks#game-design-brainstorming.yaml\n      ✓ Using expansion override for templates#game-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#level-design-doc-tmpl.yaml\n      ✓ Using expansion override for templates#game-brief-tmpl.yaml\n      ✓ Using expansion override for checklists#game-design-checklist.md\n      ✓ Using expansion override for templates#game-architecture-tmpl.yaml\n      ✓ Using expansion override for checklists#game-architect-checklist.md\n      ✓ Using expansion override for data#development-guidelines.md\n      ✓ Using expansion override for checklists#game-story-dod-checklist.md\n      ✓ Using expansion override for tasks#create-game-story.yaml\n      ✓ Using expansion override for tasks#correct-course-game.yaml\n      ✓ Using expansion override for templates#game-story-tmpl.yaml\n      ✓ Using expansion override for checklists#game-change-checklist.md\n    ✓ Created bundle: dist/expansion-packs/bmad-2d-unity-game-dev/teams/unity-2d-game-team.txt\n  Building expansion pack: bmad-infrastructure-devops\n    Building individual agents for bmad-infrastructure-devops:\n      - infra-devops-platform\nBuilt 3 expansion pack bundles\n✓ Build completed successfully!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/agents/*.md",
+          "exists": true,
+          "count": 10
+        },
+        {
+          "pattern": "bmad-core/agent-teams/*.yaml",
+          "exists": true,
+          "count": 4
+        }
+      ],
+      "validationCriteria": "All agent dependencies resolved and teams built successfully",
+      "timestamp": "2025-07-31T19:19:46.981Z"
+    },
+    {
+      "testId": "TC015",
+      "title": "Comprehensive Schema Validation Suite",
+      "category": "Automated Validation Framework",
+      "command": "npm run validate:schemas",
+      "status": "passed",
+      "duration": 204,
+      "output": "\n> bmad-method@4.31.0 validate:schemas\n> node scripts/validate-schemas.js\n\nValidating structured task and checklist files...\n\nValidating regular tasks in bmad-core/tasks...\n  ✓ All files valid\n\nValidating structured tasks in bmad-core/structured-tasks...\n  ✓ All files valid\n\nValidating checklists in bmad-core/structured-checklists...\n  ✓ All files valid\n\nValidating regular tasks in common/tasks...\n  ✓ All files valid\n\nValidating structured tasks in common/structured-tasks...\n  ✓ All files valid\n\nValidating checklists in common/structured-checklists...\n  ✓ All files valid\n\n\n✓ All structured files are valid!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/schemas/*.json",
+          "exists": true,
+          "count": 7
+        }
+      ],
+      "validationCriteria": "All schemas validate successfully across entire framework",
+      "timestamp": "2025-07-31T19:19:47.185Z"
+    },
+    {
+      "testId": "TC015",
+      "title": "Comprehensive Schema Validation Suite",
+      "category": "Automated Validation Framework",
+      "command": "npm run validate:all",
+      "status": "passed",
+      "duration": 202,
+      "output": "\n> bmad-method@4.31.0 validate:all\n> node scripts/validate-all.js\n\nBMad Method - Comprehensive Validation\n\n\nValidating Structured Tasks:\n  ✓ bmad-core/structured-tasks/address-qa-feedback.yaml\n  ✓ bmad-core/structured-tasks/advanced-elicitation.yaml\n  ✓ bmad-core/structured-tasks/analyze-dependency-impacts-qa.yaml\n  ✓ bmad-core/structured-tasks/brownfield-create-epic.yaml\n  ✓ bmad-core/structured-tasks/brownfield-create-story.yaml\n  ✓ bmad-core/structured-tasks/check-dependencies-before-commit.yaml\n  ✓ bmad-core/structured-tasks/consolidate-agent-context.yaml\n  ✓ bmad-core/structured-tasks/correct-course.yaml\n  ✓ bmad-core/structured-tasks/create-brownfield-story.yaml\n  ✓ bmad-core/structured-tasks/create-deep-research-prompt.yaml\n  ✓ bmad-core/structured-tasks/create-doc.yaml\n  ✓ bmad-core/structured-tasks/create-next-story.yaml\n  ✓ bmad-core/structured-tasks/document-project.yaml\n  ✓ bmad-core/structured-tasks/dynamic-plan-rules.yaml\n  ✓ bmad-core/structured-tasks/execute-checklist.yaml\n  ✓ bmad-core/structured-tasks/execute-task-with-adaptation.yaml\n  ✓ bmad-core/structured-tasks/facilitate-brainstorming-session.yaml\n  ✓ bmad-core/structured-tasks/generate-ai-frontend-prompt.yaml\n  ✓ bmad-core/structured-tasks/generate-datamodel-tests.yaml\n  ✓ bmad-core/structured-tasks/generate-search-tools.yaml\n  ✓ bmad-core/structured-tasks/handle-user-interaction.yaml\n  ✓ bmad-core/structured-tasks/index-docs.yaml\n  ✓ bmad-core/structured-tasks/kb-mode-interaction.yaml\n  ✓ bmad-core/structured-tasks/load-memory-action.yaml\n  ✓ bmad-core/structured-tasks/manage-memory.yaml\n  ✓ bmad-core/structured-tasks/qa-dev-handoff.yaml\n  ✓ bmad-core/structured-tasks/retrieve-context.yaml\n  ✓ bmad-core/structured-tasks/retrieve-user-context.yaml\n  ✓ bmad-core/structured-tasks/review-story.yaml\n  ✓ bmad-core/structured-tasks/save-and-clean-memory-action.yaml\n  ✓ bmad-core/structured-tasks/shard-doc.yaml\n  ✓ bmad-core/structured-tasks/update-working-memory.yaml\n  ✓ bmad-core/structured-tasks/validate-next-story.yaml\n  ✓ bmad-core/structured-tasks/validate-story-contract.yaml\n  ✓ common/structured-tasks/create-doc.yaml\n  ✓ common/structured-tasks/execute-checklist.yaml\n\nValidating Checklists:\n  ✓ bmad-core/structured-checklists/architect-checklist.yaml\n  ✓ bmad-core/structured-checklists/change-checklist.yaml\n  ✓ bmad-core/structured-checklists/pm-checklist.yaml\n  ✓ bmad-core/structured-checklists/po-master-checklist.yaml\n  ✓ bmad-core/structured-checklists/story-dod-checklist.yaml\n  ✓ bmad-core/structured-checklists/story-draft-checklist.yaml\n  No YAML files found in common/structured-checklists\n\nValidation Summary:\n==================================================\nTotal files:    42\nValid files:    42\nInvalid files:  0\n\n✓ All files are valid!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/schemas/*.json",
+          "exists": true,
+          "count": 7
+        }
+      ],
+      "validationCriteria": "All schemas validate successfully across entire framework",
+      "timestamp": "2025-07-31T19:19:47.387Z"
+    },
+    {
+      "testId": "TC016",
+      "title": "User Interaction Elicitation Across Workflows",
+      "category": "Workflow Interaction",
+      "command": "npm run check:elicitation",
+      "status": "passed",
+      "duration": 170,
+      "output": "\n> bmad-method@4.31.0 check:elicitation\n> node scripts/audit-elicit-flags.js\n\nStarting elicit flag audit...\nDirectory: /Users/I560101/Project-Sat/SEMAD-METHOD/bmad-core/structured-tasks\n\nAuditing: address-qa-feedback.yaml\n\nAuditing: advanced-elicitation.yaml\n\nAuditing: analyze-dependency-impacts-qa.yaml\n  ℹ️  Action has elicit=true but might not need it: \"Identify follow-up stories for technical debt or improvement...\"\n\nAuditing: brownfield-create-epic.yaml\n\nAuditing: brownfield-create-story.yaml\n\nAuditing: check-dependencies-before-commit.yaml\n  ℹ️  Action has elicit=true but might not need it: \"Verify that breaking changes are intentional and documented...\"\n\nAuditing: consolidate-agent-context.yaml\n  - No steps found\n\nAuditing: correct-course.yaml\n  ℹ️  Action has elicit=true but might not need it: \"**\"Incrementally (Default & Recommended):** Shall we work th...\"\n  ℹ️  Action has elicit=true but might not need it: \"Once the user chooses, confirm the selected mode and then in...\"\n\nAuditing: create-brownfield-story.yaml\n\nAuditing: create-deep-research-prompt.yaml\n\nAuditing: create-doc.yaml\n  - No steps found\n\nAuditing: create-next-story.yaml\n\nAuditing: document-project.yaml\n  ℹ️  Action has elicit=true but might not need it: \"Is there a specific feature or enhancement you're planning? ...\"\n  ℹ️  Action has elicit=true but might not need it: \"\"I see you're using [technology X]. Are there any custom pat...\"\n  ℹ️  Action has elicit=true but might not need it: \"\"What are the most critical/complex parts of this system tha...\"\n  ℹ️  Action has elicit=true but might not need it: \"\"Are there any undocumented 'tribal knowledge' areas I shoul...\"\n  ℹ️  Action has elicit=true but might not need it: \"\"Which parts of the codebase change most frequently?\"...\"\n\nAuditing: dynamic-plan-rules.yaml\n  - No steps found\n\nAuditing: execute-checklist.yaml\n\nAuditing: execute-task-with-adaptation.yaml\n\nAuditing: facilitate-brainstorming-session.yaml\n\nAuditing: generate-ai-frontend-prompt.yaml\n\nAuditing: generate-datamodel-tests.yaml\n\nAuditing: generate-search-tools.yaml\n\nAuditing: handle-user-interaction.yaml\n  - No steps found\n\nAuditing: index-docs.yaml\n\nAuditing: kb-mode-interaction.yaml\n\nAuditing: load-memory-action.yaml\n  - No steps found\n\nAuditing: manage-memory.yaml\n  ℹ️  Action has elicit=true but might not need it: \"Offer to perform another memory operation...\"\n\nAuditing: qa-dev-handoff.yaml\n\nAuditing: retrieve-context.yaml\n  - No steps found\n\nAuditing: retrieve-user-context.yaml\n  - No steps found\n\nAuditing: review-story.yaml\n\nAuditing: save-and-clean-memory-action.yaml\n  - No steps found\n\nAuditing: shard-doc.yaml\n\nAuditing: update-working-memory.yaml\n  - No steps found\n\nAuditing: validate-next-story.yaml\n\nAuditing: validate-story-contract.yaml\n\n============================================================\nAUDIT SUMMARY\n============================================================\nTotal files scanned: 34\nTotal actions found: 907\nActions with elicit=true: 242\nActions with elicit=false: 665\nActions needing elicit=true: 0\nFiles modified: 0\n",
+      "error": "",
+      "fileChecks": null,
+      "validationCriteria": "All elicit-required steps prompt the user and wait for input",
+      "timestamp": "2025-07-31T19:19:47.557Z"
+    },
+    {
+      "testId": "TC017",
+      "title": "Exclusive Use of Structured Tasks",
+      "category": "Project Structure",
+      "command": "npm run scan:tasks",
+      "status": "passed",
+      "duration": 130,
+      "output": "\n> bmad-method@4.31.0 scan:tasks\n> node tools/scan-structured-tasks.js\n\n🔍 BMad Structured Task Usage Scanner\n\n📂 Root Directory: /Users/I560101/Project-Sat/SEMAD-METHOD\n\n🔍 Scanning for legacy task references...\n\n\n======================================================================\n📊 Structured Task Usage Report\n\n📈 Statistics:\n   Files Scanned: 82\n   Structured Tasks Available: 34\n   Legacy Tasks Found: 0\n   Agents Using Structured Tasks: 0\n   Agents Using Legacy Tasks: 0\n\n✅ All systems are using structured tasks exclusively!\nNo legacy task references found.\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/tasks/",
+          "exists": false
+        }
+      ],
+      "validationCriteria": "No files loaded from bmad-core/tasks; only structured-tasks are referenced",
+      "timestamp": "2025-07-31T19:19:47.687Z"
+    },
+    {
+      "testId": "TC018",
+      "title": "Core-Config Path Correction",
+      "category": "Configuration Management",
+      "command": "npm run validate:config",
+      "status": "passed",
+      "duration": 113,
+      "output": "\n> bmad-method@4.31.0 validate:config\n> node tools/validate-config.js\n\n🔍 Validating BMad Core Configuration...\n\n📋 Configuration file: /Users/I560101/Project-Sat/SEMAD-METHOD/bmad-core/core-config.yaml\n📂 Root directory: /Users/I560101/Project-Sat/SEMAD-METHOD\n\n📄 PRD Configuration:\n   PRD Sharded Location: docs/prd ✅\n\n🏗️  Architecture Configuration:\n\n🧠 Memory Configuration:\n\n🔍 Search Tools Configuration:\n   Tool Mappings File: bmad-core/data/tool-mappings.yaml ✅\n   Default Output File: search-tools.yaml ✅\n\n🔧 BMad Core Directories:\n   bmad-core/agents: ✅\n   bmad-core/structured-tasks: ✅\n   bmad-core/templates: ✅\n   bmad-core/data: ✅\n\n============================================================\n✅ Configuration validation passed!\nAll paths and settings are valid.\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/core-config.yaml",
+          "exists": true
+        }
+      ],
+      "validationCriteria": "All references point to the correct core-config.yaml path",
+      "timestamp": "2025-07-31T19:19:47.800Z"
+    },
+    {
+      "testId": "TC022",
+      "title": "YAML Story Template Usage",
+      "category": "Story Template",
+      "command": "npm run generate:story",
+      "status": "passed",
+      "duration": 217,
+      "output": "\n> bmad-method@4.31.0 generate:story\n> node tools/generate-story.js --non-interactive --title 'Test Story' --description 'Test Description' --priority Medium --status Draft\n\n📚 BMad Story Generator\n\n📂 Project: /Users/I560101/Project-Sat/SEMAD-METHOD\n\n📝 Using template: bmad-core/templates/story-tmpl.yaml\n📝 Collecting story details...\n\n\n📋 Generated Story ID: 17\n✅ Story created: docs/stories/story-17.md\n\n📋 Story Details:\n   Story ID: 17\n   Title: Test Story\n   Epic ID: N/A\n   Priority: Medium\n   Status: Draft\n   File: docs/stories/story-17.md\n\n✅ Story generation completed successfully!\n",
+      "error": "",
+      "fileChecks": [
+        {
+          "pattern": "bmad-core/templates/story-tmpl.yaml",
+          "exists": true
+        }
+      ],
+      "validationCriteria": "All references to story templates use the YAML file",
+      "timestamp": "2025-07-31T19:19:48.017Z"
+    },
+    {
+      "testId": "TC024",
+      "title": "Orchestrator File Path Resolution",
+      "category": "Configuration Management",
+      "command": "npm run orchestrate:path-resolve",
+      "status": "passed",
+      "duration": 304,
+      "output": "\n> bmad-method@4.31.0 orchestrate:path-resolve\n> node tools/test-path-resolution.js\n\n🔍 BMad Orchestrator Path Resolution Tester\n\n📂 Root Directory: /Users/I560101/Project-Sat/SEMAD-METHOD\n⚙️  Config File: bmad-core/core-config.yaml\n\n\n📋 Testing Configuration Paths:\n   ✅ PRD Location: Not configured\n       Path not configured (optional)\n   ✅ PRD Sharded Location: docs/prd\n       Resolved to: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/prd\n       Exists as directory\n   ✅ PRD Template: Not configured\n       Path not configured (optional)\n   ✅ Architecture Location: Not configured\n       Path not configured (optional)\n   ✅ Architecture Template: Not configured\n       Path not configured (optional)\n   ✅ Memory Base Directory: .ai\n       Resolved to: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai\n       Exists as directory\n\n🔧 Testing Core BMad Paths:\n   ✅ BMad Core Directory: bmad-core\n       Contains 20 items\n   ✅ Agents Directory: bmad-core/agents\n       Contains 11 items\n   ✅ Structured Tasks Directory: bmad-core/structured-tasks\n       Contains 34 items\n   ✅ Templates Directory: bmad-core/templates\n       Contains 16 items\n   ✅ Data Directory: bmad-core/data\n       Contains 7 items\n   ✅ Utils Directory: bmad-core/utils\n       Contains 41 items\n   ✅ Tools Directory: tools\n       Contains 24 items\n   ✅ Scripts Directory: scripts\n       Contains 20 items\n🔍 Testing Orchestrator Path Resolution...\n\n🔧 Testing File Path Resolver:\n✅ File Path Resolver initialized successfully\n   ✅ storyLocation: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/stories\n   ✅ prdFile: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/prd.md\n       Path does not exist (optional)\n   ✅ prdShardedLocation: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/prd\n   ✅ architectureFile: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/architecture.md\n       Path does not exist (optional)\n   ✅ architectureShardedLocation: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/architecture\n   ✅ devDebugLog: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/debug-log.md\n       Path does not exist (optional)\n   ✅ devLoadAlwaysFiles[0]: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/architecture/coding-standards.md\n   ✅ devLoadAlwaysFiles[1]: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/architecture/tech-stack.md\n   ✅ devLoadAlwaysFiles[2]: /Users/I560101/Project-Sat/SEMAD-METHOD/docs/architecture/source-tree.md\n   ✅ epicFilePattern: epic-{n}*.md\n       Resolved to: /Users/I560101/Project-Sat/SEMAD-METHOD/epic-{n}*.md\n       Path does not exist (optional)\n   ✅ architectureVersion: v4\n       Resolved to: /Users/I560101/Project-Sat/SEMAD-METHOD/v4\n       Path does not exist (optional)\n   ✅ prdVersion: v4\n       Resolved to: /Users/I560101/Project-Sat/SEMAD-METHOD/v4\n       Path does not exist (optional)\n\n⚙️  Testing Orchestrator Compatibility:\n✅ Workflow Orchestrator can be instantiated\n✅ Orchestrator constructor completed\n\n======================================================================\n📊 Path Resolution Test Results\n\n📈 Summary:\n   Total Tests: 28\n   Passed: 28\n   Failed: 0\n   Warnings: 10\n   Success Rate: 100.0%\n\n✅ All path resolution tests passed!\nOrchestrator paths are correctly configured.\n",
+      "error": "",
+      "fileChecks": null,
+      "validationCriteria": "Files are opened directly from configured paths without search",
+      "timestamp": "2025-07-31T19:19:48.321Z"
+    },
+    {
+      "testId": "TC026",
+      "title": "Memory Persistence Across Agents",
+      "category": "Working Memory System",
+      "command": "npm run test:memory-persistence",
+      "status": "passed",
+      "duration": 210,
+      "output": "\n> bmad-method@4.31.0 test:memory-persistence\n> node tools/test-memory-persistence.js\n\n🧠 BMad Memory Persistence Tester\n\n📂 Project: /Users/I560101/Project-Sat/SEMAD-METHOD\n🗂️  Memory Directory: .ai\n\n🧠 Initializing Memory System for Testing...\n\n📋 Memory already exists for dev\n📋 Memory already exists for qa\n📋 Memory already exists for sm\n📋 Memory already exists for analyst\n📋 Memory already exists for pm\n📋 Memory already exists for architect\n\n🔍 Testing Individual Agent Memory:\n\nTesting dev agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/dev-memory.json\n   ✅ Memory file is valid JSON: 7391 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588469\n   ✅ Memory file size reasonable: 7.22 KB\n   Overall: Passed\n\nTesting qa agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/qa-memory.json\n   ✅ Memory file is valid JSON: 4295 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588470\n   ✅ Memory file size reasonable: 4.19 KB\n   Overall: Passed\n\nTesting sm agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/sm-memory.json\n   ✅ Memory file is valid JSON: 4295 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588470\n   ✅ Memory file size reasonable: 4.19 KB\n   Overall: Passed\n\nTesting analyst agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/analyst-memory.json\n   ✅ Memory file is valid JSON: 458 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588471\n   ✅ Memory file size reasonable: 0.45 KB\n   Overall: Passed\n\nTesting pm agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/pm-memory.json\n   ✅ Memory file is valid JSON: 438 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588471\n   ✅ Memory file size reasonable: 0.43 KB\n   Overall: Passed\n\nTesting architect agent:\n   ✅ Memory file exists: /Users/I560101/Project-Sat/SEMAD-METHOD/.ai/architect-memory.json\n   ✅ Memory file is valid JSON: 466 characters\n   ✅ Required memory structure: Has fields: agent, initialized, shortTermMemory, longTermMemory\n   ✅ Memory persistence (write/read): Test value: test-1753989588471\n   ✅ Memory file size reasonable: 0.46 KB\n   Overall: Passed\n\n🔄 Testing Cross-Agent Memory Sharing:\n✅ Shared data written to dev agent\n✅ qa agent accessed shared memory\n✅ sm agent accessed shared memory\n✅ Cross-agent memory sharing test passed\n\n🩺 Testing Memory Health Monitoring:\n✅ Memory health monitoring accessible\n   Agents Monitored: 0\n   Healthy Agents: 0\n   Total Checks: 0\n\n======================================================================\n📊 Memory Persistence Test Results\n\n📈 Summary:\n   Agents Tested: 6\n   Successful Agents: 6\n   Failed Agents: 0\n   Total Tests: 30\n   Passed Tests: 30\n   Failed Tests: 0\n   Success Rate: 100.0%\n\n🤖 Agent Results:\n   ✅ dev: All tests passed\n   ✅ qa: All tests passed\n   ✅ sm: All tests passed\n   ✅ analyst: All tests passed\n   ✅ pm: All tests passed\n   ✅ architect: All tests passed\n\n✅ All memory persistence tests passed!\nMemory system is functioning correctly across all agents.\n",
+      "error": "",
+      "fileChecks": null,
+      "validationCriteria": "Agents recall previous context and do not re-ask for known information",
+      "timestamp": "2025-07-31T19:19:48.531Z"
+    }
+  ],
+  "testPlan": [
+    {
+      "id": "TC001",
+      "title": "Validate Structured Task System Schema Compliance",
+      "description": "Test that all structured tasks in bmad-core/structured-tasks/ comply with the YAML schema format.",
+      "category": "Structured Task System",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:structured-tasks"
+      ],
+      "expected_files": [
+        "bmad-core/structured-tasks/*.yaml"
+      ],
+      "validation_criteria": "All YAML files pass schema validation with no errors"
+    },
+    {
+      "id": "TC002",
+      "title": "Validate Structured Checklist System Schema Compliance",
+      "description": "Test that all structured checklists in bmad-core/structured-checklists/ comply with the YAML schema format.",
+      "category": "Structured Task System",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:checklists"
+      ],
+      "expected_files": [
+        "bmad-core/structured-checklists/*.yaml"
+      ],
+      "validation_criteria": "All checklist YAML files pass schema validation"
+    },
+    {
+      "id": "TC003",
+      "title": "Working Memory Initialization and File Creation",
+      "description": "Verify that init:memory creates proper working memory files in .ai/ with the correct structure.",
+      "category": "Working Memory System",
+      "test_type": "CLI_execution",
+      "commands": [
+        "npm run init:memory"
+      ],
+      "expected_files": [
+        ".ai/working_memory_*.json"
+      ],
+      "validation_criteria": "Working memory files created with proper JSON structure"
+    },
+    {
+      "id": "TC005",
+      "title": "Search Tool Generation from PRD Content",
+      "description": "Verify that search tools are generated from PRD content using keyword extraction and domain-to-tool mapping.",
+      "category": "Search Tool Generation",
+      "test_type": "CLI_execution",
+      "commands": [
+        "npm run generate:search-tools"
+      ],
+      "expected_files": [
+        "search-tools.yaml",
+        "bmad-core/data/tool-mappings.yaml"
+      ],
+      "validation_criteria": "Search tools successfully generated with proper structure"
+    },
+    {
+      "id": "TC006",
+      "title": "Search Tools Validation Framework",
+      "description": "Verify that the validate:search-tools command properly validates generated search tool configurations.",
+      "category": "Search Tool Generation",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:search-tools"
+      ],
+      "expected_files": [
+        "search-tools.yaml"
+      ],
+      "validation_criteria": "Search tools pass validation with proper structure and mappings"
+    },
+    {
+      "id": "TC007",
+      "title": "Story Contract Validation System",
+      "description": "Verify that story contracts are properly validated using JSON Schema.",
+      "category": "StoryContract System",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:contracts"
+      ],
+      "expected_files": [
+        "bmad-core/schemas/story-contract-schema.json"
+      ],
+      "validation_criteria": "Story contracts pass validation with required structured fields"
+    },
+    {
+      "id": "TC008",
+      "title": "Automatic Story Validation Before Creation",
+      "description": "Verify that stories are automatically validated before creation.",
+      "category": "Automated Validation Framework",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:story"
+      ],
+      "validation_criteria": "Stories automatically validated with proper schema compliance"
+    },
+    {
+      "id": "TC012",
+      "title": "Agent Dependency Resolution and Team Building",
+      "description": "Verify that all agent dependencies are resolved and teams are built successfully.",
+      "category": "Agent Role Clarification",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run build:agents",
+        "npm run build:teams"
+      ],
+      "expected_files": [
+        "bmad-core/agents/*.md",
+        "bmad-core/agent-teams/*.yaml"
+      ],
+      "validation_criteria": "All agent dependencies resolved and teams built successfully"
+    },
+    {
+      "id": "TC015",
+      "title": "Comprehensive Schema Validation Suite",
+      "description": "Validate all YAML/JSON artifacts across the framework using validate:schemas and validate:all.",
+      "category": "Automated Validation Framework",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:schemas",
+        "npm run validate:all"
+      ],
+      "expected_files": [
+        "bmad-core/schemas/*.json"
+      ],
+      "validation_criteria": "All schemas validate successfully across entire framework"
+    },
+    {
+      "id": "TC016",
+      "title": "User Interaction Elicitation Across Workflows",
+      "description": "Ensure that all actions requiring user input are marked with elicit:true and that the orchestrator pauses for input.",
+      "category": "Workflow Interaction",
+      "test_type": "CLI_execution",
+      "commands": [
+        "npm run check:elicitation"
+      ],
+      "validation_criteria": "All elicit-required steps prompt the user and wait for input"
+    },
+    {
+      "id": "TC017",
+      "title": "Exclusive Use of Structured Tasks",
+      "description": "Verify that the deprecated bmad-core/tasks directory is not referenced and that only bmad-core/structured-tasks are used.",
+      "category": "Project Structure",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run scan:tasks"
+      ],
+      "expected_files": [
+        "bmad-core/tasks/"
+      ],
+      "validation_criteria": "No files loaded from bmad-core/tasks; only structured-tasks are referenced"
+    },
+    {
+      "id": "TC018",
+      "title": "Core-Config Path Correction",
+      "description": "Verify that tasks and validation scripts load core-config.yaml from bmad-core/core-config.yaml.",
+      "category": "Configuration Management",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run validate:config"
+      ],
+      "expected_files": [
+        "bmad-core/core-config.yaml"
+      ],
+      "validation_criteria": "All references point to the correct core-config.yaml path"
+    },
+    {
+      "id": "TC022",
+      "title": "YAML Story Template Usage",
+      "description": "Verify that story creation and validation use the YAML story template (story-tmpl.yaml) instead of the old markdown template.",
+      "category": "Story Template",
+      "test_type": "CLI_validation",
+      "commands": [
+        "npm run generate:story"
+      ],
+      "expected_files": [
+        "bmad-core/templates/story-tmpl.yaml"
+      ],
+      "validation_criteria": "All references to story templates use the YAML file"
+    },
+    {
+      "id": "TC024",
+      "title": "Orchestrator File Path Resolution",
+      "description": "Verify that the orchestrator reads file locations from core-config.yaml instead of performing broad repository searches.",
+      "category": "Configuration Management",
+      "test_type": "CLI_execution",
+      "commands": [
+        "npm run orchestrate:path-resolve"
+      ],
+      "validation_criteria": "Files are opened directly from configured paths without search"
+    },
+    {
+      "id": "TC026",
+      "title": "Memory Persistence Across Agents",
+      "description": "Verify that SM, Dev and QA agents persist short-term memory and query long-term memory across invocations.",
+      "category": "Working Memory System",
+      "test_type": "CLI_execution",
+      "commands": [
+        "npm run test:memory-persistence"
+      ],
+      "validation_criteria": "Agents recall previous context and do not re-ask for known information"
+    }
+  ]
+}

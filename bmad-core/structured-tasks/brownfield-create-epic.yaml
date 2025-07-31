@@ -1,19 +1,36 @@
 id: brownfield-create-epic
 name: Create Brownfield Epic Task
-purpose: >-
-  Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture
-  documentation process. This task is for isolated features or modifications that can be completed within a focused
-  scope.
+purpose: Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture documentation process. This task is for isolated features or modifications that can be completed within a focused scope.
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: pm
+          context:
+            taskId: brownfield-create-epic
+            taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory Context
-    description: "Set up working memory and retrieve project context"
+    description: Set up working memory and retrieve project context
     actions:
-      - description: "Initialize working memory for epic creation"
+      - description: Initialize working memory for epic creation
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Retrieve relevant project context from memory"
+      - description: Retrieve relevant project context from memory
         elicit: false
         metadata:
           originalIndent: 0
@@ -24,41 +41,41 @@ steps:
       **Existing Project Context:**
       **Enhancement Scope:**
     actions:
-      - description: "[ ] Project purpose and current functionality understood"
+      - description: '[ ] Project purpose and current functionality understood'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Existing technology stack identified"
+      - description: '[ ] Existing technology stack identified'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Current architecture patterns noted"
+      - description: '[ ] Current architecture patterns noted'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Integration points with existing system identified"
+      - description: '[ ] Integration points with existing system identified'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Enhancement clearly defined and scoped"
+      - description: '[ ] Enhancement clearly defined and scoped'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Impact on existing functionality assessed"
+      - description: '[ ] Impact on existing functionality assessed'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Required integration points identified"
+      - description: '[ ] Required integration points identified'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Success criteria established"
+      - description: '[ ] Success criteria established'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "1"
+      originalNumber: '1'
   - id: step2
     name: Epic Creation
     description: |-
@@ -79,81 +96,81 @@ steps:
       #### Risk Mitigation
       #### Definition of Done
     actions:
-      - description: "Current relevant functionality: {{brief description}}"
+      - description: 'Current relevant functionality: {{brief description}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Technology stack: {{relevant existing technologies}}"
+      - description: 'Technology stack: {{relevant existing technologies}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Integration points: {{where new work connects to existing system}}"
+      - description: 'Integration points: {{where new work connects to existing system}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "What's being added/changed: {{clear description}}"
+      - description: 'What''s being added/changed: {{clear description}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "How it integrates: {{integration approach}}"
+      - description: 'How it integrates: {{integration approach}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Success criteria: {{measurable outcomes}}"
+      - description: 'Success criteria: {{measurable outcomes}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Existing APIs remain unchanged"
+      - description: '[ ] Existing APIs remain unchanged'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Database schema changes are backward compatible"
+      - description: '[ ] Database schema changes are backward compatible'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] UI changes follow existing patterns"
+      - description: '[ ] UI changes follow existing patterns'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Performance impact is minimal"
+      - description: '[ ] Performance impact is minimal'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Primary Risk:** {{main risk to existing system}}"
+      - description: '**Primary Risk:** {{main risk to existing system}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Mitigation:** {{how risk will be addressed}}"
+      - description: '**Mitigation:** {{how risk will be addressed}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "**Rollback Plan:** {{how to undo changes if needed}}"
+      - description: '**Rollback Plan:** {{how to undo changes if needed}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] All stories completed with acceptance criteria met"
+      - description: '[ ] All stories completed with acceptance criteria met'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Existing functionality verified through testing"
+      - description: '[ ] Existing functionality verified through testing'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Integration points working correctly"
+      - description: '[ ] Integration points working correctly'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Documentation updated appropriately"
+      - description: '[ ] Documentation updated appropriately'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] No regression in existing features"
+      - description: '[ ] No regression in existing features'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "2"
+      originalNumber: '2'
   - id: step3
     name: Validation Checklist
     description: |-
@@ -162,57 +179,57 @@ steps:
       **Risk Assessment:**
       **Completeness Check:**
     actions:
-      - description: "[ ] Epic can be completed in 1-3 stories maximum"
+      - description: '[ ] Epic can be completed in 1-3 stories maximum'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] No architectural documentation is required"
+      - description: '[ ] No architectural documentation is required'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Enhancement follows existing patterns"
+      - description: '[ ] Enhancement follows existing patterns'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Integration complexity is manageable"
+      - description: '[ ] Integration complexity is manageable'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Risk to existing system is low"
+      - description: '[ ] Risk to existing system is low'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Rollback plan is feasible"
+      - description: '[ ] Rollback plan is feasible'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Testing approach covers existing functionality"
+      - description: '[ ] Testing approach covers existing functionality'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Team has sufficient knowledge of integration points"
+      - description: '[ ] Team has sufficient knowledge of integration points'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Epic goal is clear and achievable"
+      - description: '[ ] Epic goal is clear and achievable'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Stories are properly scoped"
+      - description: '[ ] Stories are properly scoped'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Success criteria are measurable"
+      - description: '[ ] Success criteria are measurable'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "[ ] Dependencies are identified"
+      - description: '[ ] Dependencies are identified'
         elicit: false
         metadata:
           originalIndent: 0
     metadata:
       level: 3
-      originalNumber: "3"
+      originalNumber: '3'
   - id: step4
     name: Handoff to Story Manager
     description: |-
@@ -222,7 +239,7 @@ steps:
       "Please develop detailed user stories for this brownfield epic. Key considerations:
       The epic should maintain system integrity while delivering {{epic goal}}."
       ---
-      
+
       Update working memory with epic details for future reference
       The epic creation is successful when:
       1. Enhancement scope is clearly defined and appropriately sized
@@ -236,15 +253,15 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Integration points: {{list key integration points}}"
+      - description: 'Integration points: {{list key integration points}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Existing patterns to follow: {{relevant existing patterns}}"
+      - description: 'Existing patterns to follow: {{relevant existing patterns}}'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: "Critical compatibility requirements: {{key requirements}}"
+      - description: 'Critical compatibility requirements: {{key requirements}}'
         elicit: false
         metadata:
           originalIndent: 0
@@ -268,10 +285,29 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-    notes: "- Critical compatibility requirements: {{key requirements}}"
+    notes: '- Critical compatibility requirements: {{key requirements}}'
     metadata:
       level: 3
-      originalNumber: "4"
+      originalNumber: '4'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: pm
+          taskData:
+            observation: Completed brownfield-create-epic task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: brownfield-create-epic
+            context:
+              taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:

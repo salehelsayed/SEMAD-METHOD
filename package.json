@@ -5,7 +5,8 @@
   "main": "tools/cli.js",
   "bin": {
     "bmad": "tools/bmad-npx-wrapper.js",
-    "bmad-method": "tools/bmad-npx-wrapper.js"
+    "bmad-method": "tools/bmad-npx-wrapper.js",
+    "bmad-orchestrator": "tools/workflow-orchestrator.js"
   },
   "scripts": {
     "build": "node tools/cli.js build",
@@ -21,10 +22,14 @@
     "validate:story": "node bmad-core/scripts/validate-story-contract.js",
     "validate:contracts": "node scripts/validate-story-contract.js --all",
     "validate:workflows": "node bmad-core/utils/workflow-validator.js",
+    "validate:config": "node tools/validate-config.js",
+    "check:elicitation": "node scripts/audit-elicit-flags.js",
+    "scan:tasks": "node tools/scan-structured-tasks.js",
     "install:bmad": "node tools/installer/bin/bmad.js install",
     "format": "prettier --write \"**/*.md\"",
     "test": "jest --config jest.config.js",
     "test:watch": "jest --watch",
+    "test:cli": "node testsprite_tests/run-cli-tests.js",
     "init:memory": "node bmad-core/scripts/init-memory.js",
     "generate:search-tools": "node scripts/generate-search-tools.js",
     "ingest:search-results": "node scripts/ingest-to-qdrant.js",
@@ -42,6 +47,18 @@
     "version:expansion:all:minor": "node tools/bump-all-versions.js minor",
     "version:expansion:all:major": "node tools/bump-all-versions.js major",
     "version:expansion:all:patch": "node tools/bump-all-versions.js patch",
+    "orchestrate": "node tools/workflow-orchestrator.js run --non-interactive",
+    "orchestrate:status": "node tools/workflow-orchestrator.js status",
+    "orchestrate:greenfield": "node tools/workflow-orchestrator.js run --non-interactive --mode=greenfield",
+    "orchestrate:path-resolve": "node tools/test-path-resolution.js",
+    "dev:next-story": "node tools/dev-next-story.js",
+    "qa:review": "node tools/qa-review.js",
+    "generate:story": "node tools/generate-story.js --non-interactive --title 'Test Story' --description 'Test Description' --priority Medium --status Draft",
+    "test:memory-persistence": "node tools/test-memory-persistence.js",
+    "interact:analysis": "node tools/interaction-analysis.js",
+    "memory:update-tasks": "node scripts/update-tasks-with-memory.js",
+    "memory:test": "npm test tests/unified-memory-manager.test.js tests/agent-runner.test.js",
+    "memory:test:integration": "npm test tests/integration/memory-integration.test.js",
     "release": "semantic-release",
     "release:test": "semantic-release --dry-run --no-ci || echo 'Config test complete - authentication errors are expected locally'",
     "prepare": "husky"
@@ -53,11 +70,13 @@
     "ajv-formats": "^2.1.1",
     "bmad-method": "^4.30.3",
     "chalk": "^4.1.2",
+    "chokidar": "^4.0.3",
     "commander": "^14.0.0",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.3",
     "inquirer": "^8.2.6",
     "js-yaml": "^4.1.0",
+    "openai": "^4.73.1",
     "ora": "^5.4.1"
   },
   "keywords": [

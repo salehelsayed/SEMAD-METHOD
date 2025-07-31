@@ -9,12 +9,32 @@ purpose: |-
   - Guide systematic investigation of complex topics
   - Ensure actionable insights are captured
 steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: generic
+          context:
+            taskId: create-deep-research-prompt
+            taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
   - id: step0
     name: Initialize Memory and Context
     description: Set up working memory and retrieve relevant context
     actions:
       - description: Initialize working memory for research prompt creation
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Retrieve previous research patterns and methodologies
@@ -112,7 +132,7 @@ steps:
         metadata:
           originalIndent: 3
       - description: Analyze build vs. buy vs. partner options
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 3
       - description: Map industry value chains and dynamics
@@ -195,7 +215,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Note technical constraints and preferences
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Highlight uncertainties and assumptions
@@ -235,7 +255,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Gather essential context through questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Define the problem space
@@ -290,19 +310,19 @@ steps:
         metadata:
           originalIndent: 0
       - description: Central questions that must be answered
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Priority ranking of questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Dependencies between questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Additional context-building questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Nice-to-have insights
@@ -523,7 +543,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Which team members should review results
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: How to validate findings
@@ -539,7 +559,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Be specific rather than general in research questions
-        elicit: false
+        elicit: true
         metadata:
           originalIndent: 0
       - description: Consider both current state and future implications
@@ -561,6 +581,25 @@ steps:
     metadata:
       level: 3
       originalNumber: '6'
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: generic
+          taskData:
+            observation: Completed create-deep-research-prompt task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: create-deep-research-prompt
+            context:
+              taskType: content-creation
+        metadata:
+          memoryAction: true
+          executionOrder: last
 inputs: {}
 outputs: {}
 metadata:

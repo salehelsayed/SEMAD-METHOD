@@ -1,0 +1,218 @@
+id: analyze-dependency-impacts-qa
+name: analyze-dependency-impacts-qa
+purpose: Perform comprehensive dependency impact analysis during QA review to identify potential issues and missing updates
+steps:
+  - id: load-memory
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and relevant long-term context using unified memory system
+    actions:
+      - description: Load agent working memory and relevant long-term context
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: qa
+          context:
+            taskId: analyze-dependency-impacts-qa
+            taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to task execution planning
+        elicit: true
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step0
+    name: Initialize Memory and Context
+    description: Initialize working memory for QA dependency analysis
+    actions:
+      - description: Execute task `update-working-memory` with agentName='qa' and taskId='analyze-dependency-impacts-qa'
+        elicit: true
+      - description: Execute task `retrieve-context` with query='QA dependency review patterns' to load relevant memories
+        elicit: true
+  - id: step1
+    name: Identify Implementation Changes
+    description: Review the story implementation to understand what was changed
+    actions:
+      - description: Read the story's File List to see all modified files
+        elicit: false
+      - description: Review the Change Log to understand the nature of changes
+        elicit: false
+      - description: Examine the Dev Agent Record for implementation details
+        elicit: false
+      - description: Use git diff to see the actual changes made to each file
+        elicit: false
+  - id: step2
+    name: Run Comprehensive Dependency Analysis
+    description: Analyze the full dependency impact of the implemented changes
+    actions:
+      - description: Load the dependency-impact-checker utility
+        elicit: false
+      - description: Execute analyzeBatchImpact() on all modified files
+        elicit: false
+      - description: Generate a detailed impact report using generateImpactReport() with full details
+        elicit: false
+      - description: Run quickRiskAssessment() to identify risk categories
+        elicit: false
+  - id: step3
+    name: Cross-Reference with Original Analysis
+    description: Compare current impacts with any dependency analysis done during development
+    actions:
+      - description: Check the Debug Log for previous dependency analysis results
+        elicit: false
+      - description: Compare current impact analysis with dev-time analysis if available
+        elicit: false
+      - description: Identify any new impacts that weren't previously detected or addressed
+        elicit: false
+      - description: Flag any discrepancies between planned and actual impacts
+        elicit: false
+  - id: step4
+    name: Verify Impacted Code is Tested
+    description: Ensure that all code affected by dependencies has adequate test coverage
+    actions:
+      - description: For each impacted symbol, check if it has corresponding unit tests
+        elicit: false
+      - description: Verify that integration points affected by changes are tested
+        elicit: false
+      - description: Check if impacted public APIs have integration or contract tests
+        elicit: false
+      - description: Identify any impacted critical paths that lack test coverage
+        elicit: false
+  - id: step5
+    name: Review High-Risk Dependencies
+    description: Focus on high-impact changes and critical dependency paths
+    actions:
+      - description: Examine all changes marked as high-risk by the assessment
+        elicit: false
+      - description: Verify that breaking changes are properly handled and documented
+        elicit: false
+      - description: Check that changes to shared utilities or common components are safe
+        elicit: false
+      - description: Review impacts on configuration files, core services, or data models
+        elicit: false
+  - id: step6
+    name: Analyze Unaddressed Dependencies
+    description: Identify symbols that depend on changes but weren't updated
+    actions:
+      - description: Check each impacted symbol to see if it was reviewed/updated during implementation
+        elicit: false
+      - description: Identify potentially stale dependencies that might now be broken
+        elicit: false
+      - description: Look for deprecated usage patterns that should be updated
+        elicit: false
+      - description: Flag any circular dependencies or architectural concerns
+        elicit: false
+  - id: step7
+    name: Validate Dependency Documentation
+    description: Ensure changes and their impacts are properly documented
+    actions:
+      - description: Verify that breaking changes are documented in the Change Log
+        elicit: false
+      - description: Check that public API changes are noted for consumers
+        elicit: false
+      - description: Ensure migration notes are provided for significant changes
+        elicit: true
+      - description: Validate that dependency impacts are communicated to affected teams
+        elicit: false
+  - id: step8
+    name: Generate QA Dependency Assessment
+    description: Create comprehensive findings for the QA Results section
+    actions:
+      - description: Compile all dependency analysis findings into a structured report
+        elicit: false
+      - description: Categorize issues by severity (Critical, Major, Minor, Info)
+        elicit: false
+      - description: Provide specific recommendations for addressing each finding
+        elicit: true
+      - description: Include risk assessment and mitigation suggestions
+        elicit: false
+  - id: step9
+    name: Make QA Recommendations
+    description: Provide actionable feedback based on dependency analysis
+    actions:
+      - description: Recommend additional tests for high-impact dependencies
+        elicit: false
+      - description: Suggest updates to impacted but unchanged code if needed
+        elicit: false
+      - description: Flag any changes that should be broken into smaller increments
+        elicit: false
+      - description: Identify follow-up stories for technical debt or improvements
+        elicit: true
+        prompt: |
+          DEPENDENCY ANALYSIS FINDINGS:
+
+          {{DEPENDENCY_IMPACT_REPORT}}
+
+          QA ASSESSMENT SUMMARY:
+          {{QA_FINDINGS_SUMMARY}}
+
+          Based on this comprehensive dependency analysis:
+
+          1. Are there any critical dependency issues that must be fixed before approval?
+          2. What additional testing would you recommend for the impacted dependencies?
+          3. Are there any architectural concerns about the dependency impacts?
+          4. Should any impacted-but-unchanged code be updated in this story or a follow-up?
+          5. Are there any breaking changes that need better documentation or communication?
+
+          Please provide your final QA recommendations for dependency-related items.
+      - description: Document final dependency-related recommendations in QA Results
+        elicit: false
+  - id: step10
+    name: Update QA Results
+    description: Add dependency analysis findings to the story's QA Results section
+    actions:
+      - description: Add a "Dependency Impact Analysis" subsection to QA Results
+        elicit: false
+      - description: Include the risk assessment and impact summary
+        elicit: false
+      - description: List all critical and major findings with specific recommendations
+        elicit: false
+      - description: Document any follow-up actions or additional stories needed
+        elicit: false
+  - id: save-memory
+    name: Save Task Results and Clean Memory
+    description: Save task completion and findings to memory with hygiene cleanup
+    actions:
+      - description: Save task completion and findings to working memory
+        elicit: true
+        function: saveAndCleanMemory
+        parameters:
+          agentName: qa
+          taskData:
+            observation: Completed analyze-dependency-impacts-qa task successfully
+            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+            taskCompleted: true
+            taskId: analyze-dependency-impacts-qa
+            context:
+              taskType: general
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  story_file:
+    description: Path to the story file being reviewed
+    type: string
+    required: true
+  focus_areas:
+    description: Specific areas to focus dependency analysis on (optional)
+    type: array
+    required: false
+outputs:
+  dependency_report:
+    description: Complete dependency impact analysis report
+    type: string
+  risk_level:
+    description: Overall risk assessment (Critical/High/Medium/Low)
+    type: string
+  qa_recommendations:
+    description: Specific QA recommendations based on dependency analysis
+    type: array
+  follow_up_items:
+    description: Items that should be addressed in follow-up stories
+    type: array
+notes: |
+  - This task should be run as part of comprehensive QA review process
+  - Focus on identifying gaps in testing coverage for impacted dependencies
+  - Critical dependency issues should block story approval
+  - Consider architectural impact of changes, not just functional correctness
+  - Recommend breaking large dependency impacts into smaller stories when appropriate

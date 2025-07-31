@@ -1,3 +1,28 @@
+# [4.32.0](https://github.com/bmadcode/BMAD-METHOD/compare/v4.31.0...v4.32.0) (2025-07-30)
+
+### Features
+
+* **orchestrator**: Add Dev↔QA iterative flow option alongside existing linear flow
+  - New workflow orchestrator CLI tool for choosing between linear and iterative flows
+  - Configuration support via `.bmad-workflow.yaml` for flow preferences
+  - Metadata persistence to remember flow choices across sessions
+  - Maximum iteration limits with user prompts when exceeded
+  - Comprehensive test coverage for both flow types
+
+### Bug Fixes
+
+* **core-config**: Fix incorrect path references from `.bmad-core/core-config.yaml` to `bmad-core/core-config.yaml`
+  - Fixed all path references across the codebase to use the correct directory without leading dot
+  - Added deprecation warning for old path in IDE setup for backward compatibility
+  - Updated tests to verify correct path usage and helpful error messages
+  - **MIGRATION NOTE**: If upgrading from an older version, move your core config from `.bmad-core/` to `bmad-core/` directory
+
+### Documentation
+
+* Add Dev↔QA Flow Options guide explaining when to use each flow type
+* Update README with new iterative flow feature
+* Add example workflow configuration file
+
 # [4.31.0](https://github.com/bmadcode/BMAD-METHOD/compare/v4.30.4...v4.31.0) (2025-07-20)
 
 
