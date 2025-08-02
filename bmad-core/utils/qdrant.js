@@ -1,10 +1,31 @@
 const { QdrantClient } = require('@qdrant/js-client-rest');
 const { MEMORY_CONFIG, validateAgentName, validateTextContent, sanitizeTextContent } = require('./memory-config');
 
-const client = new QdrantClient({ 
-  host: MEMORY_CONFIG.QDRANT_HOST, 
-  port: MEMORY_CONFIG.QDRANT_PORT 
-});
+// Lazy import to avoid circular dependency
+let logLongTermMemory = null;
+function getLogLongTermMemory() {
+    if (!logLongTermMemory) {
+        try {
+            const memoryLogger = require('./memory-usage-logger');
+            logLongTermMemory = memoryLogger.logLongTermMemory;
+        } catch (e) {
+            // Fallback to no-op if circular dependency issues
+            logLongTermMemory = async () => {};
+        }
+    }
+    return logLongTermMemory;
+}
+
+// Use centralized connection manager
+const connectionManager = require('./connection-manager');
+
+function getQdrantClient() {
+  return connectionManager.getQdrantConnection('default', {
+    host: MEMORY_CONFIG.QDRANT_HOST,
+    port: MEMORY_CONFIG.QDRANT_PORT,
+    timeout: 5000
+  });
+}
 
 // Connection health tracking
 let qdrantHealthy = null; // null = unknown, true = healthy, false = unhealthy
@@ -34,6 +55,22 @@ const COLLECTION_NAME = MEMORY_CONFIG.QDRANT_COLLECTION;
 const VECTOR_SIZE = MEMORY_CONFIG.QDRANT_VECTOR_SIZE;
 
 /**
+ * Get collection point count
+ * @returns {number} Number of points in collection, or 0 if error
+ */
+async function getCollectionPointCount() {
+  try {
+    const isHealthy = await checkQdrantHealth();
+    if (!isHealthy) return 0;
+    
+    const info = await getQdrantClient().getCollection(COLLECTION_NAME);
+    return info.points_count || 0;
+  } catch (error) {
+    return 0;
+  }
+}
+
+/**
  * Check Qdrant connection health
  * @returns {boolean} True if healthy, false otherwise
  */
@@ -45,26 +82,16 @@ async function checkQdrantHealth() {
     return qdrantHealthy;
   }
   
-  try {
-    // Simple health check - try to get collections
-    await client.getCollections();
-    qdrantHealthy = true;
-    lastHealthCheck = now;
-    
-    if (process.env.NODE_ENV !== 'test') {
-      console.log('✅ Qdrant connection healthy');
-    }
-    return true;
-  } catch (error) {
-    qdrantHealthy = false;
-    lastHealthCheck = now;
-    
-    if (process.env.NODE_ENV !== 'test') {
-      console.warn('❌ Qdrant connection failed:', error.message);
-      console.warn('📝 Falling back to in-memory storage');
-    }
-    return false;
+  // Use connection manager's health check
+  const healthy = await connectionManager.checkConnectionHealth('qdrant_default');
+  qdrantHealthy = healthy;
+  lastHealthCheck = now;
+  
+  if (!healthy && process.env.NODE_ENV !== 'test') {
+    console.warn('📝 Falling back to in-memory storage');
   }
+  
+  return healthy;
 }
 
 async function ensureCollection() {
@@ -74,11 +101,11 @@ async function ensureCollection() {
       return false; // Skip collection creation if Qdrant is down
     }
     
-    const collections = await client.getCollections();
+    const collections = await getQdrantClient().getCollections();
     const exists = collections.collections.some(c => c.name === COLLECTION_NAME);
     
     if (!exists) {
-      await client.createCollection(COLLECTION_NAME, {
+      await getQdrantClient().createCollection(COLLECTION_NAME, {
         vectors: {
           size: VECTOR_SIZE,
           distance: 'Cosine'
@@ -135,6 +162,19 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
     validateAgentName(agentName);
     validateTextContent(text, 'memory snippet text');
     
+    // Run validation hooks
+    const validationHooks = require('./validation-hooks');
+    const validation = await validationHooks.executeHooks('beforeMemorySave', {
+      agentName,
+      text,
+      metadata
+    });
+    
+    if (!validation.valid) {
+      const errorMessage = validation.errors.map(e => e.message).join('; ');
+      throw new Error(`Memory validation failed: ${errorMessage}`);
+    }
+    
     // Sanitize text content
     const sanitizedText = sanitizeTextContent(text);
     
@@ -145,7 +185,7 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
       // Store in Qdrant if available
       const { embedding, method } = await generateEmbedding(sanitizedText, true);
       
-      await client.upsert(COLLECTION_NAME, {
+      await getQdrantClient().upsert(COLLECTION_NAME, {
         wait: true,
         points: [
           {
@@ -163,6 +203,12 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
         ]
       });
       
+      // Log successful Qdrant storage
+      await getLogLongTermMemory()(agentName, 'store', {
+        memoryType: 'snippet',
+        metadata: { method, ...metadata }
+      }, { storageType: 'qdrant', id });
+      
       return id;
     } else {
       // Fallback to in-memory storage
@@ -178,6 +224,12 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
       };
       
       fallbackMemory.set(fallbackId, payload);
+      
+      // Log fallback storage
+      await getLogLongTermMemory()(agentName, 'store', {
+        memoryType: 'snippet',
+        metadata
+      }, { storageType: 'fallback', id: fallbackId });
       
       if (process.env.NODE_ENV !== 'test') {
         console.warn(`📝 Stored memory snippet in fallback storage: ${fallbackId}`);
@@ -264,7 +316,7 @@ async function retrieveMemory(query, topN = 5, filters = {}) {
         };
       }
       
-      const searchResult = await client.search(COLLECTION_NAME, searchParams);
+      const searchResult = await getQdrantClient().search(COLLECTION_NAME, searchParams);
       
       return searchResult.map(result => ({
         score: result.score,
@@ -382,8 +434,40 @@ async function storeContextualMemory(agentName, text, context = {}) {
   return await storeMemorySnippet(agentName, text, metadata);
 }
 
+/**
+ * Close Qdrant connection and cleanup resources
+ * Call this when done with memory operations to allow process to exit
+ */
+async function closeConnections() {
+  try {
+    // Clear any intervals first
+    connectionManager.clearIntervals();
+    
+    // Use connection manager to close connections
+    await connectionManager.closeConnection('qdrant_default');
+    
+    // For subprocess commands that need quick exit, force shutdown
+    if (process.argv.some(arg => arg.includes('AndExit'))) {
+      await connectionManager.shutdown();
+    }
+    
+    // Reset health check state
+    qdrantHealthy = null;
+    lastHealthCheck = null;
+    
+    // Clear any pending operations
+    if (global.gc) {
+      global.gc();
+    }
+    
+    console.log('Memory connections closed');
+  } catch (error) {
+    console.error('Error closing connections:', error.message);
+  }
+}
+
 module.exports = {
-  client,
+  getQdrantClient,
   storeMemorySnippet,
   retrieveMemory,
   retrieveAgentStoryMemory,
@@ -391,6 +475,8 @@ module.exports = {
   retrieveTaskMemory,
   storeContextualMemory,
   checkQdrantHealth,
+  getCollectionPointCount,
+  closeConnections,
   // Expose fallback memory for diagnostics (read-only)
   getFallbackMemoryStatus: () => ({
     isHealthy: qdrantHealthy,

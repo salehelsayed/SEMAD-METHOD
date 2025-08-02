@@ -4,7 +4,9 @@ workflow:
   description: >-
     Agent workflow for building full-stack applications from concept to development.
     Supports both comprehensive planning for complex projects and rapid prototyping for simple ones.
+    Uses orchestrator-managed hub-and-spoke pattern for all agent coordination.
   type: greenfield
+  orchestration_pattern: hub-and-spoke
   project_types:
     - web-app
     - saas
@@ -12,72 +14,133 @@ workflow:
     - prototype
     - mvp
 
+  orchestrator_config:
+    manages_context: true
+    context_path: .ai/handoff-context.json
+    return_to_orchestrator: always
+    persist_conversations: true
+
   sequence:
+    - orchestrator: initiate
+      action: prepare_workflow
+      creates: .ai/handoff-context.json
+      notes: "Orchestrator initializes workflow context and prepares for agent coordination"
+
     - agent: analyst
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       creates: project-brief.md
+      context_includes:
+        - .ai/handoff-context.json
+        - previous_agent_outputs
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_completion
       optional_steps:
         - brainstorming_session
         - market_research_prompt
-      notes: "Can do brainstorming first, then optional deep research before creating project brief. SAVE OUTPUT: Copy final project-brief.md to your project's docs/ folder."
+      notes: "Orchestrator provides context to analyst. Analyst completes work and returns to orchestrator with updated context. SAVE OUTPUT: Copy final project-brief.md to your project's docs/ folder."
 
     - agent: pm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       creates: prd.md
       requires: project-brief.md
+      context_includes:
+        - .ai/handoff-context.json
+        - analyst_outputs
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_completion
-      notes: "Creates PRD from project brief using prd-tmpl. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+      notes: "Orchestrator provides context and analyst outputs to PM. PM creates PRD and returns to orchestrator. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
 
     - agent: sm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       action: generate_search_tools
       requires: prd.md
       creates: search-tools.yaml
-      notes: "Extracts keywords from PRD and generates search tool queries for external documentation retrieval."
+      context_includes:
+        - .ai/handoff-context.json
+        - pm_outputs
+      notes: "Orchestrator provides context to SM. SM generates search tools and returns to orchestrator."
 
     - agent: ux-expert
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       creates: front-end-spec.md
       requires: prd.md
+      context_includes:
+        - .ai/handoff-context.json
+        - pm_outputs
+        - sm_outputs
       optional_steps:
         - user_research_prompt
-      notes: "Creates UI/UX specification using front-end-spec-tmpl. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
+      notes: "Orchestrator provides context to UX expert. UX expert creates spec and returns to orchestrator. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
 
     - agent: ux-expert
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       creates: v0_prompt (optional)
       requires: front-end-spec.md
       condition: user_wants_ai_generation
-      notes: "OPTIONAL BUT RECOMMENDED: Generate AI UI prompt for tools like v0, Lovable, etc. Use the generate-ai-frontend-prompt task. User can then generate UI in external tool and download project structure."
+      context_includes:
+        - .ai/handoff-context.json
+        - ux_expert_previous_outputs
+      notes: "Orchestrator checks if user wants AI generation. If yes, returns to UX expert to generate prompt, then back to orchestrator."
 
     - agent: architect
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       creates: fullstack-architecture.md
       requires:
         - prd.md
         - front-end-spec.md
+      context_includes:
+        - .ai/handoff-context.json
+        - all_previous_outputs
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_completion
       optional_steps:
         - technical_research_prompt
         - review_generated_ui_structure
-      notes: "Creates comprehensive architecture using fullstack-architecture-tmpl. If user generated UI with v0/Lovable, can incorporate the project structure into architecture. May suggest changes to PRD stories or new stories. SAVE OUTPUT: Copy final fullstack-architecture.md to your project's docs/ folder."
+      notes: "Orchestrator provides full context to architect. Architect creates architecture and returns to orchestrator. SAVE OUTPUT: Copy final fullstack-architecture.md to your project's docs/ folder."
 
     - agent: pm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       updates: prd.md (if needed)
       requires: fullstack-architecture.md
       condition: architecture_suggests_prd_changes
-      notes: "If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder."
+      context_includes:
+        - .ai/handoff-context.json
+        - architect_outputs
+        - original_prd
+      notes: "Orchestrator evaluates if changes needed. If yes, returns to PM with architect feedback. PM updates PRD and returns to orchestrator."
 
     - agent: po
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       validates: all_artifacts
       uses: po-master-checklist
-      notes: "Validates all documents for consistency and completeness. May require updates to any document."
+      context_includes:
+        - .ai/handoff-context.json
+        - all_created_artifacts
+      notes: "Orchestrator provides all artifacts to PO. PO validates and returns findings to orchestrator."
 
-    - agent: various
-      updates: any_flagged_documents
+    - orchestrator: coordinate_fixes
+      action: route_to_appropriate_agent
       condition: po_checklist_issues
-      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+      notes: "Orchestrator evaluates PO findings and routes to appropriate agent(s) for fixes, maintaining context throughout."
 
     - project_setup_guidance:
       action: guide_project_structure
@@ -89,26 +152,41 @@ workflow:
       notes: "Based on PRD stories: If stories are frontend-heavy, start with frontend project/directory first. If backend-heavy or API-first, start with backend. For tightly coupled features, follow story sequence in monorepo setup. Reference sharded PRD epics for development order."
 
     - agent: po
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       action: shard_documents
       creates: sharded_docs
       requires: all_artifacts_in_project
+      context_includes:
+        - .ai/handoff-context.json
+        - validated_artifacts
       notes: |
-        Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
+        Orchestrator provides validated artifacts to PO for sharding.
+        PO shards documents and returns to orchestrator.
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
     - agent: sm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       action: create_story
       creates: story.md
       requires: sharded_docs
       repeats: for_each_epic
+      context_includes:
+        - .ai/handoff-context.json
+        - current_epic_context
+        - previous_stories
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_story_created
       notes: |
-        Story creation cycle:
-        - SM Agent (New Chat): @sm → *create
-        - Creates next story from sharded docs
+        Orchestrator manages story creation cycle:
+        - Provides epic context to SM
+        - SM creates story and returns to orchestrator
+        - Orchestrator tracks story progress
         - Story starts in "Draft" status
 
     - agent: analyst/pm
@@ -124,30 +202,47 @@ workflow:
         - Update story status: Draft → Approved
 
     - agent: dev
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       action: implement_story
       creates: implementation_files
       requires: story.md
+      context_includes:
+        - .ai/handoff-context.json
+        - story_details
+        - architecture_context
+        - related_implementations
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: during_implementation
         - update-working-memory: after_completion
       notes: |
-        Dev Agent (New Chat): @dev
-        - Implements approved story
+        Orchestrator provides story and full context to dev:
+        - Dev implements story with all necessary context
         - Updates File List with all changes
-        - Marks story as "Review" when complete
+        - Returns to orchestrator when complete
+        - Orchestrator marks story as "Review"
 
     - agent: qa
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
       action: review_implementation
       updates: implementation_files
       requires: implementation_files
       optional: true
+      context_includes:
+        - .ai/handoff-context.json
+        - implementation_details
+        - story_requirements
+        - quality_standards
       notes: |
-        OPTIONAL: QA Agent (New Chat): @qa → review-story
-        - Senior dev review with refactoring ability
+        OPTIONAL: Orchestrator provides implementation to QA:
+        - QA performs senior dev review
         - Fixes small issues directly
-        - Leaves checklist for remaining items
-        - Updates story status (Review → Done or stays Review)
+        - Returns findings to orchestrator
+        - Orchestrator updates story status
 
     - agent: dev
       action: address_qa_feedback
@@ -186,59 +281,93 @@ workflow:
   flow_diagram: |
     ```mermaid
     graph TD
-        A[Start: Greenfield Project] --> B[analyst: project-brief.md]
-        B --> C[pm: prd.md]
-        C --> D[ux-expert: front-end-spec.md]
-        D --> D2{Generate v0 prompt?}
-        D2 -->|Yes| D3[ux-expert: create v0 prompt]
-        D2 -->|No| E[architect: fullstack-architecture.md]
-        D3 --> D4[User: generate UI in v0/Lovable]
-        D4 --> E
-        E --> F{Architecture suggests PRD changes?}
-        F -->|Yes| G[pm: update prd.md]
-        F -->|No| H[po: validate all artifacts]
-        G --> H
-        H --> I{PO finds issues?}
-        I -->|Yes| J[Return to relevant agent for fixes]
-        I -->|No| K[po: shard documents]
-        J --> H
+        A[Start: Greenfield Project] --> ORCH[ORCHESTRATOR: Initialize Workflow<br/>.ai/handoff-context.json]
         
-        K --> L[sm: create story]
-        L --> M{Review draft story?}
-        M -->|Yes| N[analyst/pm: review & approve story]
-        M -->|No| O[dev: implement story]
-        N --> O
-        O --> P{QA review?}
-        P -->|Yes| Q[qa: review implementation]
-        P -->|No| R{More stories?}
-        Q --> S{QA found issues?}
-        S -->|Yes| T[dev: address QA feedback]
-        S -->|No| R
-        T --> Q
-        R -->|Yes| L
-        R -->|No| U{Epic retrospective?}
-        U -->|Yes| V[po: epic retrospective]
-        U -->|No| W[Project Complete]
-        V --> W
+        %% Planning Phase - Hub and Spoke Pattern
+        ORCH --> B[analyst: project-brief.md]
+        B --> ORCH
+        ORCH --> C[pm: prd.md]
+        C --> ORCH
+        ORCH --> D[ux-expert: front-end-spec.md]
+        D --> ORCH
+        ORCH --> D2{Generate v0 prompt?}
+        D2 -->|Yes| ORCH
+        ORCH --> D3[ux-expert: create v0 prompt]
+        D3 --> ORCH
+        D2 -->|No| ORCH
+        ORCH --> E[architect: fullstack-architecture.md]
+        E --> ORCH
+        ORCH --> F{Architecture suggests PRD changes?}
+        F -->|Yes| ORCH
+        ORCH --> G[pm: update prd.md]
+        G --> ORCH
+        F -->|No| ORCH
+        ORCH --> H[po: validate all artifacts]
+        H --> ORCH
+        ORCH --> I{PO finds issues?}
+        I -->|Yes| ORCH
+        ORCH --> J[Route to relevant agent for fixes]
+        J --> ORCH
+        I -->|No| ORCH
+        ORCH --> K[po: shard documents]
+        K --> ORCH
+        
+        %% Development Phase - Hub and Spoke Pattern
+        ORCH --> L[sm: create story]
+        L --> ORCH
+        ORCH --> M{Review draft story?}
+        M -->|Yes| ORCH
+        ORCH --> N[analyst/pm: review & approve story]
+        N --> ORCH
+        M -->|No| ORCH
+        ORCH --> O[dev: implement story]
+        O --> ORCH
+        ORCH --> P{QA review?}
+        P -->|Yes| ORCH
+        ORCH --> Q[qa: review implementation]
+        Q --> ORCH
+        ORCH --> S{QA found issues?}
+        S -->|Yes| ORCH
+        ORCH --> T[dev: address QA feedback]
+        T --> ORCH
+        S -->|No| ORCH
+        P -->|No| ORCH
+        ORCH --> R{More stories?}
+        R -->|Yes| ORCH
+        R -->|No| ORCH
+        ORCH --> U{Epic retrospective?}
+        U -->|Yes| ORCH
+        ORCH --> V[po: epic retrospective]
+        V --> ORCH
+        U -->|No| W[Project Complete<br/>Context preserved in .ai/]
 
+        %% Optional steps
         B -.-> B1[Optional: brainstorming]
         B -.-> B2[Optional: market research]
         D -.-> D1[Optional: user research]
         E -.-> E1[Optional: technical research]
 
+        %% Styling
+        style ORCH fill:#FF6B6B,stroke:#333,stroke-width:4px,color:#fff
         style W fill:#90EE90
         style K fill:#ADD8E6
         style L fill:#ADD8E6
         style O fill:#ADD8E6
         style D3 fill:#E6E6FA
-        style D4 fill:#E6E6FA
         style B fill:#FFE4B5
         style C fill:#FFE4B5
         style D fill:#FFE4B5
         style E fill:#FFE4B5
+        style G fill:#FFE4B5
+        style H fill:#FFDAB9
         style N fill:#F0E68C
         style Q fill:#F0E68C
         style V fill:#F0E68C
+        style T fill:#FFE4B5
+        
+        %% Add note about orchestrator
+        ORCH -.- NOTE[Orchestrator manages all context<br/>passing via .ai/handoff-context.json]
+        style NOTE fill:#f9f,stroke:#333,stroke-dasharray: 5 5
     ```
 
   decision_guidance:
@@ -250,12 +379,21 @@ workflow:
       - Long-term maintenance expected
       - Enterprise or customer-facing applications
 
+  orchestrator_handoff_prompts:
+    orchestrator_to_agent: "I'm the orchestrator coordinating this workflow. Here's your context from .ai/handoff-context.json and previous agent outputs. Please complete your task and return control to me when finished."
+    agent_to_orchestrator: "Task completed. Returning control to orchestrator with updated context and outputs."
+    orchestrator_context_update: "Updating workflow context with outputs from {{agent_name}}. Preparing handoff to next agent."
+    orchestrator_route_decision: "Based on current workflow state, routing to {{next_agent}} with consolidated context."
+    orchestrator_completion_check: "Checking if {{agent_name}} has completed their task and all outputs are ready."
+    orchestrator_workflow_complete: "All workflow steps completed. Final artifacts available in docs/ folder. Context preserved in .ai/handoff-context.json."
+
   handoff_prompts:
-    analyst_to_pm: "Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD."
-    pm_to_ux: "PRD is ready. Save it as docs/prd.md in your project, then create the UI/UX specification."
-    ux_to_architect: "UI/UX spec complete. Save it as docs/front-end-spec.md in your project, then create the fullstack architecture."
-    architect_review: "Architecture complete. Save it as docs/fullstack-architecture.md. Do you suggest any changes to the PRD stories or need new stories added?"
-    architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
-    updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
-    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
-    complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+    analyst_to_orchestrator: "Project brief is complete and saved to docs/project-brief.md. Returning to orchestrator for next step."
+    pm_to_orchestrator: "PRD is ready and saved to docs/prd.md. Returning to orchestrator for coordination."
+    ux_to_orchestrator: "UI/UX spec complete and saved to docs/front-end-spec.md. Returning to orchestrator."
+    architect_to_orchestrator: "Architecture complete and saved to docs/fullstack-architecture.md. Returning to orchestrator with any PRD change suggestions."
+    po_to_orchestrator: "Validation complete. Returning findings to orchestrator for routing."
+    sm_to_orchestrator: "Story created. Returning to orchestrator for development coordination."
+    dev_to_orchestrator: "Implementation complete. Returning to orchestrator for QA coordination."
+    qa_to_orchestrator: "Review complete. Returning findings to orchestrator for next steps."
+    orchestrator_final: "Workflow complete. All artifacts validated and saved. Context preserved for future sessions."

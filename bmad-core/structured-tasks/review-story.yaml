@@ -6,7 +6,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load QA agent working memory and relevant long-term review context
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -51,6 +51,28 @@ steps:
       - description: Assess test coverage and identify missing test scenarios
         elicit: false
   - id: step3
+    name: Code Quality Analysis
+    description: Perform automated code quality analysis on implemented files
+    actions:
+      - description: Execute analyze-code-quality task on story implementation files
+        elicit: false
+        function: executeStructuredTask
+        parameters:
+          taskId: analyze-code-quality
+          taskParameters:
+            analysisScope: story
+            outputFormat: markdown
+            agentName: qa
+        metadata:
+          taskExecution: true
+          taskType: code-quality-analysis
+      - description: Review quality metrics against project thresholds
+        elicit: false
+      - description: Identify quality violations and areas for improvement
+        elicit: false
+      - description: Generate refactoring recommendations if quality issues found
+        elicit: false
+  - id: step4
     name: Security and Performance Analysis
     description: Review implementation for security vulnerabilities and performance concerns
     actions:
@@ -62,39 +84,41 @@ steps:
         elicit: false
       - description: Identify potential bottlenecks or resource-intensive operations
         elicit: false
-  - id: step4
+  - id: step5
     name: Generate QA Report
     description: Create comprehensive QA report with recommendations for Dev agent
     actions:
-      - description: Compile all findings into structured QA Results format
+      - description: Compile all findings into structured QA Results format, including quality analysis results
         elicit: false
-      - description: Prioritize issues by severity and impact
+      - description: Prioritize issues by severity and impact, incorporating quality metrics
         elicit: false
-      - description: Write clear, actionable recommendations for each issue found
+      - description: Write clear, actionable recommendations for each issue found, including quality improvements
         elicit: false
       - description: Include specific file names and line numbers where applicable
         elicit: false
-  - id: step5
+      - description: Reference quality analysis report and refactoring recommendations in QA results
+        elicit: false
+  - id: step6
     name: Update Story File QA Section and Final Status
     description: Update the QA Results section and set final story status
     actions:
       - description: Read the current story file to preserve all existing content
         elicit: false
-      - description: Update ONLY the QA Results section with the review findings
+      - description: Update ONLY the QA Results section with the review findings, including quality metrics
         elicit: false
-      - description: Determine if implementation is approved based on review findings
+      - description: Determine if implementation is approved based on review findings and quality thresholds
         elicit: false
-      - description: Update Status section to "Done" if approved with no issues found
+      - description: Update Status section to "Done" if approved with no issues found and quality standards met
         elicit: false
-      - description: Update Status section to "Needs Fixes" if any recommendations or issues found
+      - description: Update Status section to "Needs Fixes" if any recommendations, issues, or quality violations found
         elicit: false
       - description: Ensure no other sections of the story file are modified except Status and QA Results
         elicit: false
-  - id: step6
+  - id: step7
     name: Save Review Results and Clean Memory
     description: Save review findings to memory and perform hygiene cleanup
     actions:
-      - description: Save review completion and findings to working memory
+      - description: Save review completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: saveAndCleanMemory
         parameters:
@@ -141,18 +165,32 @@ metadata:
 
         ### Code Quality Assessment
         [Overall assessment of implementation quality]
+        
+        **Quality Metrics:**
+        - Overall Quality Score: [score]/100
+        - Files Analyzed: [count]
+        - Quality Grade: [A/B/C/D/F]
+        
+        **Quality Issues Found:**
+        - Critical Issues: [count] (must fix before approval)
+        - Major Issues: [count] (should fix soon)
+        - Minor Issues: [count] (future improvement)
+        
+        **Quality Analysis Report**: [link to detailed quality report if generated]
 
         ### Recommended Refactoring
-        [List refactoring recommendations for Dev agent to implement]
+        [List refactoring recommendations for Dev agent to implement, including quality-based suggestions]
         - **File**: [filename]
           - **Recommendation**: [what should be changed]
-          - **Why**: [reason for change]
+          - **Why**: [reason for change including quality metrics]
           - **How**: [how it would improve the code]
+          - **Quality Impact**: [expected improvement in quality score]
 
         ### Compliance Check
         - Coding Standards: [✓/✗] [notes if any]
         - Project Structure: [✓/✗] [notes if any]
         - Testing Strategy: [✓/✗] [notes if any]
+        - Code Quality Thresholds: [✓/✗] [list any violations]
         - All ACs Met: [✓/✗] [notes if any]
 
         ### Improvements Checklist

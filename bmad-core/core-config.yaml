@@ -91,3 +91,40 @@ memory:
     memoryLockTimeout: 5000
     batchTaskDelay: 500
     retryDelay: 1000
+codeQuality:
+  enabled: true
+  metrics:
+    maxFileLines: 500
+    maxFunctionLines: 50
+    maxCyclomaticComplexity: 10
+    maxClassLines: 300
+    maxNestingDepth: 4
+    duplicateCodeThreshold: 30
+    commentDensityMin: 0.1  # Minimum 10% comments
+    commentDensityMax: 0.4  # Maximum 40% comments
+  autoRefactor:
+    enabled: true
+    autoApply: false  # Generate recommendations but don't auto-apply
+    generateExamples: true
+    prioritizeByImpact: true
+  qualityGates:
+    blockOnCritical: false  # Don't block commits on quality issues
+    warnOnMajor: true
+    reportMinor: true
+  reporting:
+    outputDirectory: ".ai/quality-reports"
+    retainReports: 30  # Keep 30 most recent reports
+    includeMetrics: true
+    generateCharts: false
+  excludePatterns:
+    - "**/*.test.js"
+    - "**/*.test.ts"
+    - "**/*.spec.js"
+    - "**/*.spec.ts"
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/*.md"
+    - "**/*.json"
+    - "**/*.yaml"
+    - "**/*.yml"

@@ -48,6 +48,7 @@ const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/
 const StructuredTaskLoader = require('./lib/structured-task-loader');
 const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator'));
 const ModuleResolver = require(resolveModule('utils/module-resolver', '../bmad-core/utils/module-resolver'));
+const validationHooks = require(resolveModule('utils/validation-hooks', '../bmad-core/utils/validation-hooks'));
 
 class TaskRunner {
   constructor(rootDir) {
@@ -205,6 +206,20 @@ class TaskRunner {
           await updateWorkingMemory(agentName, memory);
         }
       }, 'Clear task execution state');
+
+      // Run pre-execution validation hook
+      const preValidation = await validationHooks.executeHooks('beforeTaskExecute', {
+        taskPath,
+        agentName,
+        context
+      });
+      
+      if (!preValidation.valid && !context.ignoreValidation) {
+        throw new ValidationError(
+          'Task pre-execution validation failed',
+          preValidation.errors
+        );
+      }
 
       // Load the task
       const taskData = await this.taskLoader.loadTask(taskPath);
@@ -617,11 +632,10 @@ class TaskRunner {
    * @returns {*} The output data produced by the step
    */
   async executeStepActions(step, agentName, context) {
-    // This is a placeholder implementation
-    // In a real system, this would execute the step's actions and return the result
-    // For now, we'll check if the output already exists in the context
-    // (which would be set by the agent during actual execution)
+    // Import function registry
+    const { executeFunction, hasFunction } = require('./lib/function-registry');
     
+    // Check if the output already exists in the context
     if (step.output && context[step.output]) {
       return context[step.output];
     }
@@ -676,8 +690,50 @@ class TaskRunner {
           // For now, we'll continue but log the requirement
         }
         
+        // Execute function-based actions (new structured task format)
+        if (action.function && hasFunction(action.function)) {
+          try {
+            console.log(`Executing function: ${action.function}`);
+            
+            // Create enhanced context with current timestamp and other dynamic values
+            const enhancedContext = {
+              ...context,
+              current_timestamp: new Date().toISOString(),
+              agentName: agentName
+            };
+            
+            // Execute the function with resolved parameters
+            const result = await executeFunction(action.function, action.parameters || {}, enhancedContext);
+            
+            // Store result for potential use by subsequent actions
+            if (result && typeof result === 'object') {
+              context._lastFunctionResult = result;
+            }
+            
+            console.log(`Function ${action.function} completed:`, result?.success ? 'SUCCESS' : 'FAILED');
+            
+            // For functions that indicate exit (AndExit versions), respect that intent
+            if (action.function.includes('AndExit') && result?.success === false) {
+              throw new ActionExecutionError(
+                `Function ${action.function} failed and requested exit`,
+                action.function,
+                action.parameters,
+                result
+              );
+            }
+            
+          } catch (error) {
+            console.error(`Function execution failed: ${action.function}`, error.message);
+            throw new ActionExecutionError(
+              `Function execution failed: ${error.message}`,
+              action.function,
+              action.parameters || {},
+              { error: error.message, stack: error.stack }
+            );
+          }
+        }
         // Execute command-based actions (old format)
-        if (action.action && typeof action.action === 'string') {
+        else if (action.action && typeof action.action === 'string') {
           // Replace template variables in the action
           let command = action.action;
           

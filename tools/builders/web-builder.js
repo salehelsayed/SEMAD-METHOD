@@ -241,11 +241,22 @@ These references map directly to bundle sections:
       if (parsed["activation-instructions"] && Array.isArray(parsed["activation-instructions"])) {
         parsed["activation-instructions"] = parsed["activation-instructions"].filter(
           (instruction) => {
-            return (
-              typeof instruction === 'string' &&
-              !instruction.startsWith("IDE-FILE-RESOLUTION:") &&
-              !instruction.startsWith("REQUEST-RESOLUTION:")
-            );
+            // Keep strings that don't start with IDE-FILE-RESOLUTION or REQUEST-RESOLUTION
+            if (typeof instruction === 'string') {
+              return (
+                !instruction.startsWith("IDE-FILE-RESOLUTION:") &&
+                !instruction.startsWith("REQUEST-RESOLUTION:")
+              );
+            }
+            // Keep objects (like STEP instructions) but filter out IDE/REQUEST resolution objects
+            if (typeof instruction === 'object' && instruction !== null) {
+              const keys = Object.keys(instruction);
+              return !keys.some(key => 
+                key.startsWith("IDE-FILE-RESOLUTION") || 
+                key.startsWith("REQUEST-RESOLUTION")
+              );
+            }
+            return true;
           }
         );
       }

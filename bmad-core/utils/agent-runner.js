@@ -18,6 +18,7 @@ const {
 } = require('./memory-health');
 
 const VerboseLogger = require('./verbose-logger');
+const { withTimeout } = require('./timeout-wrapper');
 
 class AgentRunner {
   constructor(options = {}) {
@@ -250,6 +251,13 @@ class AgentRunner {
   async executeWithMemory(agentName, taskId, context = {}, taskExecutor) {
     const startTime = Date.now();
     
+    // Extract timeout configuration from context
+    const {
+      executionTimeout = 300000, // 5 minutes default
+      memoryTimeout = 30000,     // 30 seconds for memory operations
+      healthCheckTimeout = 15000  // 15 seconds for health checks
+    } = context.timeouts || {};
+    
     this.logger.taskStart(`Agent ${agentName} execution`, `Task: ${taskId}`, 'detailed');
     
     let memoryContext = null;
@@ -258,8 +266,14 @@ class AgentRunner {
     let healthCheckResult = null;
     
     try {
-      // Phase 0: Perform startup memory health check
-      healthCheckResult = await this.performStartupHealthCheck(agentName, {
+      // Phase 0: Perform startup memory health check with timeout
+      const performHealthCheckWithTimeout = withTimeout(
+        this.performStartupHealthCheck.bind(this),
+        healthCheckTimeout,
+        'Health check'
+      );
+      
+      healthCheckResult = await performHealthCheckWithTimeout(agentName, {
         skipOperations: context.skipHealthOperations !== false
       });
       
@@ -277,7 +291,13 @@ class AgentRunner {
       if (this.memoryEnabled) {
         this.logger.taskStart('Loading agent memory', `Loading context for ${agentName}`, 'minimal');
         
-        memoryContext = await loadMemoryForTask(agentName, {
+        const loadMemoryWithTimeout = withTimeout(
+          loadMemoryForTask,
+          memoryTimeout,
+          'Memory loading'
+        );
+        
+        memoryContext = await loadMemoryWithTimeout(agentName, {
           taskId,
           storyId: context.storyId,
           epicId: context.epicId,
@@ -304,7 +324,14 @@ class AgentRunner {
         taskId
       };
       
-      executionResult = await taskExecutor(enrichedContext);
+      // Execute task with timeout
+      const executeTaskWithTimeout = withTimeout(
+        taskExecutor,
+        executionTimeout,
+        `Agent ${agentName} task execution`
+      );
+      
+      executionResult = await executeTaskWithTimeout(enrichedContext);
       
       this.logger.taskComplete('Task execution completed', {
         success: executionResult.success,
@@ -331,7 +358,13 @@ class AgentRunner {
           }
         };
         
-        memoryResult = await saveAndCleanMemory(agentName, taskData);
+        const saveMemoryWithTimeout = withTimeout(
+          saveAndCleanMemory,
+          memoryTimeout,
+          'Memory saving'
+        );
+        
+        memoryResult = await saveMemoryWithTimeout(agentName, taskData);
         
         if (memoryResult.success) {
           this.logger.taskComplete('Memory saved successfully', {
@@ -355,17 +388,28 @@ class AgentRunner {
       };
       
     } catch (error) {
+      const isTimeout = error.name === 'TimeoutError';
+      
       this.logger.error(`Agent execution failed for ${agentName}:${taskId}`, error);
       
       // Try to save error information to memory if possible
       if (this.memoryEnabled) {
         try {
-          await saveAndCleanMemory(agentName, {
+          // Use quick timeout for error saving
+          const saveErrorWithTimeout = withTimeout(
+            saveAndCleanMemory,
+            5000, // 5 second timeout for error save
+            'Error memory save'
+          );
+          
+          await saveErrorWithTimeout(agentName, {
             observation: `Task ${taskId} failed: ${error.message}`,
             taskCompleted: false,
             taskId,
             context: {
               error: error.message,
+              errorType: error.name,
+              isTimeout,
               taskType: context.taskType,
               errorTimestamp: new Date().toISOString()
             }
@@ -380,6 +424,7 @@ class AgentRunner {
         success: false,
         error: error.message,
         errorType: error.name || 'UnknownError',
+        isTimeout,
         executionResult: null,
         memoryContext,
         memoryResult: null,
@@ -388,6 +433,15 @@ class AgentRunner {
         agentName,
         taskId
       };
+      
+      // For timeout errors, add additional context
+      if (isTimeout) {
+        errorResponse.timeoutDetails = {
+          operation: error.operationName,
+          timeoutMs: error.timeoutMs,
+          suggestion: 'Consider increasing timeout or optimizing the operation'
+        };
+      }
       
       // Re-throw for proper error propagation in some contexts
       if (context.throwOnError) {

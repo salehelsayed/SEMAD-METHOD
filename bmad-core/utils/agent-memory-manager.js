@@ -5,7 +5,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const { storeMemorySnippet, retrieveMemory } = require('./qdrant');
+const { storeMemorySnippet, retrieveMemory, closeConnections } = require('./qdrant');
 const { MemoryTransaction } = require('./memory-transaction');
 const { safeReadJson, safeWriteJson, updateJsonFile } = require('./safe-file-operations');
 const { 
@@ -19,6 +19,16 @@ const {
   performMemoryHygiene, 
   shouldRunMemoryHygiene 
 } = require('./memory-hygiene');
+const { withTimeout, fireAndForget } = require('./timeout-wrapper');
+const {
+  logMemoryInit,
+  logWorkingMemory,
+  logLongTermMemory,
+  logMemoryRetrieval,
+  logMemoryError,
+  logTaskMemory,
+  logSessionSummary
+} = require('./memory-usage-logger');
 
 // Queue to prevent concurrent memory hygiene operations per agent
 const hygieneQueue = new Map();
@@ -36,6 +46,9 @@ async function initializeWorkingMemory(agentName, options = {}) {
   try {
     // Validate agent name
     validateAgentName(agentName);
+    
+    // Log memory initialization start
+    await logMemoryInit(agentName, 'initialize_start', { options });
     
     // Ensure memory directory exists
     await fs.mkdir(MEMORY_CONFIG.BASE_DIR, { recursive: true });
@@ -69,9 +82,18 @@ async function initializeWorkingMemory(agentName, options = {}) {
     await safeWriteJson(memoryPath, memory);
     
     console.log(`Initialized working memory for agent: ${agentName}`);
+    
+    // Log successful initialization
+    await logMemoryInit(agentName, 'initialize_complete', {
+      sessionId: memory.sessionId,
+      hasExistingMemory: Object.keys(existingMemory).length > 0,
+      contextKeys: Object.keys(memory.currentContext).filter(k => memory.currentContext[k])
+    });
+    
     return memory;
   } catch (error) {
     console.error(`Failed to initialize working memory for ${agentName}:`, error);
+    await logMemoryError(agentName, 'initialize_failed', error, { options });
     throw error;
   }
 }
@@ -87,13 +109,24 @@ async function loadWorkingMemory(agentName) {
     validateAgentName(agentName);
     
     const memoryPath = getWorkingMemoryPath(agentName);
-    return await safeReadJson(memoryPath, null);
+    const memory = await safeReadJson(memoryPath, null);
+    
+    if (memory) {
+      await logWorkingMemory(agentName, 'load_success', 'working_memory', memory, {
+        observationCount: memory.observations?.length || 0,
+        sessionId: memory.sessionId
+      });
+    }
+    
+    return memory;
   } catch (error) {
     if (error.code === 'ENOENT') {
       console.warn(`No working memory found for agent ${agentName}, will initialize new memory`);
+      await logWorkingMemory(agentName, 'load_not_found', 'working_memory', null, { reason: 'file_not_found' });
       return null;
     }
     console.error(`Failed to load working memory for ${agentName}:`, error.message);
+    await logMemoryError(agentName, 'load_failed', error);
     return null;
   }
 }
@@ -108,6 +141,11 @@ async function updateWorkingMemory(agentName, updates) {
   try {
     // Validate inputs
     validateAgentName(agentName);
+    
+    // Log the memory update start
+    await logWorkingMemory(agentName, 'update_start', 'working_memory', updates, {
+      updateKeys: Object.keys(updates)
+    });
     
     // Validate and sanitize text content in updates
     if (updates.observation) {
@@ -268,9 +306,26 @@ async function updateWorkingMemory(agentName, updates) {
     // Use a proper async queue to prevent race conditions
     performMemoryHygieneAsync(agentName);
     
-    return updatedMemory;
+    // Log successful memory update
+    await logWorkingMemory(agentName, 'update_complete', 'working_memory', updatedMemory, {
+      observationCount: updatedMemory.observations?.length || 0,
+      decisionCount: updatedMemory.decisions?.length || 0,
+      blockerCount: updatedMemory.blockers?.filter(b => !b.resolved).length || 0
+    });
+    
+    // Use setImmediate to ensure we return quickly
+    setImmediate(() => {
+      // Any post-update operations can happen here
+    });
+    
+    return {
+      success: true,
+      memory: updatedMemory,
+      timestamp: new Date().toISOString()
+    };
   } catch (error) {
     console.error(`Failed to update working memory for ${agentName}:`, error);
+    await logMemoryError(agentName, 'update_failed', error, { updates });
     throw error;
   }
 }
@@ -290,6 +345,15 @@ async function updateWorkingMemory(agentName, updates) {
 async function retrieveRelevantMemories(agentName, query, options = {}) {
   try {
     const { storyId, epicId, topN = 5, shortTermOnly = false, longTermOnly = false } = options;
+    
+    // Log memory retrieval start
+    await logMemoryRetrieval(agentName, 'retrieve_start', query, 0, { 
+      storyId, 
+      epicId, 
+      topN, 
+      shortTermOnly, 
+      longTermOnly 
+    });
     
     const results = {
       shortTerm: {
@@ -392,36 +456,55 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
     }
 
     // Retrieve long-term memory if not excluded
-    if (!shortTermOnly) {
+    if (!longTermOnly) {
       try {
-        // Create context-aware query for Qdrant
-        let contextQuery = query;
-        if (storyId) {
-          contextQuery += ` story:${storyId}`;
-        }
-        if (epicId) {
-          contextQuery += ` epic:${epicId}`;
-        }
-        contextQuery += ` agent:${agentName}`;
+        // Quick check if collection has any data with timeout
+        const { getCollectionPointCount } = require('./qdrant');
+        const pointCount = await withTimeout(
+          getCollectionPointCount,
+          2000,
+          'Get Collection Point Count'
+        )();
         
-        const longTermMemories = await retrieveMemory(contextQuery, topN);
-        
-        // Filter and format long-term memories
-        results.longTerm = longTermMemories
-          .filter(memory => {
-            if (memory.agentName && memory.agentName !== agentName) return false;
-            if (storyId && memory.storyId && memory.storyId !== storyId) return false;
-            if (epicId && memory.epicId && memory.epicId !== epicId) return false;
-            return true;
-          })
-          .map(memory => ({
-            ...memory,
-            source: 'long-term',
-            type: memory.type || 'archived-memory'
-          }));
+        if (!pointCount || pointCount === 0) {
+          console.log('Qdrant collection is empty or unavailable - skipping long-term memory search');
+          results.longTerm = [];
+        } else {
+          // Create context-aware query for Qdrant
+          let contextQuery = query;
+          if (storyId) {
+            contextQuery += ` story:${storyId}`;
+          }
+          if (epicId) {
+            contextQuery += ` epic:${epicId}`;
+          }
+          contextQuery += ` agent:${agentName}`;
+          
+          // Wrap retrieveMemory with timeout
+          const longTermMemories = await withTimeout(
+            () => retrieveMemory(contextQuery, topN),
+            3000,
+            'Retrieve Long-term Memory'
+          )() || [];
+          
+          // Filter and format long-term memories
+          results.longTerm = longTermMemories
+            .filter(memory => {
+              if (memory.agentName && memory.agentName !== agentName) return false;
+              if (storyId && memory.storyId && memory.storyId !== storyId) return false;
+              if (epicId && memory.epicId && memory.epicId !== epicId) return false;
+              return true;
+            })
+            .map(memory => ({
+              ...memory,
+              source: 'long-term',
+              type: memory.type || 'archived-memory'
+            }));
+        }
       } catch (longTermError) {
         console.warn(`Failed to retrieve long-term memories for ${agentName}:`, longTermError.message);
         results.longTermError = longTermError.message;
+        results.longTerm = []; // Ensure empty array on error
       }
     }
 
@@ -444,9 +527,22 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
       return bTime - aTime;
     });
 
+    // Log successful retrieval
+    const combinedCount = results.combined.length;
+    const shortTermCount = Object.values(results.shortTerm).reduce((sum, arr) => sum + arr.length, 0);
+    const longTermCount = results.longTerm.length;
+    
+    await logMemoryRetrieval(agentName, 'retrieve_complete', query, combinedCount, {
+      shortTermCount,
+      longTermCount,
+      hasError: !!results.longTermError
+    });
+    
     return results;
   } catch (error) {
     console.error(`Failed to retrieve memories for ${agentName}:`, error);
+    await logMemoryError(agentName, 'retrieve_failed', error, { query, options });
+    
     return {
       shortTerm: { observations: [], decisions: [], keyFacts: [], blockers: [], plan: [] },
       longTerm: [],
@@ -467,6 +563,9 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
  */
 async function storeMemorySnippetWithContext(agentName, content, metadata = {}) {
   try {
+    // Ensure content is a string
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    
     // Load current context from working memory
     const workingMemory = await loadWorkingMemory(agentName);
     const context = workingMemory?.currentContext || {};
@@ -481,9 +580,28 @@ async function storeMemorySnippetWithContext(agentName, content, metadata = {}) 
       ...metadata
     };
     
-    return await storeMemorySnippet(agentName, content, enhancedMetadata);
+    // Log long-term memory storage
+    await logLongTermMemory(agentName, 'store_start', { content: contentStr, metadata: enhancedMetadata }, {
+      contentLength: contentStr.length,
+      memoryType: enhancedMetadata.type
+    });
+    
+    const memoryId = await storeMemorySnippet(agentName, contentStr, enhancedMetadata);
+    
+    if (memoryId) {
+      await logLongTermMemory(agentName, 'store_complete', { content: contentStr, metadata: enhancedMetadata }, {
+        memoryId,
+        contentLength: contentStr.length,
+        memoryType: enhancedMetadata.type
+      });
+    } else {
+      await logMemoryError(agentName, 'store_failed', new Error('Store returned null'), { content: contentStr, metadata });
+    }
+    
+    return memoryId;
   } catch (error) {
     console.error(`Failed to store memory snippet for ${agentName}:`, error);
+    await logMemoryError(agentName, 'store_snippet_failed', error, { content, metadata });
     return null;
   }
 }
@@ -548,7 +666,13 @@ async function archiveTaskMemory(agentName, taskId) {
  */
 async function checkContextSufficiency(agentName, requiredContext = []) {
   try {
-    const memory = await loadWorkingMemory(agentName);
+    // Wrap memory loading with timeout to prevent hanging
+    const memory = await withTimeout(
+      loadWorkingMemory,
+      3000,
+      'Load Working Memory for Context Check'
+    )(agentName);
+    
     if (!memory) {
       return {
         sufficient: false,
@@ -742,6 +866,178 @@ function performMemoryHygieneAsync(agentName) {
   });
 }
 
+// Convenience functions for agents that expect specific persist functions
+async function persistObservation(agentName, observation, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    observation: observation
+  });
+}
+
+async function persistDecision(agentName, decision, rationale, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    decision: decision,
+    reasoning: rationale
+  });
+}
+
+async function persistBlocker(agentName, blocker, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    blocker: blocker
+  });
+}
+
+async function persistBlockerResolution(agentName, blockerId, resolution) {
+  const memory = await loadWorkingMemory(agentName);
+  const blockerIndex = memory.blockers.findIndex(b => b.blocker === blockerId || b.timestamp === blockerId);
+  if (blockerIndex >= 0) {
+    memory.blockers[blockerIndex].resolution = resolution;
+    memory.blockers[blockerIndex].resolvedAt = new Date().toISOString();
+    memory.blockers[blockerIndex].status = 'resolved';
+    await updateWorkingMemory(agentName, memory);
+  }
+}
+
+async function persistTaskCompletion(agentName, taskId, details = {}) {
+  await updateWorkingMemory(agentName, {
+    completedTasks: [taskId],
+    observations: [{
+      observation: `Completed task: ${taskId}`,
+      timestamp: new Date().toISOString(),
+      taskId,
+      ...details
+    }]
+  });
+  // Also archive to long-term memory
+  return archiveTaskMemory(agentName, taskId);
+}
+
+async function persistKeyFact(agentName, fact, metadata = {}) {
+  const factKey = `fact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Use fire-and-forget for key fact persistence to avoid blocking
+  fireAndForget(
+    async () => updateWorkingMemory(agentName, {
+      keyFacts: {
+        [factKey]: {
+          content: fact,
+          timestamp: new Date().toISOString(),
+          ...metadata
+        }
+      }
+    }),
+    'Persist Key Fact'
+  )();
+  
+  // Return immediately with the fact key
+  return factKey;
+}
+
+// Add long-term memory save function
+async function saveToLongTermMemory(agentName, memoryContent) {
+  try {
+    // Validate input
+    if (!memoryContent || !memoryContent.content) {
+      console.warn('saveToLongTermMemory called with invalid content');
+      return { saved: false, error: 'Invalid memory content', timestamp: new Date().toISOString() };
+    }
+    
+    await logLongTermMemory(agentName, 'save_start', memoryContent, {
+      memoryType: memoryContent.memoryType,
+      hasContent: !!memoryContent.content
+    });
+    
+    // Execute the actual save operation synchronously to ensure proper error handling
+    const result = await storeMemorySnippetWithContext(agentName, memoryContent.content, {
+      ...memoryContent.metadata,
+      memoryType: memoryContent.memoryType || 'general'
+    });
+    
+    if (!result) {
+      throw new Error('Failed to store memory snippet - no result returned');
+    }
+    
+    await logLongTermMemory(agentName, 'save_complete', memoryContent, {
+      memoryId: result,
+      memoryType: memoryContent.memoryType
+    });
+    
+    // Return success with the memory ID
+    return { 
+      saved: true, 
+      memoryId: result,
+      timestamp: new Date().toISOString() 
+    };
+  } catch (error) {
+    await logMemoryError(agentName, 'save_long_term_failed', error, { memoryContent });
+    return { saved: false, error: error.message, timestamp: new Date().toISOString() };
+  }
+}
+
+// Add missing validation and summary functions
+async function loadMemoryWithValidation(agentName, context = {}) {
+  const memory = await loadWorkingMemory(agentName);
+  const sufficiency = await checkContextSufficiency(agentName, context);
+  
+  return {
+    memory,
+    validation: {
+      hasSufficientContext: sufficiency.hasSufficientContext,
+      recommendations: sufficiency.recommendations || []
+    }
+  };
+}
+
+async function createSessionSummary(agentName, sessionDetails = {}) {
+  try {
+    await logSessionSummary(agentName, 'create_start', sessionDetails, { hasDetails: Object.keys(sessionDetails).length > 0 });
+    
+    // Load memory with timeout
+    const memory = await withTimeout(
+      loadWorkingMemory,
+      2000,
+      'Load Working Memory'
+    )(agentName) || {};
+    
+    const summary = {
+      agentName,
+      sessionEnd: new Date().toISOString(),
+      tasksCompleted: memory.completedTasks || [],
+      decisionsMode: memory.decisions?.length || 0,
+      observationsMade: memory.observations?.length || 0,
+      blockersEncountered: memory.blockers?.filter(b => b.status === 'active').length || 0,
+      ...sessionDetails
+    };
+    
+    await logSessionSummary(agentName, 'create_complete', summary, {
+      taskCount: summary.tasksCompleted.length,
+      decisionCount: summary.decisionsMode,
+      observationCount: summary.observationsMade
+    });
+    
+    // Fire and forget the persist operation - don't wait for it
+    fireAndForget(
+      async () => persistKeyFact(agentName, `Session Summary: ${JSON.stringify(summary)}`, {
+        type: 'session-summary',
+        sessionEnd: summary.sessionEnd
+      }),
+      'Persist Session Summary'
+    )();
+    
+    return summary;
+  } catch (error) {
+    console.log(`⚡ Session summary creation failed: ${error.message}`);
+    await logMemoryError(agentName, 'create_session_summary_failed', error, { sessionDetails });
+    
+    // Return minimal summary on error
+    return {
+      agentName,
+      sessionEnd: new Date().toISOString(),
+      error: error.message,
+      ...sessionDetails
+    };
+  }
+}
+
 module.exports = {
   initializeWorkingMemory,
   loadWorkingMemory,
@@ -753,7 +1049,113 @@ module.exports = {
   getMemorySummary,
   clearWorkingMemory,
   performAgentMemoryHygiene,
+  // Add the missing persist functions
+  persistObservation,
+  persistDecision,
+  persistBlocker,
+  persistBlockerResolution,
+  persistTaskCompletion,
+  persistKeyFact,
+  saveToLongTermMemory,
+  loadMemoryWithValidation,
+  createSessionSummary,
   // Export configuration for backward compatibility
   MEMORY_DIR: MEMORY_CONFIG.BASE_DIR,
   MAX_OBSERVATIONS: MEMORY_CONFIG.MAX_OBSERVATIONS
 };
+
+// Command-line interface
+if (require.main === module) {
+  const command = process.argv[2];
+  const agentName = process.argv[3];
+  
+  async function runCommand() {
+    try {
+      switch (command) {
+        case 'checkContextSufficiency': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          // Parse required context from additional arguments
+          const requiredContext = process.argv.slice(4);
+          
+          console.log(`Checking context sufficiency for agent: ${agentName}`);
+          const result = await checkContextSufficiency(agentName, requiredContext);
+          
+          // Output result as JSON for parsing
+          console.log(JSON.stringify(result, null, 2));
+          
+          // Exit with appropriate code
+          await closeConnections();
+          process.exit(result.sufficient ? 0 : 1);
+          break;
+        }
+        
+        case 'initializeWorkingMemory': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          console.log(`Initializing working memory for agent: ${agentName}`);
+          const result = await initializeWorkingMemory(agentName);
+          console.log(JSON.stringify(result, null, 2));
+          await closeConnections();
+          process.exit(0);
+          break;
+        }
+        
+        case 'getMemorySummary': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          console.log(`Getting memory summary for agent: ${agentName}`);
+          const result = await getMemorySummary(agentName);
+          console.log(JSON.stringify(result, null, 2));
+          await closeConnections();
+          process.exit(0);
+          break;
+        }
+        
+        case 'updateWorkingMemoryAndExit':
+        case 'saveToLongTermMemoryAndExit':
+          console.error(`Error: Command '${command}' is not available in agent-memory-manager.js`);
+          console.error('These commands are only available in agent-memory-loader.js');
+          console.error('Please use: node .bmad-core/utils/agent-memory-loader.js ' + command);
+          await closeConnections();
+          process.exit(1);
+          break;
+          
+        default:
+          console.error(`Error: Unknown command '${command}'`);
+          console.error('Available commands: checkContextSufficiency, initializeWorkingMemory, getMemorySummary');
+          console.error('Note: updateWorkingMemoryAndExit and saveToLongTermMemoryAndExit are only available in agent-memory-loader.js');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      console.error(error.stack);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  // Add timeout for the entire command execution
+  const timeout = setTimeout(async () => {
+    console.error('Command timed out after 10 seconds');
+    await closeConnections();
+    process.exit(1);
+  }, 10000);
+  
+  runCommand().finally(() => {
+    clearTimeout(timeout);
+  });
+}

@@ -6,7 +6,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -54,6 +54,8 @@ steps:
         elicit: false
       - description: Generate a dependency impact report using generateImpactReport()
         elicit: false
+      - description: Load the dependency-analysis-storage utility to save the analysis
+        elicit: false
   - id: step3
     name: Assess Risk Level
     description: Evaluate the severity of dependency impacts and identify high-risk changes
@@ -91,10 +93,12 @@ steps:
       - description: Consider end-to-end tests for critical dependency chains
         elicit: false
   - id: step6
-    name: Document Dependency Warnings
-    description: Record dependency analysis results and warnings in the story
+    name: Save and Document Dependency Analysis
+    description: Save the complete dependency analysis report and document key findings
     actions:
-      - description: Add dependency impact summary to the story's Debug Log
+      - description: Use saveDependencyAnalysis() to save the full analysis report with story ID and task context
+        elicit: false
+      - description: Add dependency impact summary to the story's Debug Log with reference to saved analysis file
         elicit: false
       - description: Document any high-risk changes and mitigation plans
         elicit: false
@@ -102,6 +106,20 @@ steps:
         elicit: false
       - description: Record recommended additional testing based on dependency analysis
         elicit: false
+      - description: Include the saved analysis filepath in the Debug Log for QA reference
+        elicit: true
+        prompt: |
+          DEPENDENCY ANALYSIS SAVED:
+
+          The complete dependency impact analysis has been saved to:
+          {{DEPENDENCY_ANALYSIS_FILEPATH}}
+
+          Please add the following to the story's Debug Log:
+          - Dependency Analysis Location: {{DEPENDENCY_ANALYSIS_FILEPATH}}
+          - Analysis Timestamp: {{ANALYSIS_TIMESTAMP}}
+          - Risk Assessment: {{RISK_LEVEL}}
+          - High-Risk Files: {{HIGH_RISK_COUNT}}
+          - Total Impacted Symbols: {{TOTAL_IMPACTED_SYMBOLS}}
   - id: step7
     name: Make Go/No-Go Decision
     description: Determine if changes can proceed or if additional work is needed
@@ -145,7 +163,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:

@@ -5,7 +5,7 @@
 
 // Import functions dynamically to avoid circular dependencies
 const getMemoryManager = () => require('./agent-memory-manager');
-const { storeContextualMemory } = require('./qdrant');
+const { storeContextualMemory, closeConnections } = require('./qdrant');
 
 /**
  * Persist agent observation after a significant action
@@ -439,3 +439,66 @@ module.exports = {
   createSessionSummary,
   batchPersistObservations
 };
+
+// Command line interface for subprocess execution
+if (require.main === module) {
+  async function closeConnections() {
+    // Import the connection closer from memory config
+    try {
+      const { closeConnections } = require('./memory-config');
+      await closeConnections();
+    } catch (error) {
+      console.error('Warning: Could not close connections:', error.message);
+    }
+  }
+
+  async function runCommand() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+    
+    if (!command) {
+      console.error('Error: Command is required');
+      console.error('Available commands: persistObservation, persistDecision, persistKeyFact, persistTaskCompletion, persistBlocker, persistBlockerResolution, createSessionSummary');
+      console.error('Note: This file does not support updateWorkingMemoryAndExit or saveToLongTermMemoryAndExit commands.');
+      console.error('Use agent-memory-loader.js for those commands instead.');
+      await closeConnections();
+      process.exit(1);
+    }
+
+    try {
+      switch (command) {
+        case 'updateWorkingMemoryAndExit':
+        case 'saveToLongTermMemoryAndExit':
+          console.error(`Error: Command '${command}' is not available in agent-memory-persistence.js`);
+          console.error('These commands are only available in agent-memory-loader.js');
+          console.error('Please use: node .bmad-core/utils/agent-memory-loader.js ' + command);
+          await closeConnections();
+          process.exit(1);
+          break;
+          
+        default:
+          console.error(`Error: Unknown command '${command}'`);
+          console.error('Available commands: persistObservation, persistDecision, persistKeyFact, persistTaskCompletion, persistBlocker, persistBlockerResolution, createSessionSummary');
+          console.error('Note: updateWorkingMemoryAndExit and saveToLongTermMemoryAndExit are only available in agent-memory-loader.js');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      console.error(error.stack);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  // Add timeout for the entire command execution
+  const timeout = setTimeout(async () => {
+    console.error('Command timed out after 10 seconds');
+    await closeConnections();
+    process.exit(1);
+  }, 10000);
+  
+  runCommand().finally(() => {
+    clearTimeout(timeout);
+  });
+}

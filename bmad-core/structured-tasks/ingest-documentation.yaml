@@ -1,0 +1,86 @@
+id: ingest-documentation
+name: Ingest Documentation to Qdrant
+purpose: Fetch technical documentation from search results and ingest into Qdrant for agent access
+inputs:
+  searchToolsPath:
+    type: string
+    description: Path to the tech-search-tools.yaml file
+    default: tech-search-tools.yaml
+  collectionName:
+    type: string
+    description: Qdrant collection name for documentation
+    default: project_documentation
+outputs:
+  ingestionReport:
+    type: string
+    description: Report of ingested documentation
+    default: documentation-ingestion-report.yaml
+steps:
+  - id: parse-search-tools
+    name: Parse Search Tools Configuration
+    description: Read and parse the tech search tools file
+    actions:
+      - description: Load the search tools configuration
+        action: Read the {{inputs.searchToolsPath}} file and extract documentation queries
+        elicit: true
+  
+  - id: fetch-documentation
+    name: Fetch Documentation Content
+    description: Fetch documentation from identified sources
+    actions:
+      - description: For each documentation query, fetch the content
+        action: |
+          echo "Fetching documentation based on queries..."
+          echo "This step would typically:"
+          echo "1. Use web scraping or APIs to fetch documentation"
+          echo "2. Clean and parse the HTML/markdown content"
+          echo "3. Extract code examples and explanations"
+          echo "4. Store temporarily for processing"
+        elicit: true
+  
+  - id: process-content
+    name: Process Documentation for Qdrant
+    description: Convert documentation into vector embeddings
+    actions:
+      - description: Process documentation content for vector storage
+        action: |
+          echo "Processing documentation for Qdrant..."
+          echo "This would:"
+          echo "1. Split documentation into semantic chunks"
+          echo "2. Generate embeddings using OpenAI or local model"
+          echo "3. Extract metadata (source, date, technology, version)"
+          echo "4. Prepare for Qdrant ingestion"
+        elicit: true
+  
+  - id: ingest-to-qdrant
+    name: Ingest to Qdrant
+    description: Store processed documentation in Qdrant
+    actions:
+      - description: Use ingest-to-qdrant.js to store documentation
+        action: node {root}/scripts/ingest-to-qdrant.js --collection {{inputs.collectionName}} --data processed-docs.json
+        elicit: true
+  
+  - id: generate-report
+    name: Generate Ingestion Report
+    description: Create a report of what was ingested
+    actions:
+      - description: Generate ingestion summary report
+        action: |
+          echo "Generating ingestion report..."
+          echo "Report would include:"
+          echo "- Number of documents ingested"
+          echo "- Technologies covered"
+          echo "- Sources used"
+          echo "- Collection statistics"
+        elicit: true
+        
+metadata:
+  agent: sm
+  priority: high
+  estimated_hours: 2.0
+  depends_on:
+    - tech-search-tools.yaml
+  tags:
+    - documentation
+    - qdrant
+    - ingestion

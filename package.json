@@ -77,7 +77,8 @@
     "inquirer": "^8.2.6",
     "js-yaml": "^4.1.0",
     "openai": "^4.73.1",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "undici": "^7.13.0"
   },
   "keywords": [
     "agile",

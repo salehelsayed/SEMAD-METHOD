@@ -4,6 +4,10 @@
 
 The StoryContract is a structured YAML block that replaces free-form summarization in story creation. It ensures that the Scrum Master extracts requirements directly from PRDs and Architecture documents without interpretation or hallucination.
 
+## Important Note about Validation
+
+The `validate-story-contract.js` script validates StoryContracts in story files. If no StoryContract is found, it will show a warning message but still return success (exit code 0) because not all stories require a StoryContract. This is intentional behavior to support different story types and maintain backward compatibility.
+
 ## Purpose
 
 - **Eliminate hallucinations**: Force verbatim extraction of requirements

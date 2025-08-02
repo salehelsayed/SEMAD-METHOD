@@ -1,0 +1,195 @@
+id: dev-save-memory
+name: Dev Agent Save Memory
+purpose: Saves implementation decisions and patterns to long-term memory for future reference and context preservation
+steps:
+  - id: step1
+    name: Load Memory Utils
+    description: Load the memory management utilities for working and long-term memory operations
+    actions:
+      - description: Log memory task initialization
+        elicit: false
+        function: logTaskMemory
+        parameters:
+          agentName: "dev"
+          taskName: "dev-save-memory"
+          operation: "task_start"
+          taskData:
+            taskId: "{{task_name}}"
+            storyId: "{{story_id}}"
+        metadata:
+          loggingAction: true
+      - description: Load the memory management utilities (always use AndExit versions when running in subprocess)
+        elicit: false
+
+  - id: step2
+    name: Update Working Memory
+    description: Update working memory with current task completion and implementation decisions
+    actions:
+      - description: Log working memory update start
+        elicit: false
+        function: logWorkingMemory
+        parameters:
+          agentName: "dev"
+          operation: "update_start"
+          memoryType: "recentDecisions"
+          data:
+            taskId: "{{task_name}}"
+            storyId: "{{story_id}}"
+        metadata:
+          loggingAction: true
+      - description: Update working memory with current task details including decision, rationale, and affected files
+        elicit: false
+        function: updateWorkingMemoryAndExit
+        parameters:
+          agentName: dev
+          memoryType: recentDecisions
+          data:
+            taskId: "{{task_name}}"
+            storyId: "{{story_id}}"
+            decision: "{{implementation_details.decision}}"
+            rationale: "{{implementation_details.rationale}}"
+            timestamp: "{{current_timestamp}}"
+            files: {{implementation_details.files}}
+        metadata:
+          memoryAction: true
+      - description: Add task to completed tasks list in working memory
+        elicit: false
+        function: updateWorkingMemoryAndExit
+        parameters:
+          agentName: dev
+          memoryType: completedTasks
+          data:
+            taskName: "{{task_name}}"
+            timestamp: "{{current_timestamp}}"
+        metadata:
+          memoryAction: true
+
+  - id: step3
+    name: Save to Long-Term Memory
+    description: Save important implementation patterns and decisions to long-term memory for future reference
+    actions:
+      - description: Log long-term memory save start
+        elicit: false
+        function: logLongTermMemory
+        parameters:
+          agentName: dev
+          operation: save_start
+          memoryContent:
+            memoryType: implementation-pattern
+            storyId: "{{story_id}}"
+            taskId: "{{task_name}}"
+        metadata:
+          loggingAction: true
+      - description: Save implementation pattern and technical decisions to long-term memory
+        elicit: false
+        function: saveToLongTermMemoryAndExit
+        parameters:
+          agentName: dev
+          memoryContent:
+            memoryType: implementation-pattern
+            content:
+              storyId: "{{story_id}}"
+              task: "{{task_name}}"
+              pattern: "{{implementation_details.pattern}}"
+              description: "{{implementation_details.description}}"
+              codeSnippet: "{{implementation_details.codeSnippet}}"
+              files: {{implementation_details.files}}
+              techStack: "{{implementation_details.techStack}}"
+              challenges: "{{implementation_details.challenges}}"
+              solutions: "{{implementation_details.solutions}}"
+            metadata:
+              timestamp: "{{current_timestamp}}"
+              importance: "{{implementation_details.importance}}"
+              tags: {{implementation_details.tags}}
+        metadata:
+          memoryAction: true
+
+  - id: step4
+    name: Handle Story Completion
+    description: Save comprehensive story completion summary when story is fully complete
+    actions:
+      - description: Save story completion summary with all tasks, decisions, and lessons learned
+        elicit: false
+        function: saveToLongTermMemoryAndExit
+        parameters:
+          agentName: "dev"
+          memoryContent:
+            memoryType: "story-completion"
+            content:
+              storyId: "{{story_id}}"
+              completedTasks: "{{implementation_details.completedTasks}}"
+              technicalDecisions: "{{implementation_details.decisions}}"
+              filesCreated: "{{implementation_details.filesCreated}}"
+              filesModified: "{{implementation_details.filesModified}}"
+              challenges: "{{implementation_details.challenges}}"
+              lessonsLearned: "{{implementation_details.lessons}}"
+            metadata:
+              timestamp: "{{current_timestamp}}"
+              importance: "high"
+              tags: ["story-complete", "{{story_id}}"]
+        condition: "{{task_name}} === 'story_complete'"
+        metadata:
+          memoryAction: true
+
+  - id: step5
+    name: Log Task Completion
+    description: Log the completion of the memory save task
+    actions:
+      - description: Log successful completion of memory save task
+        elicit: false
+        function: logTaskMemory
+        parameters:
+          agentName: "dev"
+          taskName: "dev-save-memory"
+          operation: "task_complete"
+          taskData:
+            taskId: "{{task_name}}"
+            storyId: "{{story_id}}"
+            success: true
+        metadata:
+          loggingAction: true
+
+inputs:
+  story_id:
+    type: string
+    required: true
+    description: The story being implemented
+  task_name:
+    type: string
+    required: true
+    description: The specific task completed
+  implementation_details:
+    type: object
+    required: true
+    description: Details about the implementation including decisions, files, patterns, and challenges
+outputs:
+  memory_saved:
+    type: boolean
+    description: Whether memory was successfully saved
+  memory_id:
+    type: string
+    description: ID of the saved memory entry
+metadata:
+  canBeUsedBy: ["dev"]
+  requiresConfiguration: ["memory"]
+  category: memory
+  complexity: low
+  version: "1.0"
+  tags:
+    - memory
+    - persistence
+    - dev-agent
+notes: |
+  This task ensures the dev agent preserves implementation knowledge
+  for future reference. Call this after each task completion and
+  especially when marking story as "Ready for Review".
+  
+  Best practices:
+  - Save memory after each significant task completion
+  - Include rationale for technical decisions
+  - Capture both successes and challenges
+  - Tag memories appropriately for future retrieval
+  
+  Error handling:
+  - If memory save fails, log error but continue
+  - Ensure working memory is always updated even if long-term save fails

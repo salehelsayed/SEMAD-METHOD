@@ -6,7 +6,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -58,7 +58,11 @@ steps:
     name: Cross-Reference with Original Analysis
     description: Compare current impacts with any dependency analysis done during development
     actions:
-      - description: Check the Debug Log for previous dependency analysis results
+      - description: Load the dependency-analysis-storage utility to retrieve dev's analysis
+        elicit: false
+      - description: Use getLatestDependencyAnalysis() to retrieve the dev agent's pre-implementation analysis
+        elicit: false
+      - description: Check the Debug Log for the dependency analysis file reference
         elicit: false
       - description: Compare current impact analysis with dev-time analysis if available
         elicit: false
@@ -66,6 +70,25 @@ steps:
         elicit: false
       - description: Flag any discrepancies between planned and actual impacts
         elicit: false
+      - description: Note if dev's analysis accurately predicted the actual impacts
+        elicit: true
+        prompt: |
+          COMPARING DEPENDENCY ANALYSES:
+
+          Dev's Pre-Implementation Analysis Location:
+          {{DEV_ANALYSIS_FILEPATH}}
+
+          Dev's Predicted Impacts:
+          {{DEV_PREDICTED_IMPACTS}}
+
+          QA's Post-Implementation Analysis:
+          {{QA_ACTUAL_IMPACTS}}
+
+          Please compare:
+          1. Were all predicted impacts actually realized?
+          2. Are there new impacts that weren't predicted?
+          3. Were any predicted impacts avoided through implementation choices?
+          4. Is the actual risk level different from what was predicted?
   - id: step4
     name: Verify Impacted Code is Tested
     description: Ensure that all code affected by dependencies has adequate test coverage
@@ -120,11 +143,15 @@ steps:
     actions:
       - description: Compile all dependency analysis findings into a structured report
         elicit: false
+      - description: Use saveDependencyAnalysis() to save the QA comparison analysis
+        elicit: false
       - description: Categorize issues by severity (Critical, Major, Minor, Info)
         elicit: false
       - description: Provide specific recommendations for addressing each finding
         elicit: true
       - description: Include risk assessment and mitigation suggestions
+        elicit: false
+      - description: Save the QA analysis with references to the dev's original analysis
         elicit: false
   - id: step9
     name: Make QA Recommendations
@@ -173,7 +200,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:

@@ -46,10 +46,21 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 
 ```yaml
 activation-instructions:
+  - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
+  - STEP 2: Initialize working memory for this agent session using loadAgentMemoryContextAndExit from utils/agent-memory-loader.js with agent name 'sm' (always use AndExit version when running in subprocess)
+  - STEP 3: Load relevant long-term memories from previous story creation sessions using retrieveRelevantMemoriesAndExit from agent-memory-loader.js with query 'story creation session context' (always use AndExit version when running in subprocess)
+  - STEP 4: Check memory recommendations and validate if sufficient context exists to proceed
+  - STEP 5: Adopt the persona defined in the 'agent' and 'persona' sections below
+  - STEP 6: Greet user with your name/role, mention `*help` command, and briefly summarize any relevant context from memory
+  - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
+  - CRITICAL WORKFLOW RULE: When executing tasks from dependencies, follow task instructions exactly as written - they are executable workflows, not reference material
+  - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
+  - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
+  - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
   name: Bob
   id: sm
@@ -70,19 +81,23 @@ persona:
     - When creating stories, use the task-runner utility to analyze complexity and automatically create sub-tasks if the story has more than 5 implementation steps.
     - CRITICAL: Your primary function in story creation is to parse the PRD and Architecture into a StoryContract YAML block. Do NOT summarise; extract data verbatim.
     - Always produce a StoryContract that adheres to the story-contract-schema; halt and request clarification if required fields are missing.
-    - MEMORY OPERATIONS: After each significant story creation step, record key observations using persistObservation with actionType. Before starting new stories, check retrieveRelevantMemories for similar work patterns.
-    - CONTEXT VALIDATION: Use checkContextSufficiency to verify you have epic/story context before proceeding. If context is missing, explicitly request it from user rather than making assumptions.
-    - KNOWLEDGE PERSISTENCE: Store important story patterns, user preferences, and PRD insights as key facts using persistKeyFact for future story creation sessions.
+    - MEMORY OPERATIONS: After each significant story creation step, record key observations using persistObservation with actionType and log using logWorkingMemory. Before starting new stories, check retrieveRelevantMemoriesAndExit for similar work patterns and log retrieval using logMemoryRetrieval.
+    - CONTEXT VALIDATION: Use checkContextSufficiency from utils/agent-memory-manager.js to verify you have epic/story context before proceeding and log validation using logContextValidation. If context is missing, explicitly request it from user rather than making assumptions.
+    - KNOWLEDGE PERSISTENCE: Store important story patterns, user preferences, and PRD insights as key facts using persistKeyFact for future story creation sessions and log using logLongTermMemory.
+    - SPECIFIC MEMORY CALLS - After create-story persistObservation with actionType story-creation, persistDecision about story structure, and persistKeyFact about story-creation-pattern. After correct-course persistDecision about agile process corrections. After story-checklist persistObservation with actionType quality-check and persistKeyFact about story-quality-pattern
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - create-story: Execute task create-next-story.yaml with memory persistence of key observations
-  - correct-course: Execute task correct-course.yaml
-  - story-checklist: Execute task execute-checklist.yaml with checklist story-draft-checklist.yaml
-  - memory-status: Show current working memory status and recent observations using getMemorySummary
-  - recall-context: Retrieve relevant memories for current epic/story context using retrieveRelevantMemories
-  - exit: Say goodbye as the Scrum Master, create session summary using createSessionSummary, and abandon inhabiting this persona
+  - create-story: 'Execute task create-next-story.yaml with memory persistence of key observations, log story creation using logTaskMemory, and save story patterns to long-term memory using logLongTermMemory → execute: node bmad-core/utils/persist-memory-cli.js observation sm ''Story creation completed'' → execute: node bmad-core/utils/persist-memory-cli.js decision sm ''Story structure'' ''Decisions made based on PRD and epic requirements'' → execute: node bmad-core/utils/persist-memory-cli.js keyfact sm ''Story creation patterns applied'''
+  - correct-course: 'Execute task correct-course.yaml with memory logging of corrections using logWorkingMemory → execute: node bmad-core/utils/persist-memory-cli.js decision sm ''Agile process corrections'' ''Applied improvements to development workflow'''
+  - story-checklist: 'Execute task execute-checklist.yaml with checklist story-draft-checklist.yaml and log checklist results using logTaskMemory → execute: node bmad-core/utils/persist-memory-cli.js observation sm ''Story quality checklist completed'' → execute: node bmad-core/utils/persist-memory-cli.js keyfact sm ''Story quality patterns validated'''
+  - memory-status: Show current working memory status and recent observations using getMemorySummary and getMemoryUsageStats from memory-usage-logger.js
+  - recall-context: Retrieve relevant memories for current epic/story context using retrieveRelevantMemoriesAndExit and log retrieval using logMemoryRetrieval
+  - generate-search-tools: Execute task generate-search-tools.yaml to create search tool configurations for the current epic/story
+  - generate-tech-search-tools: 'Generate technical documentation search queries by running: node .bmad-core/scripts/generate-tech-search-tools.js --prd docs/prd.md --output tech-search-tools.yaml'
+  - query-docs: Execute task query-technical-docs.yaml to search documentation in configured Qdrant collections
+  - exit: Say goodbye as the Scrum Master, create session summary using createSessionSummary and log summary using logSessionSummary, and abandon inhabiting this persona
 dependencies:
-  tasks:
+  structured-tasks:
     - create-next-story.yaml
     - execute-checklist.yaml
     - correct-course.yaml
@@ -91,456 +106,16 @@ dependencies:
     - generate-search-tools.yaml
   templates:
     - story-tmpl.yaml
-  checklists:
+  structured-checklists:
     - story-draft-checklist.yaml
   utils:
     agent-memory-loader: agent-memory-loader.js
     agent-memory-manager: agent-memory-manager.js
     agent-memory-persistence: agent-memory-persistence.js
+    memory-usage-logger: memory-usage-logger.js
     qdrant: qdrant.js
 ```
 ==================== END: .bmad-core/agents/sm.md ====================
-
-==================== START: .bmad-core/structured-tasks/create-next-story.yaml ====================
-# Create Next Story Task
-
-## Purpose
-
-To identify the next logical story based on project progress and epic definitions, and then to prepare a comprehensive, self-contained, and actionable story file using the `Story Template`. This task ensures the story is enriched with all necessary technical context, requirements, and acceptance criteria, making it ready for efficient implementation by a Developer Agent with minimal need for additional research or finding its own context.
-
-## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
-
-### 1. Load Memory and Initialize Context
-
-Load agent working memory and relevant long-term context using unified memory system
-
-- Load agent working memory and relevant long-term context
-- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
-- **[USER INPUT REQUIRED]** Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
-
-### 0. Load Core Configuration and Check Workflow
-
-- Load `bmad-core/core-config.yaml` from the project root
-- If the file does not exist, HALT and inform the user: "core-config.yaml not found. This file is required for story creation. You can either: 1) Copy it from GITHUB bmad-core/core-config.yaml and configure it for your project OR 2) Run the BMad installer against your project to upgrade and add the file automatically. Please add and configure core-config.yaml before proceeding."
-- Extract key configurations: `devStoryLocation`, `prd.*`, `architecture.*`, `workflow.*`
-
-### 1. Identify Next Story for Preparation
-
-#### 1.1. Locate Epic Files and Review Existing Stories
-
-- Based on `prdSharded` from config, locate epic files (sharded location/pattern or monolithic PRD sections)
-- If `devStoryLocation` has story files, load the highest `{epicNum}.{storyNum}.story.md` file
-- **If highest story exists:**
-- **[USER INPUT REQUIRED]** Verify status is 'Done'. If not, alert user and halt: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status]. Cannot proceed until this story is completed or manually moved to Done status."
-- **[USER INPUT REQUIRED]** Automatically select next sequential story in the current epic based on epic progress
-- If epic is complete, automatically proceed to next epic: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Proceeding to Epic {epicNum + 1}, Story 1."
-- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.
-- **If no story files exist:** The next story is ALWAYS 1.1 (first story of first epic)
-- Announce the identified story to the user: "Identified next story for preparation: {epicNum}.{storyNum} - {Story Title}"
-- **[USER INPUT REQUIRED]** Execute task `update-working-memory` with currentStep='story-identified' and context containing epicNum, storyNum, and story title
-
-- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.
-
-### 2. Gather Story Requirements and Previous Story Context
-
-- Extract story requirements from the identified epic file
-- If previous story exists, review Dev Agent Record sections for:
-- Completion Notes and Debug Log References
-- Implementation deviations and technical decisions
-- Challenges encountered and lessons learned
-- Extract relevant insights that inform the current story's preparation
-
-### 3. Gather Architecture Context
-
-#### 3.1. Determine Architecture Reading Strategy
-
-- **If `architectureVersion: >= v4` and `architectureSharded: true`**: Read `{architectureShardedLocation}/index.md` then follow structured reading order below
-- **Else**: Use monolithic `architectureFile` for similar sections
-
-#### 3.2. Read Architecture Documents Based on Story Type
-
-**For ALL Stories:** tech-stack.md, unified-project-structure.md, coding-standards.md, testing-strategy.md
-**For Backend/API Stories, additionally:** data-models.md, database-schema.md, backend-architecture.md, rest-api-spec.md, external-apis.md
-**For Frontend/UI Stories, additionally:** frontend-architecture.md, components.md, core-workflows.md, data-models.md
-**For Full-Stack Stories:** Read both Backend and Frontend sections above
-
-#### 3.3. Extract Story-Specific Technical Details
-
-Extract ONLY information directly relevant to implementing the current story. Do NOT invent new libraries, patterns, or standards not in the source documents.
-Extract:
-ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
-
-- Specific data models, schemas, or structures the story will use
-- API endpoints the story must implement or consume
-- Component specifications for UI elements in the story
-- File paths and naming conventions for new code
-- Testing requirements specific to the story's features
-- Security or performance considerations affecting the story
-
-### 4. Parse Story Requirements into StoryContract
-
-From the sharded PRD and architecture docs, extract endpoints, data models, file paths and acceptance criteria and construct a StoryContract YAML block.
-
-- Extract all API endpoints from architecture documents with their method, path, description, request body, and success response
-- Identify all files that need to be created or modified based on the story requirements
-- Link acceptance criteria from the epic to this story
-- Build StoryContract YAML block with version, story_id, epic_id, apiEndpoints, filesToModify, and acceptanceCriteriaLinks
-- CRITICAL - Do NOT summarise or invent data. Extract requirements verbatim from PRD and Architecture documents
-
-### 4. Verify Project Structure Alignment
-
-- Cross-reference story requirements with Project Structure Guide from `docs/architecture/unified-project-structure.md`
-- Ensure file paths, component locations, or module names align with defined structures
-- Document any structural conflicts in "Project Structure Notes" section within the story draft
-
-### 5. Populate Story Template with Full Context
-
-- Create new story file: `{devStoryLocation}/{epicNum}.{storyNum}.story.md` using Story Template
-- Embed the StoryContract YAML block at the top of the story file between --- markers
-- **[USER INPUT REQUIRED]** Execute task `validate-story-contract` with storyFilePath set to the newly created story file path
-- If validation fails, halt the workflow and inform the user of the specific validation errors so corrections can be made
-- Fill in basic story information: Title, Status (Draft), Story statement, Acceptance Criteria from Epic
-- **`Dev Notes` section (CRITICAL):**
-- CRITICAL: This section MUST contain ONLY information extracted from architecture documents. NEVER invent or assume technical details.
-- Include ALL relevant technical details from Steps 2-3, organized by category:
-- **Previous Story Insights**: Key learnings from previous story
-- **Data Models**: Specific schemas, validation rules, relationships [with source references]
-- **API Specifications**: Endpoint details, request/response formats, auth requirements [with source references]
-- **Component Specifications**: UI component details, props, state management [with source references]
-- **File Locations**: Exact paths where new code should be created based on project structure
-- **Testing Requirements**: Specific test cases or strategies from testing-strategy.md
-- **Technical Constraints**: Version requirements, performance considerations, security rules
-- Every technical detail MUST include its source reference: `[Source: architecture/{filename}.md#{section}]`
-- If information for a category is not found in the architecture docs, explicitly state: "No specific guidance found in architecture docs"
-- **[USER INPUT REQUIRED]** **`Tasks / Subtasks` section:**
-- **[USER INPUT REQUIRED]** Generate detailed, sequential list of technical tasks based ONLY on: Epic Requirements, Story AC, Reviewed Architecture Information
-- **[USER INPUT REQUIRED]** Each task must reference relevant architecture documentation
-- **[USER INPUT REQUIRED]** Include unit testing as explicit subtasks based on the Testing Strategy
-- **[USER INPUT REQUIRED]** Link tasks to acceptance criteria from the contract (e.g., `Task 1 (AC-1, AC-3)`) so developers know exactly what to implement
-- Add notes on project structure alignment or discrepancies found in Step 4
-
-- **`Dev Notes` section (CRITICAL):**
-  - CRITICAL: This section MUST contain ONLY information extracted from architecture documents. NEVER invent or assume technical details.
-
-### 13. Story Draft Completion and Review
-
-- Review all sections for completeness and accuracy
-- **[USER INPUT REQUIRED]** Verify all source references are included for technical details
-- **[USER INPUT REQUIRED]** Ensure tasks align with both epic requirements and architecture constraints
-- Update status to "Draft" and save the story file
-- **[USER INPUT REQUIRED]** Execute `.bmad-core/tasks/execute-checklist` `.bmad-core/checklists/story-draft-checklist`
-- **[USER INPUT REQUIRED]** MANDATORY VALIDATION: Execute task `validate-next-story` with the newly created story file path
-- If validation fails, halt workflow and surface all validation errors to the user. Story CANNOT proceed until all validation issues are resolved.
-- **[USER INPUT REQUIRED]** Provide summary to user including:
-- Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`
-- Status: Draft
-- Key technical components included from architecture docs
-- Any deviations or conflicts noted between epic and architecture
-- Checklist Results
-- Validation Results (pass/fail with any issues)
-- Next steps: Story has been validated and is ready for implementation
-- **[USER INPUT REQUIRED]** Save task completion to working memory and archive significant findings
-==================== END: .bmad-core/structured-tasks/create-next-story.yaml ====================
-
-==================== START: .bmad-core/structured-tasks/execute-checklist.yaml ====================
-# Execute Checklist
-
-## Purpose
-
-Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
-
-## SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
-
-### 1. Load Memory and Initialize Context
-
-Load agent working memory and relevant long-term context using unified memory system
-
-- Load agent working memory and relevant long-term context
-- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
-
-### 2. Initialize Working Memory
-
-Initialize working memory for checklist execution session
-
-- **[USER INPUT REQUIRED]** Execute task `update-working-memory` with agentName and taskId='execute-checklist'
-- **[USER INPUT REQUIRED]** Verify checklist file exists at specified path
-- Load checklist content and parse structure
-
-### 3. Determine Execution Mode
-
-Determine how to execute the checklist based on user preference
-
-- Check if execution mode was provided in input
-- **[USER INPUT REQUIRED]** If mode not specified, ask user for preference:
-- **[USER INPUT REQUIRED]** **How would you like to work through this checklist?**
-- **[USER INPUT REQUIRED]** 1. Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
-- 2. All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end
-- **[USER INPUT REQUIRED]** Select option (1 or 2):
-
-### 4. Parse Checklist Structure
-
-Analyze the checklist to identify sections and items
-
-- Identify main sections in the checklist
-- Extract checklist items (lines starting with '- [ ]')
-- Parse any LLM instructions embedded in [[LLM: ]] blocks
-- Create structured representation of checklist hierarchy
-- Record total items count and section breakdown in memory
-
-### 5. Execute Checklist Items
-
-Work through each checklist item based on selected mode
-
-- For each section in the checklist:
-- Read and understand the section context and any LLM instructions
-- Evaluate each checklist item in the section
-- Mark items as checked [x] or unchecked [ ] based on evaluation
-- Document findings, issues, or observations for each item
-- **[USER INPUT REQUIRED]** If interactive mode: Present section findings and await confirmation
-- Update progress tracking in working memory
-
-### 6. Generate Summary Report
-
-Create comprehensive report of checklist execution results
-
-- Calculate overall completion percentage
-- Summarize findings by category/section
-- Identify critical issues or blockers
-- Generate recommendations based on unchecked items
-- If checklist includes specific report format (e.g., validation tables), use that format
-- Store execution results in working memory for future reference
-
-### 7. Present Results and Next Steps
-
-Present the final results and offer follow-up actions
-
-- Display the summary report to the user
-- Highlight any critical issues or blockers found
-- Show completion statistics (X of Y items passed)
-- If unchecked items exist, offer to:
-- 1. Get detailed analysis of failed items
-- 2. Generate action plan to address issues
-- 3. Re-run specific sections
-- **[USER INPUT REQUIRED]** Would you like to perform any follow-up actions?
-
-### 8. Save Task Results and Clean Memory
-
-Save task completion and findings to memory with hygiene cleanup
-
-- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
-==================== END: .bmad-core/structured-tasks/execute-checklist.yaml ====================
-
-==================== START: .bmad-core/structured-tasks/correct-course.yaml ====================
-# Correct Course Task
-
-## Purpose
-
-- Guide a structured response to a change trigger using the `.bmad-core/checklists/change-checklist`.
-- Analyze the impacts of the change on epics, project artifacts, and the MVP, guided by the checklist's structure.
-- Explore potential solutions (e.g., adjust scope, rollback elements, re-scope features) as prompted by the checklist.
-- Draft specific, actionable proposed updates to any affected project artifacts (e.g., epics, user stories, PRD sections, architecture document sections) based on the analysis.
-- Produce a consolidated "Sprint Change Proposal" document that contains the impact analysis and the clearly drafted proposed edits for user review and approval.
-- Ensure a clear handoff path if the nature of the changes necessitates fundamental replanning by other core agents (like PM or Architect).
-
-## Task Execution
-
-### 1. Load Memory and Initialize Context
-
-Load agent working memory and relevant long-term context using unified memory system
-
-- Load agent working memory and relevant long-term context
-- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
-
-### 2. Initialize Memory Context
-
-Retrieve relevant context from previous sessions
-
-- **[USER INPUT REQUIRED]** Call retrieve-context task to get relevant past decisions and changes
-- Update working memory with current change context
-
-### 1. Initial Setup & Mode Selection
-
-- **[USER INPUT REQUIRED]** **Acknowledge Task & Inputs:**
-- **[USER INPUT REQUIRED]** Confirm with the user that the "Correct Course Task" (Change Navigation & Integration) is being initiated.
-- **[USER INPUT REQUIRED]** Verify the change trigger and ensure you have the user's initial explanation of the issue and its perceived impact.
-- **[USER INPUT REQUIRED]** Confirm access to all relevant project artifacts (e.g., PRD, Epics/Stories, Architecture Documents, UI/UX Specifications) and, critically, the `.bmad-core/checklists/change-checklist`.
-- **Establish Interaction Mode:**
-- **[USER INPUT REQUIRED]** Ask the user their preferred interaction mode for this task:
-- **[USER INPUT REQUIRED]** **"Incrementally (Default & Recommended):** Shall we work through the change-checklist section by section, discussing findings and collaboratively drafting proposed changes for each relevant part before moving to the next? This allows for detailed, step-by-step refinement."
-- **[USER INPUT REQUIRED]** **"YOLO Mode (Batch Processing):** Or, would you prefer I conduct a more batched analysis based on the checklist and then present a consolidated set of findings and proposed changes for a broader review? This can be quicker for initial assessment but might require more extensive review of the combined proposals."
-- **[USER INPUT REQUIRED]** Once the user chooses, confirm the selected mode and then inform the user: "We will now use the change-checklist to analyze the change and draft proposed updates. I will guide you through the checklist items based on our chosen interaction mode."
-
-### 2. Execute Checklist Analysis (Iteratively or Batched, per Interaction Mode)
-
-- Systematically work through Sections 1-4 of the change-checklist (typically covering Change Context, Epic/Story Impact Analysis, Artifact Conflict Resolution, and Path Evaluation/Recommendation).
-- For each checklist item or logical group of items (depending on interaction mode):
-- **[USER INPUT REQUIRED]** Present the relevant prompt(s) or considerations from the checklist to the user.
-- Request necessary information and actively analyze the relevant project artifacts (PRD, epics, architecture documents, story history, etc.) to assess the impact.
-- Discuss your findings for each item with the user.
-- Record the status of each checklist item (e.g., `[x] Addressed`, `[N/A]`, `[!] Further Action Needed`) and any pertinent notes or decisions.
-- **[USER INPUT REQUIRED]** Collaboratively agree on the "Recommended Path Forward" as prompted by Section 4 of the checklist.
-
-### 3. Draft Proposed Changes (Iteratively or Batched)
-
-- Based on the completed checklist analysis (Sections 1-4) and the agreed "Recommended Path Forward" (excluding scenarios requiring fundamental replans that would necessitate immediate handoff to PM/Architect):
-- Identify the specific project artifacts that require updates (e.g., specific epics, user stories, PRD sections, architecture document components, diagrams).
-- **Draft the proposed changes directly and explicitly for each identified artifact.** Examples include:
-- Revising user story text, acceptance criteria, or priority.
-- Adding, removing, reordering, or splitting user stories within epics.
-- Proposing modified architecture diagram snippets (e.g., providing an updated Mermaid diagram block or a clear textual description of the change to an existing diagram).
-- Updating technology lists, configuration details, or specific sections within the PRD or architecture documents.
-- Drafting new, small supporting artifacts if necessary (e.g., a brief addendum for a specific decision).
-- If in "Incremental Mode," discuss and refine these proposed edits for each artifact or small group of related artifacts with the user as they are drafted.
-- If in "YOLO Mode," compile all drafted edits for presentation in the next step.
-
-### 4. Generate "Sprint Change Proposal" with Edits
-
-- Synthesize the complete change-checklist analysis (covering findings from Sections 1-4) and all the agreed-upon proposed edits (from Instruction 3) into a single document titled "Sprint Change Proposal." This proposal should align with the structure suggested by Section 5 of the change-checklist.
-- The proposal must clearly present:
-- **Analysis Summary:** A concise overview of the original issue, its analyzed impact (on epics, artifacts, MVP scope), and the rationale for the chosen path forward.
-- **Specific Proposed Edits:** For each affected artifact, clearly show or describe the exact changes (e.g., "Change Story X.Y from: [old text] To: [new text]", "Add new Acceptance Criterion to Story A.B: [new AC]", "Update Section 3.2 of Architecture Document as follows: [new/modified text or diagram description]").
-- Present the complete draft of the "Sprint Change Proposal" to the user for final review and feedback. Incorporate any final adjustments requested by the user.
-
-### 5. Finalize & Determine Next Steps
-
-- Obtain explicit user approval for the "Sprint Change Proposal," including all the specific edits documented within it.
-- **[USER INPUT REQUIRED]** Provide the finalized "Sprint Change Proposal" document to the user.
-- Update working memory with final change decisions and outcomes
-- **Based on the nature of the approved changes:**
-- **[USER INPUT REQUIRED]** **If the approved edits sufficiently address the change and can be implemented directly or organized by a PO/SM:** State that the "Correct Course Task" is complete regarding analysis and change proposal, and the user can now proceed with implementing or logging these changes (e.g., updating actual project documents, backlog items). Suggest handoff to a PO/SM agent for backlog organization if appropriate.
-- **[USER INPUT REQUIRED]** **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
-- **Primary:** A "Sprint Change Proposal" document (in markdown format). This document will contain:
-- A summary of the change-checklist analysis (issue, impact, rationale for the chosen path).
-- Specific, clearly drafted proposed edits for all affected project artifacts.
-- **Implicit:** An annotated change-checklist (or the record of its completion) reflecting the discussions, findings, and decisions made during the process.
-
-- **If the analysis and proposed path (as per checklist Section 4 and potentially Section 6) indicate that the change requires a more fundamental replan (e.g., significant scope change, major architectural rework):** Clearly state this conclusion. Advise the user that the next step involves engaging the primary PM or Architect agents, using the "Sprint Change Proposal" as critical input and context for that deeper replanning effort.
-
-### 8. Save Task Results and Clean Memory
-
-Save task completion and findings to memory with hygiene cleanup
-
-- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
-==================== END: .bmad-core/structured-tasks/correct-course.yaml ====================
-
-==================== START: .bmad-core/structured-tasks/update-working-memory.yaml ====================
-# Update Working Memory
-
-## Description
-
-Updates the agent's working memory with current task state
-
-## Execution Steps
-
-1. Update the working memory JSON file for the agent
-2. Merge provided updates with existing memory
-3. Preserve existing data not being updated
-4. Return the updated memory state
-
-## Required Inputs
-
-- **agentName** (string): Name of the agent
-- **taskId** (string) - optional: Current task identifier
-- **currentStep** (string) - optional: Current step in the plan
-- **plan** (array) - optional: Task execution plan
-- **context** (object) - optional: Additional context to store
-
-## Outputs
-
-- **memory** (object): Updated memory state
-
-## Example Usage
-
-```
-await updateWorkingMemory('dev', {
-  taskId: 'TASK-123',
-  currentStep: 'implementing-feature',
-  plan: ['analyze', 'implement', 'test'],
-  context: { feature: 'user-auth' }
-});
-
-```
-==================== END: .bmad-core/structured-tasks/update-working-memory.yaml ====================
-
-==================== START: .bmad-core/structured-tasks/retrieve-context.yaml ====================
-# Retrieve Context from Memory
-
-## Description
-
-Retrieves relevant context from long-term memory using similarity search
-
-## Execution Steps
-
-1. Connect to Qdrant vector database
-2. Generate embedding for the query
-3. Perform similarity search
-4. Return top N matching memories with scores
-
-## Required Inputs
-
-- **query** (string): Query string to search for similar memories
-- **topN** (number) - optional: Number of top results to retrieve
-
-## Outputs
-
-- **memories** (array): Array of retrieved memory snippets with scores
-
-## Example Usage
-
-```
-const memories = await retrieveMemory(
-  'user authentication implementation',
-  5
-);
-// Returns: [
-//   { score: 0.95, text: '...', agentName: 'dev', timestamp: '...' },
-//   ...
-// ]
-
-```
-==================== END: .bmad-core/structured-tasks/retrieve-context.yaml ====================
-
-==================== START: .bmad-core/structured-tasks/generate-search-tools.yaml ====================
-# Generate Search Tools
-
-## Purpose
-
-Extract keywords from PRD and generate search tool queries for comprehensive research. This task parses the Product Requirements Document to identify key technical terms and creates targeted search queries for various platforms and repositories.
-
-## Task Execution
-
-### 1. Load Memory and Initialize Context
-
-Load agent working memory and relevant long-term context using unified memory system
-
-- Load agent working memory and relevant long-term context
-- **[USER INPUT REQUIRED]** Apply memory context to task execution planning
-
-### 2. Initialize Memory and Context
-
-Set up working memory and retrieve relevant context
-
-- Initialize working memory for search tools generation
-- Retrieve previous search patterns and keyword extraction methods
-
-### 3. Parse PRD and Extract Keywords
-
-Run the keyword extraction script to generate search tools from PRD content
-
-- **[USER INPUT REQUIRED]** Execute generate-search-tools.js script with provided inputs
-
-### 4. Validate Generated Search Tools
-
-Ensure the generated search tools file is valid YAML and contains expected structure
-
-- **[USER INPUT REQUIRED]** Run validation script to verify file exists and has correct structure
-
-### 5. Save Task Results and Clean Memory
-
-Save task completion and findings to memory with hygiene cleanup
-
-- **[USER INPUT REQUIRED]** Save task completion and findings to working memory
-==================== END: .bmad-core/structured-tasks/generate-search-tools.yaml ====================
 
 ==================== START: .bmad-core/templates/story-tmpl.yaml ====================
 template:
@@ -700,130 +275,6 @@ sections:
     editors: [qa-agent]
 ==================== END: .bmad-core/templates/story-tmpl.yaml ====================
 
-==================== START: .bmad-core/structured-checklists/story-draft-checklist.yaml ====================
-# Story Draft Checklist
-
-## 1. GOAL & CONTEXT CLARITY
-
-[[LLM: Without clear goals, developers build the wrong thing. Verify:
-
-1. The story states WHAT functionality to implement
-2. The business value or user benefit is clear
-3. How this fits into the larger epic/product is explained
-4. Dependencies are explicit ("requires Story X to be complete")
-5. Success looks like something specific, not vague]]
-
-- [ ] Story goal/purpose is clearly stated
-- [ ] Relationship to epic goals is evident
-- [ ] How the story fits into overall system flow is explained
-- [ ] Dependencies on previous stories are identified (if applicable)
-- [ ] Business context and value are clear
-
-## 2. TECHNICAL IMPLEMENTATION GUIDANCE
-
-[[LLM: Developers need enough technical context to start coding. Check:
-
-1. Key files/components to create or modify are mentioned
-2. Technology choices are specified where non-obvious
-3. Integration points with existing code are identified
-4. Data models or API contracts are defined or referenced
-5. Non-standard patterns or exceptions are called out
-
-Note: We don't need every file listed - just the important ones.]]
-
-- [ ] Key files to create/modify are identified (not necessarily exhaustive)
-- [ ] Technologies specifically needed for this story are mentioned
-- [ ] Critical APIs or interfaces are sufficiently described
-- [ ] Necessary data models or structures are referenced
-- [ ] Required environment variables are listed (if applicable)
-- [ ] Any exceptions to standard coding patterns are noted
-
-## 3. REFERENCE EFFECTIVENESS
-
-[[LLM: References should help, not create a treasure hunt. Ensure:
-
-1. References point to specific sections, not whole documents
-2. The relevance of each reference is explained
-3. Critical information is summarized in the story
-4. References are accessible (not broken links)
-5. Previous story context is summarized if needed
-Stories should be mostly self-contained to avoid context switching. Verify:
-
-1. Core requirements are in the story, not just in references
-2. Domain terms are explained or obvious from context
-3. Assumptions are stated explicitly
-4. Edge cases are mentioned (even if deferred)
-5. The story could be understood without reading 10 other documents]]
-
-- [ ] References to external documents point to specific relevant sections
-- [ ] Critical information from previous stories is summarized (not just referenced)
-- [ ] Context is provided for why references are relevant
-- [ ] References use consistent format (e.g., `docs/filename.md#section`)
-
-## 4. TESTING GUIDANCE
-
-[[LLM: Testing ensures the implementation actually works. Check:
-
-1. Test approach is specified (unit, integration, e2e)
-2. Key test scenarios are listed
-3. Success criteria are measurable
-4. Special test considerations are noted
-5. Acceptance criteria in the story are testable
-FINAL STORY VALIDATION REPORT
-
-Generate a concise validation report:
-
-1. Quick Summary
-
-   - Story readiness: READY / NEEDS REVISION / BLOCKED
-   - Clarity score (1-10)
-   - Major gaps identified
-
-2. Fill in the validation table with:
-
-   - PASS: Requirements clearly met
-   - PARTIAL: Some gaps but workable
-   - FAIL: Critical information missing
-
-3. Specific Issues (if any)
-
-   - List concrete problems to fix
-   - Suggest specific improvements
-   - Identify any blocking dependencies
-
-4. Developer Perspective
-   - Could YOU implement this story as written?
-   - What questions would you have?
-   - What might cause delays or rework?
-
-Be pragmatic - perfect documentation doesn't exist, but it must be enough to provide the extreme context a dev agent needs to get the work down and not create a mess.]]
-
-- [ ] Required testing approach is outlined
-- [ ] Key test scenarios are identified
-- [ ] Success criteria are defined
-- [ ] Special testing considerations are noted (if applicable)
-
-## Validation Result
-
-Status: pending
-
-- [ ] Core information needed is included (not overly reliant on external docs)
-- [ ] Implicit assumptions are made explicit
-- [ ] Domain-specific terms or concepts are explained
-- [ ] Edge cases or error scenarios are addressed
-| Category                             | Status | Issues |
-| ------------------------------------ | ------ | ------ |
-| 1. Goal & Context Clarity            | _TBD_  |        |
-| 2. Technical Implementation Guidance | _TBD_  |        |
-| 3. Reference Effectiveness           | _TBD_  |        |
-| 4. Self-Containment Assessment       | _TBD_  |        |
-| 5. Testing Guidance                  | _TBD_  |        |
-**Final Assessment:**
-- READY: The story provides sufficient context for implementation
-- NEEDS REVISION: The story requires updates (see issues)
-- BLOCKED: External information required (specify what information)
-==================== END: .bmad-core/structured-checklists/story-draft-checklist.yaml ====================
-
 ==================== START: .bmad-core/utils/agent-memory-loader.js ====================
 /**
  * Agent Memory Loader for BMAD Agents
@@ -835,8 +286,17 @@ const getMemoryManager = () => require('./agent-memory-manager');
 const { 
   retrieveAgentStoryMemory, 
   retrieveAgentEpicMemory,
-  retrieveTaskMemory 
+  retrieveTaskMemory,
+  closeConnections 
 } = require('./qdrant');
+const { withTimeout } = require('./timeout-wrapper');
+const {
+  logMemoryInit,
+  logMemoryRetrieval,
+  logMemoryError,
+  logLongTermMemory
+} = require('./memory-usage-logger');
+const { MemoryError, handleCriticalMemoryError, validateMemoryResult } = require('./memory-error-handler');
 
 /**
  * Load comprehensive memory context for agent activation
@@ -848,20 +308,33 @@ const {
  * @param {boolean} context.loadLongTerm - Whether to load long-term memories
  * @returns {Object} Complete memory context for agent
  */
-async function loadAgentMemoryContext(agentName, context = {}) {
+async function loadAgentMemoryContextInternal(agentName, context = {}) {
   try {
     const { storyId, epicId, taskId, loadLongTerm = true } = context;
     
     console.log(`Loading memory context for agent: ${agentName}`);
+    
+    // Log memory initialization start
+    await logMemoryInit(agentName, 'load_context_start', { 
+      storyId, 
+      epicId, 
+      taskId, 
+      loadLongTerm 
+    });
     
     // Load or initialize working memory
     const { loadWorkingMemory, initializeWorkingMemory, getMemorySummary } = getMemoryManager();
     let workingMemory = await loadWorkingMemory(agentName);
     if (!workingMemory) {
       console.log(`No existing working memory found, initializing new memory for ${agentName}`);
+      await logMemoryInit(agentName, 'initialize_working_memory', { storyId, epicId, taskId });
       workingMemory = await initializeWorkingMemory(agentName, { storyId, epicId, taskId });
     } else {
       console.log(`Loaded existing working memory for ${agentName}`);
+      await logMemoryInit(agentName, 'load_existing_working_memory', { 
+        observationCount: workingMemory.observations?.length || 0,
+        existingContext: workingMemory.currentContext
+      });
       // Update context if provided
       if (storyId || epicId || taskId) {
         workingMemory.currentContext = {
@@ -877,7 +350,13 @@ async function loadAgentMemoryContext(agentName, context = {}) {
     let longTermMemories = [];
     if (loadLongTerm) {
       console.log(`Loading long-term memories for ${agentName}`);
+      await logMemoryRetrieval(agentName, 'load_long_term_start', 'context-based search', 0, {
+        context: workingMemory.currentContext
+      });
       longTermMemories = await loadRelevantLongTermMemories(agentName, workingMemory.currentContext);
+      await logMemoryRetrieval(agentName, 'load_long_term_complete', 'context-based search', longTermMemories.length, {
+        context: workingMemory.currentContext
+      });
     }
     
     // Get memory summary
@@ -900,9 +379,21 @@ async function loadAgentMemoryContext(agentName, context = {}) {
       currentContext: workingMemory.currentContext
     });
     
+    // Log successful memory context load
+    await logMemoryInit(agentName, 'load_context_complete', {
+      workingMemoryFound: !!workingMemory,
+      observationCount: workingMemory.observations?.length || 0,
+      longTermMemoryCount: longTermMemories.length,
+      recommendationCount: memoryContext.recommendations.length
+    });
+    
     return memoryContext;
   } catch (error) {
     console.error(`Failed to load memory context for ${agentName}:`, error);
+    
+    // Log memory loading error
+    await logMemoryError(agentName, 'load_context_failed', error, { context });
+    
     return {
       agentName,
       loadedAt: new Date().toISOString(),
@@ -929,6 +420,7 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
     
     // Load story-specific memories
     if (storyId) {
+      await logMemoryRetrieval(agentName, 'retrieve_story_memories', `story ${storyId}`, 0, { storyId });
       const storyMemories = await retrieveAgentStoryMemory(
         agentName, 
         `story ${storyId} implementation observations decisions`,
@@ -936,10 +428,12 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
         5
       );
       memories.push(...storyMemories.map(m => ({ ...m, source: 'story-context' })));
+      await logMemoryRetrieval(agentName, 'retrieve_story_memories_complete', `story ${storyId}`, storyMemories.length, { storyId });
     }
     
     // Load epic-specific memories
     if (epicId) {
+      await logMemoryRetrieval(agentName, 'retrieve_epic_memories', `epic ${epicId}`, 0, { epicId });
       const epicMemories = await retrieveAgentEpicMemory(
         agentName,
         `epic ${epicId} patterns lessons learned`,
@@ -947,21 +441,43 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
         3
       );
       memories.push(...epicMemories.map(m => ({ ...m, source: 'epic-context' })));
+      await logMemoryRetrieval(agentName, 'retrieve_epic_memories_complete', `epic ${epicId}`, epicMemories.length, { epicId });
     }
     
     // Load task-specific memories if available
     if (taskId) {
+      await logMemoryRetrieval(agentName, 'retrieve_task_memories', `task ${taskId}`, 0, { taskId });
       const taskMemories = await retrieveTaskMemory(agentName, taskId, 3);
       memories.push(...taskMemories.map(m => ({ ...m, source: 'task-history' })));
+      await logMemoryRetrieval(agentName, 'retrieve_task_memories_complete', `task ${taskId}`, taskMemories.length, { taskId });
     }
     
     // Load general agent memories for similar work
     const generalQuery = `${agentName} agent similar work patterns best practices`;
     const { retrieveRelevantMemories } = getMemoryManager();
-    const generalMemories = await retrieveRelevantMemories(agentName, generalQuery, {
-      topN: 3
-    });
-    memories.push(...generalMemories.map(m => ({ ...m, source: 'general-experience' })));
+    
+    // Set a shorter timeout for memory retrieval
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Memory retrieval timeout')), 5000) // 5 second timeout
+    );
+    
+    try {
+      const memoryResults = await Promise.race([
+        retrieveRelevantMemories(agentName, generalQuery, { topN: 3 }),
+        timeoutPromise
+      ]);
+      
+      // Handle the results object structure
+      if (memoryResults && memoryResults.longTerm && Array.isArray(memoryResults.longTerm)) {
+        memories.push(...memoryResults.longTerm.map(m => ({ ...m, source: 'general-experience' })));
+      }
+      if (memoryResults && memoryResults.combined && Array.isArray(memoryResults.combined)) {
+        memories.push(...memoryResults.combined.slice(0, 3).map(m => ({ ...m, source: 'general-experience' })));
+      }
+    } catch (timeoutError) {
+      console.log('Memory retrieval timed out after 5 seconds - continuing with empty memories');
+      // Continue without historical memories - not a fatal error
+    }
     
     // Sort by relevance score and remove duplicates
     const uniqueMemories = memories
@@ -974,6 +490,7 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
     return uniqueMemories;
   } catch (error) {
     console.error(`Failed to load long-term memories for ${agentName}:`, error);
+    await logMemoryError(agentName, 'load_long_term_memories_failed', error, { currentContext });
     return [];
   }
 }
@@ -1105,13 +622,228 @@ async function loadMemoryWithValidation(agentName, context, requiredContext = []
   };
 }
 
+// Create a timeout-wrapped version of the main function
+const loadAgentMemoryContext = withTimeout(
+  loadAgentMemoryContextInternal,
+  8000, // 8 second total timeout for entire operation
+  'Load Agent Memory Context'
+);
+
+/**
+ * Load agent memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function loadAgentMemoryContextAndExit(agentName, context = {}) {
+  try {
+    // Log the initialization
+    await logMemoryInit(agentName, 'load_context_start', { context });
+    
+    const result = await loadAgentMemoryContext(agentName, context);
+    
+    // Log the completion
+    await logMemoryInit(agentName, 'load_context_complete', { 
+      sessionId: result.workingMemory?.sessionId,
+      hasExistingMemory: !!(result.workingMemory?.observations?.length),
+      recommendationsCount: result.recommendations?.length || 0
+    });
+    
+    // Ensure clean exit by closing connections
+    const { closeConnections } = require('./qdrant');
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    console.error('Memory load error:', error.message);
+    await closeConnections();
+    process.exit(1);
+  }
+}
+
+/**
+ * Retrieve relevant memories and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function retrieveRelevantMemoriesAndExit(agentName, query, options = {}) {
+  try {
+    // Log the retrieval operation
+    await logMemoryRetrieval(agentName, 'retrieve_memories_start', query, 0, { options });
+    
+    const { retrieveRelevantMemories } = getMemoryManager();
+    const result = await retrieveRelevantMemories(agentName, query, options);
+    
+    // Log the completion with results count
+    const resultsCount = result?.combined?.length || 0;
+    await logMemoryRetrieval(agentName, 'retrieve_memories_complete', query, resultsCount, { 
+      hasResults: resultsCount > 0 
+    });
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Ensure clean exit by closing connections
+    const { closeConnections } = require('./qdrant');
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    console.error('Memory retrieval error:', error.message);
+    await closeConnections();
+    process.exit(1);
+  }
+}
+
+/**
+ * Update working memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function updateWorkingMemoryAndExit(agentName, updates) {
+  try {
+    const { updateWorkingMemory } = getMemoryManager();
+    const result = await updateWorkingMemory(agentName, updates);
+    
+    // Validate the result
+    validateMemoryResult(result, 'updateWorkingMemory', agentName);
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Log successful memory update
+    console.log(`✅ Working memory successfully updated for ${agentName}`);
+    
+    // Ensure clean exit by closing connections
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    // Convert to MemoryError if not already
+    const memoryError = error instanceof MemoryError ? error : new MemoryError(
+      error.message || 'Failed to update working memory',
+      'updateWorkingMemory',
+      agentName,
+      { originalError: error.name, updates }
+    );
+    
+    await handleCriticalMemoryError(memoryError, 'Updating working memory');
+    // handleCriticalMemoryError will exit the process
+  }
+}
+
+/**
+ * Save to long-term memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function saveToLongTermMemoryAndExit(agentName, options = {}) {
+  try {
+    const { saveToLongTermMemory } = getMemoryManager();
+    const result = await saveToLongTermMemory(agentName, options);
+    
+    // Validate the result
+    validateMemoryResult(result, 'saveToLongTermMemory', agentName);
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Log successful memory save
+    console.log(`✅ Long-term memory successfully saved for ${agentName}`);
+    
+    // Ensure clean exit by closing connections
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    // Convert to MemoryError if not already
+    const memoryError = error instanceof MemoryError ? error : new MemoryError(
+      error.message || 'Failed to save to long-term memory',
+      'saveToLongTermMemory',
+      agentName,
+      { originalError: error.name, options }
+    );
+    
+    await handleCriticalMemoryError(memoryError, 'Saving to long-term memory');
+    // handleCriticalMemoryError will exit the process
+  }
+}
+
 module.exports = {
   loadAgentMemoryContext,
+  loadAgentMemoryContextAndExit,
   loadRelevantLongTermMemories,
   generateMemoryRecommendations,
   checkMemoryStatus,
-  loadMemoryWithValidation
+  loadMemoryWithValidation,
+  retrieveRelevantMemoriesAndExit,
+  updateWorkingMemoryAndExit,
+  saveToLongTermMemoryAndExit
 };
+
+// Command-line interface
+if (require.main === module) {
+  const command = process.argv[2];
+  const agentName = process.argv[3];
+  const args = process.argv.slice(4);
+  
+  async function runCommand() {
+    try {
+      switch (command) {
+        case 'loadAgentMemoryContextAndExit':
+          await loadAgentMemoryContextAndExit(agentName);
+          break;
+          
+        case 'retrieveRelevantMemoriesAndExit':
+          const query = args[0] || 'general context';
+          const topN = parseInt(args[1]) || 5;
+          await retrieveRelevantMemoriesAndExit(agentName, query, { topN });
+          break;
+          
+        case 'updateWorkingMemoryAndExit':
+          const updates = args[0] ? JSON.parse(args[0]) : {};
+          await updateWorkingMemoryAndExit(agentName, updates);
+          break;
+          
+        case 'saveToLongTermMemoryAndExit':
+          const memoryContent = args[0] ? JSON.parse(args[0]) : {};
+          await saveToLongTermMemoryAndExit(agentName, memoryContent);
+          break;
+          
+        default:
+          console.error(`Unknown command: ${command}`);
+          console.error('Available commands: loadAgentMemoryContextAndExit, retrieveRelevantMemoriesAndExit, updateWorkingMemoryAndExit, saveToLongTermMemoryAndExit');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  runCommand();
+}
 ==================== END: .bmad-core/utils/agent-memory-loader.js ====================
 
 ==================== START: .bmad-core/utils/agent-memory-manager.js ====================
@@ -1122,7 +854,7 @@ module.exports = {
 
 const fs = require('fs').promises;
 const path = require('path');
-const { storeMemorySnippet, retrieveMemory } = require('./qdrant');
+const { storeMemorySnippet, retrieveMemory, closeConnections } = require('./qdrant');
 const { MemoryTransaction } = require('./memory-transaction');
 const { safeReadJson, safeWriteJson, updateJsonFile } = require('./safe-file-operations');
 const { 
@@ -1136,6 +868,16 @@ const {
   performMemoryHygiene, 
   shouldRunMemoryHygiene 
 } = require('./memory-hygiene');
+const { withTimeout, fireAndForget } = require('./timeout-wrapper');
+const {
+  logMemoryInit,
+  logWorkingMemory,
+  logLongTermMemory,
+  logMemoryRetrieval,
+  logMemoryError,
+  logTaskMemory,
+  logSessionSummary
+} = require('./memory-usage-logger');
 
 // Queue to prevent concurrent memory hygiene operations per agent
 const hygieneQueue = new Map();
@@ -1153,6 +895,9 @@ async function initializeWorkingMemory(agentName, options = {}) {
   try {
     // Validate agent name
     validateAgentName(agentName);
+    
+    // Log memory initialization start
+    await logMemoryInit(agentName, 'initialize_start', { options });
     
     // Ensure memory directory exists
     await fs.mkdir(MEMORY_CONFIG.BASE_DIR, { recursive: true });
@@ -1186,9 +931,18 @@ async function initializeWorkingMemory(agentName, options = {}) {
     await safeWriteJson(memoryPath, memory);
     
     console.log(`Initialized working memory for agent: ${agentName}`);
+    
+    // Log successful initialization
+    await logMemoryInit(agentName, 'initialize_complete', {
+      sessionId: memory.sessionId,
+      hasExistingMemory: Object.keys(existingMemory).length > 0,
+      contextKeys: Object.keys(memory.currentContext).filter(k => memory.currentContext[k])
+    });
+    
     return memory;
   } catch (error) {
     console.error(`Failed to initialize working memory for ${agentName}:`, error);
+    await logMemoryError(agentName, 'initialize_failed', error, { options });
     throw error;
   }
 }
@@ -1204,13 +958,24 @@ async function loadWorkingMemory(agentName) {
     validateAgentName(agentName);
     
     const memoryPath = getWorkingMemoryPath(agentName);
-    return await safeReadJson(memoryPath, null);
+    const memory = await safeReadJson(memoryPath, null);
+    
+    if (memory) {
+      await logWorkingMemory(agentName, 'load_success', 'working_memory', memory, {
+        observationCount: memory.observations?.length || 0,
+        sessionId: memory.sessionId
+      });
+    }
+    
+    return memory;
   } catch (error) {
     if (error.code === 'ENOENT') {
       console.warn(`No working memory found for agent ${agentName}, will initialize new memory`);
+      await logWorkingMemory(agentName, 'load_not_found', 'working_memory', null, { reason: 'file_not_found' });
       return null;
     }
     console.error(`Failed to load working memory for ${agentName}:`, error.message);
+    await logMemoryError(agentName, 'load_failed', error);
     return null;
   }
 }
@@ -1225,6 +990,11 @@ async function updateWorkingMemory(agentName, updates) {
   try {
     // Validate inputs
     validateAgentName(agentName);
+    
+    // Log the memory update start
+    await logWorkingMemory(agentName, 'update_start', 'working_memory', updates, {
+      updateKeys: Object.keys(updates)
+    });
     
     // Validate and sanitize text content in updates
     if (updates.observation) {
@@ -1385,9 +1155,26 @@ async function updateWorkingMemory(agentName, updates) {
     // Use a proper async queue to prevent race conditions
     performMemoryHygieneAsync(agentName);
     
-    return updatedMemory;
+    // Log successful memory update
+    await logWorkingMemory(agentName, 'update_complete', 'working_memory', updatedMemory, {
+      observationCount: updatedMemory.observations?.length || 0,
+      decisionCount: updatedMemory.decisions?.length || 0,
+      blockerCount: updatedMemory.blockers?.filter(b => !b.resolved).length || 0
+    });
+    
+    // Use setImmediate to ensure we return quickly
+    setImmediate(() => {
+      // Any post-update operations can happen here
+    });
+    
+    return {
+      success: true,
+      memory: updatedMemory,
+      timestamp: new Date().toISOString()
+    };
   } catch (error) {
     console.error(`Failed to update working memory for ${agentName}:`, error);
+    await logMemoryError(agentName, 'update_failed', error, { updates });
     throw error;
   }
 }
@@ -1407,6 +1194,15 @@ async function updateWorkingMemory(agentName, updates) {
 async function retrieveRelevantMemories(agentName, query, options = {}) {
   try {
     const { storyId, epicId, topN = 5, shortTermOnly = false, longTermOnly = false } = options;
+    
+    // Log memory retrieval start
+    await logMemoryRetrieval(agentName, 'retrieve_start', query, 0, { 
+      storyId, 
+      epicId, 
+      topN, 
+      shortTermOnly, 
+      longTermOnly 
+    });
     
     const results = {
       shortTerm: {
@@ -1509,36 +1305,55 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
     }
 
     // Retrieve long-term memory if not excluded
-    if (!shortTermOnly) {
+    if (!longTermOnly) {
       try {
-        // Create context-aware query for Qdrant
-        let contextQuery = query;
-        if (storyId) {
-          contextQuery += ` story:${storyId}`;
-        }
-        if (epicId) {
-          contextQuery += ` epic:${epicId}`;
-        }
-        contextQuery += ` agent:${agentName}`;
+        // Quick check if collection has any data with timeout
+        const { getCollectionPointCount } = require('./qdrant');
+        const pointCount = await withTimeout(
+          getCollectionPointCount,
+          2000,
+          'Get Collection Point Count'
+        )();
         
-        const longTermMemories = await retrieveMemory(contextQuery, topN);
-        
-        // Filter and format long-term memories
-        results.longTerm = longTermMemories
-          .filter(memory => {
-            if (memory.agentName && memory.agentName !== agentName) return false;
-            if (storyId && memory.storyId && memory.storyId !== storyId) return false;
-            if (epicId && memory.epicId && memory.epicId !== epicId) return false;
-            return true;
-          })
-          .map(memory => ({
-            ...memory,
-            source: 'long-term',
-            type: memory.type || 'archived-memory'
-          }));
+        if (!pointCount || pointCount === 0) {
+          console.log('Qdrant collection is empty or unavailable - skipping long-term memory search');
+          results.longTerm = [];
+        } else {
+          // Create context-aware query for Qdrant
+          let contextQuery = query;
+          if (storyId) {
+            contextQuery += ` story:${storyId}`;
+          }
+          if (epicId) {
+            contextQuery += ` epic:${epicId}`;
+          }
+          contextQuery += ` agent:${agentName}`;
+          
+          // Wrap retrieveMemory with timeout
+          const longTermMemories = await withTimeout(
+            () => retrieveMemory(contextQuery, topN),
+            3000,
+            'Retrieve Long-term Memory'
+          )() || [];
+          
+          // Filter and format long-term memories
+          results.longTerm = longTermMemories
+            .filter(memory => {
+              if (memory.agentName && memory.agentName !== agentName) return false;
+              if (storyId && memory.storyId && memory.storyId !== storyId) return false;
+              if (epicId && memory.epicId && memory.epicId !== epicId) return false;
+              return true;
+            })
+            .map(memory => ({
+              ...memory,
+              source: 'long-term',
+              type: memory.type || 'archived-memory'
+            }));
+        }
       } catch (longTermError) {
         console.warn(`Failed to retrieve long-term memories for ${agentName}:`, longTermError.message);
         results.longTermError = longTermError.message;
+        results.longTerm = []; // Ensure empty array on error
       }
     }
 
@@ -1561,9 +1376,22 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
       return bTime - aTime;
     });
 
+    // Log successful retrieval
+    const combinedCount = results.combined.length;
+    const shortTermCount = Object.values(results.shortTerm).reduce((sum, arr) => sum + arr.length, 0);
+    const longTermCount = results.longTerm.length;
+    
+    await logMemoryRetrieval(agentName, 'retrieve_complete', query, combinedCount, {
+      shortTermCount,
+      longTermCount,
+      hasError: !!results.longTermError
+    });
+    
     return results;
   } catch (error) {
     console.error(`Failed to retrieve memories for ${agentName}:`, error);
+    await logMemoryError(agentName, 'retrieve_failed', error, { query, options });
+    
     return {
       shortTerm: { observations: [], decisions: [], keyFacts: [], blockers: [], plan: [] },
       longTerm: [],
@@ -1584,6 +1412,9 @@ async function retrieveRelevantMemories(agentName, query, options = {}) {
  */
 async function storeMemorySnippetWithContext(agentName, content, metadata = {}) {
   try {
+    // Ensure content is a string
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    
     // Load current context from working memory
     const workingMemory = await loadWorkingMemory(agentName);
     const context = workingMemory?.currentContext || {};
@@ -1598,9 +1429,28 @@ async function storeMemorySnippetWithContext(agentName, content, metadata = {}) 
       ...metadata
     };
     
-    return await storeMemorySnippet(agentName, content, enhancedMetadata);
+    // Log long-term memory storage
+    await logLongTermMemory(agentName, 'store_start', { content: contentStr, metadata: enhancedMetadata }, {
+      contentLength: contentStr.length,
+      memoryType: enhancedMetadata.type
+    });
+    
+    const memoryId = await storeMemorySnippet(agentName, contentStr, enhancedMetadata);
+    
+    if (memoryId) {
+      await logLongTermMemory(agentName, 'store_complete', { content: contentStr, metadata: enhancedMetadata }, {
+        memoryId,
+        contentLength: contentStr.length,
+        memoryType: enhancedMetadata.type
+      });
+    } else {
+      await logMemoryError(agentName, 'store_failed', new Error('Store returned null'), { content: contentStr, metadata });
+    }
+    
+    return memoryId;
   } catch (error) {
     console.error(`Failed to store memory snippet for ${agentName}:`, error);
+    await logMemoryError(agentName, 'store_snippet_failed', error, { content, metadata });
     return null;
   }
 }
@@ -1665,7 +1515,13 @@ async function archiveTaskMemory(agentName, taskId) {
  */
 async function checkContextSufficiency(agentName, requiredContext = []) {
   try {
-    const memory = await loadWorkingMemory(agentName);
+    // Wrap memory loading with timeout to prevent hanging
+    const memory = await withTimeout(
+      loadWorkingMemory,
+      3000,
+      'Load Working Memory for Context Check'
+    )(agentName);
+    
     if (!memory) {
       return {
         sufficient: false,
@@ -1859,6 +1715,178 @@ function performMemoryHygieneAsync(agentName) {
   });
 }
 
+// Convenience functions for agents that expect specific persist functions
+async function persistObservation(agentName, observation, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    observation: observation
+  });
+}
+
+async function persistDecision(agentName, decision, rationale, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    decision: decision,
+    reasoning: rationale
+  });
+}
+
+async function persistBlocker(agentName, blocker, metadata = {}) {
+  return updateWorkingMemory(agentName, {
+    blocker: blocker
+  });
+}
+
+async function persistBlockerResolution(agentName, blockerId, resolution) {
+  const memory = await loadWorkingMemory(agentName);
+  const blockerIndex = memory.blockers.findIndex(b => b.blocker === blockerId || b.timestamp === blockerId);
+  if (blockerIndex >= 0) {
+    memory.blockers[blockerIndex].resolution = resolution;
+    memory.blockers[blockerIndex].resolvedAt = new Date().toISOString();
+    memory.blockers[blockerIndex].status = 'resolved';
+    await updateWorkingMemory(agentName, memory);
+  }
+}
+
+async function persistTaskCompletion(agentName, taskId, details = {}) {
+  await updateWorkingMemory(agentName, {
+    completedTasks: [taskId],
+    observations: [{
+      observation: `Completed task: ${taskId}`,
+      timestamp: new Date().toISOString(),
+      taskId,
+      ...details
+    }]
+  });
+  // Also archive to long-term memory
+  return archiveTaskMemory(agentName, taskId);
+}
+
+async function persistKeyFact(agentName, fact, metadata = {}) {
+  const factKey = `fact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Use fire-and-forget for key fact persistence to avoid blocking
+  fireAndForget(
+    async () => updateWorkingMemory(agentName, {
+      keyFacts: {
+        [factKey]: {
+          content: fact,
+          timestamp: new Date().toISOString(),
+          ...metadata
+        }
+      }
+    }),
+    'Persist Key Fact'
+  )();
+  
+  // Return immediately with the fact key
+  return factKey;
+}
+
+// Add long-term memory save function
+async function saveToLongTermMemory(agentName, memoryContent) {
+  try {
+    // Validate input
+    if (!memoryContent || !memoryContent.content) {
+      console.warn('saveToLongTermMemory called with invalid content');
+      return { saved: false, error: 'Invalid memory content', timestamp: new Date().toISOString() };
+    }
+    
+    await logLongTermMemory(agentName, 'save_start', memoryContent, {
+      memoryType: memoryContent.memoryType,
+      hasContent: !!memoryContent.content
+    });
+    
+    // Execute the actual save operation synchronously to ensure proper error handling
+    const result = await storeMemorySnippetWithContext(agentName, memoryContent.content, {
+      ...memoryContent.metadata,
+      memoryType: memoryContent.memoryType || 'general'
+    });
+    
+    if (!result) {
+      throw new Error('Failed to store memory snippet - no result returned');
+    }
+    
+    await logLongTermMemory(agentName, 'save_complete', memoryContent, {
+      memoryId: result,
+      memoryType: memoryContent.memoryType
+    });
+    
+    // Return success with the memory ID
+    return { 
+      saved: true, 
+      memoryId: result,
+      timestamp: new Date().toISOString() 
+    };
+  } catch (error) {
+    await logMemoryError(agentName, 'save_long_term_failed', error, { memoryContent });
+    return { saved: false, error: error.message, timestamp: new Date().toISOString() };
+  }
+}
+
+// Add missing validation and summary functions
+async function loadMemoryWithValidation(agentName, context = {}) {
+  const memory = await loadWorkingMemory(agentName);
+  const sufficiency = await checkContextSufficiency(agentName, context);
+  
+  return {
+    memory,
+    validation: {
+      hasSufficientContext: sufficiency.hasSufficientContext,
+      recommendations: sufficiency.recommendations || []
+    }
+  };
+}
+
+async function createSessionSummary(agentName, sessionDetails = {}) {
+  try {
+    await logSessionSummary(agentName, 'create_start', sessionDetails, { hasDetails: Object.keys(sessionDetails).length > 0 });
+    
+    // Load memory with timeout
+    const memory = await withTimeout(
+      loadWorkingMemory,
+      2000,
+      'Load Working Memory'
+    )(agentName) || {};
+    
+    const summary = {
+      agentName,
+      sessionEnd: new Date().toISOString(),
+      tasksCompleted: memory.completedTasks || [],
+      decisionsMode: memory.decisions?.length || 0,
+      observationsMade: memory.observations?.length || 0,
+      blockersEncountered: memory.blockers?.filter(b => b.status === 'active').length || 0,
+      ...sessionDetails
+    };
+    
+    await logSessionSummary(agentName, 'create_complete', summary, {
+      taskCount: summary.tasksCompleted.length,
+      decisionCount: summary.decisionsMode,
+      observationCount: summary.observationsMade
+    });
+    
+    // Fire and forget the persist operation - don't wait for it
+    fireAndForget(
+      async () => persistKeyFact(agentName, `Session Summary: ${JSON.stringify(summary)}`, {
+        type: 'session-summary',
+        sessionEnd: summary.sessionEnd
+      }),
+      'Persist Session Summary'
+    )();
+    
+    return summary;
+  } catch (error) {
+    console.log(`⚡ Session summary creation failed: ${error.message}`);
+    await logMemoryError(agentName, 'create_session_summary_failed', error, { sessionDetails });
+    
+    // Return minimal summary on error
+    return {
+      agentName,
+      sessionEnd: new Date().toISOString(),
+      error: error.message,
+      ...sessionDetails
+    };
+  }
+}
+
 module.exports = {
   initializeWorkingMemory,
   loadWorkingMemory,
@@ -1870,10 +1898,116 @@ module.exports = {
   getMemorySummary,
   clearWorkingMemory,
   performAgentMemoryHygiene,
+  // Add the missing persist functions
+  persistObservation,
+  persistDecision,
+  persistBlocker,
+  persistBlockerResolution,
+  persistTaskCompletion,
+  persistKeyFact,
+  saveToLongTermMemory,
+  loadMemoryWithValidation,
+  createSessionSummary,
   // Export configuration for backward compatibility
   MEMORY_DIR: MEMORY_CONFIG.BASE_DIR,
   MAX_OBSERVATIONS: MEMORY_CONFIG.MAX_OBSERVATIONS
 };
+
+// Command-line interface
+if (require.main === module) {
+  const command = process.argv[2];
+  const agentName = process.argv[3];
+  
+  async function runCommand() {
+    try {
+      switch (command) {
+        case 'checkContextSufficiency': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          // Parse required context from additional arguments
+          const requiredContext = process.argv.slice(4);
+          
+          console.log(`Checking context sufficiency for agent: ${agentName}`);
+          const result = await checkContextSufficiency(agentName, requiredContext);
+          
+          // Output result as JSON for parsing
+          console.log(JSON.stringify(result, null, 2));
+          
+          // Exit with appropriate code
+          await closeConnections();
+          process.exit(result.sufficient ? 0 : 1);
+          break;
+        }
+        
+        case 'initializeWorkingMemory': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          console.log(`Initializing working memory for agent: ${agentName}`);
+          const result = await initializeWorkingMemory(agentName);
+          console.log(JSON.stringify(result, null, 2));
+          await closeConnections();
+          process.exit(0);
+          break;
+        }
+        
+        case 'getMemorySummary': {
+          if (!agentName) {
+            console.error('Error: Agent name is required');
+            await closeConnections();
+            process.exit(1);
+          }
+          
+          console.log(`Getting memory summary for agent: ${agentName}`);
+          const result = await getMemorySummary(agentName);
+          console.log(JSON.stringify(result, null, 2));
+          await closeConnections();
+          process.exit(0);
+          break;
+        }
+        
+        case 'updateWorkingMemoryAndExit':
+        case 'saveToLongTermMemoryAndExit':
+          console.error(`Error: Command '${command}' is not available in agent-memory-manager.js`);
+          console.error('These commands are only available in agent-memory-loader.js');
+          console.error('Please use: node .bmad-core/utils/agent-memory-loader.js ' + command);
+          await closeConnections();
+          process.exit(1);
+          break;
+          
+        default:
+          console.error(`Error: Unknown command '${command}'`);
+          console.error('Available commands: checkContextSufficiency, initializeWorkingMemory, getMemorySummary');
+          console.error('Note: updateWorkingMemoryAndExit and saveToLongTermMemoryAndExit are only available in agent-memory-loader.js');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      console.error(error.stack);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  // Add timeout for the entire command execution
+  const timeout = setTimeout(async () => {
+    console.error('Command timed out after 10 seconds');
+    await closeConnections();
+    process.exit(1);
+  }, 10000);
+  
+  runCommand().finally(() => {
+    clearTimeout(timeout);
+  });
+}
 ==================== END: .bmad-core/utils/agent-memory-manager.js ====================
 
 ==================== START: .bmad-core/utils/agent-memory-persistence.js ====================
@@ -1884,7 +2018,7 @@ module.exports = {
 
 // Import functions dynamically to avoid circular dependencies
 const getMemoryManager = () => require('./agent-memory-manager');
-const { storeContextualMemory } = require('./qdrant');
+const { storeContextualMemory, closeConnections } = require('./qdrant');
 
 /**
  * Persist agent observation after a significant action
@@ -2318,16 +2452,497 @@ module.exports = {
   createSessionSummary,
   batchPersistObservations
 };
+
+// Command line interface for subprocess execution
+if (require.main === module) {
+  async function closeConnections() {
+    // Import the connection closer from memory config
+    try {
+      const { closeConnections } = require('./memory-config');
+      await closeConnections();
+    } catch (error) {
+      console.error('Warning: Could not close connections:', error.message);
+    }
+  }
+
+  async function runCommand() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+    
+    if (!command) {
+      console.error('Error: Command is required');
+      console.error('Available commands: persistObservation, persistDecision, persistKeyFact, persistTaskCompletion, persistBlocker, persistBlockerResolution, createSessionSummary');
+      console.error('Note: This file does not support updateWorkingMemoryAndExit or saveToLongTermMemoryAndExit commands.');
+      console.error('Use agent-memory-loader.js for those commands instead.');
+      await closeConnections();
+      process.exit(1);
+    }
+
+    try {
+      switch (command) {
+        case 'updateWorkingMemoryAndExit':
+        case 'saveToLongTermMemoryAndExit':
+          console.error(`Error: Command '${command}' is not available in agent-memory-persistence.js`);
+          console.error('These commands are only available in agent-memory-loader.js');
+          console.error('Please use: node .bmad-core/utils/agent-memory-loader.js ' + command);
+          await closeConnections();
+          process.exit(1);
+          break;
+          
+        default:
+          console.error(`Error: Unknown command '${command}'`);
+          console.error('Available commands: persistObservation, persistDecision, persistKeyFact, persistTaskCompletion, persistBlocker, persistBlockerResolution, createSessionSummary');
+          console.error('Note: updateWorkingMemoryAndExit and saveToLongTermMemoryAndExit are only available in agent-memory-loader.js');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      console.error(error.stack);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  // Add timeout for the entire command execution
+  const timeout = setTimeout(async () => {
+    console.error('Command timed out after 10 seconds');
+    await closeConnections();
+    process.exit(1);
+  }, 10000);
+  
+  runCommand().finally(() => {
+    clearTimeout(timeout);
+  });
+}
 ==================== END: .bmad-core/utils/agent-memory-persistence.js ====================
+
+==================== START: .bmad-core/utils/memory-usage-logger.js ====================
+/**
+ * Memory Usage Logger
+ * 
+ * Utility for logging all memory operations across BMad agents to provide
+ * visibility into memory usage patterns and operations.
+ * 
+ * Logs all memory activities to .ai/memory-usage.log for monitoring and debugging.
+ */
+
+const fs = require('fs').promises;
+const path = require('path');
+
+// Conditional import to avoid circular dependency
+let closeConnections = null;
+try {
+    const qdrant = require('./qdrant');
+    closeConnections = qdrant.closeConnections;
+} catch (e) {
+    // Handle circular dependency gracefully
+    closeConnections = async () => {
+        // No-op if qdrant module is not available
+    };
+}
+
+/**
+ * Ensures the .ai directory exists
+ */
+async function ensureAiDirectory() {
+    const aiDir = path.join(process.cwd(), '.ai');
+    try {
+        await fs.access(aiDir);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            await fs.mkdir(aiDir, { recursive: true });
+        } else {
+            throw error;
+        }
+    }
+}
+
+/**
+ * Formats a log entry with timestamp and structured data
+ */
+function formatLogEntry(logData) {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        ...logData
+    };
+    return JSON.stringify(logEntry) + '\n';
+}
+
+/**
+ * Writes a log entry to the memory usage log file
+ */
+async function writeLogEntry(logData) {
+    try {
+        await ensureAiDirectory();
+        const logPath = path.join(process.cwd(), '.ai', 'memory-usage.log');
+        const logEntry = formatLogEntry(logData);
+        await fs.appendFile(logPath, logEntry);
+    } catch (error) {
+        // Log to console if file logging fails, but don't throw
+        console.warn('Memory usage logging failed:', error.message);
+        // Don't throw to avoid disrupting the main operation
+        // The memory operation itself is more important than logging
+    }
+}
+
+/**
+ * Logs memory initialization operations
+ */
+async function logMemoryInit(agentName, operation, details = {}) {
+    await writeLogEntry({
+        type: 'memory_init',
+        agent: agentName,
+        operation,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs working memory operations
+ */
+async function logWorkingMemory(agentName, operation, memoryType, data, details = {}) {
+    await writeLogEntry({
+        type: 'working_memory',
+        agent: agentName,
+        operation,
+        memoryType,
+        dataSize: typeof data === 'string' ? data.length : JSON.stringify(data).length,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs long-term memory operations
+ */
+async function logLongTermMemory(agentName, operation, memoryContent, details = {}) {
+    await writeLogEntry({
+        type: 'long_term_memory',
+        agent: agentName,
+        operation,
+        memoryType: memoryContent?.memoryType || 'unknown',
+        importance: memoryContent?.metadata?.importance || 'medium',
+        tags: memoryContent?.metadata?.tags || [],
+        contentSize: JSON.stringify(memoryContent).length,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs memory retrieval operations
+ */
+async function logMemoryRetrieval(agentName, operation, query, resultsCount, details = {}) {
+    await writeLogEntry({
+        type: 'memory_retrieval',
+        agent: agentName,
+        operation,
+        query,
+        resultsCount,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs memory context validation operations
+ */
+async function logContextValidation(agentName, operation, contextType, isValid, details = {}) {
+    await writeLogEntry({
+        type: 'context_validation',
+        agent: agentName,
+        operation,
+        contextType,
+        isValid,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs memory operation errors
+ */
+async function logMemoryError(agentName, operation, error, details = {}) {
+    await writeLogEntry({
+        type: 'memory_error',
+        agent: agentName,
+        operation,
+        error: error.message || error,
+        stack: error.stack,
+        details,
+        level: 'error'
+    });
+}
+
+/**
+ * Logs session summary operations
+ */
+async function logSessionSummary(agentName, operation, summaryData, details = {}) {
+    await writeLogEntry({
+        type: 'session_summary',
+        agent: agentName,
+        operation,
+        summaryItems: Array.isArray(summaryData) ? summaryData.length : 1,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs task-specific memory operations
+ */
+async function logTaskMemory(agentName, taskName, operation, taskData, details = {}) {
+    await writeLogEntry({
+        type: 'task_memory',
+        agent: agentName,
+        taskName,
+        operation,
+        taskId: taskData?.taskId || 'unknown',
+        storyId: taskData?.storyId || 'unknown',
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Logs agent handoff memory operations (for orchestrated workflows)
+ */
+async function logHandoffMemory(fromAgent, toAgent, operation, contextData, details = {}) {
+    await writeLogEntry({
+        type: 'handoff_memory',
+        fromAgent,
+        toAgent,
+        operation,
+        contextSize: JSON.stringify(contextData).length,
+        details,
+        level: 'info'
+    });
+}
+
+/**
+ * Gets recent memory usage statistics from the log
+ */
+async function getMemoryUsageStats(hoursBack = 24) {
+    try {
+        const logPath = path.join(process.cwd(), '.ai', 'memory-usage.log');
+        const logContent = await fs.readFile(logPath, 'utf8');
+        const lines = logContent.trim().split('\n').filter(line => line.trim());
+        
+        const cutoffTime = new Date(Date.now() - (hoursBack * 60 * 60 * 1000));
+        const recentEntries = lines
+            .map(line => {
+                try {
+                    return JSON.parse(line);
+                } catch {
+                    return null;
+                }
+            })
+            .filter(entry => entry && new Date(entry.timestamp) > cutoffTime);
+
+        const stats = {
+            totalOperations: recentEntries.length,
+            byAgent: {},
+            byType: {},
+            byLevel: { info: 0, error: 0, warn: 0 },
+            errors: recentEntries.filter(e => e.level === 'error'),
+            timeRange: {
+                from: cutoffTime.toISOString(),
+                to: new Date().toISOString()
+            }
+        };
+
+        recentEntries.forEach(entry => {
+            // Count by agent
+            stats.byAgent[entry.agent] = (stats.byAgent[entry.agent] || 0) + 1;
+            
+            // Count by type
+            stats.byType[entry.type] = (stats.byType[entry.type] || 0) + 1;
+            
+            // Count by level
+            stats.byLevel[entry.level] = (stats.byLevel[entry.level] || 0) + 1;
+        });
+
+        return stats;
+    } catch (error) {
+        return {
+            error: 'Could not read memory usage log',
+            message: error.message
+        };
+    }
+}
+
+/**
+ * Clears old log entries (keeps last N days)
+ */
+async function cleanupOldLogs(daysToKeep = 7) {
+    try {
+        const logPath = path.join(process.cwd(), '.ai', 'memory-usage.log');
+        const logContent = await fs.readFile(logPath, 'utf8');
+        const lines = logContent.trim().split('\n').filter(line => line.trim());
+        
+        const cutoffTime = new Date(Date.now() - (daysToKeep * 24 * 60 * 60 * 1000));
+        const recentEntries = lines
+            .map(line => {
+                try {
+                    const entry = JSON.parse(line);
+                    return new Date(entry.timestamp) > cutoffTime ? line : null;
+                } catch {
+                    return null;
+                }
+            })
+            .filter(line => line !== null);
+
+        await fs.writeFile(logPath, recentEntries.join('\n') + '\n');
+        
+        await writeLogEntry({
+            type: 'log_cleanup',
+            agent: 'system',
+            operation: 'cleanup_old_logs',
+            entriesKept: recentEntries.length,
+            entriesRemoved: lines.length - recentEntries.length,
+            daysToKeep,
+            level: 'info'
+        });
+    } catch (error) {
+        console.warn('Log cleanup failed:', error.message);
+    }
+}
+
+module.exports = {
+    logMemoryInit,
+    logWorkingMemory,
+    logLongTermMemory,
+    logMemoryRetrieval,
+    logContextValidation,
+    logMemoryError,
+    logSessionSummary,
+    logTaskMemory,
+    logHandoffMemory,
+    getMemoryUsageStats,
+    cleanupOldLogs
+};
+
+// Command-line interface
+if (require.main === module) {
+    const command = process.argv[2];
+    const agent = process.argv[3];
+    const args = process.argv.slice(4);
+    
+    async function runCommand() {
+        try {
+            switch (command) {
+                case 'logMemoryInit':
+                    // Handle --data flag properly
+                    let initData = {};
+                    const dataIndex = args.indexOf('--data');
+                    if (dataIndex !== -1 && args[dataIndex + 1]) {
+                        try {
+                            initData = JSON.parse(args[dataIndex + 1]);
+                        } catch (e) {
+                            console.error('Invalid JSON in --data argument:', args[dataIndex + 1]);
+                            throw new Error(`Invalid JSON in --data argument`);
+                        }
+                    } else if (args[1] && !args[1].startsWith('--')) {
+                        try {
+                            initData = JSON.parse(args[1]);
+                        } catch (e) {
+                            // If not JSON, treat as empty object
+                            initData = {};
+                        }
+                    }
+                    await logMemoryInit(agent, args[0] || 'cli_init', initData);
+                    console.log('Memory init logged');
+                    break;
+                    
+                case 'logWorkingMemory':
+                    await logWorkingMemory(
+                        agent, 
+                        args[0] || 'cli_update', 
+                        args[1] || 'general', 
+                        args[2] || '{}', 
+                        args[3] ? JSON.parse(args[3]) : {}
+                    );
+                    console.log('Working memory logged');
+                    break;
+                    
+                case 'logLongTermMemory':
+                    await logLongTermMemory(agent, args[0] || 'cli_save', args[1] ? JSON.parse(args[1]) : {}, args[2] ? JSON.parse(args[2]) : {});
+                    console.log('Long-term memory logged');
+                    break;
+                    
+                case 'logMemoryRetrieval':
+                    await logMemoryRetrieval(
+                        agent, 
+                        args[0] || 'cli_retrieve', 
+                        args[1] || 'unknown_query', 
+                        parseInt(args[2]) || 0, 
+                        args[3] ? JSON.parse(args[3]) : {}
+                    );
+                    console.log('Memory retrieval logged');
+                    break;
+                    
+                case 'logContextValidation':
+                    await logContextValidation(
+                        agent, 
+                        args[0] || 'cli_validate', 
+                        args[1] || 'unknown_context', 
+                        args[2] === 'true' || args[2] === true, 
+                        args[3] ? JSON.parse(args[3]) : {}
+                    );
+                    console.log('Context validation logged');
+                    break;
+                    
+                default:
+                    console.error(`Unknown command: ${command}`);
+                    console.error('Available commands: logMemoryInit, logWorkingMemory, logLongTermMemory, logMemoryRetrieval, logContextValidation');
+                    await closeConnections();
+                    process.exit(1);
+            }
+            await closeConnections();
+            process.exit(0);
+        } catch (error) {
+            console.error(`Command failed: ${error.message}`);
+            await closeConnections();
+            process.exit(1);
+        }
+    }
+    
+    runCommand();
+}
+==================== END: .bmad-core/utils/memory-usage-logger.js ====================
 
 ==================== START: .bmad-core/utils/qdrant.js ====================
 const { QdrantClient } = require('@qdrant/js-client-rest');
 const { MEMORY_CONFIG, validateAgentName, validateTextContent, sanitizeTextContent } = require('./memory-config');
 
-const client = new QdrantClient({ 
-  host: MEMORY_CONFIG.QDRANT_HOST, 
-  port: MEMORY_CONFIG.QDRANT_PORT 
-});
+// Lazy import to avoid circular dependency
+let logLongTermMemory = null;
+function getLogLongTermMemory() {
+    if (!logLongTermMemory) {
+        try {
+            const memoryLogger = require('./memory-usage-logger');
+            logLongTermMemory = memoryLogger.logLongTermMemory;
+        } catch (e) {
+            // Fallback to no-op if circular dependency issues
+            logLongTermMemory = async () => {};
+        }
+    }
+    return logLongTermMemory;
+}
+
+// Use centralized connection manager
+const connectionManager = require('./connection-manager');
+
+function getQdrantClient() {
+  return connectionManager.getQdrantConnection('default', {
+    host: MEMORY_CONFIG.QDRANT_HOST,
+    port: MEMORY_CONFIG.QDRANT_PORT,
+    timeout: 5000
+  });
+}
 
 // Connection health tracking
 let qdrantHealthy = null; // null = unknown, true = healthy, false = unhealthy
@@ -2357,6 +2972,22 @@ const COLLECTION_NAME = MEMORY_CONFIG.QDRANT_COLLECTION;
 const VECTOR_SIZE = MEMORY_CONFIG.QDRANT_VECTOR_SIZE;
 
 /**
+ * Get collection point count
+ * @returns {number} Number of points in collection, or 0 if error
+ */
+async function getCollectionPointCount() {
+  try {
+    const isHealthy = await checkQdrantHealth();
+    if (!isHealthy) return 0;
+    
+    const info = await getQdrantClient().getCollection(COLLECTION_NAME);
+    return info.points_count || 0;
+  } catch (error) {
+    return 0;
+  }
+}
+
+/**
  * Check Qdrant connection health
  * @returns {boolean} True if healthy, false otherwise
  */
@@ -2368,26 +2999,16 @@ async function checkQdrantHealth() {
     return qdrantHealthy;
   }
   
-  try {
-    // Simple health check - try to get collections
-    await client.getCollections();
-    qdrantHealthy = true;
-    lastHealthCheck = now;
-    
-    if (process.env.NODE_ENV !== 'test') {
-      console.log('✅ Qdrant connection healthy');
-    }
-    return true;
-  } catch (error) {
-    qdrantHealthy = false;
-    lastHealthCheck = now;
-    
-    if (process.env.NODE_ENV !== 'test') {
-      console.warn('❌ Qdrant connection failed:', error.message);
-      console.warn('📝 Falling back to in-memory storage');
-    }
-    return false;
+  // Use connection manager's health check
+  const healthy = await connectionManager.checkConnectionHealth('qdrant_default');
+  qdrantHealthy = healthy;
+  lastHealthCheck = now;
+  
+  if (!healthy && process.env.NODE_ENV !== 'test') {
+    console.warn('📝 Falling back to in-memory storage');
   }
+  
+  return healthy;
 }
 
 async function ensureCollection() {
@@ -2397,11 +3018,11 @@ async function ensureCollection() {
       return false; // Skip collection creation if Qdrant is down
     }
     
-    const collections = await client.getCollections();
+    const collections = await getQdrantClient().getCollections();
     const exists = collections.collections.some(c => c.name === COLLECTION_NAME);
     
     if (!exists) {
-      await client.createCollection(COLLECTION_NAME, {
+      await getQdrantClient().createCollection(COLLECTION_NAME, {
         vectors: {
           size: VECTOR_SIZE,
           distance: 'Cosine'
@@ -2458,6 +3079,19 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
     validateAgentName(agentName);
     validateTextContent(text, 'memory snippet text');
     
+    // Run validation hooks
+    const validationHooks = require('./validation-hooks');
+    const validation = await validationHooks.executeHooks('beforeMemorySave', {
+      agentName,
+      text,
+      metadata
+    });
+    
+    if (!validation.valid) {
+      const errorMessage = validation.errors.map(e => e.message).join('; ');
+      throw new Error(`Memory validation failed: ${errorMessage}`);
+    }
+    
     // Sanitize text content
     const sanitizedText = sanitizeTextContent(text);
     
@@ -2468,7 +3102,7 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
       // Store in Qdrant if available
       const { embedding, method } = await generateEmbedding(sanitizedText, true);
       
-      await client.upsert(COLLECTION_NAME, {
+      await getQdrantClient().upsert(COLLECTION_NAME, {
         wait: true,
         points: [
           {
@@ -2486,6 +3120,12 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
         ]
       });
       
+      // Log successful Qdrant storage
+      await getLogLongTermMemory()(agentName, 'store', {
+        memoryType: 'snippet',
+        metadata: { method, ...metadata }
+      }, { storageType: 'qdrant', id });
+      
       return id;
     } else {
       // Fallback to in-memory storage
@@ -2501,6 +3141,12 @@ async function storeMemorySnippet(agentName, text, metadata = {}) {
       };
       
       fallbackMemory.set(fallbackId, payload);
+      
+      // Log fallback storage
+      await getLogLongTermMemory()(agentName, 'store', {
+        memoryType: 'snippet',
+        metadata
+      }, { storageType: 'fallback', id: fallbackId });
       
       if (process.env.NODE_ENV !== 'test') {
         console.warn(`📝 Stored memory snippet in fallback storage: ${fallbackId}`);
@@ -2587,7 +3233,7 @@ async function retrieveMemory(query, topN = 5, filters = {}) {
         };
       }
       
-      const searchResult = await client.search(COLLECTION_NAME, searchParams);
+      const searchResult = await getQdrantClient().search(COLLECTION_NAME, searchParams);
       
       return searchResult.map(result => ({
         score: result.score,
@@ -2705,8 +3351,40 @@ async function storeContextualMemory(agentName, text, context = {}) {
   return await storeMemorySnippet(agentName, text, metadata);
 }
 
+/**
+ * Close Qdrant connection and cleanup resources
+ * Call this when done with memory operations to allow process to exit
+ */
+async function closeConnections() {
+  try {
+    // Clear any intervals first
+    connectionManager.clearIntervals();
+    
+    // Use connection manager to close connections
+    await connectionManager.closeConnection('qdrant_default');
+    
+    // For subprocess commands that need quick exit, force shutdown
+    if (process.argv.some(arg => arg.includes('AndExit'))) {
+      await connectionManager.shutdown();
+    }
+    
+    // Reset health check state
+    qdrantHealthy = null;
+    lastHealthCheck = null;
+    
+    // Clear any pending operations
+    if (global.gc) {
+      global.gc();
+    }
+    
+    console.log('Memory connections closed');
+  } catch (error) {
+    console.error('Error closing connections:', error.message);
+  }
+}
+
 module.exports = {
-  client,
+  getQdrantClient,
   storeMemorySnippet,
   retrieveMemory,
   retrieveAgentStoryMemory,
@@ -2714,6 +3392,8 @@ module.exports = {
   retrieveTaskMemory,
   storeContextualMemory,
   checkQdrantHealth,
+  getCollectionPointCount,
+  closeConnections,
   // Expose fallback memory for diagnostics (read-only)
   getFallbackMemoryStatus: () => ({
     isHealthy: qdrantHealthy,

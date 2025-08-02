@@ -1,0 +1,120 @@
+id: orchestrator-session-handoff
+name: Orchestrator Session Handoff
+purpose: Handles in-session agent switching for seamless workflow execution
+steps:
+  - id: step1
+    name: Prepare In-Session Handoff
+    description: Prepare for in-session agent switching without user intervention
+    actions:
+      - description: Adopt the target agent's persona while maintaining orchestrator control instead of asking user to run commands
+        elicit: false
+        metadata:
+          sessionMaintenance: true
+          criticalAction: true
+
+  - id: step2
+    name: Execute Agent Role In-Session
+    description: Load agent configuration and adopt agent persona temporarily
+    actions:
+      - description: Announce transition to target agent role within orchestrator session
+        elicit: false
+        metadata:
+          roleTransition: true
+      - description: Load the agent's configuration from bmad-core/agents/ and extract persona, tasks, and behavior
+        elicit: false
+        metadata:
+          configLoad: true
+      - description: Adopt the agent's persona temporarily while maintaining orchestrator awareness
+        elicit: false
+        metadata:
+          personaAdoption: true
+
+  - id: step3
+    name: Agent Task Execution
+    description: Execute agent-specific tasks while maintaining session continuity
+    actions:
+      - description: Execute agent-specific tasks following their patterns and creating expected artifacts
+        elicit: false
+        metadata:
+          taskExecution: true
+      - description: Maintain conversation flow and update workflow context as appropriate for the agent role
+        elicit: false
+        metadata:
+          conversationFlow: true
+
+  - id: step4
+    name: Return to Orchestrator Role
+    description: Complete agent tasks and return to orchestrator control
+    actions:
+      - description: Announce return to orchestrator role after agent task completion
+        elicit: false
+        metadata:
+          roleReturn: true
+      - description: Update workflow state with completed step, agent outputs, and next step determination
+        elicit: false
+        metadata:
+          workflowUpdate: true
+      - description: Continue workflow by evaluating conditions and preparing next handoff while maintaining session continuity
+        elicit: false
+        metadata:
+          continuityMaintenance: true
+
+inputs:
+  target_agent_id:
+    type: string
+    required: true
+    description: The agent to switch to (e.g., 'analyst', 'pm')
+  workflow_context:
+    type: object
+    required: true
+    description: Current workflow context from .ai/handoff-context.json
+  session_mode:
+    type: string
+    required: true
+    description: Should be 'continuous' for same-session execution
+
+outputs:
+  handoff_completed:
+    type: boolean
+    description: Whether the in-session handoff was successful
+  agent_result:
+    type: object
+    description: Results from the agent execution
+
+metadata:
+  canBeUsedBy: ["orchestrator"]
+  requiresConfiguration: ["workflow", "agents"]
+  category: orchestration
+  complexity: high
+  version: "1.0"
+  tags:
+    - orchestration
+    - handoff
+    - session-management
+    - workflow
+
+notes: |
+  This approach allows the orchestrator to maintain session continuity
+  while executing agent tasks. It's a workaround for frameworks that
+  don't support true programmatic agent activation. The orchestrator
+  essentially "wears different hats" while maintaining control flow.
+  
+  Best practices:
+  - Keep clear indicators when switching roles
+  - Maintain context throughout role switches
+  - Don't break the conversation flow
+  - Ensure all expected outputs are created
+  - Use visual indicators (emojis/formatting) for clarity
+  
+  Implementation example:
+  Instead of:
+  Orchestrator: "Please run /BMad:agents:analyst"
+  [User runs command]
+  [New session starts]
+  
+  Do this:
+  Orchestrator: "🔄 Switching to Analyst role..."
+  Orchestrator-as-Analyst: "Hello! I'm now acting as the Business Analyst. Let's discuss your project..."
+  [Conversation continues in same session]
+  Orchestrator-as-Analyst: "✅ Project brief complete. Returning to orchestrator..."
+  Orchestrator: "📋 Analyst phase complete. Now switching to PM role..."

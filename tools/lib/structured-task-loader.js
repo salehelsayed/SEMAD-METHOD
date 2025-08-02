@@ -1,11 +1,40 @@
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
+const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
 
 class StructuredTaskLoader {
   constructor(rootDir) {
     this.rootDir = rootDir;
     this.coreConfigPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
+    this.ajv = new Ajv();
+    addFormats(this.ajv);
+    this.taskValidator = null;
+    this.initializeValidators();
+  }
+
+  async initializeValidators() {
+    try {
+      // Load structured task schema
+      const schemaPath = path.join(this.rootDir, 'bmad-core', 'schemas', 'structured-task-schema.json');
+      if (await this.fileExists(schemaPath)) {
+        const schemaContent = await fs.readFile(schemaPath, 'utf8');
+        const schema = JSON.parse(schemaContent);
+        this.taskValidator = this.ajv.compile(schema);
+      }
+    } catch (error) {
+      console.warn('Failed to load task schema:', error.message);
+    }
+  }
+
+  async fileExists(path) {
+    try {
+      await fs.access(path);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async isStructuredTasksEnabled() {
@@ -24,6 +53,16 @@ class StructuredTaskLoader {
     if (taskPath.endsWith('.yaml')) {
       // Load and parse YAML task
       const task = yaml.load(content);
+      
+      // Validate structured task if validator is available
+      if (this.taskValidator) {
+        const valid = this.taskValidator(task);
+        if (!valid) {
+          const errors = this.formatValidationErrors(this.taskValidator.errors);
+          throw new Error(`Task validation failed for ${path.basename(taskPath)}:\n${errors}`);
+        }
+      }
+      
       return {
         type: 'structured',
         data: task,
@@ -37,6 +76,30 @@ class StructuredTaskLoader {
         raw: content
       };
     }
+  }
+
+  formatValidationErrors(errors) {
+    if (!errors || errors.length === 0) {
+      return 'No errors';
+    }
+
+    return errors.map(err => {
+      const path = err.instancePath || '/';
+      const message = err.message || 'Unknown error';
+      
+      switch (err.keyword) {
+        case 'required':
+          return `  - Missing required field: ${err.params.missingProperty} at ${path}`;
+        case 'enum':
+          return `  - Invalid value at ${path}: ${message}`;
+        case 'type':
+          return `  - Invalid type at ${path}: expected ${err.params.type}`;
+        case 'pattern':
+          return `  - Invalid format at ${path}: ${message}`;
+        default:
+          return `  - ${path}: ${message}`;
+      }
+    }).join('\n');
   }
 
   async loadChecklist(checklistPath) {

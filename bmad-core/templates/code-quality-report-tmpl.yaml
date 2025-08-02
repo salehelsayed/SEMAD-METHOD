@@ -1,0 +1,288 @@
+template:
+  id: code-quality-report-template
+  name: Code Quality Report
+  version: 1.0
+  output:
+    format: markdown
+    filename: "{{output_directory}}/quality-report-{{timestamp}}.md"
+    title: "Code Quality Analysis Report"
+
+workflow:
+  mode: automated
+  elicitation: none
+
+sections:
+  - id: header
+    title: Code Quality Analysis Report
+    content: |
+      # Code Quality Analysis Report
+      
+      **Generated**: {{analysis_date}}
+      **Agent**: {{agent_name}}
+      **Analysis Scope**: {{analysis_scope}}
+      **Files Analyzed**: {{file_count}}
+      **Overall Quality Score**: {{overall_quality_score}}/100
+      
+      ---
+
+  - id: executive-summary
+    title: Executive Summary
+    content: |
+      ## Executive Summary
+      
+      ### Quality Assessment
+      - **Overall Grade**: {{quality_grade}}
+      - **Critical Issues**: {{critical_issues_count}}
+      - **Major Issues**: {{major_issues_count}}
+      - **Minor Issues**: {{minor_issues_count}}
+      - **Suggestions**: {{suggestions_count}}
+      
+      ### Key Findings
+      {{#each key_findings}}
+      - {{severity}}: {{finding}}
+      {{/each}}
+      
+      ### Recommended Actions
+      {{#if has_critical_issues}}
+      ⚠️ **IMMEDIATE ACTION REQUIRED**: Critical quality issues found that should be addressed before code review.
+      {{/if}}
+      {{#if has_major_issues}}
+      🔴 **HIGH PRIORITY**: Major quality issues that impact maintainability and should be addressed soon.
+      {{/if}}
+      {{#if has_minor_issues}}
+      🟡 **MODERATE PRIORITY**: Minor quality issues that can be addressed during regular refactoring.
+      {{/if}}
+
+  - id: metrics-summary
+    title: Quality Metrics Summary
+    content: |
+      ## Quality Metrics Summary
+      
+      | Metric | Threshold | Average | Violations | Status |
+      |--------|-----------|---------|------------|--------|
+      | File Size (lines) | {{max_file_lines}} | {{avg_file_lines}} | {{file_size_violations}} | {{file_size_status}} |
+      | Function Size (lines) | {{max_function_lines}} | {{avg_function_lines}} | {{function_size_violations}} | {{function_size_status}} |
+      | Class Size (lines) | {{max_class_lines}} | {{avg_class_lines}} | {{class_size_violations}} | {{class_size_status}} |
+      | Cyclomatic Complexity | {{max_complexity}} | {{avg_complexity}} | {{complexity_violations}} | {{complexity_status}} |
+      | Nesting Depth | {{max_nesting_depth}} | {{avg_nesting_depth}} | {{nesting_violations}} | {{nesting_status}} |
+      | Comment Density | {{comment_density_range}} | {{avg_comment_density}}% | {{comment_violations}} | {{comment_status}} |
+      
+      ### Duplication Analysis
+      - **Duplicate Blocks Found**: {{duplicate_blocks_count}}
+      - **Total Duplicate Lines**: {{duplicate_lines_count}}
+      - **Duplication Ratio**: {{duplication_ratio}}%
+
+  - id: file-analysis
+    title: File-by-File Analysis
+    content: |
+      ## File-by-File Analysis
+      
+      {{#each analyzed_files}}
+      ### {{file_path}}
+      
+      **File Metrics:**
+      - Lines of Code: {{lines_of_code}} ({{size_status}})
+      - Comment Density: {{comment_density}}% ({{comment_status}})
+      - Functions: {{function_count}}
+      - Classes: {{class_count}}
+      - Quality Score: {{file_quality_score}}/100
+      
+      {{#if violations}}
+      **Quality Issues:**
+      {{#each violations}}
+      - **{{severity}}** (Line {{line_number}}): {{description}}
+        - **Issue**: {{issue_type}}
+        - **Current**: {{current_value}}
+        - **Threshold**: {{threshold_value}}
+        - **Recommendation**: {{recommendation}}
+      {{/each}}
+      {{/if}}
+      
+      {{#if suggestions}}
+      **Improvement Suggestions:**
+      {{#each suggestions}}
+      - {{suggestion}} ({{impact}})
+      {{/each}}
+      {{/if}}
+      
+      ---
+      
+      {{/each}}
+
+  - id: complexity-analysis
+    title: Complexity Analysis
+    content: |
+      ## Complexity Analysis
+      
+      ### High Complexity Functions
+      {{#if high_complexity_functions}}
+      {{#each high_complexity_functions}}
+      #### {{function_name}} ({{file_path}}:{{line_number}})
+      - **Complexity Score**: {{complexity_score}} (Threshold: {{threshold}})
+      - **Lines of Code**: {{lines_of_code}}
+      - **Parameters**: {{parameter_count}}
+      - **Nesting Depth**: {{nesting_depth}}
+      
+      **Complexity Contributors:**
+      {{#each complexity_contributors}}
+      - {{contributor_type}}: {{count}} occurrences
+      {{/each}}
+      
+      **Refactoring Suggestions:**
+      {{#each refactoring_suggestions}}
+      - {{suggestion}}
+      {{/each}}
+      
+      ---
+      {{/each}}
+      {{else}}
+      ✅ No functions exceed the complexity threshold of {{max_complexity}}.
+      {{/if}}
+
+  - id: duplication-analysis
+    title: Code Duplication Analysis
+    content: |
+      ## Code Duplication Analysis
+      
+      {{#if duplicate_blocks}}
+      ### Detected Duplicate Code Blocks
+      
+      {{#each duplicate_blocks}}
+      #### Duplicate Block {{block_id}}
+      **Lines**: {{line_count}} | **Similarity**: {{similarity_percentage}}%
+      
+      **Instances:**
+      {{#each instances}}
+      - **{{file_path}}** (Lines {{start_line}}-{{end_line}})
+      {{/each}}
+      
+      **Code Preview:**
+      ```{{language}}
+      {{code_sample}}
+      ```
+      
+      **Refactoring Recommendation:**
+      {{refactoring_recommendation}}
+      
+      ---
+      {{/each}}
+      {{else}}
+      ✅ No significant code duplication detected (threshold: {{duplicate_threshold}} lines).
+      {{/if}}
+
+  - id: recommendations
+    title: Actionable Recommendations
+    content: |
+      ## Actionable Recommendations
+      
+      ### Critical Actions (Fix Immediately)
+      {{#each critical_recommendations}}
+      {{recommendation_number}}. **{{title}}**
+         - **File**: {{file_path}}
+         - **Issue**: {{issue_description}}
+         - **Impact**: {{impact_description}}
+         - **Solution**: {{solution_steps}}
+         - **Estimated Effort**: {{effort_estimate}}
+      
+      {{/each}}
+      
+      ### Major Improvements (Address Soon)
+      {{#each major_recommendations}}
+      {{recommendation_number}}. **{{title}}**
+         - **File**: {{file_path}}
+         - **Issue**: {{issue_description}}
+         - **Benefit**: {{benefit_description}}
+         - **Solution**: {{solution_steps}}
+         - **Estimated Effort**: {{effort_estimate}}
+      
+      {{/each}}
+      
+      ### Minor Enhancements (Future Refactoring)
+      {{#each minor_recommendations}}
+      {{recommendation_number}}. **{{title}}**
+         - **File**: {{file_path}}
+         - **Enhancement**: {{enhancement_description}}
+         - **Benefit**: {{benefit_description}}
+         - **Solution**: {{solution_steps}}
+         - **Estimated Effort**: {{effort_estimate}}
+      
+      {{/each}}
+
+  - id: trends
+    title: Quality Trends (if available)
+    content: |
+      ## Quality Trends
+      
+      {{#if has_historical_data}}
+      ### Recent Quality Evolution
+      - **Previous Analysis**: {{previous_analysis_date}}
+      - **Quality Score Change**: {{quality_score_change}}
+      - **New Issues**: {{new_issues_count}}
+      - **Resolved Issues**: {{resolved_issues_count}}
+      
+      ### Trend Analysis
+      {{#each quality_trends}}
+      - **{{metric_name}}**: {{trend_direction}} ({{change_percentage}}% change)
+      {{/each}}
+      {{else}}
+      📊 Historical data not available. This is the baseline analysis for future trend tracking.
+      {{/if}}
+
+  - id: next-steps
+    title: Next Steps
+    content: |
+      ## Recommended Next Steps
+      
+      ### Immediate Actions
+      {{#if critical_recommendations}}
+      1. **Address Critical Issues**: Review and fix {{critical_issues_count}} critical quality violations
+      2. **Run Tests**: Ensure all changes maintain functionality
+      3. **Re-analyze**: Run quality analysis after fixes to verify improvements
+      {{else}}
+      ✅ No critical issues requiring immediate attention.
+      {{/if}}
+      
+      ### Development Process Integration
+      1. **Configure IDE**: Set up quality metrics monitoring in development environment
+      2. **Pre-commit Hooks**: Consider adding quality checks to git pre-commit hooks
+      3. **Regular Reviews**: Schedule periodic quality analysis reviews
+      
+      ### Long-term Quality Strategy
+      1. **Establish Quality Gates**: Define quality thresholds for code acceptance
+      2. **Team Training**: Provide training on identified code quality patterns
+      3. **Refactoring Plan**: Create systematic refactoring plan for legacy code
+      
+      ---
+      
+      **Generated by BMAD Code Quality Analysis**
+      *For questions about this report, consult the dev agent or review the analyze-code-quality task documentation.*
+
+variables:
+  analysis_date: "Date and time of analysis"
+  agent_name: "Name of the analyzing agent"
+  analysis_scope: "Scope of analysis (story, modified, all, custom)"
+  file_count: "Number of files analyzed"
+  overall_quality_score: "Overall quality score (0-100)"
+  quality_grade: "Letter grade based on quality score"
+  critical_issues_count: "Number of critical quality issues"
+  major_issues_count: "Number of major quality issues"
+  minor_issues_count: "Number of minor quality issues"
+  suggestions_count: "Number of improvement suggestions"
+  key_findings: "Array of key quality findings"
+  has_critical_issues: "Boolean - true if critical issues exist"
+  has_major_issues: "Boolean - true if major issues exist"
+  has_minor_issues: "Boolean - true if minor issues exist"
+  max_file_lines: "Maximum allowed file lines threshold"
+  max_function_lines: "Maximum allowed function lines threshold"
+  max_class_lines: "Maximum allowed class lines threshold"
+  max_complexity: "Maximum allowed cyclomatic complexity"
+  max_nesting_depth: "Maximum allowed nesting depth"
+  comment_density_range: "Expected comment density range"
+  analyzed_files: "Array of analyzed file objects"
+  high_complexity_functions: "Array of functions exceeding complexity threshold"
+  duplicate_blocks: "Array of detected duplicate code blocks"
+  critical_recommendations: "Array of critical action items"
+  major_recommendations: "Array of major improvement items"
+  minor_recommendations: "Array of minor enhancement items"
+  has_historical_data: "Boolean - true if trend data available"
+  quality_trends: "Array of quality metric trends"

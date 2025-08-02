@@ -1,0 +1,126 @@
+id: orchestrator-create-story
+name: Orchestrator Create Story (In-Session)
+purpose: Orchestrator creates a story by adopting SM persona in-session
+steps:
+  - id: step1
+    name: Announce Role Switch
+    description: Announce transition to SM role for story creation
+    actions:
+      - description: Display role switch announcement to user indicating transition to SM role
+        elicit: false
+        metadata:
+          roleSwitch: true
+
+  - id: step2
+    name: Load SM Configuration
+    description: Load SM agent configuration and adopt SM persona
+    actions:
+      - description: Read bmad-core/agents/sm.md to understand SM behavior and adopt communication style
+        elicit: false
+        metadata:
+          configLoad: true
+      - description: Ensure all file paths are resolved from project root, looking for .bmad-core/core-config.yaml and docs/prd/
+        elicit: false
+        metadata:
+          pathResolution: true
+
+  - id: step3
+    name: Read Epic Context
+    description: Navigate to PRD folder and extract epic information
+    actions:
+      - description: Navigate to docs/prd/ folder and read the current epic file to extract story requirements
+        elicit: false
+        metadata:
+          contextRead: true
+
+  - id: step4
+    name: Read Architecture Context
+    description: Extract relevant architecture information for the story
+    actions:
+      - description: Navigate to docs/architecture/ folder and extract technical stack details, design patterns, and API specifications
+        elicit: false
+        metadata:
+          architectureRead: true
+
+  - id: step5
+    name: Create Story Content
+    description: Create comprehensive story with all required sections
+    actions:
+      - description: Create comprehensive story including metadata, story contract, user story, acceptance criteria, implementation plan, technical details, testing requirements, and definition of done
+        elicit: false
+        metadata:
+          storyCreation: true
+
+  - id: step6
+    name: Save Story
+    description: Save the story file to the appropriate location
+    actions:
+      - description: Create story file at docs/stories/epic-{{epic}}/story-{{number}}-{{title-slug}}.md ensuring folder exists first
+        elicit: false
+        metadata:
+          fileSave: true
+
+  - id: step7
+    name: Update Context
+    description: Update workflow context with story creation results
+    actions:
+      - description: Update .ai/handoff-context.json with created story path, metadata, and next action
+        elicit: false
+        metadata:
+          contextUpdate: true
+
+  - id: step8
+    name: Return to Orchestrator
+    description: Return control to orchestrator role
+    actions:
+      - description: Display story creation completion message and return to orchestrator role
+        elicit: false
+        metadata:
+          roleReturn: true
+
+inputs:
+  epic_context:
+    type: object
+    required: true
+    description: Current epic information from sharded PRD
+  story_number:
+    type: string
+    required: true
+    description: Story identifier (e.g., "1.1", "2.3")
+
+outputs:
+  story_created:
+    type: boolean
+    description: Whether story was successfully created
+  story_path:
+    type: string
+    description: Path to created story file
+
+metadata:
+  canBeUsedBy: ["orchestrator"]
+  requiresConfiguration: ["prd", "architecture"]
+  category: orchestration
+  complexity: medium
+  version: "1.0"
+  tags:
+    - orchestration
+    - story-creation
+    - in-session
+
+notes: |
+  This task enables the orchestrator to create stories without asking
+  the user to manually activate SM or provide prompts. The orchestrator
+  reads the sharded documents and creates comprehensive implementation
+  stories automatically.
+  
+  Best practices:
+  - Always read both PRD and architecture shards
+  - Include enough detail for dev to implement without questions
+  - Follow the story template structure exactly
+  - Make acceptance criteria specific and testable
+  - Include file paths and code structure details
+  
+  Error handling:
+  - If epic file not found, list available epics
+  - If story already exists, skip to next
+  - If unable to determine requirements, ask for clarification

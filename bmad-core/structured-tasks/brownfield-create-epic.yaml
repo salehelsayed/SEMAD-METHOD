@@ -6,7 +6,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -293,7 +293,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:

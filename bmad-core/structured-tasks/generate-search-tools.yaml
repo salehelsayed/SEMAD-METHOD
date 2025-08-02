@@ -18,67 +18,32 @@ outputs:
 steps:
   - id: load-memory
     name: Load Memory and Initialize Context
-    description: Load agent working memory and relevant long-term context using unified memory system
+    description: Load agent working memory and relevant long-term context
     actions:
-      - description: Load agent working memory and relevant long-term context
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: generic
-          context:
-            taskId: generate-search-tools
-            taskType: content-creation
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to task execution planning
-        elicit: true
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
-  - id: step0
-    name: Initialize Memory and Context
-    description: Set up working memory and retrieve relevant context
-    actions:
-      - description: Initialize working memory for search tools generation
-        action: Execute task `update-working-memory` with agentName='sm' and taskId='generate-search-tools'
-        elicit: false
-      - description: Retrieve previous search patterns and keyword extraction methods
-        action: Execute task `retrieve-context` with query='search tool generation patterns'
+      - description: Load agent memory context for this task
+        action: Execute `loadAgentMemoryContextAndExit` from utils/agent-memory-loader.js with agentName='sm'
         elicit: false
   - id: parse-prd
     name: Parse PRD and Extract Keywords
     description: Run the keyword extraction script to generate search tools from PRD content
     actions:
-      - description: Execute generate-search-tools.js script with provided inputs
-        action: node scripts/generate-search-tools.js --prd {{inputs.prdPath}} --mappings {{inputs.mappingsPath}} --output {{outputs.searchToolsFile}}
+      - description: Execute generate-search-tools script with provided inputs
+        action: node {root}/scripts/generate-search-tools-simple.js --prd {{inputs.prdPath}} --mappings {{inputs.mappingsPath}} --output {{outputs.searchToolsFile}}
         elicit: true
   - id: validate-output
     name: Validate Generated Search Tools
     description: Ensure the generated search tools file is valid YAML and contains expected structure
     actions:
       - description: Run validation script to verify file exists and has correct structure
-        action: node scripts/validate-search-tools.js --file {{outputs.searchToolsFile}}
+        action: node {root}/scripts/validate-search-tools-simple.js --file {{outputs.searchToolsFile}}
         elicit: true
   - id: save-memory
-    name: Save Task Results and Clean Memory
-    description: Save task completion and findings to memory with hygiene cleanup
+    name: Save Task Results
+    description: Save task completion to memory
     actions:
-      - description: Save task completion and findings to working memory
-        elicit: true
-        function: saveAndCleanMemory
-        parameters:
-          agentName: generic
-          taskData:
-            observation: Completed generate-search-tools task successfully
-            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
-            taskCompleted: true
-            taskId: generate-search-tools
-            context:
-              taskType: content-creation
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      - description: Save search tools generation completion to memory
+        action: Execute `saveToLongTermMemoryAndExit` from utils/agent-memory-loader.js with agentName='sm' and data='Search tools generation completed'
+        elicit: false
 metadata:
   agent: sm
   priority: high

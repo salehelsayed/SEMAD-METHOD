@@ -8,8 +8,17 @@ const getMemoryManager = () => require('./agent-memory-manager');
 const { 
   retrieveAgentStoryMemory, 
   retrieveAgentEpicMemory,
-  retrieveTaskMemory 
+  retrieveTaskMemory,
+  closeConnections 
 } = require('./qdrant');
+const { withTimeout } = require('./timeout-wrapper');
+const {
+  logMemoryInit,
+  logMemoryRetrieval,
+  logMemoryError,
+  logLongTermMemory
+} = require('./memory-usage-logger');
+const { MemoryError, handleCriticalMemoryError, validateMemoryResult } = require('./memory-error-handler');
 
 /**
  * Load comprehensive memory context for agent activation
@@ -21,20 +30,33 @@ const {
  * @param {boolean} context.loadLongTerm - Whether to load long-term memories
  * @returns {Object} Complete memory context for agent
  */
-async function loadAgentMemoryContext(agentName, context = {}) {
+async function loadAgentMemoryContextInternal(agentName, context = {}) {
   try {
     const { storyId, epicId, taskId, loadLongTerm = true } = context;
     
     console.log(`Loading memory context for agent: ${agentName}`);
+    
+    // Log memory initialization start
+    await logMemoryInit(agentName, 'load_context_start', { 
+      storyId, 
+      epicId, 
+      taskId, 
+      loadLongTerm 
+    });
     
     // Load or initialize working memory
     const { loadWorkingMemory, initializeWorkingMemory, getMemorySummary } = getMemoryManager();
     let workingMemory = await loadWorkingMemory(agentName);
     if (!workingMemory) {
       console.log(`No existing working memory found, initializing new memory for ${agentName}`);
+      await logMemoryInit(agentName, 'initialize_working_memory', { storyId, epicId, taskId });
       workingMemory = await initializeWorkingMemory(agentName, { storyId, epicId, taskId });
     } else {
       console.log(`Loaded existing working memory for ${agentName}`);
+      await logMemoryInit(agentName, 'load_existing_working_memory', { 
+        observationCount: workingMemory.observations?.length || 0,
+        existingContext: workingMemory.currentContext
+      });
       // Update context if provided
       if (storyId || epicId || taskId) {
         workingMemory.currentContext = {
@@ -50,7 +72,13 @@ async function loadAgentMemoryContext(agentName, context = {}) {
     let longTermMemories = [];
     if (loadLongTerm) {
       console.log(`Loading long-term memories for ${agentName}`);
+      await logMemoryRetrieval(agentName, 'load_long_term_start', 'context-based search', 0, {
+        context: workingMemory.currentContext
+      });
       longTermMemories = await loadRelevantLongTermMemories(agentName, workingMemory.currentContext);
+      await logMemoryRetrieval(agentName, 'load_long_term_complete', 'context-based search', longTermMemories.length, {
+        context: workingMemory.currentContext
+      });
     }
     
     // Get memory summary
@@ -73,9 +101,21 @@ async function loadAgentMemoryContext(agentName, context = {}) {
       currentContext: workingMemory.currentContext
     });
     
+    // Log successful memory context load
+    await logMemoryInit(agentName, 'load_context_complete', {
+      workingMemoryFound: !!workingMemory,
+      observationCount: workingMemory.observations?.length || 0,
+      longTermMemoryCount: longTermMemories.length,
+      recommendationCount: memoryContext.recommendations.length
+    });
+    
     return memoryContext;
   } catch (error) {
     console.error(`Failed to load memory context for ${agentName}:`, error);
+    
+    // Log memory loading error
+    await logMemoryError(agentName, 'load_context_failed', error, { context });
+    
     return {
       agentName,
       loadedAt: new Date().toISOString(),
@@ -102,6 +142,7 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
     
     // Load story-specific memories
     if (storyId) {
+      await logMemoryRetrieval(agentName, 'retrieve_story_memories', `story ${storyId}`, 0, { storyId });
       const storyMemories = await retrieveAgentStoryMemory(
         agentName, 
         `story ${storyId} implementation observations decisions`,
@@ -109,10 +150,12 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
         5
       );
       memories.push(...storyMemories.map(m => ({ ...m, source: 'story-context' })));
+      await logMemoryRetrieval(agentName, 'retrieve_story_memories_complete', `story ${storyId}`, storyMemories.length, { storyId });
     }
     
     // Load epic-specific memories
     if (epicId) {
+      await logMemoryRetrieval(agentName, 'retrieve_epic_memories', `epic ${epicId}`, 0, { epicId });
       const epicMemories = await retrieveAgentEpicMemory(
         agentName,
         `epic ${epicId} patterns lessons learned`,
@@ -120,21 +163,43 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
         3
       );
       memories.push(...epicMemories.map(m => ({ ...m, source: 'epic-context' })));
+      await logMemoryRetrieval(agentName, 'retrieve_epic_memories_complete', `epic ${epicId}`, epicMemories.length, { epicId });
     }
     
     // Load task-specific memories if available
     if (taskId) {
+      await logMemoryRetrieval(agentName, 'retrieve_task_memories', `task ${taskId}`, 0, { taskId });
       const taskMemories = await retrieveTaskMemory(agentName, taskId, 3);
       memories.push(...taskMemories.map(m => ({ ...m, source: 'task-history' })));
+      await logMemoryRetrieval(agentName, 'retrieve_task_memories_complete', `task ${taskId}`, taskMemories.length, { taskId });
     }
     
     // Load general agent memories for similar work
     const generalQuery = `${agentName} agent similar work patterns best practices`;
     const { retrieveRelevantMemories } = getMemoryManager();
-    const generalMemories = await retrieveRelevantMemories(agentName, generalQuery, {
-      topN: 3
-    });
-    memories.push(...generalMemories.map(m => ({ ...m, source: 'general-experience' })));
+    
+    // Set a shorter timeout for memory retrieval
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Memory retrieval timeout')), 5000) // 5 second timeout
+    );
+    
+    try {
+      const memoryResults = await Promise.race([
+        retrieveRelevantMemories(agentName, generalQuery, { topN: 3 }),
+        timeoutPromise
+      ]);
+      
+      // Handle the results object structure
+      if (memoryResults && memoryResults.longTerm && Array.isArray(memoryResults.longTerm)) {
+        memories.push(...memoryResults.longTerm.map(m => ({ ...m, source: 'general-experience' })));
+      }
+      if (memoryResults && memoryResults.combined && Array.isArray(memoryResults.combined)) {
+        memories.push(...memoryResults.combined.slice(0, 3).map(m => ({ ...m, source: 'general-experience' })));
+      }
+    } catch (timeoutError) {
+      console.log('Memory retrieval timed out after 5 seconds - continuing with empty memories');
+      // Continue without historical memories - not a fatal error
+    }
     
     // Sort by relevance score and remove duplicates
     const uniqueMemories = memories
@@ -147,6 +212,7 @@ async function loadRelevantLongTermMemories(agentName, currentContext) {
     return uniqueMemories;
   } catch (error) {
     console.error(`Failed to load long-term memories for ${agentName}:`, error);
+    await logMemoryError(agentName, 'load_long_term_memories_failed', error, { currentContext });
     return [];
   }
 }
@@ -278,10 +344,225 @@ async function loadMemoryWithValidation(agentName, context, requiredContext = []
   };
 }
 
+// Create a timeout-wrapped version of the main function
+const loadAgentMemoryContext = withTimeout(
+  loadAgentMemoryContextInternal,
+  8000, // 8 second total timeout for entire operation
+  'Load Agent Memory Context'
+);
+
+/**
+ * Load agent memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function loadAgentMemoryContextAndExit(agentName, context = {}) {
+  try {
+    // Log the initialization
+    await logMemoryInit(agentName, 'load_context_start', { context });
+    
+    const result = await loadAgentMemoryContext(agentName, context);
+    
+    // Log the completion
+    await logMemoryInit(agentName, 'load_context_complete', { 
+      sessionId: result.workingMemory?.sessionId,
+      hasExistingMemory: !!(result.workingMemory?.observations?.length),
+      recommendationsCount: result.recommendations?.length || 0
+    });
+    
+    // Ensure clean exit by closing connections
+    const { closeConnections } = require('./qdrant');
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    console.error('Memory load error:', error.message);
+    await closeConnections();
+    process.exit(1);
+  }
+}
+
+/**
+ * Retrieve relevant memories and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function retrieveRelevantMemoriesAndExit(agentName, query, options = {}) {
+  try {
+    // Log the retrieval operation
+    await logMemoryRetrieval(agentName, 'retrieve_memories_start', query, 0, { options });
+    
+    const { retrieveRelevantMemories } = getMemoryManager();
+    const result = await retrieveRelevantMemories(agentName, query, options);
+    
+    // Log the completion with results count
+    const resultsCount = result?.combined?.length || 0;
+    await logMemoryRetrieval(agentName, 'retrieve_memories_complete', query, resultsCount, { 
+      hasResults: resultsCount > 0 
+    });
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Ensure clean exit by closing connections
+    const { closeConnections } = require('./qdrant');
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    console.error('Memory retrieval error:', error.message);
+    await closeConnections();
+    process.exit(1);
+  }
+}
+
+/**
+ * Update working memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function updateWorkingMemoryAndExit(agentName, updates) {
+  try {
+    const { updateWorkingMemory } = getMemoryManager();
+    const result = await updateWorkingMemory(agentName, updates);
+    
+    // Validate the result
+    validateMemoryResult(result, 'updateWorkingMemory', agentName);
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Log successful memory update
+    console.log(`✅ Working memory successfully updated for ${agentName}`);
+    
+    // Ensure clean exit by closing connections
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    // Convert to MemoryError if not already
+    const memoryError = error instanceof MemoryError ? error : new MemoryError(
+      error.message || 'Failed to update working memory',
+      'updateWorkingMemory',
+      agentName,
+      { originalError: error.name, updates }
+    );
+    
+    await handleCriticalMemoryError(memoryError, 'Updating working memory');
+    // handleCriticalMemoryError will exit the process
+  }
+}
+
+/**
+ * Save to long-term memory and ensure clean process exit
+ * Use this when calling from a subprocess that needs to exit
+ */
+async function saveToLongTermMemoryAndExit(agentName, options = {}) {
+  try {
+    const { saveToLongTermMemory } = getMemoryManager();
+    const result = await saveToLongTermMemory(agentName, options);
+    
+    // Validate the result
+    validateMemoryResult(result, 'saveToLongTermMemory', agentName);
+    
+    // Print result to stdout for subprocess communication
+    console.log(JSON.stringify(result, null, 2));
+    
+    // Log successful memory save
+    console.log(`✅ Long-term memory successfully saved for ${agentName}`);
+    
+    // Ensure clean exit by closing connections
+    await closeConnections();
+    
+    // Close connections and force exit after a short delay to ensure output is flushed
+    setTimeout(async () => {
+      await closeConnections();
+      process.exit(0);
+    }, 100);
+    
+    return result;
+  } catch (error) {
+    // Convert to MemoryError if not already
+    const memoryError = error instanceof MemoryError ? error : new MemoryError(
+      error.message || 'Failed to save to long-term memory',
+      'saveToLongTermMemory',
+      agentName,
+      { originalError: error.name, options }
+    );
+    
+    await handleCriticalMemoryError(memoryError, 'Saving to long-term memory');
+    // handleCriticalMemoryError will exit the process
+  }
+}
+
 module.exports = {
   loadAgentMemoryContext,
+  loadAgentMemoryContextAndExit,
   loadRelevantLongTermMemories,
   generateMemoryRecommendations,
   checkMemoryStatus,
-  loadMemoryWithValidation
+  loadMemoryWithValidation,
+  retrieveRelevantMemoriesAndExit,
+  updateWorkingMemoryAndExit,
+  saveToLongTermMemoryAndExit
 };
+
+// Command-line interface
+if (require.main === module) {
+  const command = process.argv[2];
+  const agentName = process.argv[3];
+  const args = process.argv.slice(4);
+  
+  async function runCommand() {
+    try {
+      switch (command) {
+        case 'loadAgentMemoryContextAndExit':
+          await loadAgentMemoryContextAndExit(agentName);
+          break;
+          
+        case 'retrieveRelevantMemoriesAndExit':
+          const query = args[0] || 'general context';
+          const topN = parseInt(args[1]) || 5;
+          await retrieveRelevantMemoriesAndExit(agentName, query, { topN });
+          break;
+          
+        case 'updateWorkingMemoryAndExit':
+          const updates = args[0] ? JSON.parse(args[0]) : {};
+          await updateWorkingMemoryAndExit(agentName, updates);
+          break;
+          
+        case 'saveToLongTermMemoryAndExit':
+          const memoryContent = args[0] ? JSON.parse(args[0]) : {};
+          await saveToLongTermMemoryAndExit(agentName, memoryContent);
+          break;
+          
+        default:
+          console.error(`Unknown command: ${command}`);
+          console.error('Available commands: loadAgentMemoryContextAndExit, retrieveRelevantMemoriesAndExit, updateWorkingMemoryAndExit, saveToLongTermMemoryAndExit');
+          await closeConnections();
+          process.exit(1);
+      }
+    } catch (error) {
+      console.error(`Command failed: ${error.message}`);
+      await closeConnections();
+      process.exit(1);
+    }
+  }
+  
+  runCommand();
+}

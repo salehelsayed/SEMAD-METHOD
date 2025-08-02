@@ -24,6 +24,7 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **Why**: Reduces context loss and hallucination between steps
 - **Impact**: Agents maintain state across complex multi-step operations
 - **Implementation**: Memory files in `.ai/` directory, Qdrant integration for long-term memory
+- **Documentation**: See [Memory System Explanation](MEMORY-SYSTEM-EXPLANATION.md) and [Detailed Memory Guide](bmad-core/docs/memory-system-detailed-guide.md)
 
 ### 3. **Dynamic Plan Adaptation**
 - **What Changed**: Automatic task decomposition for complex operations
@@ -116,6 +117,54 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 - **[Browse ready-made expansion packs](expansion-packs/)** → Game dev, DevOps, infrastructure and get inspired with ideas and examples
 - **[Understand the architecture](docs/core-architecture.md)** → Technical deep dive
 - **[Join the community](https://discord.gg/gk8jAdXWmj)** → Get help and share ideas
+
+## Prerequisites
+
+Before using SEMAD-METHOD, ensure you have the following installed:
+
+### Required Dependencies
+
+1. **Node.js v20 or higher** - [Download Node.js](https://nodejs.org)
+   ```bash
+   node --version  # Should output v20.0.0 or higher
+   ```
+
+2. **Git** - For cloning and version control
+   ```bash
+   git --version
+   ```
+
+3. **Markdown Tree Parser** - For automatic document sharding
+   ```bash
+   npm install -g @kayvan/markdown-tree-parser
+   ```
+
+### Optional Dependencies
+
+1. **Qdrant Vector Database** - For agent memory persistence (optional but recommended)
+   ```bash
+   # Using Docker
+   docker run -d -p 6333:6333 -p 6334:6334 qdrant/qdrant
+   
+   # Or download from: https://qdrant.tech/documentation/install/
+   ```
+
+2. **OpenAI API Key** - For semantic memory search (optional)
+   ```bash
+   export OPENAI_API_KEY="your-api-key-here"
+   ```
+
+### IDE Requirements
+
+- Any modern code editor (VS Code, Cursor, Windsurf, etc.)
+- Claude.ai account or API access for running agents
+- Terminal/Command line access
+
+### System Requirements
+
+- **OS**: Windows, macOS, or Linux
+- **RAM**: 4GB minimum (8GB recommended)
+- **Disk Space**: 200MB for SEMAD-METHOD + space for your projects
 
 ## Important: Keep Your BMad Installation Updated
 

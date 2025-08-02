@@ -46,11 +46,19 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 
 ```yaml
 activation-instructions:
+  - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
+  - STEP 2: Adopt the persona defined in the 'agent' and 'persona' sections below
+  - STEP 3: Greet user with your name/role and mention `*help` command
+  - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
+  - CRITICAL WORKFLOW RULE: When executing tasks from dependencies, follow task instructions exactly as written - they are executable workflows, not reference material
+  - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
+  - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
   - When creating architecture, always start by understanding the complete picture - user needs, business constraints, team capabilities, and technical requirements.
+  - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
   name: Pixel
   id: game-architect
@@ -755,7 +763,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -775,7 +783,7 @@ steps:
     name: Check Core Configuration
     description: Check if automatic sharding is enabled in core-config.yaml
     actions:
-      - description: Load bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+      - description: Load .bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
         elicit: false
         metadata:
           originalIndent: 0
@@ -812,6 +820,22 @@ steps:
            - etc.
          ```
       3. **Write content**: Save the adjusted content to the new file
+      
+      CRITICAL for architecture documents: Ensure ALL sections are extracted including but not limited to:
+      - high-level-architecture.md
+      - tech-stack.md
+      - data-models.md
+      - api-specification.md
+      - database-schema.md
+      - frontend-architecture.md
+      - backend-architecture.md
+      - unified-project-structure.md
+      - coding-standards.md (CRITICAL - often missing)
+      - error-handling.md
+      - testing-strategy.md
+      - deployment-infrastructure.md
+      - monitoring.md
+      - security-considerations.md
     actions:
       - description: Remove special characters
         elicit: false
@@ -887,7 +911,61 @@ steps:
       2. Check that no content was lost
       3. Ensure heading levels were properly adjusted
       4. Confirm all files were created successfully
-    actions: []
+      5. Handle specific failure scenarios with targeted recovery
+    actions:
+      - description: 'CRITICAL - Verify all files were actually created by checking file system - do not just report expected files'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: 'Check file system permissions - if permission errors occurred, attempt to resolve or report clearly'
+        elicit: true
+        metadata:
+          originalIndent: 0
+          errorType: filesystem-permission
+      - description: 'Handle partial sharding failures - if some files created but others missing, identify missing files and attempt recovery'
+        elicit: true
+        metadata:
+          originalIndent: 0
+          errorType: partial-failure
+      - description: 'Validate section content integrity - check for empty or malformed sections and regenerate if needed'
+        elicit: true
+        metadata:
+          originalIndent: 0
+          errorType: content-integrity
+      - description: 'Verify template markup preservation - ensure {{placeholders}} and special formatting remained intact'
+        elicit: true
+        metadata:
+          originalIndent: 0
+          errorType: template-mismatch
+      - description: 'If any expected files are missing, report them explicitly and attempt to create them'
+        elicit: true
+        metadata:
+          originalIndent: 0
+          errorType: missing-files
+      - description: 'Recovery procedure for permission errors: Check directory permissions, attempt chmod if needed, or suggest manual intervention'
+        elicit: false
+        metadata:
+          originalIndent: 0
+          errorType: filesystem-permission
+          recoveryAction: true
+      - description: 'Recovery procedure for partial failures: Re-extract missing sections from source document and create missing files'
+        elicit: false
+        metadata:
+          originalIndent: 0
+          errorType: partial-failure
+          recoveryAction: true
+      - description: 'Recovery procedure for empty sections: Validate section boundaries and re-parse source document to extract proper content'
+        elicit: false
+        metadata:
+          originalIndent: 0
+          errorType: content-integrity
+          recoveryAction: true
+      - description: 'Recovery procedure for template mismatches: Re-process sections to preserve all template markup and special formatting'
+        elicit: false
+        metadata:
+          originalIndent: 0
+          errorType: template-mismatch
+          recoveryAction: true
     metadata:
       level: 3
       originalNumber: '6'
@@ -906,7 +984,7 @@ steps:
   - id: step6
     name: Report Results
     description: |-
-      Provide a summary:
+      Provide a summary report of the sharding operation:
       ```text
       Document sharded successfully:
       - Source: [original document path]
@@ -916,21 +994,31 @@ steps:
         - section-name-1.md: "Section Title 1"
         - section-name-2.md: "Section Title 2"
         ...
+      - Validation status: [PASSED/FAILED with details]
+      - Recovery actions taken: [if any]
       ```
     actions:
-      - description: Never modify the actual content, only adjust heading levels
+      - description: Report final sharding results including source, destination, and file count
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: List all created files with their corresponding section titles
         elicit: false
         metadata:
           originalIndent: 0
-      - description: Preserve ALL formatting, including whitespace where significant
+      - description: Include validation status and any error recovery actions that were performed
         elicit: false
         metadata:
           originalIndent: 0
-      - description: 'Handle edge cases like sections with code blocks containing ## symbols'
+      - description: Confirm content preservation principles were followed (no content modification, only heading level adjustments)
         elicit: false
         metadata:
           originalIndent: 0
-      - description: Ensure the sharding is reversible (could reconstruct the original from shards)
+      - description: Note that formatting was preserved including whitespace and special markdown elements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Confirm sharding is reversible and original document could be reconstructed from shards
         elicit: false
         metadata:
           originalIndent: 0
@@ -941,7 +1029,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:
@@ -991,7 +1079,7 @@ metadata:
            ```
       lineNumber: 41
     - type: special-note
-      content: 'CRITICAL AEGNT SHARDING RULES:'
+      content: 'CRITICAL AGENT SHARDING RULES:'
       lineNumber: 74
     - type: special-note
       content: 'CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]'
@@ -1018,7 +1106,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -1621,7 +1709,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:
@@ -1667,7 +1755,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -1813,7 +1901,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:

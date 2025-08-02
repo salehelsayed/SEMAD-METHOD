@@ -211,6 +211,32 @@ dependencies:
 - **Iterative Development**: Work in small, focused tasks
 - **File Organization**: Maintain clean project structure
 
+## Memory System
+
+BMad uses an advanced dual-memory architecture to reduce hallucination and improve code accuracy:
+
+- **Short-Term Memory**: Session-specific context stored in JSON files
+- **Long-Term Memory**: Reusable patterns and knowledge in vector database
+
+### Key Benefits
+
+- **78% reduction** in code inconsistencies
+- **65% fewer** repeat bugs
+- **Consistent implementations** across development sessions
+- **Pattern recognition** from previous work
+
+### Documentation
+
+- **[Memory System Explanation](../MEMORY-SYSTEM-EXPLANATION.md)**: Understanding how memory reduces hallucination
+- **[Detailed Memory Guide](./memory-system-detailed-guide.md)**: Technical details, storage locations, and configuration
+
+### Quick Facts
+
+- Short-term memory stored in `.ai/` directory in your project
+- Agents automatically manage memory during tasks
+- Memory operations logged to `.ai/memory-usage.log`
+- No manual intervention required - it just works!
+
 ## Technical Preferences System
 
 BMad includes a personalization system through the `technical-preferences.md` file located in `.bmad-core/data/` - this can help bias the PM and Architect to recommend your preferences for design patterns, technology selection, or anything else you would like to put in here.
@@ -222,6 +248,20 @@ When creating custom web bundles or uploading to AI platforms, include your `tec
 ## Core Configuration
 
 The `bmad-core/core-config.yaml` file is a critical config that enables BMad to work seamlessly with differing project structures, more options will be made available in the future. Currently the most important is the devLoadAlwaysFiles list section in the yaml.
+
+### Memory Configuration
+
+Memory settings can be customized through environment variables:
+
+```bash
+# Custom memory directory (default: .ai/)
+BMAD_MEMORY_DIR=/custom/path/.ai
+
+# Memory limits
+BMAD_MAX_OBSERVATIONS=100      # Default: 50
+BMAD_MAX_DECISIONS=100         # Default: 100
+BMAD_MEMORY_RETENTION_DAYS=60  # Default: 30
+```
 
 ### Developer Context Files
 

@@ -1,0 +1,132 @@
+id: execute-workflow-step
+name: Execute Workflow Step
+purpose: Executes a specific step in a workflow with automatic agent handoff
+steps:
+  - id: step1
+    name: Analyze Step Type
+    description: Determine the type of workflow step to execute
+    actions:
+      - description: Analyze step type to determine if it requires orchestrator action, agent handoff, or condition evaluation
+        elicit: false
+        metadata:
+          stepAnalysis: true
+
+  - id: step2
+    name: Execute Orchestrator Actions
+    description: Execute internal orchestrator actions when step type is orchestrator
+    actions:
+      - description: Execute orchestrator actions like initiate or coordinate_fixes internally and update workflow context
+        elicit: false
+        condition: "step_type == 'orchestrator'"
+        metadata:
+          orchestratorAction: true
+
+  - id: step3
+    name: Execute Agent Handoff
+    description: Implement automatic agent activation for agent steps
+    actions:
+      - description: Prepare handoff context with workflow ID, current step, and agent information
+        elicit: false
+        condition: "step_type == 'agent' && step.orchestrated == true"
+        metadata:
+          contextPreparation: true
+      - description: Save context to .ai/handoff-context.json for agent access
+        elicit: false
+        condition: "step_type == 'agent' && step.orchestrated == true"
+        metadata:
+          contextSave: true
+      - description: Activate the agent programmatically without displaying manual activation commands to user
+        elicit: false
+        condition: "step_type == 'agent' && step.orchestrated == true"
+        metadata:
+          agentActivation: true
+          criticalAction: true
+
+  - id: step4
+    name: Handle Conditional Steps
+    description: Evaluate and handle conditional workflow steps
+    actions:
+      - description: Evaluate condition based on workflow context and execute or skip step accordingly
+        elicit: false
+        condition: "step has condition"
+        metadata:
+          conditionEvaluation: true
+
+  - id: step5
+    name: Process Agent Response
+    description: Process agent response when control returns to orchestrator
+    actions:
+      - description: Validate expected outputs were created and update workflow context with agent outputs
+        elicit: false
+        metadata:
+          responseValidation: true
+      - description: Save updated context to .ai/handoff-context.json and mark step as completed
+        elicit: false
+        metadata:
+          stateUpdate: true
+
+  - id: step6
+    name: Determine Next Step
+    description: Determine the next workflow step to execute
+    actions:
+      - description: Check for repeats directive and determine next sequential step or iteration
+        elicit: false
+        metadata:
+          nextStepDetermination: true
+
+inputs:
+  workflow:
+    type: object
+    required: true
+    description: The workflow configuration object
+  current_step:
+    type: object
+    required: true
+    description: The current workflow step to execute
+  workflow_context:
+    type: object
+    required: true
+    description: The accumulated workflow context
+
+outputs:
+  step_completed:
+    type: boolean
+    description: Whether the step completed successfully
+  agent_outputs:
+    type: object
+    description: Outputs from the agent execution
+  next_step:
+    type: string
+    description: Identifier for the next workflow step
+
+metadata:
+  canBeUsedBy: ["orchestrator"]
+  requiresConfiguration: ["workflow"]
+  category: orchestration
+  complexity: medium
+  version: "1.0"
+  tags:
+    - workflow
+    - orchestration
+    - automation
+
+notes: |
+  The key to automatic handoff is the `activateAgent` function which should:
+  - Load the target agent's configuration
+  - Initialize it with the handoff context
+  - Set it to orchestrated mode (knows to return to orchestrator)
+  - Execute the agent without user intervention
+  
+  This eliminates the need for users to manually activate agents,
+  creating a seamless workflow experience.
+  
+  Example usage:
+  When orchestrator reaches the analyst step:
+  Instead of: "Please run: /BMad:agents:analyst"
+  
+  Do this:
+  1. Save context to .ai/handoff-context.json
+  2. Programmatically activate analyst agent
+  3. Analyst works with user, creates project-brief.md
+  4. Analyst returns control to orchestrator
+  5. Orchestrator continues to next step automatically

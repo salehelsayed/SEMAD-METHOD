@@ -7,8 +7,9 @@ const path = require('path');
 
 /**
  * Base memory directory - can be overridden by environment variable
+ * Uses current working directory (project root) instead of relative to this file
  */
-const MEMORY_BASE_DIR = process.env.BMAD_MEMORY_DIR || path.join(__dirname, '../../.ai');
+const MEMORY_BASE_DIR = process.env.BMAD_MEMORY_DIR || path.join(process.cwd(), '.ai');
 
 /**
  * Memory system configuration

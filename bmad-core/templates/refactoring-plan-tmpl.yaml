@@ -1,0 +1,400 @@
+template:
+  id: refactoring-plan-template
+  name: Refactoring Plan
+  version: 1.0
+  output:
+    format: markdown
+    filename: "{{output_directory}}/refactoring-plan-{{timestamp}}.md"
+    title: "Code Refactoring Plan"
+
+workflow:
+  mode: automated
+  elicitation: none
+
+sections:
+  - id: header
+    title: Code Refactoring Plan
+    content: |
+      # Code Refactoring Plan
+      
+      **Generated**: {{plan_date}}
+      **Agent**: {{agent_name}}
+      **Based on Analysis**: {{quality_report_reference}}
+      **Target Files**: {{target_file_count}}
+      **Estimated Total Effort**: {{total_effort_estimate}}
+      
+      ---
+
+  - id: executive-summary
+    title: Executive Summary
+    content: |
+      ## Executive Summary
+      
+      ### Refactoring Objectives
+      {{#each objectives}}
+      - {{objective}}
+      {{/each}}
+      
+      ### Impact Summary
+      - **Quality Score Improvement**: {{current_score}} → {{projected_score}} (+{{improvement_points}} points)
+      - **Technical Debt Reduction**: {{debt_reduction_percentage}}%
+      - **Maintainability Improvement**: {{maintainability_improvement}}
+      - **Performance Impact**: {{performance_impact}}
+      
+      ### Execution Strategy
+      - **Recommended Order**: {{execution_strategy}}
+      - **Estimated Timeline**: {{timeline_estimate}}
+      - **Risk Level**: {{risk_assessment}}
+
+  - id: prioritization
+    title: Refactoring Prioritization
+    content: |
+      ## Refactoring Priority Matrix
+      
+      ### High Priority (Execute First)
+      {{#each high_priority_items}}
+      **{{item_number}}. {{refactoring_title}}**
+      - **Impact**: {{impact_score}}/10
+      - **Effort**: {{effort_score}}/10
+      - **Risk**: {{risk_score}}/10
+      - **Files**: {{affected_files_count}}
+      - **Justification**: {{justification}}
+      {{/each}}
+      
+      ### Medium Priority (Execute Second)
+      {{#each medium_priority_items}}
+      **{{item_number}}. {{refactoring_title}}**
+      - **Impact**: {{impact_score}}/10
+      - **Effort**: {{effort_score}}/10
+      - **Risk**: {{risk_score}}/10
+      - **Files**: {{affected_files_count}}
+      - **Justification**: {{justification}}
+      {{/each}}
+      
+      ### Low Priority (Future Consideration)
+      {{#each low_priority_items}}
+      **{{item_number}}. {{refactoring_title}}**
+      - **Impact**: {{impact_score}}/10
+      - **Effort**: {{effort_score}}/10
+      - **Risk**: {{risk_score}}/10
+      - **Files**: {{affected_files_count}}
+      - **Justification**: {{justification}}
+      {{/each}}
+
+  - id: detailed-refactorings
+    title: Detailed Refactoring Instructions
+    content: |
+      ## Detailed Refactoring Plans
+      
+      {{#each refactoring_items}}
+      ### {{item_number}}. {{refactoring_title}}
+      
+      **Objective**: {{objective}}
+      **Priority**: {{priority_level}}
+      **Estimated Effort**: {{effort_estimate}}
+      **Risk Level**: {{risk_level}}
+      
+      #### Current State Analysis
+      {{current_state_description}}
+      
+      **Issues Identified:**
+      {{#each issues}}
+      - {{issue_type}}: {{issue_description}} (Severity: {{severity}})
+      {{/each}}
+      
+      #### Target State
+      {{target_state_description}}
+      
+      **Expected Benefits:**
+      {{#each benefits}}
+      - {{benefit_type}}: {{benefit_description}}
+      {{/each}}
+      
+      #### Step-by-Step Implementation
+      
+      {{#each implementation_steps}}
+      **Step {{step_number}}: {{step_title}}**
+      
+      {{step_description}}
+      
+      {{#if code_changes}}
+      **Code Changes:**
+      
+      *Before:*
+      ```{{language}}
+      {{before_code}}
+      ```
+      
+      *After:*
+      ```{{language}}
+      {{after_code}}
+      ```
+      
+      **Explanation**: {{change_explanation}}
+      {{/if}}
+      
+      {{#if files_affected}}
+      **Files to Modify:**
+      {{#each files_affected}}
+      - `{{file_path}}` - {{modification_description}}
+      {{/each}}
+      {{/if}}
+      
+      {{#if validation_steps}}
+      **Validation:**
+      {{#each validation_steps}}
+      - {{validation_step}}
+      {{/each}}
+      {{/if}}
+      
+      {{/each}}
+      
+      #### Testing Strategy
+      {{testing_strategy_description}}
+      
+      **Required Tests:**
+      {{#each required_tests}}
+      - {{test_type}}: {{test_description}}
+      {{/each}}
+      
+      #### Rollback Plan
+      {{#if rollback_plan}}
+      {{rollback_plan}}
+      {{else}}
+      Standard git revert procedures apply. Ensure all changes are committed in logical, revertible chunks.
+      {{/if}}
+      
+      ---
+      
+      {{/each}}
+
+  - id: dependency-analysis
+    title: Dependency Impact Analysis
+    content: |
+      ## Dependency Impact Analysis
+      
+      ### Cross-File Dependencies
+      {{#each cross_file_dependencies}}
+      **{{source_file}} → {{target_file}}**
+      - **Dependency Type**: {{dependency_type}}
+      - **Impact Level**: {{impact_level}}
+      - **Refactoring Effect**: {{refactoring_effect}}
+      - **Mitigation**: {{mitigation_strategy}}
+      {{/each}}
+      
+      ### External Dependencies
+      {{#if external_dependencies}}
+      {{#each external_dependencies}}
+      **{{dependency_name}}** ({{dependency_type}})
+      - **Current Usage**: {{current_usage}}
+      - **Refactoring Impact**: {{impact_description}}
+      - **Required Actions**: {{required_actions}}
+      {{/each}}
+      {{else}}
+      ✅ No external dependency impacts identified.
+      {{/if}}
+      
+      ### API Contract Changes
+      {{#if api_changes}}
+      {{#each api_changes}}
+      **{{api_endpoint}}** ({{http_method}})
+      - **Change Type**: {{change_type}}
+      - **Backward Compatibility**: {{backward_compatibility}}
+      - **Migration Required**: {{migration_required}}
+      - **Consumer Impact**: {{consumer_impact}}
+      {{/each}}
+      {{else}}
+      ✅ No API contract changes required.
+      {{/if}}
+
+  - id: risk-mitigation
+    title: Risk Assessment & Mitigation
+    content: |
+      ## Risk Assessment & Mitigation Strategies
+      
+      ### Identified Risks
+      {{#each identified_risks}}
+      #### {{risk_title}} ({{risk_level}})
+      
+      **Description**: {{risk_description}}
+      **Probability**: {{probability}}/10
+      **Impact**: {{impact}}/10
+      **Risk Score**: {{risk_score}}/100
+      
+      **Mitigation Strategies:**
+      {{#each mitigation_strategies}}
+      - {{strategy_type}}: {{strategy_description}}
+      {{/each}}
+      
+      **Contingency Plan:**
+      {{contingency_plan}}
+      
+      ---
+      {{/each}}
+      
+      ### Pre-Refactoring Checklist
+      {{#each pre_refactoring_checks}}
+      - [ ] {{check_description}}
+      {{/each}}
+
+  - id: execution-timeline
+    title: Execution Timeline
+    content: |
+      ## Execution Timeline
+      
+      ### Phase 1: Preparation ({{phase1_duration}})
+      {{#each phase1_activities}}
+      - **{{activity_name}}** ({{duration}})
+        - {{activity_description}}
+        - **Deliverable**: {{deliverable}}
+      {{/each}}
+      
+      ### Phase 2: High Priority Refactoring ({{phase2_duration}})
+      {{#each phase2_activities}}
+      - **{{activity_name}}** ({{duration}})
+        - {{activity_description}}
+        - **Deliverable**: {{deliverable}}
+        - **Dependencies**: {{dependencies}}
+      {{/each}}
+      
+      ### Phase 3: Medium Priority Refactoring ({{phase3_duration}})
+      {{#each phase3_activities}}
+      - **{{activity_name}}** ({{duration}})
+        - {{activity_description}}
+        - **Deliverable**: {{deliverable}}
+        - **Dependencies**: {{dependencies}}
+      {{/each}}
+      
+      ### Phase 4: Validation & Cleanup ({{phase4_duration}})
+      {{#each phase4_activities}}
+      - **{{activity_name}}** ({{duration}})
+        - {{activity_description}}
+        - **Deliverable**: {{deliverable}}
+      {{/each}}
+      
+      **Total Estimated Duration**: {{total_duration}}
+
+  - id: success-metrics
+    title: Success Metrics
+    content: |
+      ## Success Metrics & Validation
+      
+      ### Quality Metrics Targets
+      | Metric | Current | Target | Success Criteria |
+      |--------|---------|--------|------------------|
+      | Overall Quality Score | {{current_quality_score}} | {{target_quality_score}} | {{quality_success_criteria}} |
+      | Code Duplication | {{current_duplication}}% | {{target_duplication}}% | {{duplication_success_criteria}} |
+      | Average Function Complexity | {{current_complexity}} | {{target_complexity}} | {{complexity_success_criteria}} |
+      | Test Coverage | {{current_coverage}}% | {{target_coverage}}% | {{coverage_success_criteria}} |
+      | Technical Debt | {{current_debt}} | {{target_debt}} | {{debt_success_criteria}} |
+      
+      ### Functional Validation
+      {{#each functional_validations}}
+      - [ ] {{validation_description}}
+      {{/each}}
+      
+      ### Performance Validation
+      {{#each performance_validations}}
+      - [ ] {{validation_description}}
+      {{/each}}
+      
+      ### Integration Validation
+      {{#each integration_validations}}
+      - [ ] {{validation_description}}
+      {{/each}}
+
+  - id: post-refactoring
+    title: Post-Refactoring Activities
+    content: |
+      ## Post-Refactoring Activities
+      
+      ### Documentation Updates
+      {{#each documentation_updates}}
+      - **{{document_type}}**: {{update_description}}
+        - **File**: {{file_path}}
+        - **Priority**: {{priority}}
+      {{/each}}
+      
+      ### Team Communication
+      {{#each communication_items}}
+      - **{{communication_type}}**: {{description}}
+        - **Audience**: {{audience}}
+        - **Timeline**: {{timeline}}
+      {{/each}}
+      
+      ### Knowledge Transfer
+      {{#each knowledge_transfer_items}}
+      - **{{topic}}**: {{description}}
+        - **Format**: {{format}}
+        - **Participants**: {{participants}}
+      {{/each}}
+      
+      ### Follow-up Actions
+      {{#each followup_actions}}
+      - [ ] {{action_description}} (Due: {{due_date}})
+      {{/each}}
+
+  - id: appendices
+    title: Appendices
+    content: |
+      ## Appendices
+      
+      ### A. Code Quality Analysis Reference
+      **Full Report**: {{quality_report_path}}
+      **Analysis Date**: {{analysis_date}}
+      **Quality Score**: {{quality_score}}
+      
+      ### B. Configuration References
+      **Quality Thresholds**: {{config_reference}}
+      **Coding Standards**: {{standards_reference}}
+      
+      ### C. Tool Recommendations
+      {{#each tool_recommendations}}
+      - **{{tool_name}}**: {{tool_description}}
+        - **Purpose**: {{purpose}}
+        - **Integration**: {{integration_notes}}
+      {{/each}}
+      
+      ---
+      
+      **Generated by BMAD Refactoring Planner**
+      *This plan should be reviewed and approved before execution. Adjust timelines and priorities based on team capacity and project constraints.*
+
+variables:
+  plan_date: "Date and time when plan was generated"
+  agent_name: "Name of the agent that generated the plan"
+  quality_report_reference: "Reference to the quality analysis report"
+  target_file_count: "Number of files targeted for refactoring"
+  total_effort_estimate: "Total estimated effort for all refactoring"
+  objectives: "Array of refactoring objectives"
+  current_score: "Current quality score"
+  projected_score: "Projected quality score after refactoring"
+  improvement_points: "Quality score improvement points"
+  debt_reduction_percentage: "Percentage of technical debt reduction"
+  maintainability_improvement: "Description of maintainability improvements"
+  performance_impact: "Expected performance impact"
+  execution_strategy: "Recommended execution strategy"
+  timeline_estimate: "Overall timeline estimate"
+  risk_assessment: "Overall risk assessment level"
+  high_priority_items: "Array of high priority refactoring items"
+  medium_priority_items: "Array of medium priority refactoring items"
+  low_priority_items: "Array of low priority refactoring items"
+  refactoring_items: "Array of detailed refactoring items"
+  cross_file_dependencies: "Array of cross-file dependency impacts"
+  external_dependencies: "Array of external dependency impacts"
+  api_changes: "Array of API contract changes"
+  identified_risks: "Array of identified risks and mitigations"
+  pre_refactoring_checks: "Array of pre-refactoring checklist items"
+  phase1_activities: "Array of Phase 1 activities"
+  phase2_activities: "Array of Phase 2 activities"
+  phase3_activities: "Array of Phase 3 activities"
+  phase4_activities: "Array of Phase 4 activities"
+  total_duration: "Total estimated duration"
+  functional_validations: "Array of functional validation steps"
+  performance_validations: "Array of performance validation steps"
+  integration_validations: "Array of integration validation steps"
+  documentation_updates: "Array of documentation updates needed"
+  communication_items: "Array of team communication items"
+  knowledge_transfer_items: "Array of knowledge transfer activities"
+  followup_actions: "Array of follow-up actions"
+  tool_recommendations: "Array of recommended tools"

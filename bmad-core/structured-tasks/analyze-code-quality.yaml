@@ -1,0 +1,171 @@
+id: analyze-code-quality
+name: analyze-code-quality
+purpose: Analyze code quality metrics for modified files, check complexity, size, and generate actionable quality reports
+steps:
+  - id: step0
+    name: Load Memory and Initialize Context
+    description: Load agent working memory and quality analysis context
+    actions:
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
+        elicit: false
+        function: loadMemoryForTask
+        parameters:
+          agentName: "{{AGENT_NAME}}"
+          context:
+            taskId: analyze-code-quality
+            taskType: code-quality-analysis
+        metadata:
+          memoryAction: true
+          executionOrder: first
+      - description: Apply memory context to analysis planning
+        elicit: false
+        metadata:
+          memoryAction: true
+          executionOrder: after-load
+  - id: step1
+    name: Load Configuration and Identify Target Files
+    description: Load quality metrics configuration and identify files to analyze
+    actions:
+      - description: Load .bmad-core/core-config.yaml and check if codeQuality.enabled is true
+        elicit: false
+      - description: If codeQuality.enabled is false or not configured, halt execution and inform user that code quality analysis is disabled
+        elicit: false
+      - description: Load code quality configuration from .bmad-core/core-config.yaml codeQuality section
+        elicit: false
+      - description: Identify target files for analysis - either specified files or modified files from git status
+        elicit: false
+      - description: Filter files to include only source code files (exclude tests, documentation, config files unless specifically requested)
+        elicit: false
+      - description: Create analysis scope with file list and quality thresholds from configuration
+        elicit: false
+  - id: step2
+    name: Analyze File Structure and Size Metrics
+    description: Examine each target file for size and structural quality metrics
+    actions:
+      - description: For each target file, analyze basic metrics - total lines, code lines (excluding comments/whitespace), comment density
+        elicit: false
+      - description: Check file size against maxFileLines threshold from configuration
+        elicit: false
+      - description: Identify files exceeding size limits and mark for potential splitting recommendations
+        elicit: false
+      - description: Calculate comment-to-code ratio and assess documentation quality
+        elicit: false
+  - id: step3
+    name: Analyze Function and Class Complexity
+    description: Examine function length, class size, and cyclomatic complexity
+    actions:
+      - description: For each function/method in target files, count lines and compare against maxFunctionLines threshold
+        elicit: false
+      - description: For each class in target files, count lines and compare against maxClassLines threshold
+        elicit: false
+      - description: Estimate cyclomatic complexity by counting decision points (if/else, switch, loops, try/catch)
+        elicit: false
+      - description: Check nesting depth against maxNestingDepth threshold
+        elicit: false
+      - description: Identify overly complex functions and classes that exceed configuration thresholds
+        elicit: false
+  - id: step4
+    name: Detect Code Duplication and Patterns
+    description: Identify duplicate code blocks and anti-patterns
+    actions:
+      - description: Scan for duplicate code blocks that exceed duplicateCodeThreshold (default 30 lines)
+        elicit: false
+      - description: Identify common anti-patterns - long parameter lists, god classes, deep nesting
+        elicit: false
+      - description: Look for opportunities to extract common functionality into reusable components
+        elicit: false
+      - description: Assess naming conventions and consistency across files
+        elicit: false
+  - id: step5
+    name: Generate Quality Report
+    description: Compile analysis results into structured quality report
+    actions:
+      - description: Use code-quality-report-tmpl.yaml template to structure the quality report
+        elicit: false
+        template: code-quality-report-tmpl.yaml
+      - description: Populate report with file-by-file analysis results
+        elicit: false
+      - description: Calculate overall quality score based on threshold violations
+        elicit: false
+      - description: Prioritize issues by severity - critical (major threshold violations), warning (minor violations), info (suggestions)
+        elicit: false
+      - description: Generate actionable recommendations for each identified issue
+        elicit: false
+  - id: step6
+    name: Create Refactoring Plan (if autoRefactor enabled)
+    description: Generate specific refactoring recommendations when quality issues are found
+    actions:
+      - description: Check if autoRefactor is enabled in configuration
+        elicit: false
+      - description: If enabled and quality issues found, use refactoring-plan-tmpl.yaml template to create refactoring recommendations
+        elicit: false
+        template: refactoring-plan-tmpl.yaml
+      - description: For each quality violation, provide specific refactoring steps with before/after examples
+        elicit: false
+      - description: Estimate effort and impact for each refactoring recommendation
+        elicit: false
+      - description: Suggest order of refactoring based on impact and effort
+        elicit: false
+  - id: step7
+    name: Save Analysis Results and Update Memory
+    description: Persist quality analysis results and update agent memory
+    actions:
+      - description: Save quality report to designated output location or return to calling agent
+        elicit: false
+      - description: Update working memory with analysis completion and key findings (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
+        elicit: false
+        function: saveAndCleanMemory
+        parameters:
+          agentName: "{{AGENT_NAME}}"
+          taskData:
+            observation: "Completed code quality analysis for {{FILE_COUNT}} files"
+            significantFinding: "Quality analysis findings: {{QUALITY_SUMMARY}}"
+            decision: "{{QUALITY_DECISION}}"
+            reasoning: "{{ANALYSIS_REASONING}}"
+            taskCompleted: true
+            taskId: analyze-code-quality
+            context:
+              taskType: code-quality-analysis
+              filesAnalyzed: "{{ANALYZED_FILES}}"
+              qualityScore: "{{OVERALL_QUALITY_SCORE}}"
+        metadata:
+          memoryAction: true
+          executionOrder: last
+inputs:
+  targetFiles:
+    type: array
+    description: List of files to analyze (optional - defaults to modified files from git status)
+    required: false
+  analysisScope:
+    type: string
+    description: Scope of analysis - "modified", "story", "all", or "custom"
+    default: "modified"
+    required: false
+  outputFormat:
+    type: string
+    description: Output format for quality report - "markdown", "json", "yaml"
+    default: "markdown"
+    required: false
+outputs:
+  qualityReport:
+    type: object
+    description: Structured quality analysis report
+  refactoringPlan:
+    type: object
+    description: Refactoring recommendations (if autoRefactor enabled)
+  qualityScore:
+    type: number
+    description: Overall quality score (0-100)
+metadata:
+  canBeUsedBy: ["dev", "qa"]
+  requiresConfiguration: ["codeQuality"]
+  templates: ["code-quality-report-tmpl.yaml", "refactoring-plan-tmpl.yaml"]
+  outputFiles: 
+    - ".ai/quality-reports/quality-report-{{timestamp}}.md"
+    - ".ai/refactoring-plans/refactoring-plan-{{timestamp}}.md"
+notes: |
+  This task provides comprehensive code quality analysis capabilities for both Dev and QA agents.
+  Configuration is loaded from .bmad-core/core-config.yaml codeQuality section.
+  Analysis scope can be customized based on needs - story files, modified files, or specific file lists.
+  When autoRefactor is enabled, detailed refactoring plans are generated with specific implementation steps.
+  Quality metrics are tracked in agent memory for trend analysis across development sessions.

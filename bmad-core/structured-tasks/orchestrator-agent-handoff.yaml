@@ -1,0 +1,120 @@
+id: orchestrator-agent-handoff
+name: Orchestrator Agent Handoff
+purpose: Automatically hands off control from orchestrator to another agent with full context
+steps:
+  - id: step1
+    name: Prepare Handoff Context
+    description: Load and prepare the handoff context with orchestrator metadata
+    actions:
+      - description: Load the current handoff context from .ai/handoff-context.json and add orchestrator metadata
+        elicit: false
+        metadata:
+          orchestratorAction: true
+
+  - id: step2
+    name: Activate Target Agent
+    description: Programmatically activate the target agent with the prepared context
+    actions:
+      - description: Programmatically activate the target agent using the BMad framework instead of asking user to manually activate
+        elicit: false
+        metadata:
+          agentActivation: true
+          criticalAction: true
+
+  - id: step3
+    name: Monitor Agent Execution
+    description: Track agent progress and ensure proper access to required resources
+    actions:
+      - description: Monitor agent execution and ensure access to handoff context, previous outputs, and workflow requirements
+        elicit: false
+        metadata:
+          monitoring: true
+
+  - id: step4
+    name: Receive Agent Response
+    description: Receive and validate agent outputs upon completion
+    actions:
+      - description: Receive agent outputs including created artifacts, updated context, and completion status
+        elicit: false
+        metadata:
+          validation: true
+
+  - id: step5
+    name: Update Workflow State
+    description: Update workflow state with agent outputs and determine next step
+    actions:
+      - description: Update .ai/handoff-context.json with agent outputs, completion timestamp, and next workflow step
+        elicit: false
+        metadata:
+          stateUpdate: true
+
+  - id: step6
+    name: Return Control
+    description: Resume orchestrator control and prepare for next workflow step
+    actions:
+      - description: Resume orchestrator control, evaluate workflow conditions, and prepare for next agent handoff
+        elicit: false
+        metadata:
+          controlReturn: true
+
+inputs:
+  target_agent:
+    type: string
+    required: true
+    description: The agent ID to hand off to (e.g., 'analyst', 'pm', 'architect')
+  handoff_context:
+    type: object
+    required: true
+    description: The context object from .ai/handoff-context.json
+  workflow_step:
+    type: string
+    required: true
+    description: Current workflow step identifier
+  previous_outputs:
+    type: array
+    required: false
+    description: List of previous agent outputs to include
+
+outputs:
+  handoff_success:
+    type: boolean
+    description: Whether the handoff was successful
+  agent_response:
+    type: object
+    description: The response from the target agent
+  updated_context:
+    type: object
+    description: Updated context after agent completion
+
+metadata:
+  canBeUsedBy: ["orchestrator"]
+  requiresConfiguration: ["workflow"]
+  category: orchestration
+  complexity: medium
+  version: "1.0"
+  tags:
+    - orchestration
+    - handoff
+    - workflow
+    - automation
+
+notes: |
+  This task enables the orchestrator to automatically hand off control to agents
+  without requiring manual user intervention. The key is programmatic agent
+  activation with proper context passing.
+  
+  The orchestrator should maintain control flow throughout the workflow,
+  with agents operating in "orchestrated mode" where they know to return
+  control after completing their tasks.
+  
+  Best practices:
+  - Always preserve full context between handoffs
+  - Validate agent outputs before proceeding
+  - Handle errors gracefully with fallback to manual handoff
+  - Log all handoffs for audit trail
+  - Ensure agents know to return to orchestrator
+  
+  Error handling:
+  - If agent activation fails, fall back to manual activation request
+  - If context is corrupted, restore from backup
+  - If agent doesn't return, provide timeout and recovery options

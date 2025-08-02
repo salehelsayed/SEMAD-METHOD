@@ -246,8 +246,8 @@ async function updateJsonFile(filePath, updateFn, defaultValue = {}, options = {
       throw new Error('Update function returned undefined');
     }
     
-    // Write updated data
-    await safeWriteJson(filePath, updatedData, { timeout: 0 }); // No need for separate lock
+    // Write updated data (already have lock, so skip locking)
+    await fs.writeFile(filePath, JSON.stringify(updatedData, null, 2), 'utf8');
     
     return updatedData;
   } finally {

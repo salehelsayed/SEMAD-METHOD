@@ -1,0 +1,249 @@
+workflow:
+  id: development-phase
+  name: Development Phase Workflow (SM-Dev-QA Cycle)
+  description: >-
+    Focused workflow for the development phase only. Assumes planning artifacts 
+    (PRD and Architecture) are already created and sharded. Uses orchestrator-managed 
+    hub-and-spoke pattern with explicit handoffs between separate agent sessions.
+  type: development
+  orchestration_pattern: hub-and-spoke
+  
+  prerequisites:
+    - sharded_prd: docs/prd/ folder with epic files
+    - sharded_architecture: docs/architecture/ folder
+    - stories_folder: docs/stories/ folder (will be created if missing)
+  
+  orchestrator_config:
+    manages_context: true
+    context_path: .ai/handoff-context.json
+    return_to_orchestrator: always
+    persist_conversations: true
+    
+  sequence:
+    - orchestrator: initialize_development_phase
+      action: prepare_context
+      creates: .ai/handoff-context.json
+      instructions: |
+        1. Verify prerequisites exist (sharded docs)
+        2. Initialize handoff context for development phase
+        3. Load first epic from docs/prd/
+        4. Prepare for story creation cycle
+      notes: "Orchestrator initializes workflow context and prepares for agent coordination"
+
+    - agent: sm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: create_story
+      creates: story.md in docs/stories/
+      context_includes:
+        - .ai/handoff-context.json
+        - sharded_prd_context
+        - previous_stories
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_story_creation
+        - save-story-patterns: after_story_created
+      instructions: |
+        1. Activate SM agent in new session with orchestrator context
+        2. Load .bmad-core/core-config.yaml (HIDDEN DIR - starts with DOT!)
+        3. Find next story needing implementation from docs/prd/
+        4. Read story details from PRD shard
+        5. Generate comprehensive implementation story
+        6. Save to docs/stories/
+        7. Return control to orchestrator with updated context
+      notes: "Orchestrator provides context to SM. SM creates story and returns to orchestrator."
+
+    - orchestrator: review_story_creation
+      action: validate_story
+      instructions: |
+        1. Verify story was created successfully
+        2. Update context with story location
+        3. Prepare for development handoff
+
+    - agent: dev
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: implement_story
+      creates: implementation_files
+      requires: story.md
+      context_includes:
+        - .ai/handoff-context.json
+        - story_details
+        - architecture_context
+        - related_implementations
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_implementation
+        - dev-save-memory: after_each_task
+        - dev-save-memory: after_completion
+      instructions: |
+        1. Activate Dev agent in new session with orchestrator context
+        2. Read the story created by SM
+        3. Implement the story:
+           - Follow all implementation steps
+           - Create/modify required files
+           - Run tests as specified
+           - Update story status to "Review"
+        4. Return control to orchestrator with updated context
+      modifies: project files as per story requirements
+      notes: "Orchestrator provides story and full context to dev. Dev implements story and returns to orchestrator."
+
+    - orchestrator: review_implementation
+      action: check_implementation_status
+      instructions: |
+        1. Verify implementation completed
+        2. Check if QA review is enabled
+        3. Decide next action (QA or next story)
+
+    - agent: qa
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: review_story
+      condition: qa_review_enabled
+      optional: true
+      updates: story.md with QA results
+      requires: implementation_files
+      context_includes:
+        - .ai/handoff-context.json
+        - implementation_details
+        - story_requirements
+        - quality_standards
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_review
+        - qa-save-memory: after_review_complete
+      instructions: |
+        1. Activate QA agent in new session with orchestrator context
+        2. Execute review-story task:
+           - Review implementation against requirements
+           - Check code quality and standards
+           - Run additional tests if needed
+           - Document findings in story
+           - Execute qa-save-memory task with review findings
+        3. Return control to orchestrator with updated context
+      notes: "Orchestrator provides implementation to QA. QA performs review, saves quality findings to memory, and returns findings to orchestrator."
+
+    - orchestrator: check_qa_results
+      action: evaluate_qa_feedback
+      condition: qa_was_executed
+      instructions: |
+        1. Read QA results from story
+        2. If issues found, route back to Dev
+        3. If approved, mark story as Done
+
+    - agent: dev
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: address_qa_feedback
+      condition: qa_found_issues
+      updates: implementation_files
+      context_includes:
+        - .ai/handoff-context.json
+        - qa_feedback
+        - original_implementation
+      memory_tasks:
+        - retrieve-context: at_start
+        - update-working-memory: during_fixes
+        - dev-save-memory: after_fixes_complete
+      instructions: |
+        1. Activate Dev agent in new session with orchestrator context
+        2. Read QA feedback from story
+        3. Implement requested changes
+        4. Execute dev-save-memory task with fix details
+        5. Update story status
+        6. Return control to orchestrator with updated context
+      notes: "If QA found issues, orchestrator provides feedback to dev. Dev addresses issues, saves fix patterns to memory, and returns to orchestrator."
+
+    - orchestrator: check_more_stories
+      action: evaluate_epic_progress
+      instructions: |
+        1. Check if more stories exist in current epic
+        2. If yes, loop back to SM for next story
+        3. If no, check for next epic
+        4. If no more epics, complete workflow
+
+    - repeat_cycle:
+      condition: more_stories_exist
+      goto: sm
+      notes: "Continue cycle for all stories in all epics"
+
+    - workflow_end:
+      action: development_complete
+      notes: "All stories implemented and reviewed!"
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        Start[Start: Development Phase] --> ORCH[ORCHESTRATOR: Initialize<br/>.ai/handoff-context.json]
+        
+        %% Development Phase - Hub and Spoke Pattern
+        ORCH --> SM[sm: create story]
+        SM --> ORCH
+        ORCH --> DEV[dev: implement story]
+        DEV --> ORCH
+        ORCH --> QA_CHECK{QA Enabled?}
+        QA_CHECK -->|Yes| QA[qa: review implementation]
+        QA --> ORCH
+        ORCH --> QA_RESULT{Issues Found?}
+        QA_RESULT -->|Yes| DEV2[dev: address QA feedback]
+        DEV2 --> ORCH
+        QA_RESULT -->|No| MORE
+        QA_CHECK -->|No| MORE{More Stories?}
+        MORE -->|Yes| SM
+        MORE -->|No| DONE[Development Complete<br/>Context preserved in .ai/]
+        
+        %% Styling
+        style ORCH fill:#FF6B6B,stroke:#333,stroke-width:4px,color:#fff
+        style SM fill:#4ECDC4,stroke:#333,stroke-width:2px
+        style DEV fill:#45B7D1,stroke:#333,stroke-width:2px
+        style QA fill:#96CEB4,stroke:#333,stroke-width:2px
+        style DEV2 fill:#45B7D1,stroke:#333,stroke-width:2px
+        style DONE fill:#90EE90,stroke:#333,stroke-width:2px
+        
+        %% Add note about orchestrator
+        ORCH -.- NOTE[Orchestrator manages all context<br/>passing via .ai/handoff-context.json]
+        style NOTE fill:#f9f,stroke:#333,stroke-dasharray: 5 5
+    ```
+
+  orchestrator_handoff_prompts:
+    orchestrator_to_agent: "I'm the orchestrator coordinating this development workflow. Here's your context from .ai/handoff-context.json and previous agent outputs. Please complete your task and return control to me when finished."
+    agent_to_orchestrator: "Task completed. Returning control to orchestrator with updated context and outputs."
+    orchestrator_context_update: "Updating workflow context with outputs from {{agent_name}}. Preparing handoff to next agent."
+    orchestrator_route_decision: "Based on current workflow state, routing to {{next_agent}} with consolidated context."
+    orchestrator_completion_check: "Checking if {{agent_name}} has completed their task and all outputs are ready."
+    orchestrator_workflow_complete: "All development stories completed. Final artifacts available in docs/stories/ folder. Context preserved in .ai/handoff-context.json."
+
+  handoff_prompts:
+    orchestrator_init: |
+      Starting development phase workflow. I'll coordinate the entire SM → Dev → QA 
+      cycle using explicit handoffs between separate agent sessions. Let me verify prerequisites...
+    
+    sm_to_orchestrator: |
+      Story created successfully at: {{story_path}}
+      Returning control to orchestrator for development coordination.
+    
+    dev_to_orchestrator: |
+      Implementation complete. Story status updated to "Review"
+      Returning control to orchestrator for QA coordination.
+    
+    qa_to_orchestrator: |
+      QA review complete. Results appended to story.
+      Returning control to orchestrator for next steps.
+
+  implementation_notes: |
+    CRITICAL: This workflow uses explicit handoffs between separate agent sessions 
+    to reduce hallucination risk and improve implementation accuracy. The orchestrator should:
+    
+    1. Coordinate all agent handoffs through .ai/handoff-context.json
+    2. Activate each agent in a fresh session with proper context
+    3. Ensure context is passed between agents consistently
+    4. Manage the SM → Dev → QA cycle for all stories
+    5. Track progress and maintain workflow state
+    
+    Each agent runs in its own session with fresh context, preventing 
+    context contamination and improving code quality. The orchestrator 
+    maintains overall workflow coordination and context management.

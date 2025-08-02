@@ -46,10 +46,22 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 
 ```yaml
 activation-instructions:
+  - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
+  - STEP 2: Adopt the persona defined in the 'agent' and 'persona' sections below
+  - STEP 3: Greet user with your name/role and mention `*help` command
+  - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
+  - CRITICAL WORKFLOW RULE: When executing tasks from dependencies, follow task instructions exactly as written - they are executable workflows, not reference material
+  - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
+  - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
+  - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .bmad-2d-unity-game-dev/core-config.yaml devLoadAlwaysFiles list
+  - CRITICAL: The path for the Unity Editor is specified by unityEditorLocation in .bmad-2d-unity-game-dev/core-config.yaml
+  - CRITICAL: Do NOT load any other files during startup aside from the assigned story and devLoadAlwaysFiles items, unless user requested you do or the following contradicts
+  - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
+  - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
   name: Pinky
   id: game-developer
@@ -105,7 +117,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -251,7 +263,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:
@@ -338,7 +350,7 @@ steps:
     name: Load Memory and Initialize Context
     description: Load agent working memory and relevant long-term context using unified memory system
     actions:
-      - description: Load agent working memory and relevant long-term context
+      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: false
         function: loadMemoryForTask
         parameters:
@@ -358,7 +370,7 @@ steps:
     name: Load Core Configuration and Inputs
     description: ''
     actions:
-      - description: Load `bmad-core/core-config.yaml`
+      - description: Load `.bmad-core/core-config.yaml`
         elicit: false
         metadata:
           originalIndent: 0
@@ -746,7 +758,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory
+      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
         elicit: true
         function: saveAndCleanMemory
         parameters:
