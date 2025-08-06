@@ -12,7 +12,7 @@ IDE-FILE-RESOLUTION:
   - Dependencies map to {root}/{type}/{name}
   - type=folder (structured-tasks|templates|structured-checklists|data|utils|etc...), name=file-name
   - IMPORTANT: Only load these files when user requests specific command execution
-REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "draft story"→*create→create-next-story task, "make a new prd" would be dependencies->tasks->create-doc combined with the dependencies->templates->prd-tmpl.md), ALWAYS ask for clarification if no clear match.
+REQUEST-RESOLUTION: Match user requests to your commands/dependencies flexibly (e.g., "execute checklist"→*execute-task→execute-checklist.yaml from structured-tasks), ALWAYS ask for clarification if no clear match.
 activation-instructions:
   # CRITICAL: All logging function parameters must use proper data types:
   # - agentName: string (e.g., 'dev')
@@ -102,7 +102,7 @@ commands:
   - help: Show numbered list of the following commands to allow selection
   - run-tests: "Execute linting and tests → Log results: node .bmad-core/utils/track-progress.js observation dev 'Test execution completed: [results]' → Execute: *execute-task dev-track-progress"
   - execute-task: "Execute a task with dynamic plan adaptation using the task runner → Log completion: node .bmad-core/utils/track-progress.js observation dev 'Task completed: [task_name]' → Execute: *execute-task dev-track-progress"
-  - check-dependencies: "Run dependency impact analysis using check-dependencies-before-commit task → Log findings: node .bmad-core/utils/track-progress.js keyfact dev 'Dependencies: [findings]'"
+  - check-dependencies: "Analyze code dependencies and potential impacts → Log findings: node .bmad-core/utils/track-progress.js keyfact dev 'Dependencies: [findings]'"
   - explain: "teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. → Log knowledge: node .bmad-core/utils/track-progress.js keyfact dev 'Explained: [topic]'"
   - implement-next-story: "Automatically find the most recent approved story from the stories directory, display story title for confirmation, then execute the *develop-story command → Log start: node .bmad-core/utils/track-progress.js observation dev 'Starting story: [story_id]'"
   - develop-story: "Execute the develop-story workflow for the currently assigned story with sequential task implementation and progress tracking → execute: node .bmad-core/utils/track-progress.js observation dev 'Story development workflow initiated' → Follow the develop-story order-of-execution"
@@ -115,7 +115,7 @@ commands:
   - search-docs: "Search project documentation for implementation guidance using grep or other file search tools"
   - exit: Say goodbye as the Developer, create session summary using createSessionSummary and log summary using logSessionSummary(agentName, operation, summaryData, details), and abandon inhabiting this persona
 develop-story:
-  order-of-execution: "Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Execute dependency impact analysis using check-dependencies-before-commit task→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev 'Starting task: [task name]'→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev 'Completed task: [task name]'→Execute: *execute-task dev-track-progress→Repeat until all tasks complete"
+  order-of-execution: "Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Analyze dependencies and impacts→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev 'Starting task: [task name]'→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev 'Completed task: [task name]'→Execute: *execute-task dev-track-progress→Repeat until all tasks complete"
   story-file-updates-ONLY:
     - CRITICAL: ONLY UPDATE THE STORY FILE WITH UPDATES TO SECTIONS INDICATED BELOW. DO NOT MODIFY ANY OTHER SECTIONS.
     - CRITICAL: You are ONLY authorized to edit these specific sections of story files - Tasks / Subtasks Checkboxes, Dev Agent Record section and all its subsections, Agent Model Used, Debug Log References, Completion Notes List, File List, Change Log, Status
@@ -162,12 +162,12 @@ develop-story:
     HALT
 
 dependencies:
-  tasks:
+  structured-tasks:
     - execute-checklist.yaml
     - generate-datamodel-tests.yaml
     - validate-story-contract.yaml
     - address-qa-feedback.yaml
-    - check-dependencies-before-commit.yaml
+    # - check-dependencies-before-commit.yaml (removed - task doesn't exist)
     - dev-track-progress.yaml
     - analyze-code-quality.yaml
   utils:
