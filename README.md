@@ -19,12 +19,12 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **Impact**: Deterministic task execution with validation support
 - **Files**: All tasks in `bmad-core/structured-tasks/`, validated by schemas in `bmad-core/schemas/`
 
-### 2. **Working Memory & Scratchboard System**
-- **What Changed**: Added persistent working memory for each agent session
-- **Why**: Reduces context loss and hallucination between steps
-- **Impact**: Agents maintain state across complex multi-step operations
-- **Implementation**: Memory files in `.ai/` directory, Qdrant integration for long-term memory
-- **Documentation**: See [Memory System Explanation](MEMORY-SYSTEM-EXPLANATION.md) and [Detailed Memory Guide](bmad-core/docs/memory-system-detailed-guide.md)
+### 2. **Simple Task Tracking System**
+- **What Changed**: Added lightweight task tracking for agent workflows
+- **Why**: Ensures systematic completion of all tasks without missing items
+- **Impact**: Agents can track progress through complex multi-step operations
+- **Implementation**: In-memory tracking with `.ai/` directory for persistence, simple file-based logging
+- **Key Files**: `simple-task-tracker.js` for workflow tracking, `track-progress.js` for persistent observations
 
 ### 3. **Dynamic Plan Adaptation**
 - **What Changed**: Automatic task decomposition for complex operations
@@ -74,7 +74,7 @@ These improvements have transformed BMad-Method into a production-ready system:
 - **Agent Reliability**: 16/16 agent connectivity tests passing
 - **Dependency Management**: All 135 dependencies validated and working
 - **Hallucination Reduction**: Structured contracts eliminate interpretation errors
-- **Memory Persistence**: No context loss between agent sessions
+- **Task Tracking**: Simple, reliable progress tracking ensures nothing gets missed
 
 **Original Project Links:**
 - **[Subscribe to BMadCode on YouTube](https://www.youtube.com/@BMadCode?sub_confirmation=1)** - Original BMad-Method creator
@@ -86,7 +86,7 @@ These improvements have transformed BMad-Method into a production-ready system:
 
 **SEMAD-METHOD builds on BMad's Two Key Innovations:**
 
-**1. Structured Agentic Planning:** Dedicated agents (Analyst, PM, Architect) collaborate with you to create detailed, consistent PRDs and Architecture documents. SEMAD enhances this with structured YAML tasks, working memory persistence, and dynamic plan adaptation to ensure consistent, hallucination-free planning.
+**1. Structured Agentic Planning:** Dedicated agents (Analyst, PM, Architect) collaborate with you to create detailed, consistent PRDs and Architecture documents. SEMAD enhances this with structured YAML tasks, simple task tracking, and dynamic plan adaptation to ensure consistent, hallucination-free planning.
 
 **2. Contract-Driven Development:** The Scrum Master agent transforms detailed plans into structured StoryContract specifications embedded in development stories. SEMAD's formal contract system ensures Dev agents work from explicit specifications, not interpretations, eliminating implementation drift.
 
@@ -141,15 +141,7 @@ Before using SEMAD-METHOD, ensure you have the following installed:
 
 ### Optional Dependencies
 
-1. **Qdrant Vector Database** - For agent memory persistence (optional but recommended)
-   ```bash
-   # Using Docker
-   docker run -d -p 6333:6333 -p 6334:6334 qdrant/qdrant
-   
-   # Or download from: https://qdrant.tech/documentation/install/
-   ```
-
-2. **OpenAI API Key** - For semantic memory search (optional)
+1. **OpenAI API Key** - For future semantic search features (optional)
    ```bash
    export OPENAI_API_KEY="your-api-key-here"
    ```
@@ -253,16 +245,9 @@ The tool creates a `search-tools.yaml` file containing:
 - Mapped search queries for various documentation sources (GitHub, npm, API docs)
 - Repository-specific search configurations
 
-### Ingesting into Qdrant
+### Using Search Results
 
-Once search tools are generated, you can ingest the results into Qdrant for retrieval-augmented development:
-
-```bash
-# Coming soon: Qdrant ingestion script
-# npm run ingest:search-results -- --input outputs/search-tools.yaml
-```
-
-This enables AI agents to access relevant external documentation during development, improving code quality and reducing hallucinations.
+Once search tools are generated, agents can use the search queries to find relevant external documentation during development. The generated `search-tools.yaml` file contains pre-configured searches that agents can execute to improve code quality and reduce hallucinations.
 
 📚 **[See the complete Search Tools Guide](docs/search-tools-guide.md)** for detailed information on:
 - How agents use search-tools.yaml during development
@@ -281,9 +266,9 @@ SEMAD-METHOD maintains full backward compatibility with BMad-Method:
 To enable SEMAD features in your `core-config.yaml`:
 ```yaml
 structuredTasks: true          # Use YAML task definitions
-enableWorkingMemory: true      # Enable agent memory persistence
 useStoryContracts: true       # Use formal story contracts
 dynamicPlanAdaptation: true   # Enable automatic task decomposition
+simpleTaskTracking: true      # Use simple task tracking system
 ```
 
 ## Documentation & Resources
@@ -308,7 +293,8 @@ dynamicPlanAdaptation: true   # Enable automatic task decomposition
 - **Structured Tasks**: `bmad-core/structured-tasks/*.yaml` - All tasks converted to YAML
 - **Schemas**: `bmad-core/schemas/` - JSON schemas for validation
 - **Dynamic Planner**: `bmad-core/tools/dynamic-planner.js` - Task decomposition engine
-- **Memory System**: `bmad-core/utils/memory-transaction.js` - Working memory management
+- **Task Tracking**: `bmad-core/utils/simple-task-tracker.js` - Lightweight progress tracking
+- **Progress Logging**: `bmad-core/utils/track-progress.js` - Persistent observation logging
 - **Search Tools**: `scripts/generate-search-tools.js` - PRD keyword extraction
 - **Validation**: `scripts/validate-all.js` - Comprehensive validation system
 - **Error Handling**: `bmad-core/utils/error-handler.js` - Centralized error management
@@ -318,7 +304,7 @@ dynamicPlanAdaptation: true   # Enable automatic task decomposition
 
 - **Reduced Hallucination**: Structured contracts eliminate ~90% of interpretation errors
 - **Faster Development**: Deterministic task execution reduces retry cycles
-- **Better Error Recovery**: Persistent memory enables graceful failure handling
+- **Better Error Recovery**: Simple tracking enables clear progress visibility
 - **Improved Scalability**: Validation catches issues before they propagate
 
 ## Contributing

@@ -1,0 +1,121 @@
+id: integration-test-checklist
+name: Integration Test Checklist
+purpose: Comprehensive checklist for system-wide integration testing and validation
+categories:
+  - name: StoryContract Validation
+    items:
+      - id: contracts-extracted
+        description: All StoryContracts extracted from story files
+        severity: critical
+      - id: endpoints-verified
+        description: All apiEndpoints exist with correct method/path/request/response
+        severity: critical
+      - id: files-modified
+        description: All filesToModify entries have corresponding implementations
+        severity: critical
+      - id: acceptance-criteria-tested
+        description: All acceptanceCriteria have corresponding test cases
+        severity: major
+      - id: contract-consistency
+        description: StoryContracts follow consistent schema across all stories
+        severity: minor
+  
+  - name: Cross-Module Integration
+    items:
+      - id: module-boundaries
+        description: All module boundaries properly defined with clear interfaces
+        severity: major
+      - id: data-flow-verified
+        description: Data flows correctly across module boundaries
+        severity: critical
+      - id: error-propagation
+        description: Errors propagate correctly through the call stack
+        severity: critical
+      - id: async-communication
+        description: Async communication patterns work correctly
+        severity: major
+      - id: timeout-handling
+        description: Timeouts are handled gracefully at all integration points
+        severity: major
+  
+  - name: CLI Implementation
+    items:
+      - id: command-handlers
+        description: All documented CLI commands have handler implementations
+        severity: critical
+      - id: cli-error-handling
+        description: CLI commands handle errors and exit properly
+        severity: critical
+      - id: cli-help-text
+        description: All commands have proper help text and usage examples
+        severity: minor
+      - id: cli-validation
+        description: Input validation exists for all CLI arguments
+        severity: major
+      - id: cli-output-format
+        description: CLI output follows consistent format
+        severity: minor
+  
+  - name: Implementation Completeness
+    items:
+      - id: no-todo-comments
+        description: No TODO comments in production code paths
+        severity: major
+      - id: no-stub-implementations
+        description: No stub functions that throw 'not implemented'
+        severity: critical
+      - id: error-handling-complete
+        description: All functions have proper error handling
+        severity: major
+      - id: validation-complete
+        description: Input validation at all entry points
+        severity: major
+      - id: consistent-patterns
+        description: Similar modules follow consistent implementation patterns
+        severity: minor
+  
+  - name: End-to-End Workflows
+    items:
+      - id: critical-paths-tested
+        description: All critical user workflows tested end-to-end
+        severity: critical
+      - id: failure-recovery
+        description: System recovers gracefully from failures at any point
+        severity: critical
+      - id: transaction-integrity
+        description: Transactions maintain integrity across modules
+        severity: critical
+      - id: state-consistency
+        description: System state remains consistent after operations
+        severity: critical
+      - id: concurrent-operations
+        description: Concurrent operations don't cause race conditions
+        severity: major
+  
+  - name: Testing Infrastructure
+    items:
+      - id: integration-tests-exist
+        description: Integration tests exist for all major workflows
+        severity: major
+      - id: test-coverage-adequate
+        description: Test coverage includes both success and failure paths
+        severity: major
+      - id: test-data-management
+        description: Test data is properly managed and isolated
+        severity: minor
+      - id: test-environment-parity
+        description: Test environment matches production configuration
+        severity: major
+      - id: performance-tests
+        description: Performance tests exist for critical paths
+        severity: minor
+
+completion_criteria:
+  - All critical items must pass
+  - At least 80% of major items must pass
+  - Minor items are recommendations
+
+notes: |
+  This checklist focuses on system-wide integration health rather than individual code quality.
+  Use in conjunction with story-level QA reviews for comprehensive quality assurance.
+  Prioritize fixing critical issues before deployment.

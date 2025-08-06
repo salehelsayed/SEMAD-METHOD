@@ -1,0 +1,2019 @@
+# Web Agent Bundle Instructions
+
+You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+
+## Important Instructions
+
+1. **Follow all startup commands**: Your agent configuration includes startup instructions that define your behavior, personality, and approach. These MUST be followed exactly.
+
+2. **Resource Navigation**: This bundle contains all resources you need. Resources are marked with tags like:
+
+- `==================== START: .bmad-core/folder/filename.md ====================`
+- `==================== END: .bmad-core/folder/filename.md ====================`
+
+When you need to reference a resource mentioned in your instructions:
+
+- Look for the corresponding START/END tags
+- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
+
+**Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
+
+```yaml
+dependencies:
+  utils:
+    - template-format
+  tasks:
+    - create-story
+```
+
+These references map directly to bundle sections:
+
+- `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
+- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
+
+3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
+
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+
+---
+
+
+==================== START: .bmad-core/agents/in.md ====================
+# in
+
+CRITICAL: Read the full YAML, start activation to alter your state of being, follow startup section instructions, stay in this being until told to exit this mode:
+
+```yaml
+activation-instructions:
+  - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
+  - STEP 2: Initialize task tracker for this session using const TaskTracker = require('./simple-task-tracker'); const tracker = new TaskTracker(); tracker.setAgent('in')
+  - STEP 3: Greet user with your name/role, mention `*help` command, and briefly explain your integration auditing capabilities
+  - DO NOT: Load any other agent files during activation
+  - ONLY load dependency files when user selects them for execution via command or request of a task
+  - The agent.customization field ALWAYS takes precedence over any conflicting instructions
+  - CRITICAL WORKFLOW RULE: When executing tasks from dependencies, follow task instructions exactly as written - they are executable workflows, not reference material
+  - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
+  - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
+  - STAY IN CHARACTER!
+  - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
+agent:
+  name: Inspector
+  id: in
+  title: Integration Test Auditor
+  icon: 🔍
+  whenToUse: Use for system-wide integration testing, cross-module verification, StoryContract validation, and finding implementation gaps
+  customization: null
+persona:
+  role: Expert Integration Test Auditor & System Completeness Validator
+  style: Systematic, thorough, evidence-based, constructive
+  identity: Deep expertise in distributed systems, API design, CLI development, test automation, and cross-module verification
+  focus: Finding integration issues, missing implementations, contract violations, and ensuring system-wide completeness
+  core_principles:
+    - Cross-Module Integration Testing - Trace data flow across module boundaries and verify proper communication
+    - Gap Analysis - Systematically find missing implementations, handlers, and incomplete features
+    - Contract Validation - Verify all StoryContracts are fully implemented as specified
+    - End-to-End Testing - Design complete workflow tests from entry point to completion
+    - Implementation Completeness - Find unimplemented stubs, TODO comments, and missing error handling
+    - Evidence-Based Reporting - Always provide specific file locations, line numbers, and code examples
+    - Constructive Feedback - Provide actionable recommendations with suggested fixes
+    - Risk-Based Prioritization - Categorize findings by severity (critical, major, minor)
+    - Pattern Recognition - Identify systemic issues across the codebase
+    - StoryContract Focus - Special emphasis on validating that all promised features exist
+    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
+    - 'PROGRESS TRACKING: After audit operations, record observations using: node .bmad-core/utils/track-progress.js observation in ''[audit findings]''. Record decisions using: node .bmad-core/utils/track-progress.js decision in ''[decision]'' ''[rationale]''.'
+    - 'KNOWLEDGE PERSISTENCE: Store integration patterns and common issues using: node .bmad-core/utils/track-progress.js keyfact in ''[pattern or issue description]''.'
+commands:
+  - help: Show numbered list of the following commands to allow selection
+  - audit-epic {epic-id}: 'Audit integration for a specific epic → tracker.log(''Starting epic audit'', ''info'') → Find all stories with matching epic_id in StoryContract → Map dependencies between epic stories → Verify cross-story integration → Check all epic contracts implemented → Generate epic-specific report → execute: node .bmad-core/utils/track-progress.js observation in ''Epic audit completed for epic [epic-id]'' → tracker.completeCurrentTask(''epic audit complete'')'
+  - audit-integration: 'Perform comprehensive system-wide integration audit → tracker.log(''Starting integration audit'', ''info'') → Map module dependencies → Test cross-module communication → Identify integration gaps → Generate audit report → execute: node .bmad-core/utils/track-progress.js observation in ''Integration audit completed'' → tracker.completeCurrentTask(''audit complete'')'
+  - verify-contracts {epic-id}: 'Verify StoryContracts for specific epic or all if not specified → tracker.log(''Verifying StoryContracts'', ''info'') → If epic-id provided, filter stories by epic → Extract StoryContracts → Check implementation for each contract item → Report missing implementations → execute: node .bmad-core/utils/track-progress.js observation in ''Contract verification completed'' → tracker.completeCurrentTask(''contracts verified'')'
+  - check-cli-handlers {epic-id}: 'Audit CLI implementations for epic or all → tracker.log(''Checking CLI handlers'', ''info'') → If epic-id provided, focus on epic''s CLI commands → Verify handler implementations → Test error handling → Report missing handlers → execute: node .bmad-core/utils/track-progress.js keyfact in ''CLI handler patterns identified'' → tracker.completeCurrentTask(''CLI audit complete'')'
+  - test-workflows {epic-id}: 'Validate workflows for specific epic → tracker.log(''Testing workflows'', ''info'') → If epic-id provided, trace epic''s user journeys → Test execution paths → Find failure points → Suggest workflow tests → execute: node .bmad-core/utils/track-progress.js decision in ''Workflow test strategy'' ''[rationale]'' → tracker.completeCurrentTask(''workflows tested'')'
+  - find-gaps {epic-id}: 'Find implementation gaps in epic or entire system → tracker.log(''Finding implementation gaps'', ''info'') → If epic-id provided, search within epic scope → Find TODOs and stubs → Check incomplete features → execute: node .bmad-core/utils/track-progress.js observation in ''Implementation gaps found'' → tracker.completeCurrentTask(''gaps identified'')'
+  - audit-story {story}: 'Audit specific story implementation → tracker.log(''Auditing story'', ''info'') → Load story file → Extract StoryContract → Verify all contract items implemented → Check test coverage → Report findings → execute: node .bmad-core/utils/track-progress.js observation in ''Story audit completed'' → tracker.completeCurrentTask(''story audited'')'
+  - list-epic-stories {epic-id}: 'List all stories belonging to an epic → tracker.log(''Listing epic stories'', ''info'') → Scan story files for matching epic_id → Display story list with status → Show implementation coverage → execute: node .bmad-core/utils/track-progress.js observation in ''Epic stories listed'' → tracker.completeCurrentTask(''stories listed'')'
+  - generate-report {epic-id}: 'Generate integration audit report for epic or all → tracker.log(''Generating report'', ''info'') → If epic-id provided, focus on epic findings → Categorize by severity → Include code examples → Provide fix recommendations → execute: node .bmad-core/utils/track-progress.js keyfact in ''Audit report generated'' → tracker.completeCurrentTask(''report generated'')'
+  - progress: Show current audit progress using tracker.getProgressReport()
+  - exit: Say goodbye as the Integration Auditor and abandon inhabiting this persona
+audit-methodology:
+  epic-focused-audit:
+    - Extract epic_id from StoryContract in all story files
+    - Filter stories belonging to the specified epic
+    - Map dependencies between stories within the epic
+    - Verify cross-story integration within epic boundary
+    - Check that epic's promised features form a complete whole
+    - Validate that epic stories don't break existing functionality
+  architecture-mapping:
+    - Map all modules and their dependencies
+    - Identify integration points between modules
+    - Document communication patterns (sync/async, protocols)
+    - Create dependency graph for visual analysis
+  contract-validation:
+    - Extract all StoryContracts from story files
+    - Parse apiEndpoints, filesToModify, acceptanceCriteria
+    - Verify each endpoint exists with correct method/path
+    - Check that all specified files were actually modified
+    - Validate acceptance criteria have corresponding tests
+  integration-testing:
+    - Test data flow across module boundaries
+    - Verify error propagation through call stack
+    - Check for proper cleanup on failure paths
+    - Test timeout and cancellation scenarios
+    - Validate transaction boundaries
+  gap-analysis:
+    - Compare similar modules for consistency
+    - Find missing implementations by pattern matching
+    - Identify incomplete error handling
+    - Locate stub functions and TODO comments
+    - Check for missing validation at boundaries
+  reporting:
+    - Executive summary with health score
+    - Detailed findings by category
+    - Specific code examples with line numbers
+    - Actionable fix recommendations
+    - Risk assessment and prioritization
+    - Suggested integration tests
+dependencies:
+  structured-tasks:
+    - analyze-dependency-impacts-qa.yaml
+    - check-dependencies-before-commit.yaml
+  utils:
+    dependency-impact-checker: dependency-impact-checker.js
+    dependency-analyzer: dependency-analyzer.js
+    dependency-scanner: dependency-scanner.js
+    story-loader: story-loader.js
+    validate-story-contract: ../scripts/validate-story-contract.js
+    track-progress: track-progress.js
+    simple-task-tracker: simple-task-tracker.js
+  data:
+    - technical-preferences.md
+  structured-checklists:
+    - integration-test-checklist.yaml
+```
+==================== END: .bmad-core/agents/in.md ====================
+
+==================== START: .bmad-core/data/technical-preferences.md ====================
+# User-Defined Preferred Patterns and Preferences
+
+None Listed
+==================== END: .bmad-core/data/technical-preferences.md ====================
+
+==================== START: .bmad-core/utils/dependency-impact-checker.js ====================
+const { queryImpactedSymbols, querySymbolsInFile, searchSymbols } = require('./dependency-analyzer');
+const { parseFile } = require('./dependency-parser');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * High-level dependency impact checking utilities for Dev and QA agents
+ * Provides functions to analyze potential impacts of code changes
+ */
+
+/**
+ * Check what symbols would be impacted by changes to a specific file
+ */
+async function checkFileImpact(filePath, rootDir = process.cwd()) {
+  try {
+    // Normalize file path to relative path
+    const relativePath = path.isAbsolute(filePath) 
+      ? path.relative(rootDir, filePath)
+      : filePath;
+    
+    // Get symbols that depend on this file
+    const impactedSymbols = await queryImpactedSymbols(relativePath);
+    
+    // Get symbols defined in this file
+    const fileSymbols = await querySymbolsInFile(relativePath);
+    
+    // Group impacts by file
+    const impactsByFile = {};
+    impactedSymbols.forEach(symbol => {
+      if (!impactsByFile[symbol.filePath]) {
+        impactsByFile[symbol.filePath] = [];
+      }
+      impactsByFile[symbol.filePath].push(symbol);
+    });
+    
+    return {
+      targetFile: relativePath,
+      symbolsInFile: fileSymbols,
+      impactedSymbols,
+      impactedFiles: Object.keys(impactsByFile),
+      impactsByFile,
+      totalImpacted: impactedSymbols.length
+    };
+  } catch (error) {
+    console.error(`Error checking file impact for ${filePath}:`, error.message);
+    return {
+      targetFile: filePath,
+      symbolsInFile: [],
+      impactedSymbols: [],
+      impactedFiles: [],
+      impactsByFile: {},
+      totalImpacted: 0,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Check impact of specific symbol changes
+ */
+async function checkSymbolImpact(filePath, symbolNames, rootDir = process.cwd()) {
+  try {
+    const relativePath = path.isAbsolute(filePath) 
+      ? path.relative(rootDir, filePath)
+      : filePath;
+    
+    // Query for symbols that depend on the specific symbols
+    const impactedSymbols = await queryImpactedSymbols(relativePath, symbolNames);
+    
+    // Group by symbol and file
+    const impactsBySymbol = {};
+    symbolNames.forEach(symbolName => {
+      impactsBySymbol[symbolName] = impactedSymbols.filter(symbol => 
+        symbol.dependencies.some(dep => dep.includes(symbolName))
+      );
+    });
+    
+    const impactsByFile = {};
+    impactedSymbols.forEach(symbol => {
+      if (!impactsByFile[symbol.filePath]) {
+        impactsByFile[symbol.filePath] = [];
+      }
+      impactsByFile[symbol.filePath].push(symbol);
+    });
+    
+    return {
+      targetFile: relativePath,
+      targetSymbols: symbolNames,
+      impactedSymbols,
+      impactsBySymbol,
+      impactsByFile,
+      impactedFiles: Object.keys(impactsByFile),
+      totalImpacted: impactedSymbols.length
+    };
+  } catch (error) {
+    console.error(`Error checking symbol impact:`, error.message);
+    return {
+      targetFile: filePath,
+      targetSymbols: symbolNames,
+      impactedSymbols: [],
+      impactsBySymbol: {},
+      impactsByFile: {},
+      impactedFiles: [],
+      totalImpacted: 0,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Analyze the dependency impact of a list of files (e.g., from a git diff)
+ */
+async function analyzeBatchImpact(filePaths, rootDir = process.cwd()) {
+  const results = {
+    totalFiles: filePaths.length,
+    analyzedFiles: 0,
+    impactSummary: {
+      totalImpactedSymbols: 0,
+      totalImpactedFiles: new Set(),
+      highRiskFiles: [], // Files with many dependencies
+      criticalImpacts: [] // Impacts on important symbols
+    },
+    fileResults: []
+  };
+  
+  for (const filePath of filePaths) {
+    try {
+      const impact = await checkFileImpact(filePath, rootDir);
+      results.fileResults.push(impact);
+      results.analyzedFiles++;
+      
+      // Update summary
+      results.impactSummary.totalImpactedSymbols += impact.totalImpacted;
+      impact.impactedFiles.forEach(file => 
+        results.impactSummary.totalImpactedFiles.add(file)
+      );
+      
+      // Identify high-risk files (> 10 impacted symbols)
+      if (impact.totalImpacted > 10) {
+        results.impactSummary.highRiskFiles.push({
+          file: filePath,
+          impactedSymbols: impact.totalImpacted,
+          impactedFiles: impact.impactedFiles.length
+        });
+      }
+      
+      // Identify critical impacts (on classes or important functions)
+      const criticalSymbols = impact.impactedSymbols.filter(symbol => 
+        symbol.symbolType === 'class' || 
+        symbol.symbolName.toLowerCase().includes('main') ||
+        symbol.symbolName.toLowerCase().includes('init') ||
+        symbol.dependencies.length > 5
+      );
+      
+      if (criticalSymbols.length > 0) {
+        results.impactSummary.criticalImpacts.push({
+          file: filePath,
+          criticalSymbols: criticalSymbols.map(s => ({
+            name: s.symbolName,
+            type: s.symbolType,
+            file: s.filePath,
+            dependencyCount: s.dependencies.length
+          }))
+        });
+      }
+    } catch (error) {
+      console.error(`Error analyzing ${filePath}:`, error.message);
+      results.fileResults.push({
+        targetFile: filePath,
+        error: error.message,
+        symbolsInFile: [],
+        impactedSymbols: [],
+        impactedFiles: [],
+        totalImpacted: 0
+      });
+    }
+  }
+  
+  // Convert set to array
+  results.impactSummary.totalImpactedFiles = Array.from(results.impactSummary.totalImpactedFiles);
+  
+  return results;
+}
+
+/**
+ * Generate a dependency impact report for Dev/QA review
+ */
+function generateImpactReport(impactResults, options = {}) {
+  const { 
+    includeDetails = true, 
+    maxDetailsPerFile = 5,
+    format = 'markdown' 
+  } = options;
+  
+  let report = '';
+  
+  if (format === 'markdown') {
+    report += '# Dependency Impact Analysis Report\n\n';
+    
+    if (impactResults.error) {
+      report += `⚠️ **Error**: ${impactResults.error}\n\n`;
+      return report;
+    }
+    
+    // Summary section
+    if (impactResults.impactSummary) {
+      const summary = impactResults.impactSummary;
+      report += '## Summary\n\n';
+      report += `- **Files analyzed**: ${impactResults.analyzedFiles}/${impactResults.totalFiles}\n`;
+      report += `- **Total impacted symbols**: ${summary.totalImpactedSymbols}\n`;
+      report += `- **Total impacted files**: ${summary.totalImpactedFiles.length}\n`;
+      
+      if (summary.highRiskFiles.length > 0) {
+        report += `- **High-risk changes**: ${summary.highRiskFiles.length} files\n`;
+      }
+      
+      if (summary.criticalImpacts.length > 0) {
+        report += `- **Critical impacts detected**: ${summary.criticalImpacts.length} files\n`;
+      }
+      
+      report += '\n';
+      
+      // High-risk files
+      if (summary.highRiskFiles.length > 0) {
+        report += '## ⚠️ High-Risk Changes\n\n';
+        summary.highRiskFiles.forEach(risk => {
+          report += `- **${risk.file}**: ${risk.impactedSymbols} impacted symbols across ${risk.impactedFiles} files\n`;
+        });
+        report += '\n';
+      }
+      
+      // Critical impacts
+      if (summary.criticalImpacts.length > 0) {
+        report += '## 🚨 Critical Impacts\n\n';
+        summary.criticalImpacts.forEach(critical => {
+          report += `### ${critical.file}\n`;
+          critical.criticalSymbols.forEach(symbol => {
+            report += `- **${symbol.name}** (${symbol.type}) in ${symbol.file} - ${symbol.dependencyCount} dependencies\n`;
+          });
+          report += '\n';
+        });
+      }
+    } else {
+      // Single file report
+      report += '## File Impact Analysis\n\n';
+      report += `**Target File**: ${impactResults.targetFile}\n\n`;
+      
+      if (impactResults.symbolsInFile && impactResults.symbolsInFile.length > 0) {
+        report += `**Symbols in file**: ${impactResults.symbolsInFile.length}\n`;
+      }
+      
+      report += `**Impacted symbols**: ${impactResults.totalImpacted}\n`;
+      report += `**Impacted files**: ${impactResults.impactedFiles.length}\n\n`;
+      
+      if (impactResults.totalImpacted > 0) {
+        report += '### Impacted Files\n\n';
+        Object.entries(impactResults.impactsByFile).forEach(([file, symbols]) => {
+          report += `- **${file}**: ${symbols.length} symbols\n`;
+          if (includeDetails) {
+            symbols.slice(0, maxDetailsPerFile).forEach(symbol => {
+              report += `  - ${symbol.symbolName} (${symbol.symbolType}) at line ${symbol.lineNumber}\n`;
+            });
+            if (symbols.length > maxDetailsPerFile) {
+              report += `  - ... and ${symbols.length - maxDetailsPerFile} more\n`;
+            }
+          }
+        });
+      }
+    }
+    
+    // Recommendations
+    report += '\n## Recommendations\n\n';
+    
+    if (impactResults.totalImpacted === 0) {
+      report += '✅ No dependency impacts detected. Changes appear to be isolated.\n';
+    } else if (impactResults.totalImpacted < 5) {
+      report += '⚠️ Low impact detected. Review the affected symbols and consider updating tests.\n';
+    } else if (impactResults.totalImpacted < 15) {
+      report += '⚠️ Medium impact detected. Carefully review all affected files and ensure comprehensive testing.\n';
+    } else {
+      report += '🚨 High impact detected. Consider breaking changes into smaller pieces and ensure thorough testing of all affected components.\n';
+    }
+    
+    report += '\n';
+  }
+  
+  return report;
+}
+
+/**
+ * Quick check for common risky changes
+ */
+async function quickRiskAssessment(filePaths, rootDir = process.cwd()) {
+  const risks = {
+    high: [],
+    medium: [],
+    low: []
+  };
+  
+  for (const filePath of filePaths) {
+    try {
+      const impact = await checkFileImpact(filePath, rootDir);
+      
+      // Categorize risk based on impact count and file patterns
+      const isConfigFile = filePath.includes('config') || filePath.includes('settings');
+      const isUtilityFile = filePath.includes('util') || filePath.includes('helper') || filePath.includes('common');
+      const isTestFile = filePath.includes('.test.') || filePath.includes('.spec.');
+      
+      if (isTestFile) {
+        risks.low.push({ file: filePath, reason: 'Test file', impact: impact.totalImpacted });
+      } else if (impact.totalImpacted > 20 || (isConfigFile && impact.totalImpacted > 5)) {
+        risks.high.push({ file: filePath, reason: 'High dependency impact', impact: impact.totalImpacted });
+      } else if (impact.totalImpacted > 5 || isUtilityFile) {
+        risks.medium.push({ file: filePath, reason: 'Medium dependency impact', impact: impact.totalImpacted });
+      } else {
+        risks.low.push({ file: filePath, reason: 'Low dependency impact', impact: impact.totalImpacted });
+      }
+    } catch (error) {
+      risks.high.push({ file: filePath, reason: `Analysis failed: ${error.message}`, impact: 0 });
+    }
+  }
+  
+  return risks;
+}
+
+module.exports = {
+  checkFileImpact,
+  checkSymbolImpact,
+  analyzeBatchImpact,
+  generateImpactReport,
+  quickRiskAssessment
+};
+==================== END: .bmad-core/utils/dependency-impact-checker.js ====================
+
+==================== START: .bmad-core/utils/dependency-analyzer.js ====================
+// Simplified dependency analyzer - Qdrant functionality removed
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const { logger } = require('./logger');
+
+// In-memory storage for dependencies (simplified implementation)
+const dependencyStore = new Map();
+
+/**
+ * Store symbol dependency information (simplified - no vector DB)
+ * @param {Object} dependency - Dependency information
+ */
+async function storeSymbolDependency(dependency) {
+  try {
+    const key = `${dependency.projectId}:${dependency.filePath}:${dependency.symbol}`;
+    dependencyStore.set(key, dependency);
+    logger.debug(`Stored dependency: ${key}`);
+    return true;
+  } catch (error) {
+    logger.error('Error storing dependency:', error);
+    return false;
+  }
+}
+
+/**
+ * Remove all symbols for a specific file (simplified)
+ * @param {string} projectId - Project identifier
+ * @param {string} filePath - Path to the file
+ */
+async function removeFileSymbols(projectId, filePath) {
+  try {
+    const keysToDelete = [];
+    for (const key of dependencyStore.keys()) {
+      if (key.startsWith(`${projectId}:${filePath}:`)) {
+        keysToDelete.push(key);
+      }
+    }
+    keysToDelete.forEach(key => dependencyStore.delete(key));
+    logger.debug(`Removed ${keysToDelete.length} symbols for file: ${filePath}`);
+    return keysToDelete.length;
+  } catch (error) {
+    logger.error('Error removing file symbols:', error);
+    return 0;
+  }
+}
+
+/**
+ * Query symbols that would be impacted by changes (simplified)
+ * @param {string} projectId - Project identifier
+ * @param {Array<Object>} changedSymbols - List of changed symbols
+ * @returns {Array} List of impacted symbols
+ */
+async function queryImpactedSymbols(projectId, changedSymbols) {
+  try {
+    const impactedSymbols = [];
+    
+    // Simple implementation: find symbols that import the changed symbols
+    for (const [key, dependency] of dependencyStore.entries()) {
+      if (!key.startsWith(`${projectId}:`)) continue;
+      
+      for (const changedSymbol of changedSymbols) {
+        if (dependency.imports && dependency.imports.includes(changedSymbol.symbol)) {
+          impactedSymbols.push({
+            symbol: dependency.symbol,
+            filePath: dependency.filePath,
+            type: dependency.type,
+            impactType: 'import',
+            changedSymbol: changedSymbol.symbol
+          });
+        }
+      }
+    }
+    
+    return impactedSymbols;
+  } catch (error) {
+    logger.error('Error querying impacted symbols:', error);
+    return [];
+  }
+}
+
+/**
+ * Query all symbols in a specific file (simplified)
+ * @param {string} projectId - Project identifier
+ * @param {string} filePath - Path to the file
+ * @returns {Array} List of symbols in the file
+ */
+async function querySymbolsInFile(projectId, filePath) {
+  try {
+    const symbols = [];
+    
+    for (const [key, dependency] of dependencyStore.entries()) {
+      if (key.startsWith(`${projectId}:${filePath}:`)) {
+        symbols.push({
+          symbol: dependency.symbol,
+          type: dependency.type,
+          exports: dependency.exports || [],
+          imports: dependency.imports || []
+        });
+      }
+    }
+    
+    return symbols;
+  } catch (error) {
+    logger.error('Error querying symbols in file:', error);
+    return [];
+  }
+}
+
+/**
+ * Search for symbols by query (simplified)
+ * @param {string} projectId - Project identifier
+ * @param {string} query - Search query
+ * @param {Object} options - Search options
+ * @returns {Array} List of matching symbols
+ */
+async function searchSymbols(projectId, query, options = {}) {
+  try {
+    const results = [];
+    const lowerQuery = query.toLowerCase();
+    
+    for (const [key, dependency] of dependencyStore.entries()) {
+      if (!key.startsWith(`${projectId}:`)) continue;
+      
+      if (dependency.symbol.toLowerCase().includes(lowerQuery)) {
+        results.push({
+          symbol: dependency.symbol,
+          filePath: dependency.filePath,
+          type: dependency.type,
+          score: 1.0 // Simplified scoring
+        });
+      }
+    }
+    
+    // Apply limit if specified
+    if (options.limit && results.length > options.limit) {
+      results.length = options.limit;
+    }
+    
+    return results;
+  } catch (error) {
+    logger.error('Error searching symbols:', error);
+    return [];
+  }
+}
+
+/**
+ * Get dependency statistics (simplified)
+ * @param {string} projectId - Project identifier
+ * @returns {Object} Statistics about stored dependencies
+ */
+async function getDependencyStats(projectId) {
+  try {
+    let fileCount = new Set();
+    let symbolCount = 0;
+    let importCount = 0;
+    let exportCount = 0;
+    
+    for (const [key, dependency] of dependencyStore.entries()) {
+      if (!key.startsWith(`${projectId}:`)) continue;
+      
+      fileCount.add(dependency.filePath);
+      symbolCount++;
+      importCount += (dependency.imports || []).length;
+      exportCount += (dependency.exports || []).length;
+    }
+    
+    return {
+      files: fileCount.size,
+      symbols: symbolCount,
+      imports: importCount,
+      exports: exportCount,
+      storageType: 'in-memory'
+    };
+  } catch (error) {
+    logger.error('Error getting dependency stats:', error);
+    return {
+      files: 0,
+      symbols: 0,
+      imports: 0,
+      exports: 0,
+      storageType: 'in-memory',
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Initialize dependency storage (simplified - no-op for in-memory)
+ * @param {boolean} recreate - Whether to recreate storage
+ */
+async function initializeDependencyStorage(recreate = false) {
+  try {
+    if (recreate) {
+      dependencyStore.clear();
+      logger.info('Cleared in-memory dependency storage');
+    }
+    logger.info('Dependency storage initialized (in-memory mode)');
+    return true;
+  } catch (error) {
+    logger.error('Error initializing dependency storage:', error);
+    return false;
+  }
+}
+
+module.exports = {
+  storeSymbolDependency,
+  removeFileSymbols,
+  queryImpactedSymbols,
+  querySymbolsInFile,
+  searchSymbols,
+  getDependencyStats,
+  initializeDependencyStorage
+};
+==================== END: .bmad-core/utils/dependency-analyzer.js ====================
+
+==================== START: .bmad-core/utils/dependency-scanner.js ====================
+const fs = require('fs');
+const path = require('path');
+const { glob } = require('glob');
+const { parseFile, analyzeCrossFileDependencies, isFileSupported } = require('./dependency-parser');
+const { storeSymbolDependency, removeFileSymbols, getDependencyStats } = require('./dependency-analyzer');\nconst { logger } = require('./logger');
+
+/**
+ * Repository scanner that analyzes the codebase and populates Qdrant
+ * with dependency information for impact analysis
+ */
+
+/**
+ * Default configuration for repository scanning
+ */
+const DEFAULT_CONFIG = {
+  // Patterns to include
+  include: [
+    '**/*.js',
+    '**/*.ts',
+    '**/*.jsx',
+    '**/*.tsx',
+    '**/*.py',
+    '**/*.java'
+  ],
+  
+  // Patterns to exclude
+  exclude: [
+    'node_modules/**',
+    'dist/**',
+    'build/**',
+    '.git/**',
+    'coverage/**',
+    '*.min.js',
+    '*.test.js',
+    '*.spec.js',
+    '__pycache__/**',
+    '*.pyc',
+    'target/**',
+    '.class'
+  ],
+  
+  // Maximum file size to process (in bytes)
+  maxFileSize: 1024 * 1024, // 1MB
+  
+  // Whether to process test files
+  includeTests: false,
+  
+  // Whether to show progress during scanning
+  showProgress: true,
+  
+  // Repository root directory
+  rootDir: process.cwd(),
+  
+  // Streaming/chunking configuration for memory efficiency
+  batchSize: 50, // Process files in batches
+  pauseBetweenBatches: 100, // ms pause between batches
+  memoryThreshold: 500 * 1024 * 1024, // 500MB memory threshold
+  enableMemoryMonitoring: true
+};
+
+/**
+ * Scan a single file and store its dependencies
+ */
+async function scanFile(filePath, config = {}) {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  
+  try {
+    // Check file size
+    let stats;
+    try {
+      stats = fs.statSync(filePath);
+    } catch (error) {
+      const contextError = new Error(`Failed to get file stats for '${filePath}': ${error.message}`);
+      contextError.originalError = error;
+      console.error(contextError.message);
+      return { success: false, reason: contextError.message };
+    }
+    
+    if (stats.size > fullConfig.maxFileSize) {
+      const message = `File too large: ${filePath} (${stats.size} bytes > ${fullConfig.maxFileSize} bytes)`;
+      console.warn(message);
+      return { success: false, reason: message };
+    }
+    
+    // Check if file is supported
+    if (!isFileSupported(filePath)) {
+      return { success: false, reason: 'Unsupported file type' };
+    }
+    
+    // Parse the file
+    const relativePath = path.relative(fullConfig.rootDir, filePath);
+    const { symbols, fileHash } = parseFile(filePath);
+    
+    if (!symbols || symbols.length === 0) {
+      return { success: true, symbolCount: 0 };
+    }
+    
+    // Store each symbol in Qdrant
+    const storedIds = [];
+    for (const symbol of symbols) {
+      try {
+        const id = await storeSymbolDependency({
+          ...symbol,
+          filePath: relativePath // Store relative path
+        });
+        storedIds.push(id);
+      } catch (error) {
+        const contextError = new Error(`Failed to store symbol '${symbol.symbolName}' from '${relativePath}' at line ${symbol.lineNumber}: ${error.message}`);
+        contextError.originalError = error;
+        contextError.context = { symbol, filePath: relativePath };
+        console.error(contextError.message);
+        // Continue with other symbols instead of failing completely
+      }
+    }
+    
+    return {
+      success: true,
+      symbolCount: symbols.length,
+      storedIds,
+      fileHash
+    };
+  } catch (error) {
+    const contextError = new Error(`Critical error scanning file '${filePath}': ${error.message}`);
+    contextError.originalError = error;
+    contextError.context = { filePath, config: fullConfig };
+    console.error(contextError.message);
+    return { success: false, reason: contextError.message };
+  }
+}
+
+/**
+ * Get all files to scan based on include/exclude patterns
+ */
+async function getFilesToScan(config = {}) {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  
+  const files = [];
+  
+  // Process include patterns
+  for (const pattern of fullConfig.include) {
+    try {
+      const matches = await glob(pattern, {
+        cwd: fullConfig.rootDir,
+        ignore: fullConfig.exclude,
+        absolute: true
+      });
+      files.push(...matches);
+    } catch (error) {
+      const contextError = new Error(`Failed to process glob pattern '${pattern}': ${error.message}`);
+      contextError.originalError = error;
+      contextError.context = { pattern, rootDir: fullConfig.rootDir };
+      console.error(contextError.message);
+      // Continue with other patterns
+    }
+  }
+  
+  // Remove duplicates and filter
+  const uniqueFiles = [...new Set(files)];
+  
+  // Filter out test files if not included
+  const filteredFiles = fullConfig.includeTests 
+    ? uniqueFiles
+    : uniqueFiles.filter(file => {
+        const basename = path.basename(file);
+        return !basename.includes('.test.') && 
+               !basename.includes('.spec.') &&
+               !basename.includes('test_') &&
+               !file.includes('/tests/') &&
+               !file.includes('/test/');
+      });
+  
+  return filteredFiles.sort();
+}
+
+/**
+ * Monitor memory usage during scanning
+ */
+function getMemoryUsage() {
+  const usage = process.memoryUsage();
+  return {
+    heapUsed: usage.heapUsed,
+    heapTotal: usage.heapTotal,
+    external: usage.external,
+    rss: usage.rss
+  };
+}
+
+/**
+ * Force garbage collection if available
+ */
+function forceGarbageCollection() {
+  if (global.gc) {
+    global.gc();
+  }
+}
+
+/**
+ * Process files in batches for memory efficiency
+ */
+async function processBatch(filesBatch, fullConfig, batchIndex) {
+  const batchResults = {
+    filesScanned: 0,
+    filesSkipped: 0,
+    symbolsStored: 0,
+    errors: []
+  };
+  
+  console.log(`Processing batch ${batchIndex + 1}: ${filesBatch.length} files`);
+  
+  for (let i = 0; i < filesBatch.length; i++) {
+    const file = filesBatch[i];
+    
+    // Memory monitoring
+    if (fullConfig.enableMemoryMonitoring && i % 10 === 0) {
+      const memUsage = getMemoryUsage();
+      if (memUsage.heapUsed > fullConfig.memoryThreshold) {
+        console.warn(`High memory usage detected: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`);
+        forceGarbageCollection();
+        await new Promise(resolve => setTimeout(resolve, 50)); // Brief pause
+      }
+    }
+    
+    const result = await scanFile(file, fullConfig);
+    
+    if (result.success) {
+      batchResults.filesScanned++;
+      batchResults.symbolsStored += result.symbolCount || 0;
+    } else {
+      batchResults.filesSkipped++;
+      batchResults.errors.push({
+        file: path.relative(fullConfig.rootDir, file),
+        reason: result.reason
+      });
+    }
+  }
+  
+  // Force garbage collection after each batch
+  if (fullConfig.enableMemoryMonitoring) {
+    forceGarbageCollection();
+  }
+  
+  return batchResults;
+}
+
+/**
+ * Scan the entire repository and populate dependency information
+ * Uses streaming/chunked processing for memory efficiency
+ */
+async function scanRepository(config = {}) {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  const startTime = Date.now();
+  
+  console.log('Starting repository dependency scan...');
+  console.log(`Root directory: ${fullConfig.rootDir}`);
+  console.log(`Batch size: ${fullConfig.batchSize}, Memory monitoring: ${fullConfig.enableMemoryMonitoring}`);
+  
+  try {
+    // Get all files to scan
+    const files = await getFilesToScan(fullConfig);
+    console.log(`Found ${files.length} files to analyze`);
+    
+    if (files.length === 0) {
+      console.log('No files found to scan');
+      return { success: true, filesScanned: 0, symbolsStored: 0 };
+    }
+    
+    // Initialize results
+    const results = {
+      filesScanned: 0,
+      filesSkipped: 0,
+      symbolsStored: 0,
+      errors: [],
+      memoryStats: []
+    };
+    
+    // Process files in batches for memory efficiency
+    const totalBatches = Math.ceil(files.length / fullConfig.batchSize);
+    
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const startIdx = batchIndex * fullConfig.batchSize;
+      const endIdx = Math.min(startIdx + fullConfig.batchSize, files.length);
+      const filesBatch = files.slice(startIdx, endIdx);
+      
+      if (fullConfig.showProgress) {
+        console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (files ${startIdx + 1}-${endIdx}/${files.length})`);
+      }
+      
+      // Record memory usage before batch
+      if (fullConfig.enableMemoryMonitoring) {
+        const memBefore = getMemoryUsage();
+        results.memoryStats.push({
+          batch: batchIndex + 1,
+          memoryBefore: memBefore,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      // Process the batch
+      const batchResult = await processBatch(filesBatch, fullConfig, batchIndex);
+      
+      // Aggregate results
+      results.filesScanned += batchResult.filesScanned;
+      results.filesSkipped += batchResult.filesSkipped;
+      results.symbolsStored += batchResult.symbolsStored;
+      results.errors.push(...batchResult.errors);
+      
+      // Record memory usage after batch
+      if (fullConfig.enableMemoryMonitoring) {
+        const memAfter = getMemoryUsage();
+        const lastStat = results.memoryStats[results.memoryStats.length - 1];
+        lastStat.memoryAfter = memAfter;
+        lastStat.memoryDelta = memAfter.heapUsed - lastStat.memoryBefore.heapUsed;
+      }
+      
+      // Pause between batches to allow memory cleanup
+      if (batchIndex < totalBatches - 1 && fullConfig.pauseBetweenBatches > 0) {
+        await new Promise(resolve => setTimeout(resolve, fullConfig.pauseBetweenBatches));
+      }
+    }
+    
+    // Perform cross-file dependency analysis (if enabled and memory allows)
+    if (fullConfig.enableCrossFileAnalysis && results.symbolsStored < 10000) {
+      console.log('Analyzing cross-file dependencies...');
+      // Note: Only perform cross-file analysis for smaller codebases to avoid memory issues
+      // This feature can be enhanced in future iterations
+    } else {
+      console.log('Skipping cross-file dependency analysis (large codebase or disabled)');
+    }
+    
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000;
+    
+    console.log('Repository scan completed!');
+    console.log(`Files scanned: ${results.filesScanned}`);
+    console.log(`Files skipped: ${results.filesSkipped}`);
+    console.log(`Symbols stored: ${results.symbolsStored}`);
+    console.log(`Duration: ${duration.toFixed(2)} seconds`);
+    
+    // Memory usage summary
+    if (fullConfig.enableMemoryMonitoring && results.memoryStats.length > 0) {
+      const maxMemory = Math.max(...results.memoryStats.map(s => s.memoryAfter?.heapUsed || 0));
+      const avgMemory = results.memoryStats.reduce((sum, s) => sum + (s.memoryAfter?.heapUsed || 0), 0) / results.memoryStats.length;
+      console.log(`\nMemory Usage:`);
+      console.log(`  Peak: ${Math.round(maxMemory / 1024 / 1024)}MB`);
+      console.log(`  Average: ${Math.round(avgMemory / 1024 / 1024)}MB`);
+      console.log(`  Batches processed: ${results.memoryStats.length}`);
+    }
+    
+    if (results.errors.length > 0) {
+      console.log('\nErrors encountered:');
+      results.errors.slice(0, 10).forEach(error => { // Show first 10 errors
+        console.log(`  ${error.file}: ${error.reason}`);
+      });
+      if (results.errors.length > 10) {
+        console.log(`  ... and ${results.errors.length - 10} more errors`);
+      }
+    }
+    
+    // Show final stats
+    const stats = await getDependencyStats();
+    console.log('\nDependency Database Stats:');
+    console.log(`Total symbols: ${stats.totalSymbols}`);
+    console.log('Symbol types:', stats.typeDistribution);
+    
+    return {
+      success: true,
+      ...results,
+      duration,
+      stats
+    };
+    
+  } catch (error) {
+    const contextError = new Error(`Repository scan failed for directory '${fullConfig.rootDir}': ${error.message}`);
+    contextError.originalError = error;
+    contextError.context = { 
+      rootDir: fullConfig.rootDir, 
+      config: fullConfig,
+      scanPhase: 'repository_scan'
+    };
+    console.error(contextError.message);
+    return {
+      success: false,
+      error: contextError.message,
+      context: contextError.context
+    };
+  }
+}
+
+/**
+ * Scan only files that have changed since the last scan
+ */
+async function scanChangedFiles(changedFiles, config = {}) {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  
+  console.log(`Scanning ${changedFiles.length} changed files...`);
+  
+  const results = {
+    filesScanned: 0,
+    filesSkipped: 0,
+    symbolsStored: 0,
+    errors: []
+  };
+  
+  for (const file of changedFiles) {
+    const absolutePath = path.resolve(fullConfig.rootDir, file);
+    
+    // Remove old symbols for this file first
+    await removeFileSymbols(file);
+    
+    // Scan the file if it still exists
+    if (fs.existsSync(absolutePath)) {
+      const result = await scanFile(absolutePath, fullConfig);
+      
+      if (result.success) {
+        results.filesScanned++;
+        results.symbolsStored += result.symbolCount || 0;
+      } else {
+        results.filesSkipped++;
+        results.errors.push({
+          file,
+          reason: result.reason
+        });
+      }
+    } else {
+      // File was deleted, symbols already removed
+      console.log(`File deleted: ${file}`);
+    }
+  }
+  
+  console.log(`Changed files scan completed: ${results.filesScanned} scanned, ${results.symbolsStored} symbols stored`);
+  return results;
+}
+
+/**
+ * Watch for file changes and update dependencies incrementally
+ */
+function watchRepository(config = {}) {
+  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  const chokidar = require('chokidar');
+  
+  console.log('Starting repository watch for dependency updates...');
+  
+  const watcher = chokidar.watch(fullConfig.include, {
+    ignored: fullConfig.exclude,
+    cwd: fullConfig.rootDir,
+    persistent: true
+  });
+  
+  const changedFiles = new Set();
+  let scanTimeout = null;
+  
+  const processBatch = async () => {
+    if (changedFiles.size > 0) {
+      const files = Array.from(changedFiles);
+      changedFiles.clear();
+      await scanChangedFiles(files, fullConfig);
+    }
+  };
+  
+  watcher
+    .on('change', filePath => {
+      if (isFileSupported(filePath)) {
+        changedFiles.add(filePath);
+        
+        // Batch changes to avoid too frequent scans
+        if (scanTimeout) {
+          clearTimeout(scanTimeout);
+        }
+        scanTimeout = setTimeout(processBatch, 5000); // 5 second delay
+      }
+    })
+    .on('unlink', filePath => {
+      if (isFileSupported(filePath)) {
+        removeFileSymbols(filePath);
+      }
+    });
+  
+  return watcher;
+}
+
+module.exports = {
+  scanRepository,
+  scanFile,
+  scanChangedFiles,
+  watchRepository,
+  getFilesToScan,
+  DEFAULT_CONFIG,
+  processBatch, // Export for testing
+  getMemoryUsage // Export for monitoring
+};
+==================== END: .bmad-core/utils/dependency-scanner.js ====================
+
+==================== START: .bmad-core/utils/story-loader.js ====================
+/**
+ * Story Loader with Automatic Validation
+ * 
+ * Loads story files and automatically validates them using validation hooks.
+ * Ensures story contracts and memory operations are validated on load.
+ */
+
+const fs = require('fs').promises;
+const path = require('path');
+const yaml = require('js-yaml');
+const validationHooks = require('./validation-hooks');
+
+class StoryLoader {
+  constructor() {
+    this.loadedStories = new Map();
+  }
+
+  /**
+   * Load a story file with automatic validation
+   * @param {string} storyPath - Path to the story file
+   * @param {Object} options - Loading options
+   * @returns {Object} Loaded and validated story
+   */
+  async loadStory(storyPath, options = {}) {
+    try {
+      // Check if story exists
+      await fs.access(storyPath);
+      
+      // Read story content
+      const content = await fs.readFile(storyPath, 'utf8');
+      
+      // Parse story structure
+      const storyData = this.parseStoryContent(content);
+      storyData.path = storyPath;
+      storyData.loadedAt = new Date().toISOString();
+      
+      // Run validation hooks
+      const validation = await validationHooks.executeHooks('afterStoryLoad', storyData);
+      
+      // Store validation results with the story
+      storyData.validation = validation;
+      
+      // Cache the loaded story
+      this.loadedStories.set(storyPath, storyData);
+      
+      // Log validation issues if any
+      if (!validation.valid && !options.suppressValidationErrors) {
+        console.error(`Story validation failed for ${path.basename(storyPath)}:`);
+        validation.errors.forEach(error => {
+          console.error(`  - ${error.type}: ${error.message}`);
+        });
+      }
+      
+      if (validation.warnings && validation.warnings.length > 0 && !options.suppressWarnings) {
+        console.warn(`Story validation warnings for ${path.basename(storyPath)}:`);
+        validation.warnings.forEach(warning => {
+          console.warn(`  - ${warning.type}: ${warning.message}`);
+        });
+      }
+      
+      return storyData;
+    } catch (error) {
+      throw new Error(`Failed to load story ${storyPath}: ${error.message}`);
+    }
+  }
+
+  /**
+   * Parse story content into structured format
+   * @param {string} content - Raw story content
+   * @returns {Object} Parsed story data
+   */
+  parseStoryContent(content) {
+    const result = {
+      frontMatter: null,
+      content: content,
+      sections: new Map()
+    };
+    
+    // Extract YAML front matter
+    const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    if (yamlMatch) {
+      result.frontMatter = yaml.load(yamlMatch[1]);
+      result.content = content.substring(yamlMatch[0].length).trim();
+    }
+    
+    // Parse sections
+    const lines = result.content.split('\n');
+    let currentSection = null;
+    let sectionContent = [];
+    
+    for (const line of lines) {
+      const sectionMatch = line.match(/^#{1,3}\s+(.+)$/);
+      if (sectionMatch) {
+        // Save previous section
+        if (currentSection) {
+          result.sections.set(currentSection, sectionContent.join('\n').trim());
+        }
+        // Start new section
+        currentSection = sectionMatch[1];
+        sectionContent = [];
+      } else {
+        sectionContent.push(line);
+      }
+    }
+    
+    // Save last section
+    if (currentSection) {
+      result.sections.set(currentSection, sectionContent.join('\n').trim());
+    }
+    
+    return result;
+  }
+
+  /**
+   * Save a story with automatic validation
+   * @param {string} storyPath - Path to save the story
+   * @param {Object} storyData - Story data to save
+   * @param {Object} options - Save options
+   */
+  async saveStory(storyPath, storyData, options = {}) {
+    // Validate before save
+    const validation = await validationHooks.executeHooks('beforeStorySave', storyData);
+    
+    if (!validation.valid && !options.forceWrite) {
+      throw new Error(`Story validation failed: ${validation.errors.map(e => e.message).join('; ')}`);
+    }
+    
+    // Construct story content
+    let content = '';
+    
+    // Add front matter if present
+    if (storyData.frontMatter) {
+      content += '---\n';
+      content += yaml.dump(storyData.frontMatter, { lineWidth: -1 });
+      content += '---\n\n';
+    }
+    
+    // Add main content
+    if (storyData.content) {
+      content += storyData.content;
+    } else if (storyData.sections) {
+      // Reconstruct from sections
+      for (const [section, sectionContent] of storyData.sections.entries()) {
+        content += `## ${section}\n\n${sectionContent}\n\n`;
+      }
+    }
+    
+    // Write to file
+    await fs.writeFile(storyPath, content.trim() + '\n', 'utf8');
+    
+    // Update cache
+    this.loadedStories.set(storyPath, {
+      ...storyData,
+      path: storyPath,
+      savedAt: new Date().toISOString(),
+      validation
+    });
+    
+    return { success: true, validation };
+  }
+
+  /**
+   * Validate a story without loading it into memory
+   * @param {string} storyPath - Path to the story file
+   * @returns {Object} Validation result
+   */
+  async validateStory(storyPath) {
+    const storyData = await this.loadStory(storyPath, { 
+      suppressValidationErrors: true,
+      suppressWarnings: true 
+    });
+    return storyData.validation;
+  }
+
+  /**
+   * Get cached story if available
+   * @param {string} storyPath - Path to the story file
+   * @returns {Object|null} Cached story data or null
+   */
+  getCachedStory(storyPath) {
+    return this.loadedStories.get(storyPath) || null;
+  }
+
+  /**
+   * Clear story cache
+   * @param {string} storyPath - Optional specific story to clear
+   */
+  clearCache(storyPath = null) {
+    if (storyPath) {
+      this.loadedStories.delete(storyPath);
+    } else {
+      this.loadedStories.clear();
+    }
+  }
+
+  /**
+   * Batch validate multiple stories
+   * @param {Array<string>} storyPaths - Array of story paths
+   * @returns {Object} Batch validation results
+   */
+  async batchValidate(storyPaths) {
+    const results = {
+      total: storyPaths.length,
+      validated: 0,
+      passed: 0,
+      failed: 0,
+      stories: []
+    };
+    
+    for (const storyPath of storyPaths) {
+      try {
+        const validation = await this.validateStory(storyPath);
+        results.validated++;
+        
+        if (validation.valid) {
+          results.passed++;
+        } else {
+          results.failed++;
+        }
+        
+        results.stories.push({
+          path: storyPath,
+          ...validation
+        });
+      } catch (error) {
+        results.stories.push({
+          path: storyPath,
+          valid: false,
+          errors: [{ type: 'LOAD_ERROR', message: error.message }]
+        });
+      }
+    }
+    
+    return results;
+  }
+}
+
+// Create singleton instance
+const storyLoader = new StoryLoader();
+
+// Export both the class and singleton
+module.exports = storyLoader;
+module.exports.StoryLoader = StoryLoader;
+==================== END: .bmad-core/utils/story-loader.js ====================
+
+==================== START: .bmad-core/scripts/validate-story-contract.js ====================
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs');
+
+// Try to use the module resolver if available
+let StoryContractValidator;
+try {
+  const ModuleResolver = require('../utils/module-resolver');
+  const validatorPath = ModuleResolver.resolveModule('utils/story-contract-validator', '../utils/story-contract-validator', __dirname);
+  StoryContractValidator = require(validatorPath);
+} catch (e) {
+  // Fallback to direct path
+  try {
+    StoryContractValidator = require('../utils/story-contract-validator');
+  } catch (err) {
+    console.error('Could not find StoryContractValidator module');
+    process.exit(1);
+  }
+}
+
+/**
+ * Script to validate StoryContract in story files
+ * Usage: node validate-story-contract.js <story-file-path>
+ */
+
+function main() {
+  const args = process.argv.slice(2);
+  
+  if (args.length === 0) {
+    console.log('Usage: node validate-story-contract.js <story-file-path>');
+    console.log('');
+    console.log('No story file provided. Searching for stories to validate...');
+    
+    // Try to find story files in common locations
+    const possiblePaths = [
+      'docs/stories',
+      'stories',
+      'story.md',
+      'docs/story.md'
+    ];
+    
+    let foundStories = [];
+    
+    for (const searchPath of possiblePaths) {
+      const fullPath = path.resolve(searchPath);
+      
+      if (fs.existsSync(fullPath)) {
+        if (fs.statSync(fullPath).isDirectory()) {
+          // Search for .md files in directory
+          const storyFiles = fs.readdirSync(fullPath)
+            .filter(file => file.endsWith('.md'))
+            .map(file => path.join(fullPath, file));
+          foundStories.push(...storyFiles);
+        } else if (fullPath.endsWith('.md')) {
+          foundStories.push(fullPath);
+        }
+      }
+    }
+    
+    if (foundStories.length === 0) {
+      console.error('No story files found in common locations.');
+      console.error('Please provide a story file path as an argument.');
+      process.exit(1);
+    }
+    
+    console.log(`Found ${foundStories.length} story file(s):`);
+    foundStories.forEach(file => console.log(`  - ${path.relative(process.cwd(), file)}`));
+    console.log('');
+    console.log('Validating all found stories...');
+    console.log('');
+    
+    // Validate all found stories
+    let allValid = true;
+    foundStories.forEach(storyPath => {
+      console.log(`Validating: ${path.relative(process.cwd(), storyPath)}`);
+      const result = validateSingleStory(storyPath);
+      if (!result) allValid = false;
+      console.log('');
+    });
+    
+    if (allValid) {
+      console.log('✅ All story files are valid!');
+      process.exit(0);
+    } else {
+      console.log('❌ Some story files have validation errors.');
+      process.exit(1);
+    }
+    
+    return;
+  }
+
+  const storyFilePath = path.resolve(args[0]);
+  
+  if (!fs.existsSync(storyFilePath)) {
+    console.error(`Story file not found: ${storyFilePath}`);
+    process.exit(1);
+  }
+  
+  const result = validateSingleStory(storyFilePath);
+  process.exit(result ? 0 : 1);
+}
+
+function validateSingleStory(storyFilePath) {
+  const validator = new StoryContractValidator();
+  
+  console.log(`Validating StoryContract in: ${storyFilePath}`);
+  console.log('---');
+  
+  const result = validator.validateStoryFile(storyFilePath);
+  
+  if (result.valid) {
+    console.log('✅ StoryContract is valid!');
+    console.log('\nContract details:');
+    console.log(`  Version: ${result.contract.version}`);
+    console.log(`  Story ID: ${result.contract.story_id}`);
+    console.log(`  Epic ID: ${result.contract.epic_id}`);
+    console.log(`  API Endpoints: ${result.contract.apiEndpoints.length}`);
+    console.log(`  Files to Modify: ${result.contract.filesToModify.length}`);
+    console.log(`  Acceptance Criteria Links: ${result.contract.acceptanceCriteriaLinks.length}`);
+    return true;
+  } else {
+    // Check if the error is just about missing StoryContract
+    const noContractError = result.errors.some(err => 
+      err.message && err.message.includes('No StoryContract found'));
+    
+    if (noContractError && result.errors.length === 1) {
+      console.log('⚠️  No StoryContract found in story file (this is acceptable for some story types)');
+      console.log('    Story files without contracts will use default processing rules.');
+      return true; // Treat as success since this is acceptable
+    } else {
+      console.error('❌ StoryContract validation failed!');
+      console.error('\nErrors:');
+      console.error(validator.formatErrors(result.errors));
+      return false;
+    }
+  }
+}
+
+// Run the script
+main();
+==================== END: .bmad-core/scripts/validate-story-contract.js ====================
+
+==================== START: .bmad-core/utils/track-progress.js ====================
+#!/usr/bin/env node
+
+/**
+ * Simple progress tracking CLI for agents
+ * Replaces the complex persist-memory-cli.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// Parse command line arguments
+const [operation, agent, ...args] = process.argv.slice(2);
+
+// Ensure .ai directory exists
+const aiDir = path.join(process.cwd(), '.ai');
+if (!fs.existsSync(aiDir)) {
+  fs.mkdirSync(aiDir, { recursive: true });
+}
+
+// Simple file-based tracking
+const contextFile = path.join(aiDir, `${agent}_context.json`);
+const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+
+// Ensure history directory exists
+const historyDir = path.join(aiDir, 'history');
+if (!fs.existsSync(historyDir)) {
+  fs.mkdirSync(historyDir, { recursive: true });
+}
+
+// Load current context
+let context = {};
+if (fs.existsSync(contextFile)) {
+  try {
+    context = JSON.parse(fs.readFileSync(contextFile, 'utf8'));
+  } catch (e) {
+    context = {};
+  }
+}
+
+// Process operation
+const timestamp = new Date().toISOString();
+
+switch (operation) {
+  case 'observation':
+    const observation = args.join(' ');
+    // Update context
+    context.lastObservation = observation;
+    context.lastUpdated = timestamp;
+    
+    // Append to log
+    const obsEntry = {
+      timestamp,
+      type: 'observation',
+      agent,
+      content: observation
+    };
+    fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
+    
+    console.log(`[${agent}] Observation recorded: ${observation}`);
+    break;
+    
+  case 'decision':
+    const decision = args[0];
+    const rationale = args.slice(1).join(' ');
+    
+    // Update context
+    if (!context.decisions) context.decisions = [];
+    context.decisions.push({ decision, rationale, timestamp });
+    context.lastUpdated = timestamp;
+    
+    // Append to log
+    const decEntry = {
+      timestamp,
+      type: 'decision',
+      agent,
+      decision,
+      rationale
+    };
+    fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
+    
+    console.log(`[${agent}] Decision recorded: ${decision}`);
+    break;
+    
+  case 'keyfact':
+    const fact = args.join(' ');
+    
+    // Append to log
+    const factEntry = {
+      timestamp,
+      type: 'keyfact',
+      agent,
+      content: fact
+    };
+    fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
+    
+    console.log(`[${agent}] Key fact recorded: ${fact}`);
+    break;
+    
+  case 'show':
+    console.log('Current context:', JSON.stringify(context, null, 2));
+    break;
+    
+  default:
+    console.log('Usage: track-progress.js <operation> <agent> [args...]');
+    console.log('Operations: observation, decision, keyfact, show');
+    process.exit(1);
+}
+
+// Save updated context
+if (operation !== 'show') {
+  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+}
+==================== END: .bmad-core/utils/track-progress.js ====================
+
+==================== START: .bmad-core/utils/simple-task-tracker.js ====================
+/**
+ * Simple Task Tracker
+ * A lightweight in-memory task tracking system for agent workflows
+ * Replaces the over-engineered memory system for basic task tracking needs
+ */
+
+class TaskTracker {
+  constructor() {
+    this.workflow = null;
+    this.history = [];
+    this.startTime = new Date();
+  }
+
+  /**
+   * Start a new workflow with a list of tasks
+   * @param {string} workflowName - Name of the workflow (e.g., 'develop-story')
+   * @param {Array} tasks - Array of task objects with at least a 'name' property
+   */
+  startWorkflow(workflowName, tasks) {
+    this.workflow = {
+      name: workflowName,
+      tasks: tasks.map((task, index) => ({
+        ...task,
+        id: task.id || `task-${index + 1}`,
+        status: 'pending'
+      })),
+      currentIndex: 0,
+      completed: [],
+      startTime: new Date(),
+      agentName: null
+    };
+    
+    this.log(`Started workflow: ${workflowName} with ${tasks.length} tasks`);
+    return true;
+  }
+
+  /**
+   * Set the agent name for the current workflow
+   * @param {string} agentName - Name of the agent (e.g., 'dev', 'qa')
+   */
+  setAgent(agentName) {
+    if (this.workflow) {
+      this.workflow.agentName = agentName;
+    }
+  }
+
+  /**
+   * Get the current task details
+   * @returns {Object|null} Current task info or null if no tasks remain
+   */
+  getCurrentTask() {
+    if (!this.workflow || this.workflow.currentIndex >= this.workflow.tasks.length) {
+      return null;
+    }
+    
+    const task = this.workflow.tasks[this.workflow.currentIndex];
+    return {
+      task: task,
+      index: this.workflow.currentIndex,
+      total: this.workflow.tasks.length,
+      progress: `${this.workflow.currentIndex + 1}/${this.workflow.tasks.length}`,
+      percentComplete: Math.round((this.workflow.completed.length / this.workflow.tasks.length) * 100)
+    };
+  }
+
+  /**
+   * Mark the current task as completed
+   * @param {string} notes - Optional completion notes
+   * @returns {boolean} Success status
+   */
+  completeCurrentTask(notes = '') {
+    const current = this.getCurrentTask();
+    if (!current) return false;
+    
+    // Update task status
+    this.workflow.tasks[this.workflow.currentIndex].status = 'completed';
+    
+    // Add to completed list
+    this.workflow.completed.push({
+      task: current.task,
+      completedAt: new Date(),
+      notes: notes,
+      duration: this.getTaskDuration()
+    });
+    
+    this.log(`Completed task ${current.index + 1}: ${current.task.name}`, 'success');
+    
+    // Move to next task
+    this.workflow.currentIndex++;
+    
+    // Check if workflow is complete
+    if (this.workflow.currentIndex >= this.workflow.tasks.length) {
+      this.log(`Workflow '${this.workflow.name}' completed! All ${this.workflow.tasks.length} tasks done.`, 'success');
+    }
+    
+    return true;
+  }
+
+  /**
+   * Skip the current task with a reason
+   * @param {string} reason - Reason for skipping
+   * @returns {boolean} Success status
+   */
+  skipCurrentTask(reason) {
+    const current = this.getCurrentTask();
+    if (!current) return false;
+    
+    this.workflow.tasks[this.workflow.currentIndex].status = 'skipped';
+    this.workflow.tasks[this.workflow.currentIndex].skipReason = reason;
+    
+    this.log(`Skipped task ${current.index + 1}: ${current.task.name} - Reason: ${reason}`, 'warning');
+    
+    this.workflow.currentIndex++;
+    return true;
+  }
+
+  /**
+   * Log a message with timestamp and context
+   * @param {string} message - Message to log
+   * @param {string} type - Log type (info, success, warning, error)
+   */
+  log(message, type = 'info') {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      type: type,
+      message: message,
+      workflowContext: this.workflow ? {
+        name: this.workflow.name,
+        agent: this.workflow.agentName,
+        progress: `${this.workflow.completed.length}/${this.workflow.tasks.length}`,
+        currentTask: this.getCurrentTask()?.task?.name || 'None'
+      } : null
+    };
+    
+    this.history.push(entry);
+    
+    // Console output with color coding
+    const colors = {
+      info: '\x1b[36m',    // Cyan
+      success: '\x1b[32m', // Green
+      warning: '\x1b[33m', // Yellow
+      error: '\x1b[31m'    // Red
+    };
+    
+    const resetColor = '\x1b[0m';
+    const color = colors[type] || colors.info;
+    
+    console.log(`${color}[${type.toUpperCase()}]${resetColor} ${message}`);
+  }
+
+  /**
+   * Get current progress summary
+   * @returns {Object|null} Progress information
+   */
+  getProgress() {
+    if (!this.workflow) return null;
+    
+    const remainingTasks = this.workflow.tasks.filter(t => t.status === 'pending');
+    const skippedTasks = this.workflow.tasks.filter(t => t.status === 'skipped');
+    
+    return {
+      workflow: this.workflow.name,
+      agent: this.workflow.agentName,
+      totalTasks: this.workflow.tasks.length,
+      completedTasks: this.workflow.completed.length,
+      skippedTasks: skippedTasks.length,
+      remainingTasks: remainingTasks.length,
+      currentTask: this.getCurrentTask(),
+      percentComplete: Math.round((this.workflow.completed.length / this.workflow.tasks.length) * 100),
+      elapsedTime: this.getElapsedTime(),
+      estimatedTimeRemaining: this.getEstimatedTimeRemaining()
+    };
+  }
+
+  /**
+   * Get a formatted progress report
+   * @returns {string} Formatted progress report
+   */
+  getProgressReport() {
+    const progress = this.getProgress();
+    if (!progress) return 'No active workflow';
+    
+    let report = `\n=== Task Progress Report ===\n`;
+    report += `Workflow: ${progress.workflow}\n`;
+    report += `Agent: ${progress.agent || 'Not set'}\n`;
+    report += `Progress: ${progress.completedTasks}/${progress.totalTasks} tasks (${progress.percentComplete}%)\n`;
+    report += `Elapsed Time: ${progress.elapsedTime}\n`;
+    
+    if (progress.currentTask) {
+      report += `\nCurrent Task: ${progress.currentTask.task.name}\n`;
+      report += `Task Progress: ${progress.currentTask.progress}\n`;
+    }
+    
+    if (progress.skippedTasks > 0) {
+      report += `\nSkipped Tasks: ${progress.skippedTasks}\n`;
+    }
+    
+    if (progress.estimatedTimeRemaining) {
+      report += `Estimated Time Remaining: ${progress.estimatedTimeRemaining}\n`;
+    }
+    
+    report += `===========================\n`;
+    
+    return report;
+  }
+
+  /**
+   * Save debug log to file for audit/debugging
+   * @param {string} directory - Directory to save the log (default: .ai)
+   * @returns {string} Path to saved file
+   */
+  saveDebugLog(directory = '.ai') {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Ensure directory exists
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true });
+    }
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `task-tracker_${this.workflow?.name || 'unknown'}_${timestamp}.json`;
+    const filepath = path.join(directory, filename);
+    
+    const debugData = {
+      workflow: this.workflow,
+      history: this.history,
+      summary: this.getProgress(),
+      savedAt: new Date().toISOString()
+    };
+    
+    fs.writeFileSync(filepath, JSON.stringify(debugData, null, 2));
+    this.log(`Debug log saved to: ${filepath}`, 'info');
+    
+    return filepath;
+  }
+
+  /**
+   * Get elapsed time since workflow start
+   * @returns {string} Formatted elapsed time
+   */
+  getElapsedTime() {
+    if (!this.workflow) return 'N/A';
+    
+    const elapsed = Date.now() - this.workflow.startTime.getTime();
+    const seconds = Math.floor(elapsed / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  /**
+   * Get task duration (time since last task completion or workflow start)
+   * @returns {number} Duration in milliseconds
+   */
+  getTaskDuration() {
+    if (!this.workflow) return 0;
+    
+    const lastCompletion = this.workflow.completed.length > 0 
+      ? this.workflow.completed[this.workflow.completed.length - 1].completedAt
+      : this.workflow.startTime;
+    
+    return Date.now() - lastCompletion.getTime();
+  }
+
+  /**
+   * Estimate time remaining based on average task completion time
+   * @returns {string|null} Formatted estimated time or null if not enough data
+   */
+  getEstimatedTimeRemaining() {
+    if (!this.workflow || this.workflow.completed.length === 0) return null;
+    
+    const totalElapsed = Date.now() - this.workflow.startTime.getTime();
+    const avgTimePerTask = totalElapsed / this.workflow.completed.length;
+    const remainingTasks = this.workflow.tasks.length - this.workflow.currentIndex;
+    const estimatedMs = avgTimePerTask * remainingTasks;
+    
+    const minutes = Math.floor(estimatedMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `~${hours}h ${minutes % 60}m`;
+    } else {
+      return `~${minutes}m`;
+    }
+  }
+
+  /**
+   * Reset the tracker for a new workflow
+   */
+  reset() {
+    this.workflow = null;
+    this.history = [];
+    this.log('Task tracker reset', 'info');
+  }
+}
+
+// Export for use in agents
+module.exports = TaskTracker;
+==================== END: .bmad-core/utils/simple-task-tracker.js ====================

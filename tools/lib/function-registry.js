@@ -32,165 +32,116 @@ function resolveModule(moduleName, fallbackPath) {
   }
 }
 
-// Import memory utilities
-const {
-  updateWorkingMemory,
-  saveToLongTermMemory
-} = require(resolveModule('utils/agent-memory-manager', '../../bmad-core/utils/agent-memory-manager'));
+// Import simple tracker utilities
+const SimpleTaskTracker = require(resolveModule('utils/simple-task-tracker', '../../bmad-core/utils/simple-task-tracker'));
+const simpleMemory = require(resolveModule('utils/simpleMemory', '../../bmad-core/utils/simpleMemory'));
 
-const {
-  logMemoryInit,
-  logWorkingMemory,
-  logLongTermMemory,
-  logMemoryRetrieval,
-  logMemoryError,
-  logTaskMemory,
-  logSessionSummary
-} = require(resolveModule('utils/memory-usage-logger', '../../bmad-core/utils/memory-usage-logger'));
+// Import QA utilities
+const QAFindingsParser = require(resolveModule('utils/qa-findings-parser', '../../bmad-core/utils/qa-findings-parser'));
+const QAFixTracker = require(resolveModule('utils/qa-fix-tracker', '../../bmad-core/utils/qa-fix-tracker'));
+const { verifyQAFixes } = require(resolveModule('utils/verify-qa-fixes', '../../bmad-core/utils/verify-qa-fixes'));
+
+// Create a singleton instance of the tracker
+let trackerInstance = null;
+const getTracker = () => {
+  if (!trackerInstance) {
+    trackerInstance = new SimpleTaskTracker();
+  }
+  return trackerInstance;
+};
+
+// Create a singleton instance of the QA tracker
+let qaTrackerInstance = null;
+const getQATracker = () => {
+  if (!qaTrackerInstance) {
+    qaTrackerInstance = new QAFixTracker();
+  }
+  return qaTrackerInstance;
+};
 
 /**
  * Registry of available functions that can be called from structured tasks
  */
 const FUNCTION_REGISTRY = {
-  // Memory logging functions
-  logTaskMemory: async (agentName, taskName, operation, taskData, metadata = {}) => {
-    try {
-      await logTaskMemory(agentName, taskName, operation, taskData, metadata);
-      return { success: true, logged: true, timestamp: new Date().toISOString() };
-    } catch (error) {
-      console.error(`logTaskMemory failed: ${error.message}`);
-      return { success: false, error: error.message, timestamp: new Date().toISOString() };
+  // Simple memory functions for structured tasks
+  'simpleMemory.saveContext': async (params) => {
+    return await simpleMemory.saveContext(params);
+  },
+  
+  'simpleMemory.logEntry': async (params) => {
+    return await simpleMemory.logEntry(params);
+  },
+  
+  'simpleMemory.getProgress': async () => {
+    return await simpleMemory.getProgress();
+  },
+  
+  'simpleMemory.getProgressReport': async () => {
+    return await simpleMemory.getProgressReport();
+  },
+  
+  // Direct tracker functions
+  trackProgress: async (workflow, task, status, notes) => {
+    const tracker = getTracker();
+    
+    if (!tracker.workflow) {
+      // Initialize workflow if not already started
+      tracker.startWorkflow(workflow, [{ name: task }]);
+    }
+    
+    if (status === 'completed') {
+      return { success: tracker.completeCurrentTask(notes), timestamp: new Date().toISOString() };
+    } else if (status === 'skipped') {
+      return { success: tracker.skipCurrentTask(notes), timestamp: new Date().toISOString() };
+    } else {
+      tracker.log(`Task ${task}: ${status}`, 'info');
+      return { success: true, timestamp: new Date().toISOString() };
     }
   },
-
-  logWorkingMemory: async (agentName, operation, memoryType, data, metadata = {}) => {
-    try {
-      await logWorkingMemory(agentName, operation, memoryType, data, metadata);
-      return { success: true, logged: true, timestamp: new Date().toISOString() };
-    } catch (error) {
-      console.error(`logWorkingMemory failed: ${error.message}`);
-      return { success: false, error: error.message, timestamp: new Date().toISOString() };
-    }
+  
+  saveDebugLog: async (directory = '.ai') => {
+    const tracker = getTracker();
+    const filepath = tracker.saveDebugLog(directory);
+    return { success: true, filepath, timestamp: new Date().toISOString() };
   },
-
-  logLongTermMemory: async (agentName, operation, memoryContent, metadata = {}) => {
-    try {
-      await logLongTermMemory(agentName, operation, memoryContent, metadata);
-      return { success: true, logged: true, timestamp: new Date().toISOString() };
-    } catch (error) {
-      console.error(`logLongTermMemory failed: ${error.message}`);
-      return { success: false, error: error.message, timestamp: new Date().toISOString() };
-    }
+  
+  // QA tracking functions
+  'qaParser.parse': async (storyContent) => {
+    const parser = new QAFindingsParser();
+    return parser.parseQAResults(storyContent);
   },
-
-  // Working memory functions
-  updateWorkingMemory: async (agentName, memoryType, data, metadata = {}) => {
-    try {
-      const updates = {};
-      
-      // Handle different memory types
-      switch (memoryType) {
-        case 'recentDecisions':
-          if (data.decision && data.rationale) {
-            updates.decision = data.decision;
-            updates.reasoning = data.rationale;
-          } else {
-            updates.observation = JSON.stringify(data);
-          }
-          break;
-        case 'completedTasks':
-          if (typeof data === 'string') {
-            updates.completedTask = data;
-          } else {
-            updates.completedTask = data.taskId || JSON.stringify(data);
-          }
-          break;
-        case 'recentReviews':
-          updates.observation = `Review completed: ${JSON.stringify(data)}`;
-          break;
-        case 'completedReviews':
-          if (typeof data === 'string') {
-            updates.completedTask = data;
-          } else {
-            updates.completedTask = data.reviewId || JSON.stringify(data);
-          }
-          break;
-        default:
-          // Generic observation
-          updates.observation = typeof data === 'string' ? data : JSON.stringify(data);
-      }
-      
-      const result = await updateWorkingMemory(agentName, updates);
-      return { success: true, updated: true, timestamp: new Date().toISOString(), result };
-    } catch (error) {
-      console.error(`updateWorkingMemory failed: ${error.message}`);
-      return { success: false, error: error.message, timestamp: new Date().toISOString() };
-    }
+  
+  'qaTracker.initialize': async (findings) => {
+    const tracker = getQATracker();
+    tracker.initializeFromFindings(findings);
+    return { success: true, taskCount: tracker.getTasks().length };
   },
-
-  updateWorkingMemoryAndExit: async (agentName, memoryType, data, metadata = {}) => {
-    try {
-      const result = await FUNCTION_REGISTRY.updateWorkingMemory(agentName, memoryType, data, metadata);
-      
-      // For subprocess execution, we would exit here
-      // In the main process, we just return the result
-      if (process.env.BMAD_SUBPROCESS === 'true') {
-        console.log(JSON.stringify(result));
-        process.exit(result.success ? 0 : 1);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error(`updateWorkingMemoryAndExit failed: ${error.message}`);
-      const errorResult = { success: false, error: error.message, timestamp: new Date().toISOString() };
-      
-      if (process.env.BMAD_SUBPROCESS === 'true') {
-        console.log(JSON.stringify(errorResult));
-        process.exit(1);
-      }
-      
-      return errorResult;
-    }
+  
+  'qaTracker.completeFix': async (fixId, verification) => {
+    const tracker = getQATracker();
+    const result = tracker.completeFix(fixId, verification);
+    return { success: result !== null, fix: result };
   },
-
-  // Long-term memory functions
-  saveToLongTermMemory: async (agentName, memoryContent, metadata = {}) => {
-    try {
-      const result = await saveToLongTermMemory(agentName, memoryContent);
-      return { 
-        success: result?.saved || false, 
-        memoryId: result?.memoryId,
-        timestamp: result?.timestamp || new Date().toISOString(),
-        result 
-      };
-    } catch (error) {
-      console.error(`saveToLongTermMemory failed: ${error.message}`);
-      return { success: false, error: error.message, timestamp: new Date().toISOString() };
-    }
+  
+  'qaTracker.getReport': async () => {
+    const tracker = getQATracker();
+    return tracker.generateFixReport();
   },
-
-  saveToLongTermMemoryAndExit: async (agentName, memoryContent, metadata = {}) => {
-    try {
-      const result = await FUNCTION_REGISTRY.saveToLongTermMemory(agentName, memoryContent, metadata);
-      
-      // For subprocess execution, we would exit here
-      if (process.env.BMAD_SUBPROCESS === 'true') {
-        console.log(JSON.stringify(result));
-        process.exit(result.success ? 0 : 1);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error(`saveToLongTermMemoryAndExit failed: ${error.message}`);
-      const errorResult = { success: false, error: error.message, timestamp: new Date().toISOString() };
-      
-      if (process.env.BMAD_SUBPROCESS === 'true') {
-        console.log(JSON.stringify(errorResult));
-        process.exit(1);
-      }
-      
-      return errorResult;
-    }
+  
+  'qaTracker.save': async (directory = '.ai') => {
+    const tracker = getQATracker();
+    const filepath = tracker.saveFixTracking(directory);
+    return { success: true, filepath };
+  },
+  
+  'qaTracker.load': async (directory = '.ai') => {
+    const tracker = getQATracker();
+    const loaded = tracker.loadFixTracking(directory);
+    return { success: loaded, taskCount: loaded ? tracker.getTasks().length : 0 };
+  },
+  
+  'qaTracker.verify': async (directory = '.ai') => {
+    return verifyQAFixes(directory);
   }
 };
 
@@ -293,13 +244,19 @@ function resolveValue(value, context) {
  */
 function extractFunctionArguments(functionName, resolvedParameters) {
   const parameterMappings = {
-    logTaskMemory: ['agentName', 'taskName', 'operation', 'taskData', 'metadata'],
-    logWorkingMemory: ['agentName', 'operation', 'memoryType', 'data', 'metadata'],
-    logLongTermMemory: ['agentName', 'operation', 'memoryContent', 'metadata'],
-    updateWorkingMemory: ['agentName', 'memoryType', 'data', 'metadata'],
-    updateWorkingMemoryAndExit: ['agentName', 'memoryType', 'data', 'metadata'],
-    saveToLongTermMemory: ['agentName', 'memoryContent', 'metadata'],
-    saveToLongTermMemoryAndExit: ['agentName', 'memoryContent', 'metadata']
+    'simpleMemory.saveContext': ['params'],
+    'simpleMemory.logEntry': ['params'],
+    'simpleMemory.getProgress': [],
+    'simpleMemory.getProgressReport': [],
+    'trackProgress': ['workflow', 'task', 'status', 'notes'],
+    'saveDebugLog': ['directory'],
+    'qaParser.parse': ['storyContent'],
+    'qaTracker.initialize': ['findings'],
+    'qaTracker.completeFix': ['fixId', 'verification'],
+    'qaTracker.getReport': [],
+    'qaTracker.save': ['directory'],
+    'qaTracker.load': ['directory'],
+    'qaTracker.verify': ['directory']
   };
 
   const expectedParams = parameterMappings[functionName];

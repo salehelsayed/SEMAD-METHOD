@@ -1,0 +1,55 @@
+id: dev-track-progress
+name: dev-track-progress  
+purpose: Update development progress tracking after completing significant tasks
+steps:
+  - id: step0
+    name: Check Current Progress
+    description: Review current task progress and recent activity
+    actions:
+      - description: View current task list status from .ai/dev_tasks.json
+        elicit: false
+      - description: Review recent activity from .ai/history/dev_log.jsonl
+        elicit: false
+      - description: Check for any pending QA fixes in .ai/qa_fixes_checklist.json
+        elicit: false
+  
+  - id: step1
+    name: Update Progress Tracking
+    description: Record current progress using track-progress utility
+    actions:
+      - description: Log observation about completed work using track-progress.js
+        elicit: false
+      - description: Record any significant decisions made during implementation
+        elicit: false
+      - description: Store any reusable patterns or solutions as keyfacts
+        elicit: false
+  
+  - id: step2
+    name: Validate Task Completion
+    description: Ensure all tracked tasks are properly marked
+    actions:
+      - description: Verify task completion status in .ai/dev_tasks.json
+        elicit: false
+      - description: Check if any QA fixes are still pending
+        elicit: false
+      - description: Update story checkboxes for completed tasks
+        elicit: false
+  
+  - id: step3
+    name: Generate Progress Summary
+    description: Create summary of current development state
+    actions:
+      - description: Generate progress summary using track-progress.js show command
+        elicit: true
+      - description: Display completion percentage for current workflow
+        elicit: false
+      - description: List any blockers or issues encountered
+        elicit: false
+
+inputs: {}
+outputs: {}
+notes: |
+  - This task is called periodically during development to update progress
+  - Integrates with both task tracking and QA fix tracking systems
+  - Helps maintain accurate progress visibility throughout implementation
+  - Should be called after completing major tasks or milestones

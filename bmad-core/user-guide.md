@@ -211,30 +211,32 @@ dependencies:
 - **Iterative Development**: Work in small, focused tasks
 - **File Organization**: Maintain clean project structure
 
-## Memory System
+## Task Tracking System
 
-BMad uses an advanced dual-memory architecture to reduce hallucination and improve code accuracy:
+BMad uses a simple, lightweight task tracking system to ensure systematic completion of complex workflows:
 
-- **Short-Term Memory**: Session-specific context stored in JSON files
-- **Long-Term Memory**: Reusable patterns and knowledge in vector database
+- **Progress Tracking**: Real-time tracking of task completion
+- **Session Persistence**: Progress saved to `.ai/` directory
 
 ### Key Benefits
 
-- **78% reduction** in code inconsistencies
-- **65% fewer** repeat bugs
-- **Consistent implementations** across development sessions
-- **Pattern recognition** from previous work
+- **Systematic execution** of all tasks without missing items
+- **Clear visibility** into current progress
+- **Simple debugging** with saved session logs
+- **No external dependencies** required
 
-### Documentation
+### How It Works
 
-- **[Memory System Explanation](../MEMORY-SYSTEM-EXPLANATION.md)**: Understanding how memory reduces hallucination
-- **[Detailed Memory Guide](./memory-system-detailed-guide.md)**: Technical details, storage locations, and configuration
+- Tasks are tracked in-memory during agent sessions
+- Progress is logged to `.ai/history/[agent]_log.jsonl`
+- Agents use `simple-task-tracker.js` for workflow management
+- Persistent observations stored via `track-progress.js`
 
 ### Quick Facts
 
-- Short-term memory stored in `.ai/` directory in your project
-- Agents automatically manage memory during tasks
-- Memory operations logged to `.ai/memory-usage.log`
+- All tracking data stored in `.ai/` directory in your project
+- Agents automatically track progress during workflows
+- Visual progress reports available via commands
 - No manual intervention required - it just works!
 
 ## Technical Preferences System
@@ -249,18 +251,16 @@ When creating custom web bundles or uploading to AI platforms, include your `tec
 
 The `bmad-core/core-config.yaml` file is a critical config that enables BMad to work seamlessly with differing project structures, more options will be made available in the future. Currently the most important is the devLoadAlwaysFiles list section in the yaml.
 
-### Memory Configuration
+### Tracking Configuration
 
-Memory settings can be customized through environment variables:
+Tracking settings can be customized through environment variables:
 
 ```bash
-# Custom memory directory (default: .ai/)
-BMAD_MEMORY_DIR=/custom/path/.ai
+# Custom tracking directory (default: .ai/)
+BMAD_TRACKING_DIR=/custom/path/.ai
 
-# Memory limits
-BMAD_MAX_OBSERVATIONS=100      # Default: 50
-BMAD_MAX_DECISIONS=100         # Default: 100
-BMAD_MEMORY_RETENTION_DAYS=60  # Default: 30
+# History retention
+BMAD_HISTORY_RETENTION_DAYS=30  # Default: 30
 ```
 
 ### Developer Context Files

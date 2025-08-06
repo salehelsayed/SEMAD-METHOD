@@ -1,96 +1,99 @@
 id: address-qa-feedback
 name: address-qa-feedback
-purpose: Address QA feedback by implementing recommended changes and fixes from the QA review report
+purpose: Address QA feedback using structured tracking to ensure all items are systematically fixed
 steps:
-  - id: load-memory
-    name: Load Memory and Initialize Context
-    description: Load agent working memory and relevant long-term context using unified memory system
-    actions:
-      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: dev
-          context:
-            taskId: address-qa-feedback
-            taskType: general
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to task execution planning
-        elicit: true
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
   - id: step0
-    name: Initialize Memory and Context
-    description: Initialize working memory for addressing QA feedback
+    name: Parse QA Findings
+    description: Parse QA Results into structured format for tracking
     actions:
-      - description: Execute task `update-working-memory` with agentName='dev' and taskId='address-qa-feedback'
-        elicit: true
-      - description: Execute task `retrieve-context` with query='QA feedback implementation patterns' to load relevant memories
-        elicit: true
+      - description: Read the story file and extract QA Results section
+        elicit: false
+      - description: Use qa-findings-parser to parse findings into structured JSON
+        elicit: false
+      - description: Save parsed findings to .ai/qa_findings.json
+        elicit: false
+      - description: Initialize QAFixTracker with parsed findings
+        elicit: false
+  
   - id: step1
-    name: Load and Analyze QA Report
-    description: Read the QA Results section from the story file to understand all feedback
+    name: Create Fix Checklist
+    description: Convert QA findings into trackable fix checklist
     actions:
-      - description: Read the story file and locate the QA Results section
+      - description: Generate .ai/qa_fixes_checklist.json with all items to fix
         elicit: false
-      - description: Extract all recommendations, issues, and improvement items from the QA report
+      - description: Display summary of fixes needed by category (critical, major, minor, checklist)
+        elicit: true
+      - description: Log fix tracking initialization using track-progress.js
         elicit: false
-      - description: Prioritize items based on severity (critical, major, minor)
-        elicit: false
-      - description: Create an implementation plan for addressing each item
-        elicit: false
+
   - id: step2
     name: Address Critical Issues
-    description: Fix all critical issues identified by QA
+    description: Fix all critical issues identified by QA with tracking
     actions:
+      - description: Get list of critical issues from QAFixTracker
+        elicit: false
       - description: For each critical issue, read the affected file
         elicit: false
       - description: Implement the recommended fix following QA's specific guidance
         elicit: false
-      - description: Ensure the fix doesn't break existing functionality
+      - description: Mark fix as completed in tracker with verification details
         elicit: false
       - description: Update the story's Debug Log with details of each fix
         elicit: false
+
   - id: step3
-    name: Implement Refactoring Recommendations
-    description: Apply code quality improvements suggested by QA
+    name: Address Major Issues
+    description: Fix all major issues with systematic tracking
     actions:
-      - description: Review each refactoring recommendation in the QA report
+      - description: Get list of major issues from QAFixTracker
         elicit: false
-      - description: Apply refactoring changes to improve code quality
+      - description: Implement fixes for each major issue
         elicit: false
-      - description: Ensure refactored code maintains the same functionality
+      - description: Mark each fix as completed in tracker
         elicit: false
-      - description: Document refactoring changes in the story's Change Log
+      - description: Verify fixes don't break existing functionality
         elicit: false
+
   - id: step4
-    name: Add Missing Tests
-    description: Implement any missing tests identified by QA
+    name: Implement Checklist Items
+    description: Complete all improvement checklist items
     actions:
-      - description: Review the Improvements Checklist for missing test items
+      - description: Get uncompleted checklist items from tracker
         elicit: false
-      - description: Write unit tests for uncovered functionality
+      - description: Implement each checklist item (refactoring, tests, etc.)
         elicit: false
-      - description: Add integration tests for edge cases mentioned by QA
+      - description: Mark each item as completed with verification
         elicit: false
-      - description: Verify all new tests pass successfully
-        elicit: true
+      - description: Document changes in story's Change Log
+        elicit: false
+
   - id: step5
+    name: Address Minor Issues
+    description: Fix minor issues and improvements
+    actions:
+      - description: Get list of minor issues from tracker
+        elicit: false
+      - description: Apply fixes for code quality improvements
+        elicit: false
+      - description: Mark each fix as completed in tracker
+        elicit: false
+
+  - id: step6
     name: Security and Performance Fixes
     description: Address any security vulnerabilities or performance issues
     actions:
-      - description: Review Security Review section for vulnerabilities
+      - description: Review security-related findings from parsed QA results
         elicit: false
       - description: Implement security fixes following QA recommendations
         elicit: false
-      - description: Review Performance Considerations section
+      - description: Review performance-related findings
         elicit: false
       - description: Apply performance optimizations as recommended
         elicit: false
-  - id: step6
+      - description: Mark security/performance fixes as completed in tracker
+        elicit: false
+
+  - id: step7
     name: Run Validation Suite
     description: Ensure all changes pass validation and tests
     actions:
@@ -100,54 +103,55 @@ steps:
         elicit: true
       - description: Run integration tests to ensure system integrity
         elicit: false
-      - description: Execute any project-specific validation scripts
+      - description: Verify no regressions introduced by fixes
         elicit: false
-  - id: step7
+
+  - id: step8
+    name: Generate Fix Report
+    description: Create comprehensive report of all fixes applied
+    actions:
+      - description: Generate fix report using QAFixTracker.generateFixReport()
+        elicit: false
+      - description: Display completion summary with statistics
+        elicit: true
+      - description: Save final fix report to .ai/qa_fix_report.json
+        elicit: false
+      - description: Verify all critical issues have been addressed
+        elicit: false
+
+  - id: step9
     name: Update Story Documentation
     description: Document all changes made in response to QA feedback
     actions:
-      - description: Update the Completion Notes with a summary of QA fixes applied
+      - description: Update the Completion Notes with QA fix summary from report
         elicit: false
       - description: Check off completed items in the Tasks/Subtasks section
         elicit: true
       - description: Update the File List with any new or modified files
         elicit: false
-      - description: Add an entry to the Change Log documenting QA feedback addressed
+      - description: Add comprehensive entry to Change Log with fix report summary
         elicit: false
-  - id: step8
+
+  - id: step10
     name: Mark Story Ready for Re-Review
     description: Update story status to indicate QA feedback has been addressed
     actions:
       - description: Update story status to "Ready for Review"
         elicit: false
-      - description: Add a note indicating "QA feedback addressed - ready for re-review"
+      - description: Add note with fix completion statistics from report
         elicit: false
-      - description: Record the completion of QA feedback addressing in working memory
+      - description: Log completion using track-progress.js with fix summary
         elicit: false
-  - id: save-memory
-    name: Save Task Results and Clean Memory
-    description: Save task completion and findings to memory with hygiene cleanup
-    actions:
-      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: true
-        function: saveAndCleanMemory
-        parameters:
-          agentName: dev
-          taskData:
-            observation: Completed address-qa-feedback task successfully
-            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
-            taskCompleted: true
-            taskId: address-qa-feedback
-            context:
-              taskType: general
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      - description: Save final state of QA fix tracking
+        elicit: false
+
 inputs: {}
 outputs: {}
 notes: |
-  - This task is triggered when QA sets story status to "Needs Fixes"
-  - All QA recommendations should be treated as advisory - implement based on technical merit
-  - Focus on addressing all items marked as critical or blocking first
-  - Ensure all changes maintain backward compatibility unless explicitly approved
-  - Document rationale if any QA recommendation is not implemented
+  - This task uses structured tracking to ensure no QA feedback is missed
+  - QAFindingsParser extracts structured data from QA Results section
+  - QAFixTracker extends TaskTracker for QA-specific tracking and reporting
+  - All fixes are tracked in .ai/qa_fixes_checklist.json
+  - Final report provides comprehensive summary of all fixes applied
+  - Critical issues must be fixed before marking story as ready
+  - The tracker provides verification that all items have been addressed

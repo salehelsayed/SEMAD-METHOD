@@ -71,19 +71,22 @@ sections:
         title: Technology Stack Table
         type: table
         columns: [Category, Technology, Version, Purpose, Rationale]
-        instruction: Fill in appropriate technology choices based on the selected framework and project requirements.
+        instruction: |
+          Fill in appropriate technology choices based on the selected framework and project requirements.
+          IMPORTANT: Always use "Latest stable", "Latest LTS", or "Latest" instead of specific version numbers.
+          This keeps documentation evergreen and prevents outdated specifications.
         rows:
-          - ["Framework", "{{framework}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["UI Library", "{{ui_library}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["State Management", "{{state_management}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Routing", "{{routing_library}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Build Tool", "{{build_tool}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Styling", "{{styling_solution}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Testing", "{{test_framework}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Component Library", "{{component_lib}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Form Handling", "{{form_library}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Animation", "{{animation_lib}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
-          - ["Dev Tools", "{{dev_tools}}", "{{version}}", "{{purpose}}", "{{why_chosen}}"]
+          - ["Framework", "{{framework}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["UI Library", "{{ui_library}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["State Management", "{{state_management}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Routing", "{{routing_library}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Build Tool", "{{build_tool}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Styling", "{{styling_solution}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Testing", "{{test_framework}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Component Library", "{{component_lib}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Form Handling", "{{form_library}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Animation", "{{animation_lib}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
+          - ["Dev Tools", "{{dev_tools}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
 
   - id: project-structure
     title: Project Structure

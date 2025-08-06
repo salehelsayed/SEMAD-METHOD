@@ -2,26 +2,7 @@ id: review-story
 name: review-story
 purpose: Review story implementation and provide advisory feedback for Dev agent, maintaining context through working memory
 steps:
-  - id: step0
-    name: Load Memory and Initialize Context
-    description: Load QA agent working memory and relevant long-term review context
-    actions:
-      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: qa
-          context:
-            taskId: review-story
-            taskType: story-review
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to review planning
-        elicit: false
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
+  # Memory loading removed - no longer using memory functions
   - id: step1
     name: Update Status and Load Story Details
     description: Set story status to 'In Review' and gather implementation details
@@ -118,23 +99,7 @@ steps:
     name: Save Review Results and Clean Memory
     description: Save review findings to memory and perform hygiene cleanup
     actions:
-      - description: Save review completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: saveAndCleanMemory
-        parameters:
-          agentName: qa
-          taskData:
-            observation: Completed story review with {{REVIEW_STATUS}} status
-            significantFinding: 'Review findings: {{REVIEW_SUMMARY}}'
-            decision: Story {{APPROVAL_STATUS}} based on quality review
-            reasoning: '{{REVIEW_REASONING}}'
-            taskCompleted: true
-            taskId: review-story
-            context:
-              taskType: story-review
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      # Memory saving removed - no longer using memory functions
 inputs: {}
 outputs: {}
 metadata:

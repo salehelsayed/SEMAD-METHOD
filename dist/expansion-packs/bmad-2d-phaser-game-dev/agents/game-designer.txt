@@ -123,26 +123,7 @@ id: execute-checklist
 name: Execute Checklist
 purpose: Generic task for executing any checklist file systematically. Supports both interactive  (section-by-section) and comprehensive (all-at-once) execution modes. Tracks progress,  captures findings, and provides structured results.
 steps:
-  - id: load-memory
-    name: Load Memory and Initialize Context
-    description: Load agent working memory and relevant long-term context using unified memory system
-    actions:
-      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: qa
-          context:
-            taskId: execute-checklist
-            taskType: general
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to task execution planning
-        elicit: true
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
+  # Memory loading removed - no longer using memory functions
   - id: step0
     name: Initialize Working Memory
     description: Initialize working memory for checklist execution session
@@ -273,21 +254,7 @@ steps:
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
     actions:
-      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: true
-        function: saveAndCleanMemory
-        parameters:
-          agentName: qa
-          taskData:
-            observation: Completed execute-checklist task successfully
-            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
-            taskCompleted: true
-            taskId: execute-checklist
-            context:
-              taskType: general
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      # Memory saving removed - no longer using memory functions
 inputs:
   checklistPath:
     description: Path to the checklist file to execute

@@ -156,11 +156,14 @@ sections:
         title: Technology Stack Table
         type: table
         columns: [Category, Technology, Version, Purpose, Rationale]
-        instruction: Populate the technology stack table with all relevant technologies
+        instruction: |
+          Populate the technology stack table with all relevant technologies.
+          IMPORTANT: Always use "Latest stable", "Latest LTS", or "Latest" instead of specific version numbers.
+          This keeps documentation evergreen and prevents outdated specifications.
         examples:
-          - "| **Language** | TypeScript | 5.3.3 | Primary development language | Strong typing, excellent tooling, team expertise |"
-          - "| **Runtime** | Node.js | 20.11.0 | JavaScript runtime | LTS version, stable performance, wide ecosystem |"
-          - "| **Framework** | NestJS | 10.3.2 | Backend framework | Enterprise-ready, good DI, matches team patterns |"
+          - "| **Language** | TypeScript | Latest stable | Primary development language | Strong typing, excellent tooling, team expertise |"
+          - "| **Runtime** | Node.js | Latest LTS | JavaScript runtime | LTS version, stable performance, wide ecosystem |"
+          - "| **Framework** | NestJS | Latest stable | Backend framework | Enterprise-ready, good DI, matches team patterns |"
 
   - id: data-models
     title: Data Models

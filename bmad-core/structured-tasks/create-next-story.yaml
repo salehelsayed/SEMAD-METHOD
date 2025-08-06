@@ -1,27 +1,17 @@
 id: create-next-story
 name: Create Next Story Task
 purpose: To identify the next logical story based on project progress and epic definitions, and then to prepare a comprehensive, self-contained, and actionable story file using the `Story Template`. This task ensures the story is enriched with all necessary technical context, requirements, and acceptance criteria, making it ready for efficient implementation by a Developer Agent with minimal need for additional research or finding its own context.
+requirements:
+  - SHARDED DOCUMENTS REQUIRED: This task requires both PRD and Architecture documents to be sharded
+  - PRD must be split into epic files in docs/prd/ directory  
+  - Architecture must be split into component files in docs/architecture/ directory
+  - Will not work with monolithic documents - sharding provides better context management
 steps:
-  - id: step0
-    name: Load Memory and Initialize Context
-    description: Load agent working memory and relevant long-term context using unified memory system
+  # Memory loading removed - no longer using memory functions
+  - id: step0-simplified
+    name: Initialize Context
+    description: Initialize context for story creation
     actions:
-      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: sm
-          context:
-            taskId: create-next-story
-            taskType: story-creation
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to task execution planning
-        elicit: true
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
       - description: Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
         elicit: true
         metadata:
@@ -42,6 +32,30 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
+      - description: 'CRITICAL VALIDATION: Verify that BOTH prdSharded AND architectureSharded are set to true'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'If prdSharded is false, HALT with error: "ERROR: PRD documents must be sharded before creating stories. Please run the shard-prd task to split your PRD into epic files in docs/prd/ directory. Story creation requires sharded documents for proper context management."'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'If architectureSharded is false, HALT with error: "ERROR: Architecture documents must be sharded before creating stories. Please run the shard-doc task on your architecture.md file to split it into component files in docs/architecture/ directory. Story creation requires sharded documents for proper technical context."'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Verify sharded directories exist: Check that docs/prd/ and docs/architecture/ directories exist and contain files'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'If docs/prd/ is empty or missing, HALT with error: "ERROR: No sharded PRD files found in docs/prd/. Please ensure your PRD has been properly sharded into epic files."'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'If docs/architecture/ is empty or missing, HALT with error: "ERROR: No sharded architecture files found in docs/architecture/. Please ensure your architecture document has been properly sharded."'
+        elicit: false
+        metadata:
+          originalIndent: 0
     metadata:
       level: 3
       originalNumber: '0'
@@ -56,7 +70,7 @@ steps:
     name: Locate Epic Files and Review Existing Stories
     description: ''
     actions:
-      - description: Based on `prdSharded` from config, locate epic files (sharded location/pattern or monolithic PRD sections)
+      - description: Navigate to docs/prd/ directory and locate epic files using the epicFilePattern from config
         elicit: false
         metadata:
           originalIndent: 0
@@ -139,14 +153,18 @@ steps:
       level: 3
       originalNumber: '3'
   - id: step6
-    name: Determine Architecture Reading Strategy
+    name: Read Sharded Architecture Documents
     description: ''
     actions:
-      - description: '**If `architectureVersion: >= v4` and `architectureSharded: true`**: Read `{architectureShardedLocation}/index.md` then follow structured reading order below'
+      - description: 'Navigate to docs/architecture/ directory and read index.md first to understand the file structure and naming convention'
         elicit: false
         metadata:
           originalIndent: 0
-      - description: '**Else**: Use monolithic `architectureFile` for similar sections'
+      - description: 'The index.md should list all architecture files - use this as your guide to find the correct files'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Note: Architecture files may use numbered prefixes (01-, 02-, etc.) or descriptive names - check index.md to determine which'
         elicit: false
         metadata:
           originalIndent: 0
@@ -156,11 +174,43 @@ steps:
   - id: step7
     name: Read Architecture Documents Based on Story Type
     description: |-
-      **For ALL Stories:** tech-stack.md, unified-project-structure.md, coding-standards.md, testing-strategy.md
-      **For Backend/API Stories, additionally:** data-models.md, database-schema.md, backend-architecture.md, rest-api-spec.md, external-apis.md
-      **For Frontend/UI Stories, additionally:** frontend-architecture.md, components.md, core-workflows.md, data-models.md
+      Read architecture files based on story type. Files may use either naming convention:
+      - Direct names: tech-stack.md, data-models.md, etc.
+      - Numbered names: 03-technology-stack.md, 05-data-models.md, etc.
+      
+      **For ALL Stories, read these topics (find by content, not exact filename):**
+      - Technology stack / Tech stack (e.g., tech-stack.md OR 03-technology-stack.md)
+      - Project structure / unified structure 
+      - Coding standards
+      - Testing strategy (e.g., testing-strategy.md OR 12-testing-strategy.md)
+      
+      **For Backend/API Stories, additionally read:**
+      - Data models (e.g., data-models.md OR 05-data-models.md)
+      - Database schema
+      - Backend architecture / Component architecture (e.g., 04-component-architecture.md)
+      - API specifications (e.g., rest-api-spec.md OR 06-api-specifications.md)
+      - External APIs
+      
+      **For Frontend/UI Stories, additionally read:**
+      - Frontend architecture / Component architecture (e.g., 04-component-architecture.md)
+      - Components / UI components
+      - Core workflows (e.g., core-workflows.md OR 07-core-workflows.md)
+      - Data models (e.g., data-models.md OR 05-data-models.md)
+      
       **For Full-Stack Stories:** Read both Backend and Frontend sections above
-    actions: []
+    actions:
+      - description: First check docs/architecture/index.md to understand the file structure and naming convention used
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Based on the index, identify which files contain the required information for this story type
+        elicit: false  
+        metadata:
+          originalIndent: 0
+      - description: Read the identified files, focusing on sections relevant to the current story
+        elicit: false
+        metadata:
+          originalIndent: 0
     metadata:
       level: 4
       originalNumber: '3.2'
@@ -412,21 +462,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: Save task completion to working memory and archive significant findings (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: true
-        function: saveAndCleanMemory
-        parameters:
-          agentName: sm
-          taskData:
-            observation: Story creation completed successfully
-            significantFinding: Created story {{STORY_ID}} with complete technical context and validation
-            taskCompleted: true
-            taskId: create-next-story
-            context:
-              taskType: story-creation
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      # Memory saving removed - no longer using memory functions
 inputs: {}
 outputs: {}
 metadata:

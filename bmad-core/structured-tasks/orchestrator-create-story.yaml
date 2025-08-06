@@ -1,21 +1,25 @@
 id: orchestrator-create-story
 name: Orchestrator Create Story (In-Session)
-purpose: Orchestrator creates a story by adopting SM persona in-session
+purpose: Orchestrator creates a story by adopting SM persona in-session, following the same process as create-next-story.yaml
+notes:
+  - This task ensures consistency with SM's direct story creation
+  - Uses same naming convention: {epicNum}.{storyNum}.story.md
+  - Follows same validation and reading patterns as create-next-story.yaml
 steps:
   - id: step1
     name: Announce Role Switch
-    description: Announce transition to SM role for story creation
+    description: Announce transition to Scrum Master role for story creation
     actions:
-      - description: Display role switch announcement to user indicating transition to SM role
+      - description: Display role switch announcement to user indicating transition to Scrum Master (SM) role
         elicit: false
         metadata:
           roleSwitch: true
 
   - id: step2
-    name: Load SM Configuration
-    description: Load SM agent configuration and adopt SM persona
+    name: Load Scrum Master Configuration
+    description: Load Scrum Master agent configuration and adopt SM persona
     actions:
-      - description: Read bmad-core/agents/sm.md to understand SM behavior and adopt communication style
+      - description: Read bmad-core/agents/sm.md to understand Scrum Master behavior and adopt communication style
         elicit: false
         metadata:
           configLoad: true
@@ -23,6 +27,14 @@ steps:
         elicit: false
         metadata:
           pathResolution: true
+      - description: CRITICAL - Follow the exact same process as defined in create-next-story.yaml task, including all validations for sharded documents
+        elicit: false
+        metadata:
+          processAlignment: true
+      - description: Verify that both prdSharded AND architectureSharded are set to true in core-config.yaml - halt if not
+        elicit: false
+        metadata:
+          shardingValidation: true
 
   - id: step3
     name: Read Epic Context
@@ -35,27 +47,39 @@ steps:
 
   - id: step4
     name: Read Architecture Context
-    description: Extract relevant architecture information for the story
+    description: Extract relevant architecture information for the story following create-next-story patterns
     actions:
-      - description: Navigate to docs/architecture/ folder and extract technical stack details, design patterns, and API specifications
+      - description: Navigate to docs/architecture/ folder and read index.md first to understand file structure and naming convention
         elicit: false
         metadata:
           architectureRead: true
+      - description: Based on story type, read appropriate architecture files (may use numbered prefixes like 03-technology-stack.md OR descriptive names like tech-stack.md)
+        elicit: false
+        metadata:
+          fileSelection: true
+      - description: Extract ALL relevant technical details and put them in the Dev Notes section so Dev agent never needs to read architecture files
+        elicit: false
+        metadata:
+          contextExtraction: true
 
   - id: step5
     name: Create Story Content
-    description: Create comprehensive story with all required sections
+    description: Create comprehensive story using story-tmpl.yaml template
     actions:
-      - description: Create comprehensive story including metadata, story contract, user story, acceptance criteria, implementation plan, technical details, testing requirements, and definition of done
+      - description: Use the story-tmpl.yaml template to create story with ALL sections including metadata, story contract, user story, acceptance criteria, tasks/subtasks, and comprehensive Dev Notes
         elicit: false
         metadata:
           storyCreation: true
+      - description: Ensure Dev Notes section contains ALL technical context from architecture files so Dev agent has complete information without needing to read other documents
+        elicit: false
+        metadata:
+          devNotesCompleteness: true
 
   - id: step6
     name: Save Story
-    description: Save the story file to the appropriate location
+    description: Save the story file to the appropriate location using SM naming convention
     actions:
-      - description: Create story file at docs/stories/epic-{{epic}}/story-{{number}}-{{title-slug}}.md ensuring folder exists first
+      - description: Create story file at docs/stories/{{epicNum}}.{{storyNum}}.story.md (e.g., 1.1.story.md, 2.3.story.md) - this matches the SM agent's create-next-story naming convention
         elicit: false
         metadata:
           fileSave: true

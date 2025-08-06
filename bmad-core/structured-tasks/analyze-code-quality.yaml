@@ -112,25 +112,7 @@ steps:
     actions:
       - description: Save quality report to designated output location or return to calling agent
         elicit: false
-      - description: Update working memory with analysis completion and key findings (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: saveAndCleanMemory
-        parameters:
-          agentName: "{{AGENT_NAME}}"
-          taskData:
-            observation: "Completed code quality analysis for {{FILE_COUNT}} files"
-            significantFinding: "Quality analysis findings: {{QUALITY_SUMMARY}}"
-            decision: "{{QUALITY_DECISION}}"
-            reasoning: "{{ANALYSIS_REASONING}}"
-            taskCompleted: true
-            taskId: analyze-code-quality
-            context:
-              taskType: code-quality-analysis
-              filesAnalyzed: "{{ANALYZED_FILES}}"
-              qualityScore: "{{OVERALL_QUALITY_SCORE}}"
-        metadata:
-          memoryAction: true
-          executionOrder: last
+      # Memory saving removed - no longer using memory functions
 inputs:
   targetFiles:
     type: array

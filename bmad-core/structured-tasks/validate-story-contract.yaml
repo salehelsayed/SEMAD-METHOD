@@ -14,26 +14,7 @@ outputs:
     type: array
     description: List of validation errors if any
 steps:
-  - id: load-memory
-    name: Load Memory and Initialize Context
-    description: Load agent working memory and relevant long-term context using unified memory system
-    actions:
-      - description: Load agent working memory and relevant long-term context (use loadMemoryForTaskAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: false
-        function: loadMemoryForTask
-        parameters:
-          agentName: qa
-          context:
-            taskId: validate-story-contract
-            taskType: story-management
-        metadata:
-          memoryAction: true
-          executionOrder: first
-      - description: Apply memory context to task execution planning
-        elicit: true
-        metadata:
-          memoryAction: true
-          executionOrder: after-load
+  # Memory loading removed - no longer using memory functions
   - id: step0
     name: Initialize Memory and Context
     description: Set up working memory and retrieve relevant context
@@ -88,22 +69,4 @@ steps:
     inputs:
       condition: '!{{validationResult}}'
       errorMessage: 'StoryContract validation failed: {{validationErrors}}'
-  - id: save-memory
-    name: Save Task Results and Clean Memory
-    description: Save task completion and findings to memory with hygiene cleanup
-    actions:
-      - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
-        elicit: true
-        function: saveAndCleanMemory
-        parameters:
-          agentName: qa
-          taskData:
-            observation: Completed validate-story-contract task successfully
-            significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
-            taskCompleted: true
-            taskId: validate-story-contract
-            context:
-              taskType: story-management
-        metadata:
-          memoryAction: true
-          executionOrder: last
+  # Memory saving removed - no longer using memory functions

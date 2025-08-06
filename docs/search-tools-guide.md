@@ -67,46 +67,36 @@ Each entry contains:
 - `repository` (optional): Specific repository to search within
 - `description` (optional): Human-readable description of the search intent
 
-## Ingesting Search Results into Qdrant
+## Using Search Results
 
-### Using the Ingestion Script
+### Manual Search Execution
 
-BMad includes a script to execute searches and ingest results into Qdrant:
+The generated search-tools.yaml file contains pre-configured search queries that can be used manually:
 
 ```bash
-# Basic usage
-node scripts/ingest-to-qdrant.js
+# View generated search queries
+cat search-tools.yaml
 
-# With custom options
-node scripts/ingest-to-qdrant.js \
-  --input search-tools.yaml \
-  --collection search-results \
-  --qdrant-url http://localhost:6333
-
-# Dry run to see what would be ingested
-node scripts/ingest-to-qdrant.js --dry-run
+# Example output:
+# - name: github
+#   query: "express authentication middleware"
+#   description: "Find auth middleware examples"
 ```
 
-### Script Options
+### How to Use the Queries
 
-- `--input <path>`: Path to search tools file (default: search-tools.yaml)
-- `--collection <name>`: Qdrant collection name (default: search-results)
-- `--qdrant-url <url>`: Qdrant server URL (default: http://localhost:6333)
-- `--dry-run`: Preview what would be ingested without executing
+1. **Copy the query** from search-tools.yaml
+2. **Navigate to the platform** (GitHub, npm, documentation sites)
+3. **Execute the search** manually
+4. **Review results** for relevant implementation patterns
 
-### What the Script Does
+### Future Enhancements
 
-1. **Reads search-tools.yaml**: Parses the generated search queries
-2. **Executes searches**: Runs each query against its designated provider
-3. **Processes results**: Normalizes and structures the search results
-4. **Generates embeddings**: Creates vector representations of the content
-5. **Stores in Qdrant**: Saves results with metadata for retrieval
-
-**Note**: The current implementation is a stub that demonstrates the workflow. To fully implement:
-- Add API clients for each search provider (GitHub, npm, etc.)
-- Implement authentication where required
-- Add embedding generation using your preferred model
-- Configure Qdrant client with proper connection settings
+The search tools system is designed to be extensible. Future versions may include:
+- Automated search execution scripts
+- Direct API integration with search providers
+- Results caching for offline development
+- Integration with AI agents for context-aware suggestions
 
 ## How Agents Use search-tools.yaml During Development
 
@@ -118,19 +108,19 @@ BMad agents can reference the search-tools.yaml file to:
 - **Architect Agent**: Researches architectural patterns and library comparisons
 - **QA Agent**: Finds testing strategies and security considerations for the technologies
 
-### 2. Integration with RAG (Retrieval-Augmented Generation)
+### 2. Development Support
 
-When properly integrated with a vector database like Qdrant:
+During development, agents can:
 
-1. **Pre-Development Phase**: 
-   - Search queries are executed against external APIs
-   - Results are fetched and embedded into vector storage
-   - Agents query the vector store during planning and implementation
+1. **Reference Queries**: 
+   - Use pre-generated queries as starting points for research
+   - Adapt queries based on specific implementation needs
+   - Find relevant examples and patterns
 
-2. **During Development**:
-   - Agents can request specific searches based on the pre-generated queries
-   - Results provide context-aware code examples and documentation
-   - Reduces hallucination by grounding responses in actual documentation
+2. **Context Building**:
+   - Agents can suggest manual searches using the queries
+   - Results inform implementation decisions
+   - Reduces hallucination by encouraging reference to actual documentation
 
 ### 3. Manual Usage
 
@@ -148,20 +138,18 @@ cat search-tools.yaml
 
 ### Current State
 
-1. **Query Generation Only**: The current implementation generates search queries but doesn't execute them
-2. **Manual Execution**: Developers need to manually run searches or implement ingestion
-3. **Future Integration**: Planned Qdrant ingestion script will automate the retrieval process
+1. **Query Generation**: The system generates optimized search queries based on your PRD
+2. **Manual Execution**: Developers manually run searches using the generated queries
+3. **Future Automation**: Planned features include automated search execution and result caching
 
 ### Planned Workflow
 
 ```mermaid
 graph LR
     A[PRD] --> B[Generate search-tools.yaml]
-    B --> C[Ingestion Script]
-    C --> D[Fetch Results from APIs]
-    D --> E[Process & Embed Documents]
-    E --> F[Store in Qdrant]
-    F --> G[Agents Query Vector Store]
+    B --> C[Manual Search Execution]
+    C --> D[Review Results]
+    D --> E[Apply to Development]
 ```
 
 ### Interim Usage
@@ -347,14 +335,14 @@ node scripts/generate-search-tools.js --prd docs/prd.md --verbose
 4. **Caching**: Local caching of search results to reduce API calls
 5. **Real-time Updates**: Periodic re-execution of searches for updated documentation
 
-### Qdrant Integration (Coming Soon)
+### Future Search Automation
 
-The planned Qdrant integration will:
+Planned automation features include:
 
-1. Execute all searches from search-tools.yaml
+1. Execute all searches from search-tools.yaml automatically
 2. Fetch and process documentation pages
-3. Generate embeddings using appropriate models
-4. Store in Qdrant with metadata for efficient retrieval
-5. Provide query interface for agents
+3. Cache results for offline access
+4. Provide organized search results for agents
+5. Smart filtering and ranking of results
 
-Stay tuned for updates on the automated ingestion feature!
+Stay tuned for updates on the automated search features!
