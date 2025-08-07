@@ -1,0 +1,88 @@
+id: analyze-dependencies-before-implementation
+name: analyze-dependencies-before-implementation
+purpose: Analyze dependency impacts before implementing story changes to identify potential ripple effects
+steps:
+  - id: step0
+    name: Extract Files to Analyze
+    description: Get list of files that will be modified from StoryContract
+    actions:
+      - description: Read the story file and extract StoryContract.filesToModify
+        elicit: false
+      - description: Create list of all files that will be modified or created
+        elicit: false
+      - description: Log files to be analyzed using track-progress.js
+        elicit: false
+
+  - id: step1
+    name: Analyze File Dependencies
+    description: Check what files and symbols depend on the files being modified
+    actions:
+      - description: For each file in filesToModify, use dependency-impact-checker to find impacted files
+        elicit: false
+      - description: Identify all symbols (classes, functions, methods) that would be affected
+        elicit: false
+      - description: Group impacts by severity (critical system files vs feature files)
+        elicit: false
+      - description: Save detailed analysis to .ai/dependency_analysis.json
+        elicit: false
+
+  - id: step2
+    name: Check Import Relationships
+    description: Analyze import chains and circular dependencies
+    actions:
+      - description: Use dependency-scanner to map import relationships
+        elicit: false
+      - description: Identify any circular dependency risks
+        elicit: false
+      - description: Check for deeply nested dependency chains (>3 levels)
+        elicit: false
+      - description: Document import relationships in analysis report
+        elicit: false
+
+  - id: step3
+    name: Identify Critical Impacts
+    description: Flag high-risk changes that could break system functionality
+    actions:
+      - description: Check if changes impact core system files (auth, db, config)
+        elicit: false
+      - description: Identify if changes affect public APIs or interfaces
+        elicit: false
+      - description: Check for impacts on test files that might need updates
+        elicit: false
+      - description: Flag any changes that affect more than 10 files
+        elicit: true
+        format: "Critical impact detected: [count] files would be affected. Continue? (yes/no)"
+
+  - id: step4
+    name: Generate Impact Report
+    description: Create comprehensive dependency impact report
+    actions:
+      - description: Generate summary of all dependency impacts
+        elicit: false
+      - description: List files that will need careful testing
+        elicit: false
+      - description: Identify files that might need refactoring
+        elicit: false
+      - description: Save report to .ai/dependency_impact_report.md
+        elicit: false
+
+  - id: step5
+    name: Update Debug Log
+    description: Document dependency analysis findings in story
+    actions:
+      - description: Add dependency analysis summary to story Debug Log
+        elicit: false
+      - description: Note any high-risk changes identified
+        elicit: false
+      - description: List files that will be impacted by changes
+        elicit: false
+      - description: Log completion using track-progress.js
+        elicit: false
+
+inputs: {}
+outputs: {}
+notes: |
+  - This task MUST be executed before implementing any story code
+  - Helps prevent breaking changes by identifying impacts early
+  - Critical for maintaining system stability during development
+  - Results guide implementation approach and testing strategy

@@ -97,6 +97,7 @@ commands:
   - help: Show numbered list of the following commands to allow selection
   - review {story}: 'execute the task review-story for the highest sequence story in docs/stories unless another is specified - keep any specified technical-preferences in mind as needed → tracker.log(''Review started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Code review completed'' → execute: node .bmad-core/utils/track-progress.js decision qa ''Quality assessment'' ''Assessment based on code standards and requirements'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Quality review patterns identified'' → tracker.completeCurrentTask(''review completed'')'
   - analyze-dependencies {story}: 'execute dependency impact analysis on a story using analyze-dependency-impacts-qa task → tracker.log(''Dependency analysis started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Dependency analysis completed'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Dependency risk patterns documented'' → tracker.completeCurrentTask(''dependency analysis completed'')'
+  - analyze-code-quality {files}: 'execute automated code quality analysis on specified files or story implementation → *execute-task analyze-code-quality → tracker.log(''Code quality analysis completed'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Code quality analysis completed'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Quality metrics and violations documented'' → tracker.completeCurrentTask(''quality analysis completed'')'
   - progress: Show current task progress using tracker.getProgressReport()
   - exit: Say goodbye as the QA Engineer and abandon inhabiting this persona
 feedback-loop-workflow:
@@ -118,6 +119,7 @@ dependencies:
   structured-tasks:
     - review-story.yaml
     - analyze-dependency-impacts-qa.yaml
+    - analyze-code-quality.yaml
   utils:
     dependency-impact-checker: dependency-impact-checker.js
     dependency-analyzer: dependency-analyzer.js

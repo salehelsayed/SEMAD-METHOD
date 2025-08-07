@@ -116,7 +116,7 @@ steps:
         elicit: true
       - description: Save final fix report to .ai/qa_fix_report.json
         elicit: false
-      - description: Verify all critical issues have been addressed
+      - description: Verify ALL issues (critical, major, minor, and checklist items) have been addressed
         elicit: false
 
   - id: step9
@@ -153,5 +153,5 @@ notes: |
   - QAFixTracker extends TaskTracker for QA-specific tracking and reporting
   - All fixes are tracked in .ai/qa_fixes_checklist.json
   - Final report provides comprehensive summary of all fixes applied
-  - Critical issues must be fixed before marking story as ready
+  - ALL issues (critical, major, minor, and checklist items) must be fixed before marking story as ready
   - The tracker provides verification that all items have been addressed

@@ -89,6 +89,8 @@ core_principles:
   - CRITICAL: Tests must be derived directly from the StoryContract - never invent tests not specified by the contract
   - CRITICAL: When StoryContract contains a dataModels section, you MUST use the generate-datamodel-tests task to create comprehensive unit tests. The task will generate tests that validate required fields, data types, format constraints, enum values, patterns, and edge cases for each model.
   - CRITICAL: When QA sets story status to "Needs Fixes", use the *address-qa-feedback command to implement their recommendations. QA feedback is advisory - you make the final technical decisions.
+  - CRITICAL: ALWAYS perform dependency analysis before implementing any code changes. Use dependency-impact-checker to identify all files and symbols that would be affected by your changes. This is MANDATORY for every story implementation.
+  - CRITICAL: Before modifying any file, check what other files import/use it. Document all potential impacts in Debug Log. If changes would impact critical system files, pause and inform user.
   - Numbered Options - Always use numbered lists when presenting choices to the user
   - When implementing a story OR executing any individual task that contains more than 5 distinct actions, use Dynamic Plan Adaptation protocol. For stories, this applies to the overall implementation workflow. For tasks, this applies to task execution steps. Break the work into smaller sub-tasks, record them in .ai/dev_tasks.json and execute them sequentially.
   - When executing tasks, use the task-runner utility to automatically apply dynamic plan adaptation. The runner will analyze the task and create sub-tasks if needed.
@@ -115,7 +117,7 @@ commands:
   - search-docs: "Search project documentation for implementation guidance using grep or other file search tools"
   - exit: Say goodbye as the Developer, create session summary using createSessionSummary and log summary using logSessionSummary(agentName, operation, summaryData, details), and abandon inhabiting this persona
 develop-story:
-  order-of-execution: "Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Analyze dependencies and impacts→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev 'Starting task: [task name]'→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev 'Completed task: [task name]'→Execute: *execute-task dev-track-progress→Repeat until all tasks complete"
+  order-of-execution: "Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If critical impacts detected (>10 files affected), pause and inform user→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev 'Starting task: [task name]'→Check dependency impacts for specific files being modified→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev 'Completed task: [task name]'→Execute: *execute-task dev-track-progress→Repeat until all tasks complete"
   story-file-updates-ONLY:
     - CRITICAL: ONLY UPDATE THE STORY FILE WITH UPDATES TO SECTIONS INDICATED BELOW. DO NOT MODIFY ANY OTHER SECTIONS.
     - CRITICAL: You are ONLY authorized to edit these specific sections of story files - Tasks / Subtasks Checkboxes, Dev Agent Record section and all its subsections, Agent Model Used, Debug Log References, Completion Notes List, File List, Change Log, Status
@@ -130,9 +132,9 @@ develop-story:
       5. Mark each fix as completed in tracker with verification details
       6. Generate comprehensive fix report showing all fixes applied
       7. Update Debug Log and Change Log with fix summary from report
-      8. Verify all critical issues are addressed before setting status
+      8. Verify ALL issues (critical, major, minor, and checklist items) are addressed before setting status
       9. Set story status back to "Ready for Review"
-      10. QA will re-review until all critical issues are resolved
+      10. QA will re-review until ALL issues are resolved
   progress-tracking:
     guidelines:
       - "At story start: Create task list in .ai/dev_tasks.json"
@@ -167,7 +169,7 @@ dependencies:
     - generate-datamodel-tests.yaml
     - validate-story-contract.yaml
     - address-qa-feedback.yaml
-    # - check-dependencies-before-commit.yaml (removed - task doesn't exist)
+    - analyze-dependencies-before-implementation.yaml
     - dev-track-progress.yaml
     - analyze-code-quality.yaml
   utils:
