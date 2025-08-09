@@ -6,6 +6,8 @@ const V3ToV4Upgrader = require('./upgraders/v3-to-v4-upgrader');
 const IdeSetup = require('./installer/lib/ide-setup');
 const path = require('path');
 const chalk = require('chalk');
+// Ensure memory artifacts are migrated at CLI startup for each command
+const fileMemoryAdapter = require('../bmad-core/utils/memory/adapters/file');
 
 const program = new Command();
 
@@ -23,6 +25,10 @@ program
   .option('--no-expansions', 'Skip building expansion packs')
   .option('--no-clean', 'Skip cleaning output directories')
   .action(async (options) => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const builder = new WebBuilder({
       rootDir: process.cwd()
     });
@@ -99,6 +105,10 @@ program
   .option('--expansion <name>', 'Build specific expansion pack only')
   .option('--no-clean', 'Skip cleaning output directories')
   .action(async (options) => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const builder = new WebBuilder({
       rootDir: process.cwd()
     });
@@ -123,6 +133,10 @@ program
   .command('list:agents')
   .description('List all available agents')
   .action(async () => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     try {
       const builder = new WebBuilder({ rootDir: process.cwd() });
       const agents = await builder.resolver.listAgents();
@@ -144,6 +158,10 @@ program
   .command('list:expansions')
   .description('List all available expansion packs')
   .action(async () => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     try {
       const builder = new WebBuilder({ rootDir: process.cwd() });
       const expansions = await builder.listExpansionPacks();
@@ -165,6 +183,10 @@ program
   .command('validate')
   .description('Validate agent and team configurations')
   .action(async () => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const builder = new WebBuilder({ rootDir: process.cwd() });
     try {
       // Validate by attempting to build all agents and teams
@@ -224,6 +246,10 @@ program
   .option('--watch', 'Watch for file changes and update dependencies incrementally')
   .option('--stats', 'Show dependency database statistics after scan')
   .action(async (options) => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     try {
       const { scanRepository, watchRepository, getDependencyStats } = require('../bmad-core/utils/dependency-scanner');
       
@@ -278,6 +304,10 @@ program
   .command('dependency-stats')
   .description('Show dependency database statistics')
   .action(async () => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     try {
       const { getDependencyStats } = require('../bmad-core/utils/dependency-analyzer');
       

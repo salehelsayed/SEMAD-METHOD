@@ -9,6 +9,8 @@ const {
   saveAndCleanMemory,
   getMemoryStatus 
 } = require('./unified-memory-manager');
+// Ensure memory artifacts are migrated for all agent runs
+const fileMemoryAdapter = require('./memory/adapters/file');
 
 const {
   performHealthCheck,
@@ -268,8 +270,15 @@ class AgentRunner {
     let executionResult = null;
     let memoryResult = null;
     let healthCheckResult = null;
+    let retriedForSchema = false;
+    let retriedForPatch = false;
     
     try {
+      // Perform migration at agent startup; fail fast if it encounters critical errors
+      try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+        this.logger.error('Memory migration failed at agent startup', e);
+        throw e;
+      }
       // Phase 0: Perform startup memory health check with timeout
       const performHealthCheckWithTimeout = withTimeout(
         this.performStartupHealthCheck.bind(this),
@@ -361,6 +370,7 @@ class AgentRunner {
               validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
             };
             executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForSchema = true;
 
             // Re-validate once
             const reParsed = this._coerceToJSONObject(executionResult);
@@ -410,6 +420,7 @@ class AgentRunner {
               validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
             };
             executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForPatch = true;
           } else {
             throw new Error(`Patch grounding failed: ${e.message}`);
           }
@@ -430,6 +441,7 @@ class AgentRunner {
               validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
             };
             executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForPatch = true;
 
             // Re-evaluate patch after retry if provided again
             const retryCarrier = (executionResult && (executionResult.patch || executionResult.data?.patch)) ?
@@ -452,6 +464,12 @@ class AgentRunner {
           this.logger.taskComplete('Patch applied', `Agent: ${agentName}`, 'detailed');
         }
       }
+      
+      // Evidence tags + confidence scoring
+      const evidence = this._checkEvidence(executionResult);
+      const confidence = this._computeConfidence({ retriedForSchema, retriedForPatch, evidenceValid: evidence.valid });
+      executionResult.confidence = confidence.score;
+      executionResult.confidenceLevel = confidence.level;
       
       this.logger.taskComplete('Task execution completed', {
         success: executionResult.success,
@@ -582,6 +600,35 @@ class AgentRunner {
       try { return JSON.parse(raw); } catch (_) { return { raw }; }
     }
     return { value: result };
+  }
+
+  _checkEvidence(result) {
+    try {
+      const data = typeof result === 'object' ? result : {};
+      const listFrom = (arr) => arr.map(f => (typeof f === 'string' ? f : f?.path)).filter(Boolean);
+      const files = (data.evidence && Array.isArray(data.evidence.files) && data.evidence.files)
+        || (Array.isArray(data.files) && listFrom(data.files))
+        || (Array.isArray(data.data?.files) && listFrom(data.data.files))
+        || [];
+      if (files.length === 0) return { valid: true };
+      const { assertPathsExist } = require('./guardrails/grounding-checks');
+      assertPathsExist(files);
+      return { valid: true };
+    } catch (e) {
+      this.logger.warning(`Evidence check failed: ${e.message}`);
+      return { valid: false, error: e.message };
+    }
+  }
+
+  _computeConfidence({ retriedForSchema = false, retriedForPatch = false, evidenceValid = true }) {
+    let score = 0.7;
+    if (!retriedForSchema) score += 0.15; else score -= 0.1;
+    if (!retriedForPatch) score += 0.1; else score -= 0.1;
+    if (evidenceValid) score += 0.05; else score -= 0.2;
+    if (score > 1) score = 1;
+    if (score < 0) score = 0;
+    const level = score >= 0.8 ? 'high' : score >= 0.5 ? 'medium' : 'low';
+    return { score, level };
   }
 
   /**

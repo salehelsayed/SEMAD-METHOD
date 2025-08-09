@@ -1,9 +1,9 @@
-// Deprecated shim: re-exports file adapter API with deprecation notice
+// Deprecated shim for legacy imports using camelCase path
 let warned = false;
 function warnOnce() {
   if (!warned) {
     warned = true;
-    console.warn('[DEPRECATED] bmad-core/utils/simple-memory.js is deprecated. Use bmad-core/utils/memory/adapters/file.js');
+    console.warn('[DEPRECATED] bmad-core/utils/simpleMemory.js is deprecated. Use bmad-core/utils/memory/adapters/file.js');
   }
 }
 
@@ -37,3 +37,4 @@ module.exports = new Proxy({}, {
     return adapter[prop];
   }
 });
+

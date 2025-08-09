@@ -6,9 +6,18 @@
 const fs = require('fs').promises;
 const { existsSync } = require('fs');
 const path = require('path');
+const { acquireLock, releaseLock, writeJsonAtomic, appendJsonlAtomic } = require('../../file-safety');
 
 const MEMORY_DIR = path.join(process.cwd(), '.ai');
 const HISTORY_DIR = path.join(MEMORY_DIR, 'history');
+
+let MIGRATION_ATTEMPTED = false;
+async function maybeMigrate() {
+  if (!MIGRATION_ATTEMPTED) {
+    MIGRATION_ATTEMPTED = true;
+    try { await migrateFromOldSystem(); } catch (_) {}
+  }
+}
 
 async function ensureDirectories() {
   if (!existsSync(MEMORY_DIR)) {
@@ -21,6 +30,7 @@ async function ensureDirectories() {
 
 async function loadContext(agent) {
   await ensureDirectories();
+  await maybeMigrate();
   const file = path.join(MEMORY_DIR, `${agent}_context.json`);
   if (!existsSync(file)) return null;
   try {
@@ -33,16 +43,30 @@ async function loadContext(agent) {
 
 async function saveContext(agent, context) {
   await ensureDirectories();
+  await maybeMigrate();
   const file = path.join(MEMORY_DIR, `${agent}_context.json`);
   if (!context.lastUpdated) context.lastUpdated = new Date().toISOString();
-  await fs.writeFile(file, JSON.stringify(context, null, 2), 'utf8');
+  let token;
+  try {
+    token = await acquireLock(file);
+    await writeJsonAtomic(file, context, { spaces: 2 });
+  } finally {
+    if (token) await releaseLock(file, token);
+  }
 }
 
 async function logEntry(agent, type, content, metadata = {}) {
   await ensureDirectories();
+  await maybeMigrate();
   const file = path.join(HISTORY_DIR, `${agent}_log.jsonl`);
   const entry = { timestamp: new Date().toISOString(), type, content, ...metadata };
-  await fs.appendFile(file, JSON.stringify(entry) + '\n', 'utf8');
+  let token;
+  try {
+    token = await acquireLock(file);
+    await appendJsonlAtomic(file, entry);
+  } finally {
+    if (token) await releaseLock(file, token);
+  }
 }
 
 async function getHistory(agent, filters = {}) {
@@ -88,7 +112,70 @@ async function getAgentSummary(agent, limit = 10) {
 async function migrateFromOldSystem() {
   await ensureDirectories();
   const flag = path.join(MEMORY_DIR, '.migrated');
-  if (!existsSync(flag)) await fs.writeFile(flag, new Date().toISOString(), 'utf8');
+
+  // If migration already flagged, exit fast
+  if (existsSync(flag)) return;
+
+  const oldDir = path.join(process.cwd(), 'bmad-core', 'ai');
+  let moved = 0;
+  try {
+    // Migrate working memory files from old location
+    const exists = require('fs').existsSync(oldDir);
+    if (exists) {
+      const entries = await fs.readdir(oldDir, { withFileTypes: true });
+      for (const e of entries) {
+        try {
+          if (e.isFile() && /^working_memory_.*\.json$/.test(e.name)) {
+            const src = path.join(oldDir, e.name);
+            const dest = path.join(MEMORY_DIR, e.name);
+            try {
+              await fs.rename(src, dest);
+            } catch (err) {
+              if (err.code === 'EXDEV') {
+                const data = await fs.readFile(src);
+                await fs.writeFile(dest, data);
+                await fs.unlink(src);
+              } else {
+                throw err;
+              }
+            }
+            moved++;
+          } else if (e.isDirectory() && e.name === 'history') {
+            // Move history directory contents
+            const oldHist = path.join(oldDir, 'history');
+            const newHist = HISTORY_DIR;
+            const histEntries = await fs.readdir(oldHist, { withFileTypes: true }).catch(() => []);
+            for (const h of histEntries) {
+              if (h.isFile() && /_log\.jsonl$/.test(h.name)) {
+                const src = path.join(oldHist, h.name);
+                const dest = path.join(newHist, h.name);
+                try {
+                  await fs.rename(src, dest);
+                } catch (err) {
+                  if (err.code === 'EXDEV') {
+                    const data = await fs.readFile(src, 'utf8');
+                    await fs.writeFile(dest, data, 'utf8');
+                    await fs.unlink(src);
+                  } // else ignore
+                }
+                moved++;
+              }
+            }
+          }
+        } catch (_) { /* continue */ }
+      }
+    }
+  } catch (_) { /* best effort migration */ }
+
+  try {
+    const payload = {
+      migratedAt: new Date().toISOString(),
+      movedItems: moved,
+      source: 'bmad-core/ai',
+      target: '.ai'
+    };
+    await fs.writeFile(flag, JSON.stringify(payload, null, 2), 'utf8');
+  } catch (_) { /* ignore */ }
 }
 
 module.exports = {
@@ -102,4 +189,3 @@ module.exports = {
   MEMORY_DIR,
   HISTORY_DIR
 };
-

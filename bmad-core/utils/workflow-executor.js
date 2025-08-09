@@ -27,6 +27,7 @@ class WorkflowExecutor {
     this.filePathResolver = new FilePathResolver(rootDir);
     this.resolvedPaths = null;
     this.initialized = false;
+    this.useStateMachine = options.useStateMachine !== false; // default true
   }
 
   /**
@@ -407,15 +408,28 @@ class WorkflowExecutor {
     for (const step of steps) {
       const stepResult = await this.executeStep(step, context);
       results.steps.push(stepResult);
-      
+
       if (!stepResult.success && step.critical !== false) {
         results.success = false;
         break;
       }
-      
+
       // Update context with step outputs
       if (stepResult.data && step.creates) {
         context[step.creates] = stepResult.data;
+      }
+
+      // Optional: if confidence is low and QA auto-review callback exists, trigger it immediately
+      if (step.agent !== 'qa' && stepResult.confidenceLevel === 'low' && typeof this.callbacks.qaAutoReview === 'function') {
+        this.logger.taskStart('Auto QA review triggered', `Low confidence detected for ${step.agent}:${step.action || step.creates}`);
+        const qaReviewStep = { agent: 'qa', action: 'auto_review' };
+        const qaResult = await this.callbacks.qaAutoReview(qaReviewStep, {
+          ...context,
+          targetStep: step,
+          lastResult: stepResult
+        });
+        results.steps.push({ agent: 'qa', action: 'auto_review', success: true, data: qaResult });
+        this.logger.taskComplete('Auto QA review completed', '');
       }
     }
     
@@ -453,7 +467,7 @@ class WorkflowExecutor {
         }
       }
       
-      // Enhance context with resolved file paths and optional output schema
+      // Enhance context with resolved file paths, schema and temperature defaults
       const enhancedContext = {
         ...context,
         resolvedPaths: this.resolvedPaths,
@@ -471,7 +485,10 @@ class WorkflowExecutor {
           findStoryFile: (epicNum, storyNum) => this.filePathResolver.findStoryFile(epicNum, storyNum),
           findEpicFile: (epicNum) => this.filePathResolver.findEpicFile(epicNum)
         },
-        ...this._schemaForStep(step)
+        ...this._schemaForStep(step),
+        modelOptions: {
+          temperature: this._temperatureForStep(step)
+        }
       };
       
       // Call appropriate callback or simulate execution
@@ -508,6 +525,22 @@ class WorkflowExecutor {
       return { outputSchemaId: 'agents/analyst.prd.output', validationOptions: { retries: 0 } };
     }
     return {};
+  }
+
+  _temperatureForStep(step) {
+    const defaults = {
+      planning: 0.7,
+      code: 0.2,
+      qa: 0.3
+    };
+    const cfg = (this.config && this.config.model && this.config.model.temperature) || {};
+    const tPlanning = cfg.planning ?? defaults.planning;
+    const tCode = cfg.code ?? defaults.code;
+    const tQA = cfg.qa ?? defaults.qa;
+    if (step.agent === 'analyst' || step.agent === 'pm' || step.agent === 'architect') return tPlanning;
+    if (step.agent === 'dev') return tCode;
+    if (step.agent === 'qa') return tQA;
+    return tPlanning;
   }
 
   /**

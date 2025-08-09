@@ -36,7 +36,7 @@ async function initializeAllMemory() {
   }
   
   console.log('\nMemory initialization complete!');
-  console.log(`Memory files created in: ${path.join(__dirname, '../ai/')}`);
+  console.log(`Memory files created in: ${path.join(process.cwd(), '.ai/')}`);
 }
 
 // Run if called directly

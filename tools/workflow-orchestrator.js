@@ -14,6 +14,8 @@ const FilePathResolver = require('../bmad-core/utils/file-path-resolver');
 const SharedContextManager = require('../bmad-core/utils/shared-context-manager');
 const AgentRunner = require('../bmad-core/utils/agent-runner');
 const { getAggregatedHealthStatus } = require('../bmad-core/utils/memory-health');
+// Ensure memory artifacts are migrated before any orchestration work
+const fileMemoryAdapter = require('../bmad-core/utils/memory/adapters/file');
 
 class WorkflowOrchestrator {
   constructor(rootDir) {
@@ -1355,6 +1357,11 @@ program
   .option('--no-verbose', 'Disable verbose output')
   .option('--non-interactive', 'Run in non-interactive mode (no user prompts)')
   .action(async (options) => {
+    // Perform migration at boot; fail fast on critical errors
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const orchestrator = new WorkflowOrchestrator(options.directory);
     await orchestrator.run(options);
   });
@@ -1364,6 +1371,10 @@ program
   .description('Show the current orchestrator status and metadata')
   .option('-d, --directory <path>', 'Project root directory', process.cwd())
   .action(async (options) => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const orchestrator = new WorkflowOrchestrator(options.directory);
     
     try {
@@ -1417,6 +1428,10 @@ program
   .description('List all available epics with their story counts and status')
   .option('-d, --directory <path>', 'Project root directory', process.cwd())
   .action(async (options) => {
+    try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+      console.error(chalk.red('Memory migration failed at startup:'), e.message);
+      process.exit(1);
+    }
     const orchestrator = new WorkflowOrchestrator(options.directory);
     
     try {

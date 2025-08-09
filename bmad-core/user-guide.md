@@ -239,6 +239,68 @@ BMad uses a simple, lightweight task tracking system to ensure systematic comple
 - Visual progress reports available via commands
 - No manual intervention required - it just works!
 
+## Memory Architecture and Health UI
+
+BMad uses a file-backed memory system designed for safety and transparency.
+
+- Location: `.ai/` (per-project)
+  - Context files: `${agent}_context.json`
+  - History logs: `history/${agent}_log.jsonl` (one JSON record per line)
+  - Migration flag: `.migrated` (JSON record of one-time migration from `bmad-core/ai`)
+- Concurrency safety: All writes use temp-file + atomic rename with a per-file `.lock` to prevent corruption during concurrent updates.
+- Startup migration: Every entrypoint (orchestrator, agent runner, CLI) attempts a one-time migration at boot. Failures surface immediately with guidance.
+
+Health UI
+- At agent start, a memory health check runs and surfaces warnings/errors in the console with recommendations.
+- Orchestrator summary: `node tools/workflow-orchestrator.js status` prints a consolidated view.
+- Troubleshooting: See docs/playbooks/memory-issues.md
+
+## Agent IO Schemas & Authoring JSON Outputs
+
+Agents are guided to emit structured JSON matching validation schemas to reduce ambiguity and hallucination.
+
+- Schemas live under `bmad-core/schemas/` and are referenced by tools and validations.
+- When prompting agents, prefer explicit instructions to output JSON only, e.g.:
+
+```
+You are the Dev agent. Produce ONLY JSON that matches this schema:
+{
+  "type": "object",
+  "properties": {
+    "decisions": {"type": "array", "items": {"type": "string"}},
+    "observations": {"type": "array", "items": {"type": "string"}},
+    "patch": {"type": "string", "description": "unified diff"}
+  },
+  "required": ["decisions", "observations"],
+  "additionalProperties": false
+}
+Return ONLY the JSON object with no commentary.
+```
+
+- Validation: The runner validates JSON structures; invalid outputs trigger targeted feedback and a retry (repair pass) when configured.
+
+## Dev↔QA State Machine Usage
+
+SEMAD supports linear Dev→QA or iterative Dev↔QA loops.
+
+- Configure via orchestrator options (CLI flags) or workflow config. See `docs/dev-qa-flow-options.md`.
+- In iterative mode, QA can send work back to Dev with structured notes; the orchestrator preserves state and loops until acceptance criteria are met.
+
+## Patcher Workflow & Repair Passes
+
+Agents propose code changes as unified diffs. The runner:
+- Validates the patch with a dry-run and path guardrails.
+- Surfaces grounding issues (e.g., missing files) and optionally triggers a repair pass with feedback.
+- Applies the patch only after validation passes.
+
+Authoring tips for patches
+- Keep diffs minimal and surgical; limit scope to requested files.
+- Include complete hunks and correct file headers; prefer small patches with context.
+- If a patch depends on new files, add them explicitly in the diff.
+
+Troubleshooting
+- See docs/playbooks/patch-failures.md for common dry-run failures and quick fixes.
+
 ## Technical Preferences System
 
 BMad includes a personalization system through the `technical-preferences.md` file located in `.bmad-core/data/` - this can help bias the PM and Architect to recommend your preferences for design patterns, technology selection, or anything else you would like to put in here.
