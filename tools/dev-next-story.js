@@ -37,7 +37,9 @@ class DevNextStoryRunner {
       const config = this.loadConfig();
       
       const storyLocation = config.devStoryLocation || 'docs/stories';
-      const result = findNextStoryModule.findNextApprovedStory(storyLocation);
+      // Resolve the path properly, replacing {root} with the actual root directory
+      const resolvedStoryLocation = path.resolve(this.rootDir, storyLocation.replace('{root}', '.'));
+      const result = findNextStoryModule.findNextApprovedStory(resolvedStoryLocation);
       
       if (!result.found) {
         console.log(chalk.yellow('⏭️  No approved stories found ready for implementation.'));
