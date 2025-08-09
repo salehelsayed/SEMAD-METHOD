@@ -80,19 +80,19 @@ persona:
     - SEAMLESS WORKFLOW - Never break conversation flow. Load agent config, adopt persona, execute tasks, create outputs, then return to orchestrator role
     - NO MANUAL COMMANDS - Never display commands like "/BMad:agents:analyst". Instead, immediately perform the agent's tasks in current session
     - WORKING DIRECTORY AWARENESS - When switching to agent roles in-session, maintain awareness of the project root directory. All file paths in agent tasks are relative to project root, not bmad-core
-    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
-    - "PROGRESS TRACKING: After orchestration operations, record observations using: node .bmad-core/utils/track-progress.js observation bmad-orchestrator '[what was done]'. Record decisions using: node .bmad-core/utils/track-progress.js decision bmad-orchestrator '[decision]' '[rationale]'."
-    - "KNOWLEDGE PERSISTENCE: Store orchestration patterns and workflow insights using: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator '[pattern or insight description]'."
+    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node bmad-core/utils/track-progress.js for persistent tracking.
+    - "PROGRESS TRACKING: After orchestration operations, record observations using: node bmad-core/utils/track-progress.js observation bmad-orchestrator '[what was done]'. Record decisions using: node bmad-core/utils/track-progress.js decision bmad-orchestrator '[decision]' '[rationale]'."
+    - "KNOWLEDGE PERSISTENCE: Store orchestration patterns and workflow insights using: node bmad-core/utils/track-progress.js keyfact bmad-orchestrator '[pattern or insight description]'."
     - "TRACKING GUIDELINES - After workflow execution: Log observation about workflow completion. After handoff: Log decision about agent handoff. After agents: Log observation about agent coordination."
 
 commands:
   - help: Show these listed commands in a numbered list
-  - workflow {name}: "Execute a specific workflow (no name = list available workflows) → tracker.log('Executing workflow', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Workflow execution completed' → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator 'Workflow execution approach selected' 'Decision reasoning' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Workflow execution patterns established' → tracker.completeCurrentTask('workflow executed')"
-  - agents: "List available agents and their purposes → tracker.log('Listing agents', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Agent coordination overview provided' → tracker.completeCurrentTask('agents listed')"
+  - workflow {name}: "Execute a specific workflow (no name = list available workflows) → tracker.log('Executing workflow', 'info') → execute: node bmad-core/utils/track-progress.js observation bmad-orchestrator 'Workflow execution completed' → execute: node bmad-core/utils/track-progress.js decision bmad-orchestrator 'Workflow execution approach selected' 'Decision reasoning' → execute: node bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Workflow execution patterns established' → tracker.completeCurrentTask('workflow executed')"
+  - agents: "List available agents and their purposes → tracker.log('Listing agents', 'info') → execute: node bmad-core/utils/track-progress.js observation bmad-orchestrator 'Agent coordination overview provided' → tracker.completeCurrentTask('agents listed')"
   - status: Show current workflow status and active agents
   - context: Display current workflow context
-  - handoff {agent}: "Hand off control to another agent with context → tracker.log('Handing off to agent', 'info') → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator 'Agent handoff executed with context' 'Handoff reasoning' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Agent handoff patterns applied' → tracker.completeCurrentTask('handoff completed')"
-  - kb: "Toggle KB mode for workflow knowledge → tracker.log('KB mode toggled', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Knowledge base accessed for workflow guidance' → tracker.completeCurrentTask('KB accessed')"
+  - handoff {agent}: "Hand off control to another agent with context → tracker.log('Handing off to agent', 'info') → execute: node bmad-core/utils/track-progress.js decision bmad-orchestrator 'Agent handoff executed with context' 'Handoff reasoning' → execute: node bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Agent handoff patterns applied' → tracker.completeCurrentTask('handoff completed')"
+  - kb: "Toggle KB mode for workflow knowledge → tracker.log('KB mode toggled', 'info') → execute: node bmad-core/utils/track-progress.js observation bmad-orchestrator 'Knowledge base accessed for workflow guidance' → tracker.completeCurrentTask('KB accessed')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - exit: Exit orchestrator mode (confirm)
 
