@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const MEMORY_DIR = path.join(__dirname, '..', 'ai');
+const MEMORY_DIR = path.join(process.cwd(), '.ai');
 const MAX_OBSERVATIONS = 100;
 
 async function initializeWorkingMemory(agentName) {
