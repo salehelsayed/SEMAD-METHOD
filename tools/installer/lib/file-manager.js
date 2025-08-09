@@ -27,6 +27,12 @@ class FileManager {
       } else {
         await fs.copy(source, destination);
       }
+      
+      // Preserve execute permissions for CLI scripts
+      if (stats.mode & 0o111) {
+        await fs.chmod(destination, stats.mode);
+      }
+      
       return true;
     } catch (error) {
       console.error(chalk.red(`Failed to copy ${source}:`), error.message);
