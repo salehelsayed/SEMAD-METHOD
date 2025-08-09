@@ -1,7 +1,6 @@
 module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.js'],
-  injectGlobals: false,
   collectCoverageFrom: [
     'bmad-core/agents/**/*.js',
     'bmad-core/utils/**/*.js',

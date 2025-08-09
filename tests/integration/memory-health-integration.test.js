@@ -4,7 +4,7 @@
  * periodic health checks, orchestrator integration, and failure simulation
  */
 
-const { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll, jest } = require('@jest/globals');
+const { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } = require('@jest/globals');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
