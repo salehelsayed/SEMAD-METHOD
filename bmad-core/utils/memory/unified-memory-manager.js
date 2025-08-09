@@ -12,6 +12,7 @@ const yaml = require('js-yaml');
 // Modules that tests will mock
 const agentMemory = require('../agent-memory-manager');
 const qdrant = require('../qdrant');
+const fileAdapter = require('./adapters/file');
 
 const DEFAULTS = Object.freeze({
   enabled: true,
@@ -66,27 +67,32 @@ async function loadMemoryForTask(agentName, params = {}) {
       return { shortTerm: null, longTerm: [], config };
     }
 
-    let shortTerm = await agentMemory.loadWorkingMemory(agentName);
-    if (!shortTerm) {
-      shortTerm = await agentMemory.initializeWorkingMemory(agentName, {
-        taskId: params.taskId,
-        storyId: params.storyId
+    // Primary path via agentMemory (mocked by tests)
+    try {
+      let shortTerm = await agentMemory.loadWorkingMemory(agentName);
+      if (!shortTerm) {
+        shortTerm = await agentMemory.initializeWorkingMemory(agentName, {
+          taskId: params.taskId,
+          storyId: params.storyId
+        });
+      }
+      const queryParts = [];
+      if (params.storyId) queryParts.push(`story:${params.storyId}`);
+      if (params.epicId) queryParts.push(`epic:${params.epicId}`);
+      queryParts.push(`agent:${agentName}`);
+      const query = queryParts.join(' ');
+      const longTerm = await agentMemory.retrieveRelevantMemories(agentName, query, {
+        storyId: params.storyId,
+        epicId: params.epicId,
+        topN: 10
       });
+      return { shortTerm, longTerm, config };
+    } catch (_primaryErr) {
+      // Fallback to file adapter
+      const ctx = await fileAdapter.loadContext(agentName);
+      const longTerm = await fileAdapter.getHistory(agentName);
+      return { shortTerm: ctx, longTerm, config };
     }
-
-    const queryParts = [];
-    if (params.storyId) queryParts.push(`story:${params.storyId}`);
-    if (params.epicId) queryParts.push(`epic:${params.epicId}`);
-    queryParts.push(`agent:${agentName}`);
-    const query = queryParts.join(' ');
-
-    const longTerm = await agentMemory.retrieveRelevantMemories(agentName, query, {
-      storyId: params.storyId,
-      epicId: params.epicId,
-      topN: 10
-    });
-
-    return { shortTerm, longTerm, config };
   } catch (error) {
     return { error: error.message, shortTerm: null, longTerm: [] };
   }
@@ -112,10 +118,30 @@ async function saveAndCleanMemory(agentName, taskData = {}) {
     if (taskData.context?.storyId) {
       updatePayload.currentContext = { storyId: taskData.context.storyId };
     }
-    await agentMemory.updateWorkingMemory(agentName, updatePayload);
+    try {
+      await agentMemory.updateWorkingMemory(agentName, updatePayload);
+    } catch (_updateErr) {
+      // Fallback: file adapter logs minimal info
+      if (updatePayload.observation) {
+        await fileAdapter.logEntry(agentName, 'observation', updatePayload.observation, {
+          story: updatePayload.currentContext?.storyId,
+          task: taskData.taskId
+        });
+      }
+      const ctx = (await fileAdapter.loadContext(agentName)) || {};
+      if (updatePayload.currentContext) {
+        ctx.currentStory = updatePayload.currentContext.storyId;
+      }
+      await fileAdapter.saveContext(agentName, ctx);
+    }
 
     if (taskData.taskCompleted && taskData.taskId) {
-      await agentMemory.archiveTaskMemory(agentName, taskData.taskId);
+      try {
+        await agentMemory.archiveTaskMemory(agentName, taskData.taskId);
+      } catch (_) {
+        // best-effort: note archived via file history
+        await fileAdapter.logEntry(agentName, 'completion', `Task ${taskData.taskId} completed`, { story: taskData.context?.storyId });
+      }
       operations.push('Archived task to long-term memory');
     }
 
@@ -129,7 +155,8 @@ async function saveAndCleanMemory(agentName, taskData = {}) {
     }
 
     // Cleanup (based on retention policies)
-    const wm = await agentMemory.loadWorkingMemory(agentName);
+    let wm;
+    try { wm = await agentMemory.loadWorkingMemory(agentName); } catch (_) { wm = null; }
     const maxObs = config.retentionPolicies.workingMemory.maxObservations;
     if (config.retentionPolicies.workingMemory.autoCleanup && Array.isArray(wm?.observations) && wm.observations.length > maxObs) {
       operations.push(`Memory cleanup: trimmed observations to ${maxObs}`);
@@ -200,4 +227,3 @@ module.exports = {
   summarizeAndArchiveMemories,
   getMemoryStatus
 };
-
