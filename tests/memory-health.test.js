@@ -3,7 +3,7 @@
  * Tests startup verification, periodic health checks, failure scenarios, and orchestrator integration
  */
 
-const { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll, jest } = require('@jest/globals');
+const { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } = require('@jest/globals');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');

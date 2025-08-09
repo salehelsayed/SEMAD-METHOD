@@ -7,6 +7,7 @@ module.exports = {
     'tools/**/*.js',
     '!tools/installer/**/*.js'
   ],
+  modulePathIgnorePatterns: ['<rootDir>/tools/installer'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
   moduleNameMapper: {

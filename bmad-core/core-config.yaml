@@ -128,3 +128,9 @@ codeQuality:
     - "**/*.json"
     - "**/*.yaml"
     - "**/*.yml"
+
+model:
+  temperature:
+    planning: 0.7   # analyst/pm/architect default
+    code: 0.2       # dev default
+    qa: 0.3         # qa default

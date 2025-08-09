@@ -61,11 +61,17 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **Impact**: Production-ready system with deterministic behavior
 - **Status**: 100% test pass rate achieved
 
-### 9. **Dev↔QA Iterative Flow Option** *(New)*
+### 9. **Dev↔QA Iterative Flow Option**
 - **What Changed**: Added choice between linear Dev→QA flow and iterative Dev↔QA loop
 - **Why**: Different projects need different quality assurance approaches
 - **Impact**: Teams can choose immediate iteration on QA findings or batch processing
 - **Usage**: `npm run orchestrate` or configure in `.bmad-workflow.yaml`
+
+### 10. **Concurrency-Safe Memory + Migration** (New)
+- What Changed: Added atomic writes with lockfiles for `.ai` memory, plus one-time migration from `bmad-core/ai` with a `.migrated` flag.
+- Why: Eliminates race conditions and JSON corruption in concurrent runs; reduces surprises during upgrades.
+- Impact: Stable memory under stress; startup migration runs at all entrypoints to fail fast on issues.
+- Files: `bmad-core/utils/file-safety.js`, `bmad-core/utils/agents/index.js` (writes), `bmad-core/utils/memory/adapters/file.js` (adapter & migration)
 
 ## 📊 Results
 
@@ -117,6 +123,20 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 - **[Browse ready-made expansion packs](expansion-packs/)** → Game dev, DevOps, infrastructure and get inspired with ideas and examples
 - **[Understand the architecture](docs/core-architecture.md)** → Technical deep dive
 - **[Join the community](https://discord.gg/gk8jAdXWmj)** → Get help and share ideas
+
+## Docs Quickstart
+
+- User Guide: `bmad-core/user-guide.md`
+  - Memory & Health: `bmad-core/user-guide.md#memory-architecture-and-health-ui`
+  - Agent IO (JSON): `bmad-core/user-guide.md#agent-io-schemas--authoring-json-outputs`
+  - Dev↔QA State Machine: `bmad-core/user-guide.md#devqa-state-machine-usage`
+  - Patcher & Repairs: `bmad-core/user-guide.md#patcher-workflow--repair-passes`
+- Playbooks: `docs/playbooks/`
+  - Memory Issues: `docs/playbooks/memory-issues.md`
+  - Migration: `docs/playbooks/migration.md`
+  - Patch Failures: `docs/playbooks/patch-failures.md`
+  - Schema Validation: `docs/playbooks/schema-validation.md`
+  - Agent IO Troubleshooting: `docs/playbooks/agent-io-troubleshooting.md`
 
 ## Prerequisites
 
@@ -279,6 +299,29 @@ simpleTaskTracking: true      # Use simple task tracking system
 - 🏗️ **[Core Architecture](docs/core-architecture.md)** - Technical deep dive and system design
 - 🚀 **[Expansion Packs Guide](docs/expansion-packs.md)** - Extend BMad to any domain beyond software development
 - 🔄 **[Dev↔QA Flow Options](docs/dev-qa-flow-options.md)** - Choose between linear and iterative development flows
+ - 🧠 **Memory & Health**: See the "Memory Architecture and Health UI" in the User Guide
+ - 🧰 **Playbooks**: Quick fixes for common issues in `docs/playbooks/`
+
+### New Memory Architecture and Health UI (Overview)
+- Memory lives in `.ai/` with per-agent JSON context and JSONL history; writes are atomic with lockfiles per file.
+- Startup migration moves any legacy `bmad-core/ai` artifacts and writes `.ai/.migrated`.
+- Health UI: At agent start, memory health is checked and surfaced in-console with warnings/errors and recommendations. Orchestrator exposes a consolidated status.
+  - Run: `node tools/workflow-orchestrator.js status`
+  - Agents surface issues automatically at run start.
+
+### Agent IO Schemas and JSON Outputs
+- Agents emit structured JSON for key outputs; schemas are validated during runs to reduce hallucinations.
+- Prompt authoring tip: ask agents to “respond with JSON only” matching the provided schema and include no commentary.
+- See: `bmad-core/schemas/` and the User Guide section “Authoring Prompts to Emit JSON”.
+
+### Dev↔QA State Machine Usage
+- Choose linear Dev→QA or iterative Dev↔QA in orchestrator options; see `docs/dev-qa-flow-options.md` for details.
+- The orchestrator enforces state transitions and will route outputs to QA and back to Dev for repair passes as configured.
+
+### Patcher-Based Workflow and Repair Passes
+- Agents propose changes as unified diffs; the runner validates with a dry-run, applies guardrails, and can request repair passes when validation fails.
+- If a patch fails to apply, the system provides feedback and retries per policy before surfacing actionable errors.
+- See User Guide section “Patcher Workflow & Repair Passes”.
 
 ## Support
 

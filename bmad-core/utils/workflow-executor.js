@@ -27,6 +27,7 @@ class WorkflowExecutor {
     this.filePathResolver = new FilePathResolver(rootDir);
     this.resolvedPaths = null;
     this.initialized = false;
+    this.useStateMachine = options.useStateMachine !== false; // default true
   }
 
   /**
@@ -44,6 +45,7 @@ class WorkflowExecutor {
   async ensureInitialized() {
     if (!this.initialized) {
       const config = await this.configLoader.loadConfig();
+      this.config = config;
       this.logger.configure({
         verbosity: config.verbosity,
         verbosityLevel: config.verbosityLevel
@@ -162,6 +164,13 @@ class WorkflowExecutor {
    */
   async executeDevQAFlow(workflow, context) {
     if (this.flowType === 'iterative') {
+      // Prefer state machine if enabled in options or config
+      const useSM = (this.useStateMachine !== false) && (this.config?.workflow?.useStateMachine !== false);
+      if (useSM) {
+        const DevQAStateMachine = require('./workflow/devqa-state-machine');
+        const sm = new DevQAStateMachine({ maxIterations: this.maxIterations, logger: this.logger });
+        return await sm.run(workflow, context, this.executeStep.bind(this));
+      }
       return await this.executeIterativeDevQAFlow(workflow, context);
     } else {
       return await this.executeLinearDevQAFlow(workflow, context);
@@ -399,15 +408,28 @@ class WorkflowExecutor {
     for (const step of steps) {
       const stepResult = await this.executeStep(step, context);
       results.steps.push(stepResult);
-      
+
       if (!stepResult.success && step.critical !== false) {
         results.success = false;
         break;
       }
-      
+
       // Update context with step outputs
       if (stepResult.data && step.creates) {
         context[step.creates] = stepResult.data;
+      }
+
+      // Optional: if confidence is low and QA auto-review callback exists, trigger it immediately
+      if (step.agent !== 'qa' && stepResult.confidenceLevel === 'low' && typeof this.callbacks.qaAutoReview === 'function') {
+        this.logger.taskStart('Auto QA review triggered', `Low confidence detected for ${step.agent}:${step.action || step.creates}`);
+        const qaReviewStep = { agent: 'qa', action: 'auto_review' };
+        const qaResult = await this.callbacks.qaAutoReview(qaReviewStep, {
+          ...context,
+          targetStep: step,
+          lastResult: stepResult
+        });
+        results.steps.push({ agent: 'qa', action: 'auto_review', success: true, data: qaResult });
+        this.logger.taskComplete('Auto QA review completed', '');
       }
     }
     
@@ -445,7 +467,7 @@ class WorkflowExecutor {
         }
       }
       
-      // Enhance context with resolved file paths
+      // Enhance context with resolved file paths, schema and temperature defaults
       const enhancedContext = {
         ...context,
         resolvedPaths: this.resolvedPaths,
@@ -462,6 +484,10 @@ class WorkflowExecutor {
           // Utility methods
           findStoryFile: (epicNum, storyNum) => this.filePathResolver.findStoryFile(epicNum, storyNum),
           findEpicFile: (epicNum) => this.filePathResolver.findEpicFile(epicNum)
+        },
+        ...this._schemaForStep(step),
+        modelOptions: {
+          temperature: this._temperatureForStep(step)
         }
       };
       
@@ -485,6 +511,36 @@ class WorkflowExecutor {
       ]);
       return result;
     }
+  }
+
+  _schemaForStep(step) {
+    // Provide output schema hints per agent/action
+    if (step.agent === 'dev' && (step.action === 'implement_story' || step.creates === 'implementation_files')) {
+      return { outputSchemaId: 'agents/dev.implement_story.output', validationOptions: { retries: 1 } };
+    }
+    if (step.agent === 'qa' && (step.action === 'review_implementation' || step.action === 'review_story')) {
+      return { outputSchemaId: 'agents/qa.review_implementation.output', validationOptions: { retries: 0 } };
+    }
+    if (step.agent === 'analyst' && (step.action === 'create_prd' || step.creates === 'prd')) {
+      return { outputSchemaId: 'agents/analyst.prd.output', validationOptions: { retries: 0 } };
+    }
+    return {};
+  }
+
+  _temperatureForStep(step) {
+    const defaults = {
+      planning: 0.7,
+      code: 0.2,
+      qa: 0.3
+    };
+    const cfg = (this.config && this.config.model && this.config.model.temperature) || {};
+    const tPlanning = cfg.planning ?? defaults.planning;
+    const tCode = cfg.code ?? defaults.code;
+    const tQA = cfg.qa ?? defaults.qa;
+    if (step.agent === 'analyst' || step.agent === 'pm' || step.agent === 'architect') return tPlanning;
+    if (step.agent === 'dev') return tCode;
+    if (step.agent === 'qa') return tQA;
+    return tPlanning;
   }
 
   /**

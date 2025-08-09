@@ -9,6 +9,8 @@ const {
   saveAndCleanMemory,
   getMemoryStatus 
 } = require('./unified-memory-manager');
+// Ensure memory artifacts are migrated for all agent runs
+const fileMemoryAdapter = require('./memory/adapters/file');
 
 const {
   performHealthCheck,
@@ -19,6 +21,10 @@ const {
 
 const VerboseLogger = require('./verbose-logger');
 const { withTimeout } = require('./timeout-wrapper');
+const { applyUnifiedDiff, parsePatch } = require('./patcher');
+const { assertPathsExist, assertModulesResolvable, assertNoDangerousOps } = require('./guardrails/grounding-checks');
+const { validate: validateSchema } = require('./validators/schema-validator');
+const { logValidationFailure } = require('./validation-enforcer');
 
 class AgentRunner {
   constructor(options = {}) {
@@ -264,8 +270,15 @@ class AgentRunner {
     let executionResult = null;
     let memoryResult = null;
     let healthCheckResult = null;
+    let retriedForSchema = false;
+    let retriedForPatch = false;
     
     try {
+      // Perform migration at agent startup; fail fast if it encounters critical errors
+      try { await fileMemoryAdapter.migrateFromOldSystem(); } catch (e) {
+        this.logger.error('Memory migration failed at agent startup', e);
+        throw e;
+      }
       // Phase 0: Perform startup memory health check with timeout
       const performHealthCheckWithTimeout = withTimeout(
         this.performStartupHealthCheck.bind(this),
@@ -332,6 +345,131 @@ class AgentRunner {
       );
       
       executionResult = await executeTaskWithTimeout(enrichedContext);
+
+      // Optional: validate agent output against schema to reduce hallucinations
+      if (context.outputSchemaId) {
+        const parsedResult = this._coerceToJSONObject(executionResult);
+        const validation = validateSchema(context.outputSchemaId, parsedResult);
+        if (!validation.valid) {
+          // Log for audit trail
+          try {
+            await logValidationFailure('AgentOutput', `${agentName}:${taskId}`, validation.errors.map(m => ({ message: m })));
+          } catch (_) {}
+
+          // Optionally retry with feedback
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            this.logger.warning(`Output validation failed for ${agentName}:${taskId}. Retrying (${retries}) with feedback.`);
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                schemaId: context.outputSchemaId,
+                errors: validation.errors
+              },
+              // Decrement retries for any further nested calls
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForSchema = true;
+
+            // Re-validate once
+            const reParsed = this._coerceToJSONObject(executionResult);
+            const recheck = validateSchema(context.outputSchemaId, reParsed);
+            if (!recheck.valid) {
+              throw new Error(`Output still invalid after retry: ${recheck.errors.join('; ')}`);
+            }
+          } else {
+            throw new Error(`Output validation failed: ${validation.errors.join('; ')}`);
+          }
+        }
+      }
+
+      // Optional: run grounding checks and patch flow if patch is provided
+      const patchCarrier = (executionResult && (executionResult.patch || executionResult.data?.patch)) ?
+        (typeof executionResult.patch === 'string' ? executionResult : executionResult.data) : null;
+
+      if (patchCarrier && typeof patchCarrier.patch === 'string') {
+        this.logger.taskStart('Validating patch (dry-run)', `Agent: ${agentName}`, 'detailed');
+        const patchText = patchCarrier.patch;
+
+        // Guardrails: optional modules/commands assertions if provided
+        if (Array.isArray(patchCarrier.modules)) {
+          assertModulesResolvable(patchCarrier.modules);
+        }
+        if (Array.isArray(patchCarrier.commands)) {
+          assertNoDangerousOps(patchCarrier.commands);
+        }
+
+        // Guardrails: paths in update/delete must exist before applying
+        try {
+          const ops = parsePatch(patchText);
+          const mustExist = ops
+            .filter(op => op.type === 'update' || op.type === 'delete')
+            .map(op => op.file);
+          if (mustExist.length) assertPathsExist(mustExist);
+        } catch (e) {
+          // If path assertion fails, provide feedback/retry or throw
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                ...(enrichedContext.validationFeedback || {}),
+                patchErrors: [e.message]
+              },
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForPatch = true;
+          } else {
+            throw new Error(`Patch grounding failed: ${e.message}`);
+          }
+        }
+
+        const dry = await applyUnifiedDiff(patchText, { dryRun: true, baseDir: process.cwd() });
+        if (!dry.success) {
+          const msg = `Patch dry-run failed: ${dry.errors.join('; ')}`;
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            this.logger.warning(msg);
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                ...(enrichedContext.validationFeedback || {}),
+                patchErrors: dry.errors
+              },
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+            retriedForPatch = true;
+
+            // Re-evaluate patch after retry if provided again
+            const retryCarrier = (executionResult && (executionResult.patch || executionResult.data?.patch)) ?
+              (typeof executionResult.patch === 'string' ? executionResult : executionResult.data) : null;
+            if (!retryCarrier || typeof retryCarrier.patch !== 'string') {
+              throw new Error('Agent retry did not return a patch.');
+            }
+            const dry2 = await applyUnifiedDiff(retryCarrier.patch, { dryRun: true, baseDir: process.cwd() });
+            if (!dry2.success) {
+              throw new Error(`Patch still invalid after retry: ${dry2.errors.join('; ')}`);
+            }
+            await applyUnifiedDiff(retryCarrier.patch, { dryRun: false, baseDir: process.cwd() });
+            this.logger.taskComplete('Patch applied', `Agent: ${agentName}`, 'detailed');
+          } else {
+            throw new Error(msg);
+          }
+        } else {
+          // Apply for real
+          await applyUnifiedDiff(patchText, { dryRun: false, baseDir: process.cwd() });
+          this.logger.taskComplete('Patch applied', `Agent: ${agentName}`, 'detailed');
+        }
+      }
+      
+      // Evidence tags + confidence scoring
+      const evidence = this._checkEvidence(executionResult);
+      const confidence = this._computeConfidence({ retriedForSchema, retriedForPatch, evidenceValid: evidence.valid });
+      executionResult.confidence = confidence.score;
+      executionResult.confidenceLevel = confidence.level;
       
       this.logger.taskComplete('Task execution completed', {
         success: executionResult.success,
@@ -450,6 +588,47 @@ class AgentRunner {
       
       return errorResponse;
     }
+  }
+
+  _coerceToJSONObject(result) {
+    if (result == null) return {};
+    if (typeof result === 'object') return result;
+    if (typeof result === 'string') {
+      // Attempt to extract fenced JSON
+      const fence = result.match(/```json\s*([\s\S]*?)\s*```/i);
+      const raw = fence ? fence[1] : result;
+      try { return JSON.parse(raw); } catch (_) { return { raw }; }
+    }
+    return { value: result };
+  }
+
+  _checkEvidence(result) {
+    try {
+      const data = typeof result === 'object' ? result : {};
+      const listFrom = (arr) => arr.map(f => (typeof f === 'string' ? f : f?.path)).filter(Boolean);
+      const files = (data.evidence && Array.isArray(data.evidence.files) && data.evidence.files)
+        || (Array.isArray(data.files) && listFrom(data.files))
+        || (Array.isArray(data.data?.files) && listFrom(data.data.files))
+        || [];
+      if (files.length === 0) return { valid: true };
+      const { assertPathsExist } = require('./guardrails/grounding-checks');
+      assertPathsExist(files);
+      return { valid: true };
+    } catch (e) {
+      this.logger.warning(`Evidence check failed: ${e.message}`);
+      return { valid: false, error: e.message };
+    }
+  }
+
+  _computeConfidence({ retriedForSchema = false, retriedForPatch = false, evidenceValid = true }) {
+    let score = 0.7;
+    if (!retriedForSchema) score += 0.15; else score -= 0.1;
+    if (!retriedForPatch) score += 0.1; else score -= 0.1;
+    if (evidenceValid) score += 0.05; else score -= 0.2;
+    if (score > 1) score = 1;
+    if (score < 0) score = 0;
+    const level = score >= 0.8 ? 'high' : score >= 0.5 ? 'medium' : 'low';
+    return { score, level };
   }
 
   /**
