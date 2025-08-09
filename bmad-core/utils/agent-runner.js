@@ -19,6 +19,8 @@ const {
 
 const VerboseLogger = require('./verbose-logger');
 const { withTimeout } = require('./timeout-wrapper');
+const { validate: validateSchema } = require('./validators/schema-validator');
+const { logValidationFailure } = require('./validation-enforcer');
 
 class AgentRunner {
   constructor(options = {}) {
@@ -332,6 +334,43 @@ class AgentRunner {
       );
       
       executionResult = await executeTaskWithTimeout(enrichedContext);
+
+      // Optional: validate agent output against schema to reduce hallucinations
+      if (context.outputSchemaId) {
+        const parsedResult = this._coerceToJSONObject(executionResult);
+        const validation = validateSchema(context.outputSchemaId, parsedResult);
+        if (!validation.valid) {
+          // Log for audit trail
+          try {
+            await logValidationFailure('AgentOutput', `${agentName}:${taskId}`, validation.errors.map(m => ({ message: m })));
+          } catch (_) {}
+
+          // Optionally retry with feedback
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            this.logger.warning(`Output validation failed for ${agentName}:${taskId}. Retrying (${retries}) with feedback.`);
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                schemaId: context.outputSchemaId,
+                errors: validation.errors
+              },
+              // Decrement retries for any further nested calls
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+
+            // Re-validate once
+            const reParsed = this._coerceToJSONObject(executionResult);
+            const recheck = validateSchema(context.outputSchemaId, reParsed);
+            if (!recheck.valid) {
+              throw new Error(`Output still invalid after retry: ${recheck.errors.join('; ')}`);
+            }
+          } else {
+            throw new Error(`Output validation failed: ${validation.errors.join('; ')}`);
+          }
+        }
+      }
       
       this.logger.taskComplete('Task execution completed', {
         success: executionResult.success,
@@ -450,6 +489,18 @@ class AgentRunner {
       
       return errorResponse;
     }
+  }
+
+  _coerceToJSONObject(result) {
+    if (result == null) return {};
+    if (typeof result === 'object') return result;
+    if (typeof result === 'string') {
+      // Attempt to extract fenced JSON
+      const fence = result.match(/```json\s*([\s\S]*?)\s*```/i);
+      const raw = fence ? fence[1] : result;
+      try { return JSON.parse(raw); } catch (_) { return { raw }; }
+    }
+    return { value: result };
   }
 
   /**

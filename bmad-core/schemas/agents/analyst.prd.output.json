@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agents/analyst.prd.output.json",
+  "title": "Analyst PRD Output",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "success": { "type": "boolean" },
+    "data": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "goals": { "type": "array", "items": { "type": "string" } },
+        "summary": { "type": "string" }
+      }
+    }
+  },
+  "required": ["success", "data"]
+}
+
