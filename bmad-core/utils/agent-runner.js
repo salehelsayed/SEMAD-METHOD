@@ -19,6 +19,8 @@ const {
 
 const VerboseLogger = require('./verbose-logger');
 const { withTimeout } = require('./timeout-wrapper');
+const { applyUnifiedDiff, parsePatch } = require('./patcher');
+const { assertPathsExist, assertModulesResolvable, assertNoDangerousOps } = require('./guardrails/grounding-checks');
 const { validate: validateSchema } = require('./validators/schema-validator');
 const { logValidationFailure } = require('./validation-enforcer');
 
@@ -369,6 +371,85 @@ class AgentRunner {
           } else {
             throw new Error(`Output validation failed: ${validation.errors.join('; ')}`);
           }
+        }
+      }
+
+      // Optional: run grounding checks and patch flow if patch is provided
+      const patchCarrier = (executionResult && (executionResult.patch || executionResult.data?.patch)) ?
+        (typeof executionResult.patch === 'string' ? executionResult : executionResult.data) : null;
+
+      if (patchCarrier && typeof patchCarrier.patch === 'string') {
+        this.logger.taskStart('Validating patch (dry-run)', `Agent: ${agentName}`, 'detailed');
+        const patchText = patchCarrier.patch;
+
+        // Guardrails: optional modules/commands assertions if provided
+        if (Array.isArray(patchCarrier.modules)) {
+          assertModulesResolvable(patchCarrier.modules);
+        }
+        if (Array.isArray(patchCarrier.commands)) {
+          assertNoDangerousOps(patchCarrier.commands);
+        }
+
+        // Guardrails: paths in update/delete must exist before applying
+        try {
+          const ops = parsePatch(patchText);
+          const mustExist = ops
+            .filter(op => op.type === 'update' || op.type === 'delete')
+            .map(op => op.file);
+          if (mustExist.length) assertPathsExist(mustExist);
+        } catch (e) {
+          // If path assertion fails, provide feedback/retry or throw
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                ...(enrichedContext.validationFeedback || {}),
+                patchErrors: [e.message]
+              },
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+          } else {
+            throw new Error(`Patch grounding failed: ${e.message}`);
+          }
+        }
+
+        const dry = await applyUnifiedDiff(patchText, { dryRun: true, baseDir: process.cwd() });
+        if (!dry.success) {
+          const msg = `Patch dry-run failed: ${dry.errors.join('; ')}`;
+          const retries = (context.validationOptions && context.validationOptions.retries) || 0;
+          if (retries > 0 && typeof taskExecutor === 'function') {
+            this.logger.warning(msg);
+            const feedbackContext = {
+              ...enrichedContext,
+              validationFeedback: {
+                ...(enrichedContext.validationFeedback || {}),
+                patchErrors: dry.errors
+              },
+              validationOptions: { ...(context.validationOptions || {}), retries: retries - 1 }
+            };
+            executionResult = await executeTaskWithTimeout(feedbackContext);
+
+            // Re-evaluate patch after retry if provided again
+            const retryCarrier = (executionResult && (executionResult.patch || executionResult.data?.patch)) ?
+              (typeof executionResult.patch === 'string' ? executionResult : executionResult.data) : null;
+            if (!retryCarrier || typeof retryCarrier.patch !== 'string') {
+              throw new Error('Agent retry did not return a patch.');
+            }
+            const dry2 = await applyUnifiedDiff(retryCarrier.patch, { dryRun: true, baseDir: process.cwd() });
+            if (!dry2.success) {
+              throw new Error(`Patch still invalid after retry: ${dry2.errors.join('; ')}`);
+            }
+            await applyUnifiedDiff(retryCarrier.patch, { dryRun: false, baseDir: process.cwd() });
+            this.logger.taskComplete('Patch applied', `Agent: ${agentName}`, 'detailed');
+          } else {
+            throw new Error(msg);
+          }
+        } else {
+          // Apply for real
+          await applyUnifiedDiff(patchText, { dryRun: false, baseDir: process.cwd() });
+          this.logger.taskComplete('Patch applied', `Agent: ${agentName}`, 'detailed');
         }
       }
       
