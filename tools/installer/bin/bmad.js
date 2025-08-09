@@ -41,7 +41,7 @@ program
   .option('-f, --full', 'Install complete BMad Method')
   .option('-x, --expansion-only', 'Install only expansion packs (no bmad-core)')
   .option('-d, --directory <path>', 'Installation directory')
-  .option('-i, --ide <ide...>', 'Configure for specific IDE(s) - can specify multiple (cursor, claude-code, windsurf, trae, roo, cline, gemini, github-copilot, other)')
+  .option('-i, --ide <ide...>', 'Configure for specific IDE(s) - can specify multiple (cursor, claude-code, windsurf, trae, roo, cline, gemini, github-copilot, codex, other)')
   .option('-e, --expansion-packs <packs...>', 'Install specific expansion packs (can specify multiple)')
   .action(async (options) => {
     try {
@@ -299,7 +299,8 @@ async function promptInstallation() {
           { name: 'Roo Code', value: 'roo' },
           { name: 'Cline', value: 'cline' },
           { name: 'Gemini CLI', value: 'gemini' },
-          { name: 'Github Copilot', value: 'github-copilot' }
+          { name: 'Github Copilot', value: 'github-copilot' },
+          { name: 'OpenAI Codex CLI', value: 'codex' }
         ]
       }
     ]);

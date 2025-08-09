@@ -57,6 +57,9 @@ class IdeSetup extends BaseIdeSetup {
         return this.setupGeminiCli(installDir, selectedAgent);
       case "github-copilot":
         return this.setupGitHubCopilot(installDir, selectedAgent, spinner, preConfiguredSettings);
+      case "codex":
+        const codexSetup = require("./codex-setup");
+        return codexSetup.setup(installDir, selectedAgent);
       default:
         console.log(chalk.yellow(`\nIDE ${ide} not yet supported`));
         return false;

@@ -90,3 +90,18 @@ ide-configurations:
       # 4. Requires VS Code 1.101+ with `chat.agent.enabled: true` in settings
       # 5. Agent files are stored in .github/chatmodes/
       # 6. Use `*help` to see available commands and agents
+  codex:
+    name: OpenAI Codex CLI
+    format: agents-md
+    file: AGENTS.md
+    instructions: |
+      # To use BMad agents with OpenAI Codex CLI:
+      # 1. The installer creates an AGENTS.md file in your project root
+      # 2. This file contains all agent definitions and activation instructions
+      # 3. Use natural language to activate agents:
+      #    - "activate dev agent" or "as dev agent"
+      #    - "use qa agent to review the code"
+      #    - "switch to sm agent and create a story"
+      # 4. Codex CLI will read AGENTS.md and follow agent-specific workflows
+      # 5. Agent commands use * prefix (e.g., *help, *implement-next-story)
+      # 6. Progress is tracked in .ai/ directory
