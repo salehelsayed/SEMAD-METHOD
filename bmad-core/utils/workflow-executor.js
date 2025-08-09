@@ -44,6 +44,7 @@ class WorkflowExecutor {
   async ensureInitialized() {
     if (!this.initialized) {
       const config = await this.configLoader.loadConfig();
+      this.config = config;
       this.logger.configure({
         verbosity: config.verbosity,
         verbosityLevel: config.verbosityLevel
@@ -162,6 +163,13 @@ class WorkflowExecutor {
    */
   async executeDevQAFlow(workflow, context) {
     if (this.flowType === 'iterative') {
+      // Prefer state machine if enabled in options or config
+      const useSM = (this.useStateMachine !== false) && (this.config?.workflow?.useStateMachine !== false);
+      if (useSM) {
+        const DevQAStateMachine = require('./workflow/devqa-state-machine');
+        const sm = new DevQAStateMachine({ maxIterations: this.maxIterations, logger: this.logger });
+        return await sm.run(workflow, context, this.executeStep.bind(this));
+      }
       return await this.executeIterativeDevQAFlow(workflow, context);
     } else {
       return await this.executeLinearDevQAFlow(workflow, context);
@@ -445,7 +453,7 @@ class WorkflowExecutor {
         }
       }
       
-      // Enhance context with resolved file paths
+      // Enhance context with resolved file paths and optional output schema
       const enhancedContext = {
         ...context,
         resolvedPaths: this.resolvedPaths,
@@ -462,7 +470,8 @@ class WorkflowExecutor {
           // Utility methods
           findStoryFile: (epicNum, storyNum) => this.filePathResolver.findStoryFile(epicNum, storyNum),
           findEpicFile: (epicNum) => this.filePathResolver.findEpicFile(epicNum)
-        }
+        },
+        ...this._schemaForStep(step)
       };
       
       // Call appropriate callback or simulate execution
@@ -485,6 +494,20 @@ class WorkflowExecutor {
       ]);
       return result;
     }
+  }
+
+  _schemaForStep(step) {
+    // Provide output schema hints per agent/action
+    if (step.agent === 'dev' && (step.action === 'implement_story' || step.creates === 'implementation_files')) {
+      return { outputSchemaId: 'agents/dev.implement_story.output', validationOptions: { retries: 1 } };
+    }
+    if (step.agent === 'qa' && (step.action === 'review_implementation' || step.action === 'review_story')) {
+      return { outputSchemaId: 'agents/qa.review_implementation.output', validationOptions: { retries: 0 } };
+    }
+    if (step.agent === 'analyst' && (step.action === 'create_prd' || step.creates === 'prd')) {
+      return { outputSchemaId: 'agents/analyst.prd.output', validationOptions: { retries: 0 } };
+    }
+    return {};
   }
 
   /**
