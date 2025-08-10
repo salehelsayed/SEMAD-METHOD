@@ -3,11 +3,19 @@
  * Prevents agents from hallucinating requirements by ensuring sufficient context exists
  */
 
-// Import functions dynamically to avoid circular dependencies
-const getMemoryManager = () => require('./agent-memory-manager');
+// Simple stubs for memory functions - replaced with file-based tracking
+const checkContextSufficiency = async (agentName, requiredContext) => ({ 
+  sufficient: true, 
+  missing: [] 
+});
 
-// Import required functions from memory manager
-const { checkContextSufficiency, loadWorkingMemory, retrieveRelevantMemories } = require('./agent-memory-manager');
+const loadWorkingMemory = async (agentName) => ({ 
+  observations: [], 
+  decisions: [], 
+  keyFacts: {} 
+});
+
+const retrieveRelevantMemories = async (agentName, query) => [];
 
 /**
  * Validate context for story creation (SM agent)

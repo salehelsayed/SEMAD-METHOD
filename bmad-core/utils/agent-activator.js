@@ -13,7 +13,9 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { executeBmadCommand, getBmadCoreDir } = require('./subprocess-executor');
 const { withTimeout } = require('./timeout-wrapper');
-const { MemoryError, handleCriticalMemoryError } = require('./memory-error-handler');
+// Simple stubs for removed memory functions
+class MemoryError extends Error {}
+const handleCriticalMemoryError = (error) => console.error('Critical error:', error);
 
 /**
  * Validates that a handoff context file exists and is readable

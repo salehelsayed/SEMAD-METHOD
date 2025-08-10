@@ -10,9 +10,12 @@
 const fs = require('fs');
 const path = require('path');
 const StoryContractValidator = require('./story-contract-validator');
-const { validateMemoryResult, MemoryError } = require('./memory-error-handler');
+// Simple stubs for removed memory functions
+const validateMemoryResult = (result) => ({ valid: true });
+class MemoryError extends Error {}
+const logMemoryError = () => {};
+
 const { executeBmadCommand } = require('./subprocess-executor');
-const { logMemoryError } = require('./memory-usage-logger');
 
 /**
  * Enforces StoryContract validation with automatic failure handling

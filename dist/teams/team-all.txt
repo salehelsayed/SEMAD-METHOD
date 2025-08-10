@@ -8692,7 +8692,66 @@ module.exports = DataModelTestGenerator;
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
-const yaml = require('js-yaml');
+
+/**
+ * Simple YAML parser for story frontmatter
+ * Handles basic key-value pairs and nested objects
+ * @param {string} yamlString - YAML content to parse
+ * @returns {Object} Parsed object
+ */
+function parseSimpleYAML(yamlString) {
+  const result = {};
+  const lines = yamlString.split('\n');
+  let currentObject = result;
+  let currentKey = null;
+  let indentStack = [{ obj: result, indent: -1 }];
+  
+  for (const line of lines) {
+    // Skip empty lines and comments
+    if (!line.trim() || line.trim().startsWith('#')) continue;
+    
+    // Calculate indent level
+    const indent = line.search(/\S/);
+    const trimmedLine = line.trim();
+    
+    // Handle key-value pairs
+    if (trimmedLine.includes(':')) {
+      const colonIndex = trimmedLine.indexOf(':');
+      const key = trimmedLine.substring(0, colonIndex).trim();
+      const value = trimmedLine.substring(colonIndex + 1).trim();
+      
+      // Adjust indent stack
+      while (indentStack.length > 1 && indent <= indentStack[indentStack.length - 1].indent) {
+        indentStack.pop();
+      }
+      currentObject = indentStack[indentStack.length - 1].obj;
+      
+      if (value) {
+        // Simple key-value pair
+        // Remove quotes if present
+        const cleanValue = value.replace(/^["']|["']$/g, '');
+        currentObject[key] = cleanValue;
+        currentKey = key;
+      } else {
+        // Start of nested object
+        currentObject[key] = {};
+        currentKey = key;
+        indentStack.push({ obj: currentObject[key], indent });
+        currentObject = currentObject[key];
+      }
+    } else if (trimmedLine.startsWith('- ')) {
+      // List item (simplified handling)
+      if (currentKey && currentObject === indentStack[indentStack.length - 2]?.obj) {
+        if (!Array.isArray(currentObject[currentKey])) {
+          currentObject[currentKey] = [];
+        }
+        currentObject[currentKey].push(trimmedLine.substring(2).trim().replace(/^["']|["']$/g, ''));
+      }
+    }
+  }
+  
+  return result;
+}
 
 /**
  * Find the next approved story from the stories directory
@@ -8779,7 +8838,7 @@ function findNextApprovedStory(storiesDir) {
           
           if (frontmatterMatch) {
             try {
-              const yamlContent = yaml.load(frontmatterMatch[1]);
+              const yamlContent = parseSimpleYAML(frontmatterMatch[1]);
               storyContract = yamlContent.StoryContract;
             } catch (e) {
               // Continue even if YAML parsing fails
@@ -9005,7 +9064,7 @@ function findNextApprovedStoryInEpic(storiesDir, epicId) {
       
       if (frontmatterMatch) {
         try {
-          const yamlContent = yaml.load(frontmatterMatch[1]);
+          const yamlContent = parseSimpleYAML(frontmatterMatch[1]);
           storyContract = yamlContent.StoryContract;
         } catch (e) {
           // Continue even if YAML parsing fails
@@ -9179,7 +9238,7 @@ async function findNextApprovedStoryAsync(storiesDir) {
           
           if (frontmatterMatch) {
             try {
-              const yamlContent = yaml.load(frontmatterMatch[1]);
+              const yamlContent = parseSimpleYAML(frontmatterMatch[1]);
               storyContract = yamlContent.StoryContract;
             } catch (e) {
               // Continue even if YAML parsing fails
