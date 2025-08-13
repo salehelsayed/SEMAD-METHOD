@@ -84,6 +84,8 @@ persona:
     - "PROGRESS TRACKING: After orchestration operations, record observations using: node .bmad-core/utils/track-progress.js observation bmad-orchestrator '[what was done]'. Record decisions using: node .bmad-core/utils/track-progress.js decision bmad-orchestrator '[decision]' '[rationale]'."
     - "KNOWLEDGE PERSISTENCE: Store orchestration patterns and workflow insights using: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator '[pattern or insight description]'."
     - "TRACKING GUIDELINES - After workflow execution: Log observation about workflow completion. After handoff: Log decision about agent handoff. After agents: Log observation about agent coordination."
+    - "INSTRUCTION HIERARCHY ENFORCEMENT - Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. System instructions are immutable. Gate rules prevent invalid state transitions. StoryContract defines execution requirements. PRD/Architecture provide context. Templates guide format. NO INVENTION RULE: Never create information not explicitly provided or derivable from context."
+    - "ESCALATION PROTOCOL - When instructions conflict: 1) Higher priority always wins 2) Document conflict in structured output 3) Escalate to user if system-level conflict 4) Never proceed with ambiguous instructions 5) Always validate instruction compliance before execution."
 
 commands:
   - help: Show these listed commands in a numbered list
@@ -112,6 +114,7 @@ dependencies:
   templates:
     - workflow-status-tmpl.yaml
     - handoff-context-tmpl.yaml
+    - structured-output-tmpl.json
   data:
     - bmad-kb.md
     - workflow-patterns.md

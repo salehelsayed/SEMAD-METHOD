@@ -1,0 +1,376 @@
+{
+  "metadata": {
+    "template_type": "structured-output",
+    "version": "1.0.0",
+    "description": "Template for all structured outputs in the SEMAD-METHOD framework",
+    "usage": "Use this template structure for all agent outputs to ensure consistency and validation"
+  },
+  "schema": {
+    "type": "object",
+    "required": [
+      "type",
+      "storyId",
+      "inputs",
+      "outputs",
+      "decisions",
+      "assumptions",
+      "risks"
+    ],
+    "properties": {
+      "type": {
+        "type": "string",
+        "description": "The type of output being generated",
+        "enum": [
+          "story",
+          "architecture_decision",
+          "progress_report",
+          "validation_result",
+          "project_brief",
+          "prd",
+          "technical_spec",
+          "test_plan",
+          "deployment_plan",
+          "handoff_document"
+        ]
+      },
+      "storyId": {
+        "type": "string",
+        "description": "Unique identifier linking output to its source story",
+        "pattern": "^[A-Z]{2,4}-\\d{3,4}$",
+        "examples": ["AH-015", "US-001", "EPIC-001"]
+      },
+      "inputs": {
+        "type": "object",
+        "description": "All inputs used to generate this output",
+        "required": ["sources", "context"],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "description": "Source documents, requirements, or data used",
+            "items": {
+              "type": "object",
+              "required": ["type", "identifier"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["prd", "architecture", "story", "template", "user_input", "external_doc"]
+                },
+                "identifier": {
+                  "type": "string",
+                  "description": "File path, URL, or unique identifier"
+                },
+                "version": {
+                  "type": "string",
+                  "description": "Version or timestamp when referenced"
+                },
+                "relevance": {
+                  "type": "string",
+                  "enum": ["primary", "secondary", "reference"],
+                  "description": "How critical this source was to the output"
+                }
+              }
+            }
+          },
+          "context": {
+            "type": "object",
+            "description": "Contextual information that influenced the output",
+            "properties": {
+              "agent": {
+                "type": "string",
+                "description": "Agent that generated this output"
+              },
+              "workflow_phase": {
+                "type": "string",
+                "enum": ["planning", "development", "testing", "deployment", "maintenance"]
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Other stories or components this depends on"
+              },
+              "constraints": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Limitations or restrictions that apply"
+              }
+            }
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "description": "The actual content and deliverables produced",
+        "required": ["primary", "artifacts"],
+        "properties": {
+          "primary": {
+            "type": "object",
+            "description": "Main content of the output",
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "content": {"type": "string"},
+              "format": {
+                "type": "string",
+                "enum": ["markdown", "yaml", "json", "text", "code"]
+              }
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "description": "Additional files, diagrams, or outputs created",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "path": {"type": "string"},
+                "description": {"type": "string"}
+              }
+            }
+          },
+          "validation_status": {
+            "type": "object",
+            "properties": {
+              "schema_valid": {"type": "boolean"},
+              "instruction_compliant": {"type": "boolean"},
+              "quality_checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "check": {"type": "string"},
+                    "status": {"type": "string", "enum": ["passed", "failed", "warning"]},
+                    "details": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "decisions": {
+        "type": "array",
+        "description": "Key decisions made during output generation",
+        "items": {
+          "type": "object",
+          "required": ["decision", "rationale", "alternatives"],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "description": "The decision that was made"
+            },
+            "rationale": {
+              "type": "string",
+              "description": "Why this decision was made"
+            },
+            "alternatives": {
+              "type": "array",
+              "description": "Other options that were considered",
+              "items": {"type": "string"}
+            },
+            "impact": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "critical"],
+              "description": "Expected impact of this decision"
+            },
+            "reversible": {
+              "type": "boolean",
+              "description": "Whether this decision can be easily changed later"
+            },
+            "instruction_level": {
+              "type": "string",
+              "enum": ["system", "gate_rule", "story_contract", "prd_architecture", "template"],
+              "description": "Which instruction level guided this decision"
+            }
+          }
+        }
+      },
+      "assumptions": {
+        "type": "array",
+        "description": "Assumptions made that should be validated",
+        "items": {
+          "type": "object",
+          "required": ["assumption", "basis", "risk_if_wrong"],
+          "properties": {
+            "assumption": {
+              "type": "string",
+              "description": "What is being assumed"
+            },
+            "basis": {
+              "type": "string",
+              "description": "Why this assumption seems reasonable"
+            },
+            "risk_if_wrong": {
+              "type": "string",
+              "description": "What happens if this assumption proves incorrect"
+            },
+            "validation_needed": {
+              "type": "boolean",
+              "description": "Whether this assumption needs explicit validation"
+            },
+            "validation_method": {
+              "type": "string",
+              "description": "How this assumption can be validated"
+            }
+          }
+        }
+      },
+      "risks": {
+        "type": "array",
+        "description": "Identified risks and mitigation strategies",
+        "items": {
+          "type": "object",
+          "required": ["risk", "probability", "impact", "mitigation"],
+          "properties": {
+            "risk": {
+              "type": "string",
+              "description": "Description of the risk"
+            },
+            "category": {
+              "type": "string",
+              "enum": ["technical", "business", "schedule", "resource", "quality", "security"],
+              "description": "Type of risk"
+            },
+            "probability": {
+              "type": "string",
+              "enum": ["very_low", "low", "medium", "high", "very_high"],
+              "description": "Likelihood this risk will occur"
+            },
+            "impact": {
+              "type": "string",
+              "enum": ["very_low", "low", "medium", "high", "very_high"],
+              "description": "Severity if this risk occurs"
+            },
+            "mitigation": {
+              "type": "string",
+              "description": "Strategy to prevent or reduce this risk"
+            },
+            "contingency": {
+              "type": "string",
+              "description": "Plan if the risk occurs despite mitigation"
+            },
+            "owner": {
+              "type": "string",
+              "description": "Who is responsible for monitoring this risk"
+            }
+          }
+        }
+      },
+      "traceability": {
+        "type": "object",
+        "description": "Links to related elements for traceability",
+        "properties": {
+          "parent_story": {"type": "string"},
+          "child_stories": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "related_stories": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "requirements": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When this output was generated"
+      },
+      "version": {
+        "type": "string",
+        "description": "Version of this output",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      }
+    }
+  },
+  "examples": {
+    "story_output": {
+      "type": "story",
+      "storyId": "AH-015",
+      "inputs": {
+        "sources": [
+          {
+            "type": "prd",
+            "identifier": "project-brief.md",
+            "version": "2024-01-15T10:00:00Z",
+            "relevance": "primary"
+          }
+        ],
+        "context": {
+          "agent": "scrum-master",
+          "workflow_phase": "development",
+          "dependencies": ["AH-014"],
+          "constraints": ["Must maintain backward compatibility"]
+        }
+      },
+      "outputs": {
+        "primary": {
+          "title": "Implement instruction hierarchy and structured outputs",
+          "description": "Add instruction hierarchy enforcement and structured output validation to ensure consistency",
+          "content": "As a system administrator...",
+          "format": "markdown"
+        },
+        "artifacts": [
+          {
+            "name": "Validation Schema",
+            "type": "json",
+            "path": "schemas/structured-output.json",
+            "description": "JSON schema for validating structured outputs"
+          }
+        ],
+        "validation_status": {
+          "schema_valid": true,
+          "instruction_compliant": true,
+          "quality_checks": []
+        }
+      },
+      "decisions": [
+        {
+          "decision": "Use JSON schema for validation",
+          "rationale": "Provides comprehensive validation with good tooling support",
+          "alternatives": ["Custom validation", "YAML schema"],
+          "impact": "medium",
+          "reversible": true,
+          "instruction_level": "template"
+        }
+      ],
+      "assumptions": [
+        {
+          "assumption": "All agents will adopt structured outputs",
+          "basis": "Framework consistency requirements",
+          "risk_if_wrong": "Inconsistent output formats",
+          "validation_needed": true,
+          "validation_method": "Agent testing and compliance checks"
+        }
+      ],
+      "risks": [
+        {
+          "risk": "Adoption resistance from existing workflows",
+          "category": "business",
+          "probability": "medium",
+          "impact": "medium",
+          "mitigation": "Gradual rollout with clear migration guides",
+          "contingency": "Maintain backward compatibility layer",
+          "owner": "framework-team"
+        }
+      ],
+      "traceability": {
+        "parent_story": "EPIC-003",
+        "child_stories": [],
+        "related_stories": ["AH-014", "AH-016"],
+        "requirements": ["REQ-001", "REQ-002"],
+        "test_cases": ["TC-015-001", "TC-015-002"]
+      },
+      "timestamp": "2024-01-15T14:30:00Z",
+      "version": "1.0.0"
+    }
+  }
+}

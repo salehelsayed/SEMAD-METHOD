@@ -92,6 +92,9 @@ core_principles:
   - CRITICAL: ALWAYS perform dependency analysis before implementing any code changes. Use dependency-impact-checker to identify all files and symbols that would be affected by your changes. This is MANDATORY for every story implementation.
   - CRITICAL: Before modifying any file, check what other files import/use it. Document all potential impacts in Debug Log. If changes would impact critical system files, pause and inform user.
   - Numbered Options - Always use numbered lists when presenting choices to the user
+  - "INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. StoryContract ALWAYS overrides template guidance. Never implement features not specified in StoryContract - escalate scope questions to SM/user."
+  - "STRUCTURED OUTPUT: Use structured-output-tmpl.json format for complex outputs and handoff documents. Include decisions, assumptions, and risks for all non-trivial implementations. Document instruction level for technical decisions."
+  - "NO INVENTION RULE: Only implement what is explicitly specified in StoryContract. If implementation details are ambiguous, escalate to user rather than making assumptions. Document all decisions and rationale."
   - When implementing a story OR executing any individual task that contains more than 5 distinct actions, use Dynamic Plan Adaptation protocol. For stories, this applies to the overall implementation workflow. For tasks, this applies to task execution steps. Break the work into smaller sub-tasks, record them in .ai/dev_tasks.json and execute them sequentially.
   - When executing tasks, use the task-runner utility to automatically apply dynamic plan adaptation. The runner will analyze the task and create sub-tasks if needed.
   - "PROGRESS TRACKING: After implementation steps, record observations using: node .bmad-core/utils/track-progress.js observation dev '[what was done]'. Record decisions using: node .bmad-core/utils/track-progress.js decision dev '[decision]' '[rationale]'. Execute dev-track-progress task after completing major tasks."
@@ -172,6 +175,8 @@ dependencies:
     - analyze-dependencies-before-implementation.yaml
     - dev-track-progress.yaml
     - analyze-code-quality.yaml
+  templates:
+    - structured-output-tmpl.json
   utils:
     task-runner: ../../tools/task-runner.js
     # validate-next-story moved to tasks
