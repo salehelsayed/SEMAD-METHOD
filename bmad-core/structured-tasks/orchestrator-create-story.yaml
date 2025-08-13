@@ -62,6 +62,33 @@ steps:
         metadata:
           contextExtraction: true
 
+  - id: parse-story
+    name: Parse Story Requirements into StoryContract
+    description: From the sharded PRD and architecture docs, extract endpoints, data models, file paths and acceptance criteria and construct a StoryContract YAML block.
+    actions:
+      - description: Extract all API endpoints from architecture documents with their method, path, description, request body, and success response
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Identify all files that need to be created or modified based on the story requirements
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Link acceptance criteria from the epic to this story
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Build StoryContract YAML block with version, story_id, epic_id, apiEndpoints, filesToModify, and acceptanceCriteriaLinks
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: CRITICAL - Do NOT summarise or invent data. Extract requirements verbatim from PRD and Architecture documents
+        elicit: false
+        metadata:
+          originalIndent: 0
+    output: storyContract
+    schema: storyContractSchema
+
   - id: step5
     name: Create Story Content
     description: Create comprehensive story using story-tmpl.yaml template
@@ -70,6 +97,18 @@ steps:
         elicit: false
         metadata:
           storyCreation: true
+      - description: Embed the StoryContract YAML block at the top of the story file between --- markers
+        elicit: false
+        metadata:
+          contractEmbedding: true
+      - description: Execute task `validate-story-contract` with storyFilePath set to the newly created story file path
+        elicit: true
+        metadata:
+          contractValidation: true
+      - description: If validation fails, halt the workflow and inform the user of the specific validation errors so corrections can be made
+        elicit: false
+        metadata:
+          validationCheck: true
       - description: Ensure Dev Notes section contains ALL technical context from architecture files so Dev agent has complete information without needing to read other documents
         elicit: false
         metadata:
@@ -137,8 +176,17 @@ notes: |
   reads the sharded documents and creates comprehensive implementation
   stories automatically.
   
+  CRITICAL: This task MUST create a StoryContract exactly like create-next-story.yaml does.
+  The StoryContract is mandatory and includes:
+  - API endpoints extracted from architecture
+  - Files to be created/modified
+  - Acceptance criteria links
+  - All technical requirements in structured YAML format
+  
   Best practices:
   - Always read both PRD and architecture shards
+  - Always create and embed the StoryContract YAML block
+  - Always validate the StoryContract before proceeding
   - Include enough detail for dev to implement without questions
   - Follow the story template structure exactly
   - Make acceptance criteria specific and testable
@@ -148,3 +196,4 @@ notes: |
   - If epic file not found, list available epics
   - If story already exists, skip to next
   - If unable to determine requirements, ask for clarification
+  - If StoryContract validation fails, halt and report errors

@@ -1,0 +1,153 @@
+# Dynamic Plan Adaptation Configuration
+# This file defines thresholds for automatic activation of dynamic plan adaptation
+# When any threshold is met, the dev agent will automatically apply plan adaptation
+
+id: dynamic-plan-config
+version: "1.0"
+description: Threshold-based automatic activation rules for dynamic plan adaptation
+
+# Automatic activation thresholds
+autoApplyThresholds:
+  # Task count thresholds
+  taskCount:
+    threshold: 5
+    description: "Apply when story has more than 5 tasks"
+    
+  # File modification thresholds  
+  fileCount:
+    threshold: 7
+    description: "Apply when story modifies more than 7 files"
+    
+  # API endpoint thresholds
+  apiEndpointCount:
+    threshold: 5
+    description: "Apply when story implements more than 5 API endpoints"
+    
+  # Data model complexity
+  dataModelCount:
+    threshold: 2
+    description: "Apply when story involves more than 2 data models"
+    
+  # Field count in data models
+  totalFieldCount:
+    threshold: 20
+    description: "Apply when total fields across all models exceeds 20"
+    
+  # Acceptance criteria count
+  acceptanceCriteriaCount:
+    threshold: 8
+    description: "Apply when story has more than 8 acceptance criteria"
+
+# QA-specific thresholds
+qaSpecificThresholds:
+  # Files to review threshold
+  filesToReview:
+    threshold: 10
+    description: "Apply when QA needs to review more than 10 files"
+    
+  # Test coverage analysis
+  testCoverageAnalysis:
+    threshold: 15
+    description: "Apply when analyzing test coverage for more than 15 test files"
+    
+  # Dependency chain depth
+  dependencyChainDepth:
+    threshold: 5
+    description: "Apply when dependency chain analysis exceeds 5 levels deep"
+    
+  # Code quality metrics
+  qualityMetricsCount:
+    threshold: 12
+    description: "Apply when evaluating more than 12 quality metrics"
+    
+  # Components to review
+  componentsToReview:
+    threshold: 8
+    description: "Apply when reviewing across more than 8 components"
+
+# Complexity indicators that trigger adaptation
+complexityIndicators:
+  - pattern: "and then"
+    description: "Sequential complexity indicator"
+  - pattern: "multiple.*components"
+    description: "Multi-component work indicator"
+  - pattern: "migrate|migration"
+    description: "Database migration complexity"
+  - pattern: "refactor.*existing"
+    description: "Refactoring complexity"
+  - pattern: "integrate.*with"
+    description: "Integration complexity"
+
+# QA-specific complexity indicators
+qaComplexityIndicators:
+  - pattern: "full.*codebase.*review"
+    description: "Complete codebase review indicator"
+  - pattern: "security.*audit"
+    description: "Security audit complexity"
+  - pattern: "performance.*analysis"
+    description: "Performance analysis complexity"
+  - pattern: "cross-module.*testing"
+    description: "Cross-module test complexity"
+  - pattern: "regression.*testing"
+    description: "Regression test suite complexity"
+
+# Skip conditions - when NOT to apply even if thresholds are met
+skipConditions:
+  - condition: "story.type == 'documentation'"
+    description: "Skip for pure documentation stories"
+  - condition: "story.type == 'bugfix' && story.tasks.length <= 3"
+    description: "Skip for simple bug fixes"
+  - condition: "story.tags.includes('no-adaptation')"
+    description: "Skip when explicitly tagged"
+  - condition: "story.status == 'Needs Fixes'"
+    description: "Skip when addressing QA feedback"
+
+# Override rules
+overrides:
+  # Force adaptation even if thresholds not met
+  forceAdaptation:
+    - "story.tags.includes('complex')"
+    - "story.tags.includes('force-adaptation')"
+    - "user.command == '*execute-task'"
+  
+  # Never apply adaptation regardless of thresholds
+  neverAdapt:
+    - "story.tags.includes('simple')"
+    - "story.tags.includes('trivial')"
+    - "story.emergency == true"
+
+# Adaptation behavior configuration
+adaptationBehavior:
+  # Maximum sub-tasks per parent task
+  maxSubTasksPerParent: 7
+  
+  # Minimum tasks to consider splitting
+  minTasksToSplit: 2
+  
+  # Whether to create checkpoint files
+  createCheckpoints: true
+  
+  # Whether to log adaptation decisions
+  logDecisions: true
+  
+  # File paths for tracking
+  paths:
+    taskList: ".ai/dev_tasks.json"
+    adaptationLog: ".ai/adaptation_decisions.log"
+    checkpoints: ".ai/checkpoints/"
+
+# Reporting configuration
+reporting:
+  # Show adaptation decision to user
+  showDecision: true
+  
+  # Message templates
+  messages:
+    applyingAdaptation: "📊 Story complexity detected ({{reason}}). Applying dynamic plan adaptation..."
+    skippingAdaptation: "✅ Story is simple enough. Proceeding with direct implementation."
+    thresholdMet: "Threshold met: {{threshold}} ({{value}}/{{limit}})"
+    
+metadata:
+  createdBy: "bmad-method"
+  lastUpdated: "2024-01-12"
+  compatibleWith: ["dev", "qa", "orchestrator"]
