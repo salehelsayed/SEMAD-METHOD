@@ -107,15 +107,21 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 
 > ⚠️ **These diagrams explain 90% of SEMAD Method workflow confusion** - Understanding the PRD+Architecture creation, StoryContract generation, and the SM/Dev/QA workflow with formal contracts is essential - and also explains why this provides deterministic, hallucination-free development!
 
+### 📚 Documentation
+
+- **[Getting Started](GETTING-STARTED.md)** → Installation and setup guide
+- **[Architecture](ARCHITECTURE.md)** → Technical architecture and design
+- **[Agents Reference](AGENTS.md)** → All agents and their capabilities
+- **[Workflows](WORKFLOWS.md)** → Two-phase workflow system
+- **[API Reference](API-REFERENCE.md)** → Complete API documentation
+- **[User Guide](bmad-core/user-guide.md)** → Complete workflow walkthrough
+
 ### What would you like to do?
 
-- **[Install and Build software with Full Stack Agile AI Team](#quick-start)** → Quick Start Instruction
-- **[Learn how to use BMad](bmad-core/user-guide.md)** → Complete user guide and walkthrough
-- **[See available AI agents](#available-agents)** → Specialized roles for your team
-- **[Explore non-technical uses](#-beyond-software-development---expansion-packs)** → Creative writing, business, wellness, education
-- **[Create my own AI agents](#creating-your-own-expansion-pack)** → Build agents for your domain
-- **[Browse ready-made expansion packs](expansion-packs/)** → Game dev, DevOps, infrastructure and get inspired with ideas and examples
-- **[Understand the architecture](docs/core-architecture.md)** → Technical deep dive
+- **[Install SEMAD-METHOD](#installation)** → Clone and set up the framework
+- **[Learn the workflow](WORKFLOWS.md)** → Understand the two-phase system
+- **[See available AI agents](AGENTS.md)** → Specialized roles for your team
+- **[Browse expansion packs](expansion-packs/)** → Game dev, DevOps, and more
 - **[Join the community](https://discord.gg/gk8jAdXWmj)** → Get help and share ideas
 
 ## Prerequisites
@@ -158,72 +164,87 @@ Before using SEMAD-METHOD, ensure you have the following installed:
 - **RAM**: 4GB minimum (8GB recommended)
 - **Disk Space**: 200MB for SEMAD-METHOD + space for your projects
 
-## Important: Keep Your BMad Installation Updated
+## Installation
 
-**Stay up-to-date effortlessly!** If you already have BMad-Method installed in your project, simply run:
+### Clone and Install SEMAD-METHOD
 
 ```bash
-npx bmad-method install
-# OR
-git pull
-npm run install:bmad
+# Clone the repository
+git clone https://github.com/salehelsayed/SEMAD-METHOD.git
+cd SEMAD-METHOD
+
+# Install dependencies
+npm install
+
+# Build the framework
+npm run build
 ```
 
-This will:
+### Install in Your Project
 
-- ✅ Automatically detect your existing v4 installation
-- ✅ Update only the files that have changed and add new files
-- ✅ Create `.bak` backup files for any custom modifications you've made
-- ✅ Preserve your project-specific configurations
+After cloning and building:
 
-This makes it easy to benefit from the latest improvements, bug fixes, and new agents without losing your customizations!
+```bash
+# Install SEMAD to your project
+npm run install:bmad -- --target /path/to/your/project
+```
+
+For detailed installation instructions, see our **[Getting Started Guide](GETTING-STARTED.md)**.
 
 ## Quick Start
 
-### One Command for Everything (IDE Installation)
-
-**Just run one of these commands:**
+### 1. Clone SEMAD-METHOD
 
 ```bash
-npx bmad-method install
-# OR if you already have BMad installed:
-git pull
-npm run install:bmad
+git clone https://github.com/salehelsayed/SEMAD-METHOD.git
+cd SEMAD-METHOD
+npm install
+npm run build
 ```
 
-This single command handles:
+### 2. Start Using SEMAD
 
-- **New installations** - Sets up BMad in your project
-- **Upgrades** - Updates existing installations automatically
-- **Expansion packs** - Installs any expansion packs you've added to package.json
+In your IDE (VS Code, Cursor, etc.), start with the orchestrator:
 
-> **That's it!** Whether you're installing for the first time, upgrading, or adding expansion packs - these commands do everything.
-
-**Prerequisites**: [Node.js](https://nodejs.org) v20+ required
-
-### Fastest Start: Web UI Full Stack Team at your disposal (2 minutes)
-
-1. **Get the bundle**: Save or clone the [full stack team file](dist/teams/team-fullstack.txt) or choose another team
-2. **Create AI agent**: Create a new Gemini Gem or CustomGPT
-3. **Upload & configure**: Upload the file and set instructions: "Your critical operating instructions are attached, do not break character as directed"
-4. **Start Ideating and Planning**: Start chatting! Type `*help` to see available commands or pick an agent like `*analyst` to start right in on creating a brief.
-5. **CRITICAL**: Talk to BMad Orchestrator in the web at ANY TIME (#bmad-orchestrator command) and ask it questions about how this all works!
-6. **When to move to the IDE**: Once you have your PRD, Architecture, optional UX and Briefs - its time to switch over to the IDE to shard your docs, and start implementing the actual code! See the [User guide](bmad-core/user-guide.md) for more details
-
-### Alternative: Clone and Build
-
-```bash
-git clone https://github.com/bmadcode/bmad-method.git
-npm run install:bmad # build and install all to a destination folder
 ```
+/orchestrator
+create comprehensive plan for [your project]
+```
+
+The orchestrator will guide you through:
+- **Planning Phase**: Analyst → PM → Architect
+- **Development Phase**: Scrum Master → Developer → QA
+
+### 3. Learn More
+
+- **[Getting Started Guide](GETTING-STARTED.md)** - Detailed setup instructions
+- **[Workflow Documentation](WORKFLOWS.md)** - Understanding the two-phase system
+- **[Agent Reference](AGENTS.md)** - All available agents and commands
+
+**Prerequisites**: 
+- [Node.js](https://nodejs.org) v20+ required
+- Git for cloning the repository
+- See [Prerequisites](#prerequisites) for complete list
+
+### Alternative: Web UI Usage
+
+For browser-based usage without installation:
+
+1. **Get the bundle**: Use the [full stack team file](dist/teams/team-fullstack.txt)
+2. **Create AI assistant**: Create a new Gemini Gem, CustomGPT, or Claude Project
+3. **Upload & configure**: Upload the bundle file and set instructions
+4. **Start planning**: Type `*help` to see commands or `/analyst` to begin
+5. **Switch to IDE**: After planning phase, move to IDE for implementation
+
+See the [User Guide](bmad-core/user-guide.md) for detailed workflow instructions.
 
 ## 🌟 Beyond Software Development - Expansion Packs
 
-BMad's natural language framework works in ANY domain. Expansion packs provide specialized AI agents for creative writing, business strategy, health & wellness, education, and more. Also expansion packs can expand the core BMad-Method with specific functionality that is not generic for all cases. [See the Expansion Packs Guide](docs/expansion-packs.md) and learn to create your own!
+SEMAD-METHOD's framework works in ANY domain. Expansion packs provide specialized AI agents for creative writing, business strategy, health & wellness, education, and more. Expansion packs can also extend SEMAD-METHOD with domain-specific functionality. [See the Expansion Packs Guide](docs/expansion-packs.md) to learn more.
 
 ## Search Tools Generation
 
-BMad now includes automatic search query generation for external documentation retrieval. After PRD creation, the system extracts keywords and generates targeted search queries.
+SEMAD-METHOD includes automatic search query generation for external documentation retrieval. After PRD creation, the system extracts keywords and generates targeted search queries.
 
 ### Running Search Tools Generation
 
@@ -255,6 +276,22 @@ Once search tools are generated, agents can use the search queries to find relev
 - Supported search providers and how to add new ones
 - Advanced usage and customization options
 
+## Available Agents
+
+SEMAD-METHOD includes specialized AI agents for each role:
+
+- **Orchestrator** (`/orchestrator`) - Master coordinator for the entire workflow
+- **Analyst** (`/analyst`) - Requirements gathering and analysis
+- **PM** (`/pm`) - Product requirements and prioritization
+- **Architect** (`/architect`) - Technical design and system architecture
+- **Scrum Master** (`/sm`) - Story creation with StoryContracts
+- **Developer** (`/dev`) - Implementation following contracts
+- **QA Engineer** (`/qa`) - Testing and validation
+- **UX Expert** (`/ux`) - User experience design
+- **Infrastructure** (`/in`) - DevOps and deployment
+
+For detailed agent documentation, see the **[Agents Reference](AGENTS.md)**.
+
 ## Backward Compatibility
 
 SEMAD-METHOD maintains full backward compatibility with BMad-Method:
@@ -275,16 +312,20 @@ simpleTaskTracking: true      # Use simple task tracking system
 
 ### Essential Guides
 
-- 📖 **[User Guide](bmad-core/user-guide.md)** - Complete walkthrough from project inception to completion
-- 🏗️ **[Core Architecture](docs/core-architecture.md)** - Technical deep dive and system design
-- 🚀 **[Expansion Packs Guide](docs/expansion-packs.md)** - Extend BMad to any domain beyond software development
-- 🔄 **[Dev↔QA Flow Options](docs/dev-qa-flow-options.md)** - Choose between linear and iterative development flows
+- 📖 **[Getting Started](GETTING-STARTED.md)** - Installation and first project
+- 🏗️ **[Architecture](ARCHITECTURE.md)** - Technical architecture documentation
+- 🤖 **[Agents Reference](AGENTS.md)** - All agents and their capabilities
+- 🔄 **[Workflows](WORKFLOWS.md)** - Two-phase workflow system
+- 🔧 **[API Reference](API-REFERENCE.md)** - Complete API documentation
+- 📚 **[User Guide](bmad-core/user-guide.md)** - Complete walkthrough
+- 🚀 **[Expansion Packs Guide](docs/expansion-packs.md)** - Extend to any domain
+- 🔄 **[Dev↔QA Flow Options](docs/dev-qa-flow-options.md)** - Development flow options
 
 ## Support
 
 - 💬 [Discord Community](https://discord.gg/gk8jAdXWmj)
-- 🐛 [Issue Tracker](https://github.com/bmadcode/bmad-method/issues)
-- 💬 [Discussions](https://github.com/bmadcode/bmad-method/discussions)
+- 🐛 [Issue Tracker](https://github.com/salehelsayed/SEMAD-METHOD/issues)
+- 💬 [Discussions](https://github.com/salehelsayed/SEMAD-METHOD/discussions)
 
 ## Technical Implementation Details
 
