@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "id": "BUNDLE-AH-005",
+  "storyId": "AH-005",
+  "artifactRefs": [
+    { "id": "AH-005", "path": "docs/stories/agentic-hardening/AH-005-grounded-editing-protocol.md", "version": "1.0", "checksum": "sha256:abcd" }
+  ],
+  "files": [
+    "docs/examples/preflight/referenced-files/src/utils/math.ts"
+  ],
+  "tests": [
+    "tests/examples/math.test.ts"
+  ],
+  "createdAt": "2024-01-20T10:00:00Z",
+  "checksum": "sha256:bundle5678"
+}

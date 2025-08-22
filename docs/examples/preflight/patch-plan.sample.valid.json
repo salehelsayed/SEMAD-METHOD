@@ -1,0 +1,16 @@
+{
+  "storyId": "AH-005",
+  "riskLevel": "low",
+  "changes": [
+    {
+      "path": "docs/examples/preflight/referenced-files/src/utils/math.ts",
+      "operations": ["modify"],
+      "symbols": ["add"],
+      "rationale": "Expose add() per AC1",
+      "mappedACs": ["AC1"]
+    }
+  ],
+  "tests": [
+    "tests/examples/math.test.ts"
+  ]
+}

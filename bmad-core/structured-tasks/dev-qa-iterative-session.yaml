@@ -1,0 +1,37 @@
+id: dev-qa-iterative-session
+name: Dev↔QA Iterative (In-Session)
+purpose: Run iterative Dev↔QA loop entirely in-session without external scripts or Codex/Claude
+steps:
+  - id: start
+    name: Start In-Session Loop
+    description: Execute the iterative Dev↔QA loop in the current session context
+    actions:
+      - description: Run the in-session Dev↔QA loop until QA passes and fixes are 100%
+        elicit: false
+        function: orchestrator.devQaIterativeSession
+        parameters:
+          storyArg: "{{inputs.story}}"
+          maxIterations: "{{inputs.maxIterations}}"
+          projectRoot: "{{inputs.projectRoot}}"
+
+inputs:
+  story:
+    type: string
+    required: true
+    description: Story file path or Story ID
+  maxIterations:
+    type: number
+    required: false
+    description: Maximum iterations (default 5)
+  projectRoot:
+    type: string
+    required: false
+    description: Project root directory (defaults to process.cwd)
+
+outputs: {}
+
+notes: |
+  - This task runs the Dev↔QA loop entirely in-process using the function registry.
+  - It will attempt structured fixes via address-qa-feedback.yaml when present.
+  - QA pass is enforced via QA gate (local/tools or .bmad-core/tools), or npm scripts/test.
+  - Fix verification requires 100% completion via verify-qa-fixes.js.

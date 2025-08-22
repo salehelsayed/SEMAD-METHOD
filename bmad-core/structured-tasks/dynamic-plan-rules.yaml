@@ -68,7 +68,7 @@ rules:
 
 thresholds:
   # Maximum number of steps before splitting
-  maxSteps: 5
+  maxSteps: 3
   # Maximum tokens of retrieved context (PRD/architecture or scratchpad) before splitting.
   # Typical models like GPT‑3.5 support around 4,000 tokens and GPT‑4 up to 32,000
   # tokens【329989590427775†L103-L108】.  Limiting context to half of a base model’s
@@ -96,7 +96,25 @@ splitStrategies:
     keywords: ["and", "then", "additionally", "furthermore", "also"]
     requireNewChunk: true
   byDomain:
-    domains: ["frontend", "backend", "database", "infrastructure", "testing"]
+    domains: [
+      "frontend",
+      "backend",
+      "database",
+      "infrastructure",
+      "testing",
+      "ops",
+      "devops",
+      "security",
+      "ci",
+      "cd",
+      "documentation",
+      "api",
+      "cli",
+      "mobile",
+      "ml",
+      "data",
+      "analytics"
+    ]
     separateByDomain: true
   byArtefacts:
     separateEach: true

@@ -133,14 +133,31 @@ persona:
     - 'PROGRESS TRACKING: After orchestration operations, record observations using: node .bmad-core/utils/track-progress.js observation bmad-orchestrator ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision bmad-orchestrator ''[decision]'' ''[rationale]''.'
     - 'KNOWLEDGE PERSISTENCE: Store orchestration patterns and workflow insights using: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator ''[pattern or insight description]''.'
     - 'TRACKING GUIDELINES - After workflow execution: Log observation about workflow completion. After handoff: Log decision about agent handoff. After agents: Log observation about agent coordination.'
+    - 'INSTRUCTION HIERARCHY ENFORCEMENT - Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. System instructions are immutable. Gate rules prevent invalid state transitions. StoryContract defines execution requirements. PRD/Architecture provide context. Templates guide format. NO INVENTION RULE: Never create information not explicitly provided or derivable from context.'
+    - 'ESCALATION PROTOCOL - When instructions conflict: 1) Higher priority always wins 2) Document conflict in structured output 3) Escalate to user if system-level conflict 4) Never proceed with ambiguous instructions 5) Always validate instruction compliance before execution.'
 commands:
   - help: Show these listed commands in a numbered list
+  - sm-review-stories: 'Run Scrum Master story template review across docs/stories via CLI: node tools/workflow-orchestrator.js sm-review-stories → tracker.log(''SM review executed'', ''info'')'
+  - sm-normalize-stories: 'Normalize stories to SM template (create/repair StoryContract; ensure sections). CLI: node tools/workflow-orchestrator.js sm-normalize-stories [--file <path>] [--dry-run] → tracker.log(''SM normalize executed'', ''info'')'
+  - dev-qa-iterative: 'Run iterative Dev↔QA flow (CLI only). CLI: node tools/workflow-orchestrator.js dev-qa-iterative --story <pathOrId> [--max <n>] [--codex] → tracker.log(''Iterative Dev↔QA flow executed'', ''info'')'
+  - dev-qa-iterative-session: 'Run iterative Dev↔QA flow fully in-session (no external processes). Use TaskRunner to execute dev-qa-iterative-session.yaml with inputs: story=<pathOrId>, maxIterations=<n>. Example: *dev-qa-iterative-session @docs/stories/STORY.md → tracker.log(''In-session Dev↔QA flow executed'', ''info'')'
   - workflow {name}: 'Execute a specific workflow (no name = list available workflows) → tracker.log(''Executing workflow'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator ''Workflow execution completed'' → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator ''Workflow execution approach selected'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator ''Workflow execution patterns established'' → tracker.completeCurrentTask(''workflow executed'')'
   - agents: 'List available agents and their purposes → tracker.log(''Listing agents'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator ''Agent coordination overview provided'' → tracker.completeCurrentTask(''agents listed'')'
   - status: Show current workflow status and active agents
+  - reverse-align: 'Run reverse alignment pipeline and handoff to PM/Architect → execute: node tools/workflow-orchestrator.js reverse-align --handoff-human → tracker.log(''Reverse alignment run with handoff'', ''info'')'
+  - refresh-manifest: 'Refresh documentation manifest from code → execute: node tools/workflow-orchestrator.js refresh-manifest → tracker.log(''Manifest refreshed'', ''info'')'
+  - pm-update-prd: 'Update PRD from implementation → execute: node tools/workflow-orchestrator.js pm-update-prd → tracker.log(''PRD updated by PM'', ''info'')'
+  - architect-rewrite: 'Rewrite Architecture from implementation → execute: node tools/workflow-orchestrator.js architect-rewrite → tracker.log(''Architecture updated by Architect'', ''info'')'
+  - generate-stories: 'Generate story candidates → execute: node tools/workflow-orchestrator.js generate-stories --cap 10 → tracker.log(''Story candidates generated'', ''info'')'
+  - reverse-quality-gate: 'Run reverse-align quality gate → execute: node tools/workflow-orchestrator.js reverse-quality-gate → tracker.log(''Reverse quality gate executed'', ''info'')'
   - context: Display current workflow context
   - handoff {agent}: 'Hand off control to another agent with context → tracker.log(''Handing off to agent'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator ''Agent handoff executed with context'' ''Handoff reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator ''Agent handoff patterns applied'' → tracker.completeCurrentTask(''handoff completed'')'
   - kb: 'Toggle KB mode for workflow knowledge → tracker.log(''KB mode toggled'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator ''Knowledge base accessed for workflow guidance'' → tracker.completeCurrentTask(''KB accessed'')'
+  - cleanup-docs: Clean docs directory keeping only core docs (PRD, architecture, brief, workflow-orchestrator) → tracker.log('Docs cleanup', 'info')
+  - validate-story-consistency: Check recreated stories reference real files and align with implementation → tracker.log('Validated story consistency', 'info')
+  - generate-alignment-report: Generate combined alignment report in .ai/reports → tracker.log('Generated alignment report', 'info')
+  - create-documentation-manifest: Create .ai/documentation-manifest.json → tracker.log('Created documentation manifest', 'info')
+  - reverse-align: Run full reverse alignment pipeline (cleanup → analyze → rewrite architecture → update PRD → recreate stories → validate → report → manifest) → tracker.log('Reverse alignment complete', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
   - exit: Exit orchestrator mode (confirm)
 dependencies:
@@ -158,6 +175,7 @@ dependencies:
   templates:
     - workflow-status-tmpl.yaml
     - handoff-context-tmpl.yaml
+    - structured-output-tmpl.json
   data:
     - bmad-kb.md
     - workflow-patterns.md
@@ -242,6 +260,8 @@ commands:
   - research-prompt {topic}: 'execute task create-deep-research-prompt.md → tracker.log(''Creating research prompt'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation analyst ''Research prompt created'' → tracker.completeCurrentTask(''research prompt created'')'
   - brainstorm {topic}: 'Facilitate structured brainstorming session (run task facilitate-brainstorming-session.md with template brainstorming-output-tmpl.yaml) → tracker.log(''Facilitating brainstorming'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation analyst ''Brainstorming session facilitated'' → execute: node .bmad-core/utils/track-progress.js keyfact analyst ''Brainstorming insights captured'' → tracker.completeCurrentTask(''brainstorming completed'')'
   - elicit: 'run the task advanced-elicitation → tracker.log(''Running elicitation'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation analyst ''Advanced elicitation completed'' → tracker.completeCurrentTask(''elicitation completed'')'
+  - analyze-codebase-changes: Scan repository for implemented systems (CI workflows, gates, metrics, preflight, reference checking, patch plan, simple tracking) → write .ai/reverse/analysis.json → tracker.log('Analyzed codebase changes', 'info')
+  - extract-implemented-features: Summarize implemented features from analysis.json → tracker.log('Extracted implemented features', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
   - exit: Say goodbye as the Business Analyst, and then abandon inhabiting this persona
 dependencies:
@@ -334,7 +354,9 @@ commands:
   - document-project: 'execute the task document-project.md → tracker.log(''Documenting project'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Project documentation completed'' → tracker.completeCurrentTask(''project documented'')'
   - execute-checklist {checklist}: 'Run task execute-checklist (default->architect-checklist) → tracker.log(''Running checklist'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture checklist validated'' → tracker.completeCurrentTask(''checklist completed'')'
   - research {topic}: 'execute task create-deep-research-prompt → tracker.log(''Researching topic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture research completed'' → tracker.completeCurrentTask(''research completed'')'
-  - shard-prd: 'run the task shard-doc.md for the provided architecture.md (ask if not found) → tracker.log(''Sharding document'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture document sharded'' → tracker.completeCurrentTask(''document sharded'')'
+  - shard-doc: 'run the task shard-doc on the provided architecture.md (ask if not found) → tracker.log(''Sharding document'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture document sharded'' → tracker.completeCurrentTask(''document sharded'')'
+  - reverse-engineer-architecture: Generate architecture.md from implementation artifacts (tools/, scripts/, bmad-core/, workflows) → tracker.log('Reverse-engineered architecture', 'info')
+  - document-design-decisions: Document real design decisions based on implementation → tracker.log('Design decisions documented', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
   - yolo: Toggle Yolo Mode
   - exit: Say goodbye as the Architect, and then abandon inhabiting this persona
@@ -369,7 +391,7 @@ activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: 'Initialize tracking for this session by ensuring .ai directory exists: mkdir -p .ai/history'
   - STEP 3: 'Log agent activation: node .bmad-core/utils/track-progress.js observation dev ''Dev agent activated for session'''
-  - STEP 4: Check if sufficient context exists to proceed with story implementation (verify story file exists and has required fields)
+  - STEP 4: Do NOT scan stories on activation. If and only if a specific story file was provided in the activation command, validate that it exists and has required fields; otherwise remain idle.
   - STEP 5: If a story is assigned, load the StoryContract from the story's YAML front-matter and verify that all required fields are present (version, story_id, epic_id, apiEndpoints, filesToModify, acceptanceCriteriaLinks). If the contract is missing fields or malformed, halt and ask the user or Scrum Master to fix the story before proceeding.
   - STEP 6: Greet user with your name/role, mention `*help` command, and briefly summarize any relevant implementation context
   - DO NOT: Load any other agent files during activation
@@ -385,6 +407,8 @@ activation-instructions:
   - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
   - PROGRESS VALIDATION: Before marking any story as 'Ready for Review', ensure all tasks in .ai/dev_tasks.json are marked complete and all tests pass.
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
+  - 'STARTUP MODE: Respect core-config.yaml `devStartup` (default: `idle`). When `idle`, do not prompt or scan for stories until a command is issued.'
+  - 'STORY SCANNING GATE: Only perform any story discovery/reads when the user explicitly invokes story workflows (e.g., `*implement-next-story`, `*develop-story`). Never enumerate stories during activation or ad-hoc tasks.'
   - IMPLEMENT-NEXT-STORY: When user invokes *implement-next-story command - (1) Load find-next-story utility from dependencies (2) Call findNextApprovedStory with devStoryLocation from core-config (3) If no approved story found, inform user with specific reason (no stories, all in wrong status, etc) (4) If approved story found, display story title and ask for confirmation (5) Upon confirmation, load the story file and proceed with develop-story workflow (6) If story has no valid StoryContract, halt and inform user to fix the story first
 agent:
   name: James
@@ -409,6 +433,9 @@ core_principles:
   - CRITICAL: ALWAYS perform dependency analysis before implementing any code changes. Use dependency-impact-checker to identify all files and symbols that would be affected by your changes. This is MANDATORY for every story implementation.
   - CRITICAL: Before modifying any file, check what other files import/use it. Document all potential impacts in Debug Log. If changes would impact critical system files, pause and inform user.
   - Numbered Options - Always use numbered lists when presenting choices to the user
+  - 'INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. StoryContract ALWAYS overrides template guidance. Never implement features not specified in StoryContract - escalate scope questions to SM/user.'
+  - 'STRUCTURED OUTPUT: Use structured-output-tmpl.json format for complex outputs and handoff documents. Include decisions, assumptions, and risks for all non-trivial implementations. Document instruction level for technical decisions.'
+  - 'NO INVENTION RULE: Only implement what is explicitly specified in StoryContract. If implementation details are ambiguous, escalate to user rather than making assumptions. Document all decisions and rationale.'
   - When implementing a story OR executing any individual task that contains more than 5 distinct actions, use Dynamic Plan Adaptation protocol. For stories, this applies to the overall implementation workflow. For tasks, this applies to task execution steps. Break the work into smaller sub-tasks, record them in .ai/dev_tasks.json and execute them sequentially.
   - When executing tasks, use the task-runner utility to automatically apply dynamic plan adaptation. The runner will analyze the task and create sub-tasks if needed.
   - 'PROGRESS TRACKING: After implementation steps, record observations using: node .bmad-core/utils/track-progress.js observation dev ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision dev ''[decision]'' ''[rationale]''. Execute dev-track-progress task after completing major tasks.'
@@ -417,9 +444,9 @@ core_principles:
   - 'TRACKING GUIDELINES - After run-tests: Log observation about test results. After execute-task: Log observation about task completion. After check-dependencies: Log findings as keyfact. After implement-next-story: Log story start. After address-qa-feedback: Log decisions about fixes. After check-quality: Log quality patterns found. After auto-refactor: Log refactoring approach.'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - run-tests: 'Execute linting and tests → Log results: node .bmad-core/utils/track-progress.js observation dev ''Test execution completed: [results]'' → Execute: *execute-task dev-track-progress'
+  - run-tests: 'Execute linting and tests (enable runner parallelism, e.g., --maxWorkers=50% or 4) → Log results: node .bmad-core/utils/track-progress.js observation dev ''Test execution completed: [results]'' → Execute: *execute-task dev-track-progress'
   - execute-task: 'Execute a task with dynamic plan adaptation using the task runner → Log completion: node .bmad-core/utils/track-progress.js observation dev ''Task completed: [task_name]'' → Execute: *execute-task dev-track-progress'
-  - check-dependencies: 'Analyze code dependencies and potential impacts → Log findings: node .bmad-core/utils/track-progress.js keyfact dev ''Dependencies: [findings]'''
+  - check-dependencies: 'Analyze code dependencies and potential impacts (bounded concurrency up to 4 workers) → Log findings: node .bmad-core/utils/track-progress.js keyfact dev ''Dependencies: [findings]'''
   - explain: 'teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. → Log knowledge: node .bmad-core/utils/track-progress.js keyfact dev ''Explained: [topic]'''
   - implement-next-story: 'Automatically find the most recent approved story from the stories directory, display story title for confirmation, then execute the *develop-story command → Log start: node .bmad-core/utils/track-progress.js observation dev ''Starting story: [story_id]'''
   - develop-story: 'Execute the develop-story workflow for the currently assigned story with sequential task implementation and progress tracking → execute: node .bmad-core/utils/track-progress.js observation dev ''Story development workflow initiated'' → Follow the develop-story order-of-execution'
@@ -430,6 +457,7 @@ commands:
   - progress-status: 'Show current progress and context: node .bmad-core/utils/track-progress.js show dev'
   - show-context: 'Display current context and recent observations: cat .ai/dev_context.json && tail -10 .ai/history/dev_log.jsonl'
   - search-docs: Search project documentation for implementation guidance using grep or other file search tools
+  - adhoc: 'Run a one-off development task without scanning or reading story files → First, load devLoadAlwaysFiles from core-config for baseline context → Execute: node .bmad-core/utils/adhoc-runner.js --desc ''[task description]'' [--paths <path1> <path2> ...] → Log: node .bmad-core/utils/track-progress.js observation dev ''Ad-hoc task completed'''
   - exit: Say goodbye as the Developer, create session summary using createSessionSummary and log summary using logSessionSummary(agentName, operation, summaryData, details), and abandon inhabiting this persona
 develop-story:
   order-of-execution: 'Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If critical impacts detected (>10 files affected), pause and inform user→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev ''Starting task: [task name]''→Check dependency impacts for specific files being modified→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev ''Completed task: [task name]''→Execute: *execute-task dev-track-progress→Repeat until all tasks complete'
@@ -443,7 +471,7 @@ develop-story:
       1. Use *address-qa-feedback command to parse QA findings with qa-findings-parser
       2. Initialize qa-fix-tracker with parsed findings for systematic tracking
       3. Review all issues tracked in .ai/qa_fixes_checklist.json
-      4. Implement fixes based on QA feedback (you have final technical decision authority)
+      4. Implement fixes based on QA feedback (you have final technical decision authority). Execute independent fixes concurrently with a safe cap (max 3 in parallel). Serialize dependent changes on the same file.
       5. Mark each fix as completed in tracker with verification details
       6. Generate comprehensive fix report showing all fixes applied
       7. Update Debug Log and Change Log with fix summary from report
@@ -457,12 +485,13 @@ develop-story:
       - 'After task completion: Log completion with: node .bmad-core/utils/track-progress.js observation dev ''Completed task: [task name]'''
       - 'For decisions: Log with: node .bmad-core/utils/track-progress.js decision dev ''[what]'' ''[why]'''
       - 'For patterns: Log with: node .bmad-core/utils/track-progress.js keyfact dev ''[pattern description]'''
+      - 'Concurrency: For *check-dependencies and *address-qa-feedback, prefer bounded concurrency (3–4 workers) for independent units to improve throughput while maintaining safety'
     operations:
       - 'View current progress: node .bmad-core/utils/track-progress.js show dev'
       - 'Check task list: cat .ai/dev_tasks.json'
       - 'View recent activity: tail -20 .ai/history/dev_log.jsonl'
   blocking: 'HALT for: Unapproved deps needed, confirm with user | Ambiguous after story check | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
-  ready-for-review: Code matches requirements + All validations pass + Follows standards + File List complete
+  ready-for-review: Code matches requirements + All validations pass + Follows standards + File List complete + AC Coverage PASSED
   completion: |
     For each item in StoryContract.apiEndpoints, write an integration test verifying the method, path, request body schema and success response schema →
     Log progress after each endpoint implementation →
@@ -475,6 +504,8 @@ develop-story:
     run execute-checklist for story-dod-checklist →
     Execute: *execute-task dev-track-progress to finalize tracking →
     VERIFY: Confirm all tasks completed successfully by checking .ai/dev_tasks.json →
+    Run AC Coverage Check: node tools/qa/ac-coverage-check.js <story-file|story-id> →
+    VERIFY: AC coverage must be 100% and tests green →
     set story status: 'Ready for Review' →
     HALT
 dependencies:
@@ -486,6 +517,8 @@ dependencies:
     - analyze-dependencies-before-implementation.yaml
     - dev-track-progress.yaml
     - analyze-code-quality.yaml
+  templates:
+    - structured-output-tmpl.json
   utils:
     task-runner: ../../tools/task-runner.js
     validate-story-contract: ../scripts/validate-story-contract.js
@@ -496,6 +529,7 @@ dependencies:
     dependency-scanner: dependency-scanner.js
     dependency-analysis-storage: dependency-analysis-storage.js
     track-progress: track-progress.js
+    adhoc-runner: adhoc-runner.js
     simple-task-tracker: simple-task-tracker.js
     qa-findings-parser: qa-findings-parser.js
     qa-fix-tracker: qa-fix-tracker.js
@@ -666,12 +700,19 @@ persona:
     - 'PROGRESS TRACKING: After product operations, record observations using: node .bmad-core/utils/track-progress.js observation pm ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision pm ''[decision]'' ''[rationale]''.'
     - 'KNOWLEDGE PERSISTENCE: Store successful PRD patterns and product insights using: node .bmad-core/utils/track-progress.js keyfact pm ''[pattern or insight description]''.'
     - 'TRACKING GUIDELINES - After create-prd: Log decision about PRD creation. After create-brownfield-prd: Log decision about brownfield approach. After create-epic: Log observation about epic creation. After create-story: Log observation about story creation.'
+    - Scope Clarification - PM may create stories/epics only via brownfield-* tasks; SM owns standard story creation in development phase
+    - 'INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. When creating PRDs, focus on requirements that directly support implementation. Never specify requirements not derivable from user needs and market research.'
+    - 'STRUCTURED OUTPUT: Use structured-output-tmpl.json format for PRDs and strategic documents. Include decisions, assumptions, and risks sections. Document instruction level for product decisions and market assumptions.'
+    - 'NO INVENTION RULE: Base all PRD requirements on user research, market analysis, or explicit stakeholder requests. If requirements are unclear, conduct additional research rather than making assumptions.'
 commands:
   - help: Show numbered list of the following commands to allow selection
   - create-prd: 'run task create-doc.yaml with template prd-tmpl.yaml → tracker.log(''Creating PRD'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision pm ''PRD created with key product decisions'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact pm ''PRD pattern applied successfully'' → tracker.completeCurrentTask(''PRD created'')'
   - create-brownfield-prd: 'run task create-doc.yaml with template brownfield-prd-tmpl.yaml → tracker.log(''Creating brownfield PRD'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision pm ''Brownfield PRD created with legacy analysis'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact pm ''Brownfield approach documented'' → tracker.completeCurrentTask(''brownfield PRD created'')'
   - create-epic: 'Create epic for brownfield projects (task brownfield-create-epic) → tracker.log(''Creating epic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation pm ''Epic created for brownfield project'' → execute: node .bmad-core/utils/track-progress.js keyfact pm ''Epic structure defined'' → tracker.completeCurrentTask(''epic created'')'
   - create-story: 'Create user story from requirements (task brownfield-create-story) → tracker.log(''Creating story'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation pm ''User story created from requirements'' → tracker.completeCurrentTask(''story created'')'
+  - update-prd-from-implementation: Rewrite PRD.md to reflect implemented features (gates, metrics, CI/CD) → tracker.log('PRD updated from implementation', 'info')
+  - document-missing-requirements: Identify and record any missing requirements discovered during reverse alignment → tracker.log('Missing requirements documented', 'info')
+  - validate-epic {epic}: 'execute: node scripts/validate-epic-contract.js --file {epic} → tracker.log(''Validating epic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation pm ''Epic validation report generated'' → tracker.completeCurrentTask(''epic validated'')'
   - doc-out: Output full document to current destination file
   - shard-prd: 'run the task shard-doc.md for the provided prd.md (ask if not found) → tracker.log(''Sharding PRD'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation pm ''PRD sharded into components'' → tracker.completeCurrentTask(''PRD sharded'')'
   - correct-course: 'execute the correct-course task → tracker.log(''Correcting course'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision pm ''Course correction applied'' ''Decision reasoning'' → tracker.completeCurrentTask(''course corrected'')'
@@ -690,6 +731,7 @@ dependencies:
   templates:
     - prd-tmpl.yaml
     - brownfield-prd-tmpl.yaml
+    - structured-output-tmpl.json
   structured-checklists:
     - pm-checklist.yaml
     - change-checklist.yaml
@@ -753,15 +795,16 @@ persona:
     - 'PROGRESS TRACKING: After backlog operations, record observations using: node .bmad-core/utils/track-progress.js observation po ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision po ''[decision]'' ''[rationale]''.'
     - 'KNOWLEDGE PERSISTENCE: Store successful story patterns and quality validation methods using: node .bmad-core/utils/track-progress.js keyfact po ''[pattern or method description]''.'
     - 'TRACKING GUIDELINES - After execute-checklist-po: Log observation about quality validation. After shard-doc: Log observation about document processing. After create-epic: Log observation about epic creation.'
+    - Scope Clarification - PO does not create stories/epics; delegate standard story creation to SM and brownfield story/epic creation to PM
 commands:
   - help: Show numbered list of the following commands to allow selection
   - execute-checklist-po: 'Run task execute-checklist (checklist po-master-checklist) → tracker.log(''Running PO checklist'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''PO quality checklist completed'' → execute: node .bmad-core/utils/track-progress.js keyfact po ''Quality checklist patterns validated'' → tracker.completeCurrentTask(''checklist completed'')'
   - shard-doc {document} {destination}: 'run the task shard-doc against the optionally provided document to the specified destination (CRITICAL - Verify all files are actually created after sharding) → tracker.log(''Sharding document'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''Document sharding completed'' → execute: node .bmad-core/utils/track-progress.js keyfact po ''Document sharding patterns applied'' → tracker.completeCurrentTask(''document sharded'')'
   - correct-course: 'execute the correct-course task → tracker.log(''Correcting course'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision po ''Process corrections applied'' ''Decision reasoning'' → tracker.completeCurrentTask(''course corrected'')'
-  - create-epic: 'Create epic for brownfield projects (task brownfield-create-epic) → tracker.log(''Creating epic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''Epic created for backlog management'' → execute: node .bmad-core/utils/track-progress.js keyfact po ''Epic creation patterns established'' → tracker.completeCurrentTask(''epic created'')'
-  - create-story: 'Create user story from requirements (task brownfield-create-story) → tracker.log(''Creating story'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''User story created from requirements'' → tracker.completeCurrentTask(''story created'')'
   - doc-out: Output full document to current destination file
   - validate-story-draft {story}: 'run the task validate-next-story against the provided story file → tracker.log(''Validating story'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''Story validation completed'' → tracker.completeCurrentTask(''story validated'')'
+  - validate-epic {epic}: 'execute: node scripts/validate-epic-contract.js --file {epic} → tracker.log(''Validating epic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''Epic validation report generated'' → tracker.completeCurrentTask(''epic validated'')'
+  - validate-ecm {epic}: 'execute: node tools/ecm-validate.js {epic} → tracker.log(''Validating ECM'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation po ''ECM validation completed'' → tracker.completeCurrentTask(''ecm validated'')'
   - progress: Show current task progress using tracker.getProgressReport()
   - yolo: Toggle Yolo Mode off on - on will skip doc section confirmations
   - exit: Exit (confirm)
@@ -842,6 +885,8 @@ commands:
   - review {story}: 'execute the task review-story for the highest sequence story in docs/stories unless another is specified - keep any specified technical-preferences in mind as needed → tracker.log(''Review started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Code review completed'' → execute: node .bmad-core/utils/track-progress.js decision qa ''Quality assessment'' ''Assessment based on code standards and requirements'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Quality review patterns identified'' → tracker.completeCurrentTask(''review completed'')'
   - analyze-dependencies {story}: 'execute dependency impact analysis on a story using analyze-dependency-impacts-qa task → tracker.log(''Dependency analysis started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Dependency analysis completed'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Dependency risk patterns documented'' → tracker.completeCurrentTask(''dependency analysis completed'')'
   - analyze-code-quality {files}: 'execute automated code quality analysis on specified files or story implementation → *execute-task analyze-code-quality → tracker.log(''Code quality analysis completed'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation qa ''Code quality analysis completed'' → execute: node .bmad-core/utils/track-progress.js keyfact qa ''Quality metrics and violations documented'' → tracker.completeCurrentTask(''quality analysis completed'')'
+  - validate-docs-code-alignment: Validate that documentation reflects the implementation and generate alignment findings → tracker.log('Docs-code alignment validated', 'info')
+  - generate-coverage-report: Generate docs coverage report (.ai/reports/) → tracker.log('Coverage report generated', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
   - exit: Say goodbye as the QA Engineer and abandon inhabiting this persona
 feedback-loop-workflow:
@@ -916,16 +961,23 @@ persona:
     - When creating stories, use the task-runner utility to analyze complexity and automatically create sub-tasks if the story has more than 5 implementation steps.
     - CRITICAL: Your primary function in story creation is to parse the PRD and Architecture into a StoryContract YAML block. Do NOT summarise; extract data verbatim.
     - Always produce a StoryContract that adheres to the story-contract-schema; halt and request clarification if required fields are missing.
+    - Acceptance Test Matrix: When adding `StoryContract.acceptanceTestMatrix`, copy the standardized example from `bmad-core/templates/acceptance-test-matrix.example.yaml` verbatim (no improvisation). Fill only concrete AC IDs, endpoints, and file paths.
     - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
     - 'PROGRESS TRACKING: After story creation steps, record observations using: node .bmad-core/utils/track-progress.js observation sm ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision sm ''[decision]'' ''[rationale]''.'
     - 'CONTEXT VALIDATION: Check that PRD and architecture files exist and have required fields before proceeding. If context is missing, explicitly request it from user rather than making assumptions.'
     - 'KNOWLEDGE PERSISTENCE: Store important story patterns and PRD insights using: node .bmad-core/utils/track-progress.js keyfact sm ''[pattern or insight description]''.'
     - 'TRACKING GUIDELINES - After create-story: Log observation about story creation. After correct-course: Log decision about process corrections. After story-checklist: Log findings as keyfact.'
+    - 'INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. When creating stories, StoryContract takes precedence over templates. Never invent information not found in PRD/Architecture - escalate missing requirements to user.'
+    - 'STRUCTURED OUTPUT: Use structured-output-tmpl.json format for all formal outputs. Include decisions, assumptions, and risks sections. Document instruction level for each decision made during story creation.'
 commands:
   - help: Show numbered list of the following commands to allow selection
   - create-story: 'Execute task create-next-story.yaml → tracker.log(''Story creation started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation sm ''Story creation completed'' → execute: node .bmad-core/utils/track-progress.js decision sm ''Story structure'' ''Decisions made based on PRD and epic requirements'' → execute: node .bmad-core/utils/track-progress.js keyfact sm ''Story creation patterns applied'' → tracker.completeCurrentTask(''story created'')'
   - correct-course: 'Execute task correct-course.yaml → tracker.log(''Course correction started'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision sm ''Agile process corrections'' ''Applied improvements to development workflow'' → tracker.completeCurrentTask(''course corrected'')'
   - story-checklist: 'Execute task execute-checklist.yaml with checklist story-draft-checklist.yaml → tracker.log(''Checklist started'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation sm ''Story quality checklist completed'' → execute: node .bmad-core/utils/track-progress.js keyfact sm ''Story quality patterns validated'' → tracker.completeCurrentTask(''checklist completed'')'
+  - review-stories: 'Review all docs/stories/*.md for SM template compliance (StoryContract + required sections). Executes: node tools/workflow-orchestrator.js sm-review-stories → tracker.log(''Reviewed stories for template compliance'', ''info'')'
+  - normalize-stories: 'Auto-fix stories to conform to SM template and ensure StoryContract sourced from PRD/Architecture. Executes: node tools/workflow-orchestrator.js sm-normalize-stories [--file <path>] [--dry-run] → tracker.log(''Normalized stories to SM template'', ''info'')'
+  - recreate-stories-from-code: Recreate stories in docs/stories/ based on implemented features (reverse alignment) → tracker.log('Recreated stories from code', 'info')
+  - update-story-templates: Update story templates to latest format → tracker.log('Updated story templates', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
   - generate-search-tools: Execute task generate-search-tools.yaml to create search tool configurations for the current epic/story
   - generate-tech-search-tools: 'Generate technical documentation search queries by running: node .bmad-core/scripts/generate-tech-search-tools.js --prd docs/prd.md --output tech-search-tools.yaml'
@@ -938,6 +990,8 @@ dependencies:
     - generate-search-tools.yaml
   templates:
     - story-tmpl.yaml
+    - structured-output-tmpl.json
+    - acceptance-test-matrix.example.yaml
   structured-checklists:
     - story-draft-checklist.yaml
   utils:
@@ -1162,6 +1216,385 @@ sections:
       - {{description}} (Mitigation: {{mitigation}})
       {{/each}}
 ==================== END: .bmad-core/templates/handoff-context-tmpl.yaml ====================
+
+==================== START: .bmad-core/templates/structured-output-tmpl.json ====================
+{
+  "metadata": {
+    "template_type": "structured-output",
+    "version": "1.0.0",
+    "description": "Template for all structured outputs in the SEMAD-METHOD framework",
+    "usage": "Use this template structure for all agent outputs to ensure consistency and validation"
+  },
+  "schema": {
+    "type": "object",
+    "required": [
+      "type",
+      "storyId",
+      "inputs",
+      "outputs",
+      "decisions",
+      "assumptions",
+      "risks"
+    ],
+    "properties": {
+      "type": {
+        "type": "string",
+        "description": "The type of output being generated",
+        "enum": [
+          "story",
+          "architecture_decision",
+          "progress_report",
+          "validation_result",
+          "project_brief",
+          "prd",
+          "technical_spec",
+          "test_plan",
+          "deployment_plan",
+          "handoff_document"
+        ]
+      },
+      "storyId": {
+        "type": "string",
+        "description": "Unique identifier linking output to its source story",
+        "pattern": "^[A-Z]{2,4}-\\d{3,4}$",
+        "examples": ["AH-015", "US-001", "EPIC-001"]
+      },
+      "inputs": {
+        "type": "object",
+        "description": "All inputs used to generate this output",
+        "required": ["sources", "context"],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "description": "Source documents, requirements, or data used",
+            "items": {
+              "type": "object",
+              "required": ["type", "identifier"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["prd", "architecture", "story", "template", "user_input", "external_doc"]
+                },
+                "identifier": {
+                  "type": "string",
+                  "description": "File path, URL, or unique identifier"
+                },
+                "version": {
+                  "type": "string",
+                  "description": "Version or timestamp when referenced"
+                },
+                "relevance": {
+                  "type": "string",
+                  "enum": ["primary", "secondary", "reference"],
+                  "description": "How critical this source was to the output"
+                }
+              }
+            }
+          },
+          "context": {
+            "type": "object",
+            "description": "Contextual information that influenced the output",
+            "properties": {
+              "agent": {
+                "type": "string",
+                "description": "Agent that generated this output"
+              },
+              "workflow_phase": {
+                "type": "string",
+                "enum": ["planning", "development", "testing", "deployment", "maintenance"]
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Other stories or components this depends on"
+              },
+              "constraints": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Limitations or restrictions that apply"
+              }
+            }
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "description": "The actual content and deliverables produced",
+        "required": ["primary", "artifacts"],
+        "properties": {
+          "primary": {
+            "type": "object",
+            "description": "Main content of the output",
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "content": {"type": "string"},
+              "format": {
+                "type": "string",
+                "enum": ["markdown", "yaml", "json", "text", "code"]
+              }
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "description": "Additional files, diagrams, or outputs created",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "path": {"type": "string"},
+                "description": {"type": "string"}
+              }
+            }
+          },
+          "validation_status": {
+            "type": "object",
+            "properties": {
+              "schema_valid": {"type": "boolean"},
+              "instruction_compliant": {"type": "boolean"},
+              "quality_checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "check": {"type": "string"},
+                    "status": {"type": "string", "enum": ["passed", "failed", "warning"]},
+                    "details": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "decisions": {
+        "type": "array",
+        "description": "Key decisions made during output generation",
+        "items": {
+          "type": "object",
+          "required": ["decision", "rationale", "alternatives"],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "description": "The decision that was made"
+            },
+            "rationale": {
+              "type": "string",
+              "description": "Why this decision was made"
+            },
+            "alternatives": {
+              "type": "array",
+              "description": "Other options that were considered",
+              "items": {"type": "string"}
+            },
+            "impact": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "critical"],
+              "description": "Expected impact of this decision"
+            },
+            "reversible": {
+              "type": "boolean",
+              "description": "Whether this decision can be easily changed later"
+            },
+            "instruction_level": {
+              "type": "string",
+              "enum": ["system", "gate_rule", "story_contract", "prd_architecture", "template"],
+              "description": "Which instruction level guided this decision"
+            }
+          }
+        }
+      },
+      "assumptions": {
+        "type": "array",
+        "description": "Assumptions made that should be validated",
+        "items": {
+          "type": "object",
+          "required": ["assumption", "basis", "risk_if_wrong"],
+          "properties": {
+            "assumption": {
+              "type": "string",
+              "description": "What is being assumed"
+            },
+            "basis": {
+              "type": "string",
+              "description": "Why this assumption seems reasonable"
+            },
+            "risk_if_wrong": {
+              "type": "string",
+              "description": "What happens if this assumption proves incorrect"
+            },
+            "validation_needed": {
+              "type": "boolean",
+              "description": "Whether this assumption needs explicit validation"
+            },
+            "validation_method": {
+              "type": "string",
+              "description": "How this assumption can be validated"
+            }
+          }
+        }
+      },
+      "risks": {
+        "type": "array",
+        "description": "Identified risks and mitigation strategies",
+        "items": {
+          "type": "object",
+          "required": ["risk", "probability", "impact", "mitigation"],
+          "properties": {
+            "risk": {
+              "type": "string",
+              "description": "Description of the risk"
+            },
+            "category": {
+              "type": "string",
+              "enum": ["technical", "business", "schedule", "resource", "quality", "security"],
+              "description": "Type of risk"
+            },
+            "probability": {
+              "type": "string",
+              "enum": ["very_low", "low", "medium", "high", "very_high"],
+              "description": "Likelihood this risk will occur"
+            },
+            "impact": {
+              "type": "string",
+              "enum": ["very_low", "low", "medium", "high", "very_high"],
+              "description": "Severity if this risk occurs"
+            },
+            "mitigation": {
+              "type": "string",
+              "description": "Strategy to prevent or reduce this risk"
+            },
+            "contingency": {
+              "type": "string",
+              "description": "Plan if the risk occurs despite mitigation"
+            },
+            "owner": {
+              "type": "string",
+              "description": "Who is responsible for monitoring this risk"
+            }
+          }
+        }
+      },
+      "traceability": {
+        "type": "object",
+        "description": "Links to related elements for traceability",
+        "properties": {
+          "parent_story": {"type": "string"},
+          "child_stories": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "related_stories": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "requirements": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When this output was generated"
+      },
+      "version": {
+        "type": "string",
+        "description": "Version of this output",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      }
+    }
+  },
+  "examples": {
+    "story_output": {
+      "type": "story",
+      "storyId": "AH-015",
+      "inputs": {
+        "sources": [
+          {
+            "type": "prd",
+            "identifier": "project-brief.md",
+            "version": "2024-01-15T10:00:00Z",
+            "relevance": "primary"
+          }
+        ],
+        "context": {
+          "agent": "scrum-master",
+          "workflow_phase": "development",
+          "dependencies": ["AH-014"],
+          "constraints": ["Must maintain backward compatibility"]
+        }
+      },
+      "outputs": {
+        "primary": {
+          "title": "Implement instruction hierarchy and structured outputs",
+          "description": "Add instruction hierarchy enforcement and structured output validation to ensure consistency",
+          "content": "As a system administrator...",
+          "format": "markdown"
+        },
+        "artifacts": [
+          {
+            "name": "Validation Schema",
+            "type": "json",
+            "path": "schemas/structured-output.json",
+            "description": "JSON schema for validating structured outputs"
+          }
+        ],
+        "validation_status": {
+          "schema_valid": true,
+          "instruction_compliant": true,
+          "quality_checks": []
+        }
+      },
+      "decisions": [
+        {
+          "decision": "Use JSON schema for validation",
+          "rationale": "Provides comprehensive validation with good tooling support",
+          "alternatives": ["Custom validation", "YAML schema"],
+          "impact": "medium",
+          "reversible": true,
+          "instruction_level": "template"
+        }
+      ],
+      "assumptions": [
+        {
+          "assumption": "All agents will adopt structured outputs",
+          "basis": "Framework consistency requirements",
+          "risk_if_wrong": "Inconsistent output formats",
+          "validation_needed": true,
+          "validation_method": "Agent testing and compliance checks"
+        }
+      ],
+      "risks": [
+        {
+          "risk": "Adoption resistance from existing workflows",
+          "category": "business",
+          "probability": "medium",
+          "impact": "medium",
+          "mitigation": "Gradual rollout with clear migration guides",
+          "contingency": "Maintain backward compatibility layer",
+          "owner": "framework-team"
+        }
+      ],
+      "traceability": {
+        "parent_story": "EPIC-003",
+        "child_stories": [],
+        "related_stories": ["AH-014", "AH-016"],
+        "requirements": ["REQ-001", "REQ-002"],
+        "test_cases": ["TC-015-001", "TC-015-002"]
+      },
+      "timestamp": "2024-01-15T14:30:00Z",
+      "version": "1.0.0"
+    }
+  }
+}
+==================== END: .bmad-core/templates/structured-output-tmpl.json ====================
 
 ==================== START: .bmad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
@@ -3067,7 +3500,7 @@ class TaskTracker {
       name: workflowName,
       tasks: tasks.map((task, index) => ({
         ...task,
-        id: task.id || `task-${index + 1}`,
+        id: task.id || ('task-' + (index + 1)),
         status: 'pending'
       })),
       currentIndex: 0,
@@ -3076,9 +3509,96 @@ class TaskTracker {
       agentName: null
     };
     
-    this.log(`Started workflow: ${workflowName} with ${tasks.length} tasks`);
+    this.log('Started workflow: ' + workflowName + ' with ' + tasks.length + ' tasks');
     return true;
   }
+
+  /**
+   * Backward-compatibility helper: add a task to the current workflow
+   * If no workflow exists, starts an 'adhoc' workflow with this single task.
+   * Accepts a string task name or a task object with a 'name' property.
+   * @param {string|Object} task - Task name or task object
+   * @returns {boolean} Success status
+   */
+  addTask(task) {
+    // Normalize input
+    const taskObj = typeof task === 'string' ? { name: task } : { ...(task || {}) };
+    if (!taskObj.name) {
+      this.log('addTask called without a task name', 'warning');
+      return false;
+    }
+
+    // If no workflow yet, create an adhoc workflow
+    if (!this.workflow) {
+      this.startWorkflow('adhoc', [taskObj]);
+      this.log('Initialized adhoc workflow with task: ' + taskObj.name, 'info');
+      return true;
+    }
+
+    // Append to existing workflow
+    const nextIndex = this.workflow.tasks.length + 1;
+    this.workflow.tasks.push({
+      ...taskObj,
+      id: taskObj.id || ('task-' + nextIndex),
+      status: 'pending'
+    });
+    this.log("Added task to workflow '" + this.workflow.name + "': " + taskObj.name, 'info');
+    return true;
+  }
+
+  /**
+   * Find task index by id or name
+   * @param {string} identifier - task id or name
+   * @returns {number} index or -1 if not found
+   */
+  _findTaskIndex(identifier) {
+    if (!this.workflow) return -1;
+    const idxById = this.workflow.tasks.findIndex(t => t.id === identifier);
+    if (idxById >= 0) return idxById;
+    const idxByName = this.workflow.tasks.findIndex(t => t.name === identifier);
+    return idxByName;
+  }
+
+  /**
+   * Backward-compat: update a task's status by id or name
+   * @param {string} identifier - task id or name
+   * @param {string} status - pending | in_progress | completed | skipped
+   * @param {string} notes - optional notes
+   * @returns {boolean}
+   */
+  updateTask(identifier, status = 'pending', notes = '') {
+    if (!this.workflow) {
+      // If no workflow, initialize adhoc with this single task
+      this.startWorkflow('adhoc', [{ name: typeof identifier === 'string' ? identifier : 'task' }]);
+    }
+    const idx = this._findTaskIndex(identifier);
+    if (idx < 0) {
+      // If not found, add then mark
+      this.addTask(typeof identifier === 'string' ? identifier : 'task');
+    }
+    const targetIdx = idx >= 0 ? idx : this.workflow.tasks.length - 1;
+    const task = this.workflow.tasks[targetIdx];
+    task.status = status;
+    if (status === 'in_progress') {
+      this.workflow.currentIndex = targetIdx;
+      this.log("Task '" + task.name + "' is now in progress", 'info');
+    } else if (status === 'completed') {
+      // Mirror completeCurrentTask behavior for this specific task
+      this.workflow.completed.push({ task, completedAt: new Date(), notes, duration: this.getTaskDuration() });
+      this.log('Completed task: ' + task.name, 'success');
+    } else if (status === 'skipped') {
+      task.skipReason = notes;
+      this.log('Skipped task: ' + task.name + ' - ' + (notes || 'no reason provided'), 'warning');
+    } else {
+      this.log("Updated task '" + task.name + "' status to " + status, 'info');
+    }
+    return true;
+  }
+
+  /** Start a task by id or name (alias) */
+  startTask(identifier, notes = '') { return this.updateTask(identifier, 'in_progress', notes); }
+  /** Complete a task by id or name (alias) */
+  completeTask(identifier, notes = '') { return this.updateTask(identifier, 'completed', notes); }
 
   /**
    * Set the agent name for the current workflow
@@ -3104,7 +3624,7 @@ class TaskTracker {
       task: task,
       index: this.workflow.currentIndex,
       total: this.workflow.tasks.length,
-      progress: `${this.workflow.currentIndex + 1}/${this.workflow.tasks.length}`,
+      progress: (this.workflow.currentIndex + 1) + '/' + this.workflow.tasks.length,
       percentComplete: Math.round((this.workflow.completed.length / this.workflow.tasks.length) * 100)
     };
   }
@@ -3129,14 +3649,14 @@ class TaskTracker {
       duration: this.getTaskDuration()
     });
     
-    this.log(`Completed task ${current.index + 1}: ${current.task.name}`, 'success');
+    this.log('Completed task ' + (current.index + 1) + ': ' + current.task.name, 'success');
     
     // Move to next task
     this.workflow.currentIndex++;
     
     // Check if workflow is complete
     if (this.workflow.currentIndex >= this.workflow.tasks.length) {
-      this.log(`Workflow '${this.workflow.name}' completed! All ${this.workflow.tasks.length} tasks done.`, 'success');
+      this.log("Workflow '" + this.workflow.name + "' completed! All " + this.workflow.tasks.length + ' tasks done.', 'success');
     }
     
     return true;
@@ -3154,7 +3674,7 @@ class TaskTracker {
     this.workflow.tasks[this.workflow.currentIndex].status = 'skipped';
     this.workflow.tasks[this.workflow.currentIndex].skipReason = reason;
     
-    this.log(`Skipped task ${current.index + 1}: ${current.task.name} - Reason: ${reason}`, 'warning');
+    this.log('Skipped task ' + (current.index + 1) + ': ' + current.task.name + ' - Reason: ' + reason, 'warning');
     
     this.workflow.currentIndex++;
     return true;
@@ -3173,7 +3693,7 @@ class TaskTracker {
       workflowContext: this.workflow ? {
         name: this.workflow.name,
         agent: this.workflow.agentName,
-        progress: `${this.workflow.completed.length}/${this.workflow.tasks.length}`,
+        progress: this.workflow.completed.length + '/' + this.workflow.tasks.length,
         currentTask: this.getCurrentTask()?.task?.name || 'None'
       } : null
     };
@@ -3191,7 +3711,7 @@ class TaskTracker {
     const resetColor = '\x1b[0m';
     const color = colors[type] || colors.info;
     
-    console.log(`${color}[${type.toUpperCase()}]${resetColor} ${message}`);
+    console.log(color + '[' + String(type).toUpperCase() + ']' + resetColor + ' ' + message);
   }
 
   /**
@@ -3226,26 +3746,26 @@ class TaskTracker {
     const progress = this.getProgress();
     if (!progress) return 'No active workflow';
     
-    let report = `\n=== Task Progress Report ===\n`;
-    report += `Workflow: ${progress.workflow}\n`;
-    report += `Agent: ${progress.agent || 'Not set'}\n`;
-    report += `Progress: ${progress.completedTasks}/${progress.totalTasks} tasks (${progress.percentComplete}%)\n`;
-    report += `Elapsed Time: ${progress.elapsedTime}\n`;
+    let report = '\n=== Task Progress Report ===\n';
+    report += 'Workflow: ' + progress.workflow + '\n';
+    report += 'Agent: ' + (progress.agent || 'Not set') + '\n';
+    report += 'Progress: ' + progress.completedTasks + '/' + progress.totalTasks + ' tasks (' + progress.percentComplete + '%)\n';
+    report += 'Elapsed Time: ' + progress.elapsedTime + '\n';
     
     if (progress.currentTask) {
-      report += `\nCurrent Task: ${progress.currentTask.task.name}\n`;
-      report += `Task Progress: ${progress.currentTask.progress}\n`;
+      report += '\nCurrent Task: ' + progress.currentTask.task.name + '\n';
+      report += 'Task Progress: ' + progress.currentTask.progress + '\n';
     }
     
     if (progress.skippedTasks > 0) {
-      report += `\nSkipped Tasks: ${progress.skippedTasks}\n`;
+      report += '\nSkipped Tasks: ' + progress.skippedTasks + '\n';
     }
     
     if (progress.estimatedTimeRemaining) {
-      report += `Estimated Time Remaining: ${progress.estimatedTimeRemaining}\n`;
+      report += 'Estimated Time Remaining: ' + progress.estimatedTimeRemaining + '\n';
     }
     
-    report += `===========================\n`;
+    report += '===========================\n';
     
     return report;
   }
@@ -3265,7 +3785,7 @@ class TaskTracker {
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `task-tracker_${this.workflow?.name || 'unknown'}_${timestamp}.json`;
+    const filename = 'task-tracker_' + ((this.workflow && this.workflow.name) || 'unknown') + '_' + timestamp + '.json';
     const filepath = path.join(directory, filename);
     
     const debugData = {
@@ -3276,7 +3796,7 @@ class TaskTracker {
     };
     
     fs.writeFileSync(filepath, JSON.stringify(debugData, null, 2));
-    this.log(`Debug log saved to: ${filepath}`, 'info');
+    this.log('Debug log saved to: ' + filepath, 'info');
     
     return filepath;
   }
@@ -3294,11 +3814,11 @@ class TaskTracker {
     const hours = Math.floor(minutes / 60);
     
     if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
+      return hours + 'h ' + (minutes % 60) + 'm';
     } else if (minutes > 0) {
-      return `${minutes}m ${seconds % 60}s`;
+      return minutes + 'm ' + (seconds % 60) + 's';
     } else {
-      return `${seconds}s`;
+      return String(seconds) + 's';
     }
   }
 
@@ -3332,9 +3852,9 @@ class TaskTracker {
     const hours = Math.floor(minutes / 60);
     
     if (hours > 0) {
-      return `~${hours}h ${minutes % 60}m`;
+      return '~' + hours + 'h ' + (minutes % 60) + 'm';
     } else {
-      return `~${minutes}m`;
+      return '~' + minutes + 'm';
     }
   }
 
@@ -6635,6 +7155,36 @@ class TaskRunner {
   }
 
   /**
+   * Roughly estimate token count for a task by character length.
+   * Heuristic: ~4 characters per token (OpenAI approximation)
+   * Includes task title/description and step/action descriptions.
+   * @param {Object} task
+   * @returns {number}
+   */
+  estimateTokenCountForTask(task) {
+    try {
+      let text = '';
+      if (!task) return 0;
+      if (task.title) text += ` ${task.title}`;
+      if (task.name) text += ` ${task.name}`;
+      if (task.description) text += ` ${task.description}`;
+      const steps = Array.isArray(task.steps) ? task.steps : [];
+      for (const step of steps) {
+        if (step.name) text += ` ${step.name}`;
+        if (step.description) text += ` ${step.description}`;
+        const actions = Array.isArray(step.actions) ? step.actions : [];
+        for (const action of actions) {
+          if (typeof action.description === 'string') text += ` ${action.description}`;
+        }
+      }
+      const approxTokens = Math.ceil((text || '').length / 4);
+      return approxTokens;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /**
    * Load core configuration to access validation schemas
    */
   loadCoreConfig() {
@@ -6811,7 +7361,8 @@ class TaskRunner {
 
       // Validate elicit requirements before proceeding
       const elicitValidation = this.validateElicitRequirements(task, context);
-      if (!elicitValidation.valid && !context.allowMissingUserInput) {
+      const allowMissingByEnv = (process.env.BMAD_ALLOW_MISSING_USER_INPUT === '1' || process.env.BMAD_ALLOW_MISSING_USER_INPUT === 'true' || process.env.BMAD_NONINTERACTIVE === '1' || process.env.BMAD_NONINTERACTIVE === 'true');
+      if (!elicitValidation.valid && !(context.allowMissingUserInput || allowMissingByEnv)) {
         // Return early with information about missing inputs
         return {
           success: false,
@@ -6820,6 +7371,9 @@ class TaskRunner {
           taskName: task.name,
           requiresUserInput: true
         };
+      }
+      if (!elicitValidation.valid && (context.allowMissingUserInput || allowMissingByEnv)) {
+        console.warn('\nℹ️  Proceeding in non-interactive mode: required user inputs will be skipped.');
       }
 
       // Get current working memory or initialize if it doesn't exist
@@ -6876,10 +7430,11 @@ class TaskRunner {
         await updateWorkingMemory(agentName, memory);
       }
 
-      // Apply dynamic plan adaptation
+      // Apply dynamic plan adaptation (pass context size estimate)
       let adaptedMemory;
       try {
-        adaptedMemory = planAdaptation(memory, task);
+        const tokenCount = this.estimateTokenCountForTask(task);
+        adaptedMemory = planAdaptation(memory, task, { tokenCount });
       } catch (planError) {
         throw new TaskExecutionError(
           `Failed to adapt plan for task: ${planError.message}`,
@@ -10575,6 +11130,164 @@ module.exports = {
 };
 ==================== END: .bmad-core/utils/dependency-analysis-storage.js ====================
 
+==================== START: .bmad-core/utils/adhoc-runner.js ====================
+#!/usr/bin/env node
+
+/**
+ * Minimal Ad-hoc Task Runner for Dev Agent
+ * - Logs start/completion to .ai via track-progress
+ * - Optionally runs dependency impact analysis for provided paths
+ * - Writes a short Markdown report to .ai/adhoc/
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { analyzeBatchImpact, generateImpactReport, quickRiskAssessment } = require('./dependency-impact-checker');
+const yaml = require('js-yaml');
+const { spawnSync } = require('child_process');
+
+function ensureDir(p) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
+
+function logObservation(message) {
+  try {
+    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
+  } catch (_) {
+    try {
+      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
+    } catch (e) {
+      console.warn('Could not record observation:', e.message);
+    }
+  }
+}
+
+function logKeyfact(message) {
+  try {
+    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
+  } catch (_) {
+    try {
+      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
+    } catch (e) {
+      console.warn('Could not record keyfact:', e.message);
+    }
+  }
+}
+
+function parseArgs(argv) {
+  const args = { desc: '', paths: [] };
+  const tokens = argv.slice(2);
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t === '--desc' || t === '--description') {
+      args.desc = tokens[++i] || '';
+    } else if (t === '--paths') {
+      // Collect until next flag or end
+      const paths = [];
+      while (i + 1 < tokens.length && !tokens[i + 1].startsWith('--')) {
+        paths.push(tokens[++i]);
+      }
+      args.paths.push(...paths);
+    } else if (!t.startsWith('--') && !args.desc) {
+      // Allow positional description as first non-flag
+      args.desc = t;
+    }
+  }
+  return args;
+}
+
+function loadCoreConfig() {
+  const candidates = [
+    path.join(process.cwd(), 'bmad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.bmad-core', 'core-config.yaml'),
+    path.join(process.cwd(), 'core-config.yaml')
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      try {
+        const raw = fs.readFileSync(p, 'utf8');
+        const cfg = yaml.load(raw) || {};
+        return { path: p, config: cfg };
+      } catch (e) {
+        return { path: p, config: {}, error: e.message };
+      }
+    }
+  }
+  return { path: null, config: {} };
+}
+
+async function main() {
+  const { desc, paths } = parseArgs(process.argv);
+  if (!desc) {
+    console.log('Usage: adhoc-runner.js --desc "<task description>" [--paths <path1> <path2> ...]');
+    process.exit(1);
+  }
+
+  ensureDir('.ai/adhoc');
+  const startedAt = new Date();
+  logObservation(`Ad-hoc task started: ${desc}`);
+
+  // Load baseline context from core-config: devLoadAlwaysFiles
+  const core = loadCoreConfig();
+  const baselineFiles = Array.isArray(core.config?.devLoadAlwaysFiles) ? core.config.devLoadAlwaysFiles : [];
+  const baselineStatus = baselineFiles.map(fp => {
+    const abs = path.isAbsolute(fp) ? fp : path.join(process.cwd(), fp);
+    try {
+      const stat = fs.statSync(abs);
+      return { file: fp, exists: true, size: stat.size, mtime: stat.mtime.toISOString() };
+    } catch (_) {
+      return { file: fp, exists: false };
+    }
+  });
+
+  let reportPath = null;
+  let summary = 'No paths provided; skipped impact analysis.';
+
+  if (paths && paths.length > 0) {
+    try {
+      const risk = await quickRiskAssessment(paths);
+      const impact = await analyzeBatchImpact(paths);
+      const report = generateImpactReport(impact, { includeDetails: true, maxDetailsPerFile: 5, format: 'markdown' });
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      reportPath = path.join('.ai/adhoc', `adhoc-impact-${ts}.md`);
+      fs.writeFileSync(reportPath, report, 'utf8');
+
+      const high = risk.high.length, med = risk.medium.length, low = risk.low.length;
+      summary = `Impact analysis completed: high=${high}, medium=${med}, low=${low}, report=${reportPath}`;
+      logKeyfact(summary);
+    } catch (e) {
+      summary = `Impact analysis failed: ${e.message}`;
+      console.warn(summary);
+      logKeyfact(summary);
+    }
+  }
+
+  const durationMs = Date.now() - startedAt.getTime();
+  logObservation(`Ad-hoc task completed: ${desc} (${Math.round(durationMs / 1000)}s)`);
+
+  // Append baseline context details to report file if created, else print summary
+  const baselineSection = ['\n## Baseline Context (devLoadAlwaysFiles)', `- core-config: ${core.path || '(not found)'}`]
+    .concat(baselineStatus.map(s => `- ${s.file} → ${s.exists ? `exists (${s.size} bytes, mtime ${s.mtime})` : 'MISSING'}`))
+    .join('\n');
+
+  if (reportPath) {
+    fs.appendFileSync(reportPath, `\n${baselineSection}\n`, 'utf8');
+  }
+
+  console.log('\nAd-hoc task summary');
+  console.log('- Description:', desc);
+  console.log('- Paths:', paths && paths.length ? paths.join(', ') : '(none)');
+  console.log('- Result:', summary);
+  console.log('- Baseline files:', baselineFiles.length);
+  if (reportPath) console.log('- Report:', reportPath);
+}
+
+main().catch(err => {
+  console.error('Ad-hoc runner error:', err);
+  process.exit(1);
+});
+==================== END: .bmad-core/utils/adhoc-runner.js ====================
+
 ==================== START: .bmad-core/utils/qa-findings-parser.js ====================
 /**
  * QA Findings Parser
@@ -11852,162 +12565,470 @@ sections:
 ==================== END: .bmad-core/templates/brownfield-prd-tmpl.yaml ====================
 
 ==================== START: .bmad-core/templates/story-tmpl.yaml ====================
-template:
-  id: story-template-v2
-  name: Story Document
-  version: 2.0
-  output:
-    format: markdown
-    filename: docs/stories/{{epic_num}}.{{story_num}}.{{story_title_short}}.md
-    title: "Story {{epic_num}}.{{story_num}}: {{story_title_short}}"
+---
+# DETERMINISTIC STORY TEMPLATE v1.0
+# This template ensures predictable, traceable story generation
+# All placeholders marked with {{}} must be filled by generation process
 
-workflow:
-  mode: interactive
-  elicitation: advanced-elicitation
+StoryContract:
+  version: "{{STORY_VERSION}}"  # Semantic version (required)
+  schemaVersion: "1.0"          # Contract schema version (required by validator)
+  story_id: "{{STORY_ID}}"      # Unique story identifier (required)
+  epic_id: "{{EPIC_ID}}"        # Parent epic identifier (required)
+  
+  # Pre-conditions that must exist before story execution
+  preConditions:
+    {{#PRECONDITIONS}}
+    - "{{.}}"  # Condition that must be met before starting
+    {{/PRECONDITIONS}}
+  
+  # Post-conditions that must be true after story completion
+  postConditions:
+    {{#POSTCONDITIONS}}
+    - "{{.}}"  # Condition that must be verified after completion
+    {{/POSTCONDITIONS}}
+  
+  # API endpoints affected by this story
+  apiEndpoints:
+    {{#API_ENDPOINTS}}
+    - "{{.}}"  # Endpoint path or identifier
+    {{/API_ENDPOINTS}}
+  
+  # Files that will be modified by this story
+  filesToModify:
+    {{#FILES_TO_MODIFY}}
+    - path: "{{PATH}}"     # File path relative to project root
+      reason: "{{REASON}}" # Why this file needs modification
+    {{/FILES_TO_MODIFY}}
+  
+  # Acceptance criteria with explicit traceability
+  acceptanceCriteriaLinks:
+    {{#ACCEPTANCE_CRITERIA}}
+    - "{{ID}}: {{DESCRIPTION}}"  # AC identifier and description
+    {{/ACCEPTANCE_CRITERIA}}
 
-agent_config:
-  editable_sections: 
-    - Status
-    - Story
-    - Acceptance Criteria
-    - Tasks / Subtasks
-    - Dev Notes
-    - Testing
-    - Change Log
+  # Acceptance Test Matrix: executable tests tied to ACs (keep concise and meaningful)
+  acceptanceTestMatrix:
+    policy:
+      test_runner: "{{TEST_RUNNER}}"           # e.g., jest, vitest
+      max_tests_per_ac: {{MAX_TESTS_PER_AC}}   # e.g., 3
+      must_cover:
+        - "1 happy path per AC"
+        - "1 key failure path per AC"
+      skip_criteria:
+        - "pure presentation change with no logic"
+        - "redundant test already covered in broader integration"
+      rationale_required: true
+    globals:
+      base_url: "{{BASE_URL}}"                 # e.g., http://localhost:3000
+      auth:
+        required: {{AUTH_REQUIRED}}            # true/false
+        roles: {{AUTH_ROLES}}                  # e.g., ["user"]
+    items:
+      # Example item (duplicate/remove as needed)
+      - ac_id: "{{AC_ID}}"
+        title: "{{TEST_TITLE}}"
+        type: "{{TEST_TYPE}}"                  # api | api-negative | auth | model | unit | integration
+        endpoint_ref: { method: "{{METHOD}}", path: "{{PATH}}" }
+        preconditions:
+          - "{{PRECONDITION}}"
+        request:
+          headers: {{REQUEST_HEADERS}}
+          body: {{REQUEST_BODY}}
+        assertions:
+          - status: {{HTTP_STATUS}}
+          - json_schema_ref: "{{SCHEMA_REF}}"
+        test_files:
+          - path: "{{TEST_FILE_PATH}}"
+            framework: "{{TEST_RUNNER}}"
+        must_have: true
+        rationale: "{{WHY_THIS_TEST_EXISTS}}"
 
-header:
-  id: story-contract
-  title: StoryContract
-  type: yaml-block
-  instruction: This section contains the formal StoryContract parsed from PRD and Architecture documents
-  template: |
-    ---
-    StoryContract:
-      version: "{{contract_version}}"
-      story_id: "{{story_id}}"
-      epic_id: "{{epic_id}}"
-      apiEndpoints: {{api_endpoints}}
-      filesToModify: {{files_to_modify}}
-      acceptanceCriteriaLinks: {{acceptance_criteria_links}}
-    ---
-  owner: scrum-master
-  editors: [scrum-master]
+  # Development and QA policies to minimize Dev↔QA loops via test-first
+  developmentPolicy:
+    tdd: true
+    test_source: "acceptanceTestMatrix"
+    required_sequence:
+      - write_tests_from_matrix
+      - run_tests_expect_fail
+      - implement_until_green
+    max_tests_per_ac: {{MAX_TESTS_PER_AC}}
+    skip_criteria:
+      - "pure presentation change with no logic"
+      - "redundant behavior already covered by an existing integration test"
+    rationale_required: true
 
-sections:
-  - id: status
-    title: Status
-    type: choice
-    choices: [Draft, Approved, InProgress, In Review, Done, Needs Fixes]
-    instruction: Select the current status of the story
-    owner: scrum-master
-    editors: [scrum-master, dev-agent, qa-agent]
-    
-  - id: story
-    title: Story
-    type: template-text
-    template: |
-      **As a** {{role}},
-      **I want** {{action}},
-      **so that** {{benefit}}
-    instruction: Define the user story using the standard format with role, action, and benefit
-    elicit: true
-    owner: scrum-master
-    editors: [scrum-master]
-    
-  - id: acceptance-criteria
-    title: Acceptance Criteria
-    type: numbered-list
-    instruction: Copy the acceptance criteria numbered list from the epic file
-    elicit: true
-    owner: scrum-master
-    editors: [scrum-master]
-    
-  - id: tasks-subtasks
-    title: Tasks / Subtasks
-    type: bullet-list
-    instruction: |
-      Break down the story into specific tasks and subtasks needed for implementation.
-      Reference applicable acceptance criteria numbers where relevant.
-    template: |
-      - [ ] Task 1 (AC: # if applicable)
-        - [ ] Subtask1.1...
-      - [ ] Task 2 (AC: # if applicable)
-        - [ ] Subtask 2.1...
-      - [ ] Task 3 (AC: # if applicable)
-        - [ ] Subtask 3.1...
-    elicit: true
-    owner: scrum-master
-    editors: [scrum-master, dev-agent]
-    
-  - id: dev-notes
-    title: Dev Notes
-    instruction: |
-      Populate relevant information, only what was pulled from actual artifacts from docs folder, relevant to this story:
-      - Do not invent information
-      - If known add Relevant Source Tree info that relates to this story
-      - If there were important notes from previous story that are relevant to this one, include them here
-      - Put enough information in this section so that the dev agent should NEVER need to read the architecture documents, these notes along with the tasks and subtasks must give the Dev Agent the complete context it needs to comprehend with the least amount of overhead the information to complete the story, meeting all AC and completing all tasks+subtasks
-    elicit: true
-    owner: scrum-master
-    editors: [scrum-master]
-    sections:
-      - id: testing-standards
-        title: Testing
-        instruction: |
-          List Relevant Testing Standards from Architecture the Developer needs to conform to:
-          - Test file location
-          - Test standards
-          - Testing frameworks and patterns to use
-          - Any specific testing requirements for this story
-        elicit: true
-        owner: scrum-master
-        editors: [scrum-master]
-        
-  - id: change-log
-    title: Change Log
-    type: table
-    columns: [Date, Version, Description, Author]
-    instruction: Track changes made to this story document
-    owner: scrum-master
-    editors: [scrum-master, dev-agent, qa-agent]
-    
-  - id: dev-agent-record
-    title: Dev Agent Record
-    instruction: This section is populated by the development agent during implementation
-    owner: dev-agent
-    editors: [dev-agent]
-    sections:
-      - id: agent-model
-        title: Agent Model Used
-        template: "{{agent_model_name_version}}"
-        instruction: Record the specific AI agent model and version used for development
-        owner: dev-agent
-        editors: [dev-agent]
-        
-      - id: debug-log-references
-        title: Debug Log References
-        instruction: Reference any debug logs or traces generated during development
-        owner: dev-agent
-        editors: [dev-agent]
-        
-      - id: completion-notes
-        title: Completion Notes List
-        instruction: Notes about the completion of tasks and any issues encountered
-        owner: dev-agent
-        editors: [dev-agent]
-        
-      - id: file-list
-        title: File List
-        instruction: List all files created, modified, or affected during story implementation
-        owner: dev-agent
-        editors: [dev-agent]
-        
-  - id: qa-results
-    title: QA Results
-    instruction: Results from QA Agent QA review of the completed story implementation
-    owner: qa-agent
-    editors: [qa-agent]
+  qaValidationPolicy:
+    enforce_tdd: true
+    checks:
+      - "Every acceptanceTestMatrix item has its listed test_files added/updated in the PR"
+      - "Tests authored before main implementation (separate commits or clearly staged)"
+      - "Each test has a rationale tied to its AC"
+    exceptions_allowed:
+      - "UI-only cosmetic changes with no logic"
+    exception_requires: "explicit rationale in story"
+  
+  # Structured work breakdown for deterministic AC→Task→Test traceability
+  workBreakdown:
+    coveragePolicy:
+      requireTaskForEveryAC: {{REQUIRE_TASK_FOR_EVERY_AC}}   # true/false
+      requireTestForEveryAC: {{REQUIRE_TEST_FOR_EVERY_AC}}   # true/false
+      minTestsPerAC: {{MIN_TESTS_PER_AC}}                    # e.g., 1
+      forbidOrphanTasks: {{FORBID_ORPHAN_TASKS}}             # true/false
+      allowedPaths:
+        {{#ALLOWED_PATHS}}
+        - "{{.}}"
+        {{/ALLOWED_PATHS}}
+      forbiddenPaths:
+        {{#FORBIDDEN_PATHS}}
+        - "{{.}}"
+        {{/FORBIDDEN_PATHS}}
+    tasks:
+      {{#WB_TASKS}}
+      - id: "{{ID}}"                                  # ^T-[\w\.\-]+$
+        title: "{{TITLE}}"
+        type: "{{TYPE}}"                              # backend|frontend|api|model|infra|test|doc|chore
+        risk: "{{RISK}}"                              # low|med|high
+        owner: "{{OWNER}}"
+        reviewers:
+          {{#REVIEWERS}}
+          - "{{.}}"
+          {{/REVIEWERS}}
+        acRefs:
+          {{#AC_REFS}}
+          - "{{.}}"                                   # ^AC-[\w\-]+
+          {{/AC_REFS}}
+        dependsOn:
+          {{#DEPENDS_ON}}
+          - "{{.}}"                                   # references other task IDs
+          {{/DEPENDS_ON}}
+        changes:
+          files:
+            {{#CHANGES_FILES}}
+            - path: "{{PATH}}"
+              action: "{{ACTION}}"                    # create|modify|move|delete
+              reason: "{{REASON}}"
+            {{/CHANGES_FILES}}
+        tests:
+          mustAdd:
+            {{#TESTS_MUST_ADD}}
+            - id: "{{ID}}"                            # ^[A-Z]+-[\w\-]+$
+              path: "{{PATH}}"
+              framework: "{{FRAMEWORK}}"
+              type: "{{TEST_TYPE}}"
+              covers:
+                {{#COVERS}}
+                - "{{.}}"                             # AC IDs
+                {{/COVERS}}
+            {{/TESTS_MUST_ADD}}
+        commands:
+          precheck:
+            {{#COMMANDS_PRECHECK}}
+            - "{{.}}"
+            {{/COMMANDS_PRECHECK}}
+          build:
+            {{#COMMANDS_BUILD}}
+            - "{{.}}"
+            {{/COMMANDS_BUILD}}
+          test:
+            {{#COMMANDS_TEST}}
+            - "{{.}}"
+            {{/COMMANDS_TEST}}
+          run:
+            {{#COMMANDS_RUN}}
+            - "{{.}}"
+            {{/COMMANDS_RUN}}
+        evidence:
+          artifacts:
+            {{#EVIDENCE_ARTIFACTS}}
+            - "{{.}}"
+            {{/EVIDENCE_ARTIFACTS}}
+          logs:
+            {{#EVIDENCE_LOGS}}
+            - "{{.}}"
+            {{/EVIDENCE_LOGS}}
+        subtasks:
+          {{#SUBTASKS}}
+          - id: "{{ID}}"
+            description: "{{DESCRIPTION}}"
+            outcome: "{{OUTCOME}}"
+          {{/SUBTASKS}}
+        acceptance:
+          {{#ACCEPTANCE}}
+          - id: "{{ID}}"
+            check: "{{CHECK}}"
+            acRefs:
+              {{#AC_REFS}}
+              - "{{.}}"
+              {{/AC_REFS}}
+          {{/ACCEPTANCE}}
+        notes: "{{NOTES}}"
+  
+  # Impact radius for dependency-aware work
+  impactRadius:
+    components:
+      {{#IMPACT_COMPONENTS}}
+      - "{{.}}"  # modules or top-level folders likely affected
+      {{/IMPACT_COMPONENTS}}
+    symbols:
+      {{#IMPACT_SYMBOLS}}
+      - "{{.}}"  # classes, functions, constants to audit for references
+      {{/IMPACT_SYMBOLS}}
+    breakageBudget:
+      allowedInterfaceChanges: {{ALLOWED_INTERFACE_CHANGES}}  # true or false
+      migrationNotes: "{{MIGRATION_NOTES}}"                   # brief guidance if interfaces change
+      maxFilesAffected: {{MAX_FILES_AFFECTED}}                 # fail fast if blast radius is too big
+
+  # Cleanup requirements to avoid dead code drift
+  cleanupRequired:
+    removeUnused: {{REMOVE_UNUSED}}  # true or false
+    deprecations:
+      {{#DEPRECATIONS}}
+      - symbol: "{{SYMBOL}}"
+        path: "{{PATH}}"
+        replacement: "{{REPLACEMENT}}"
+      {{/DEPRECATIONS}}
+    notes:
+      {{#CLEANUP_NOTES}}
+      - "{{.}}"
+      {{/CLEANUP_NOTES}}
+
+  # Quality gates to reduce hallucination and enforce precision
+  qualityGates:
+    typeErrors: {{TYPE_ERRORS}}              # usually 0
+    zeroUnused: {{ZERO_UNUSED}}              # true to enforce zero unused exports/files
+    coverageDeltaMax: {{COVERAGE_DELTA_MAX}} # max allowed coverage drop (e.g., 0.5)
+    runImpactScan: {{RUN_IMPACT_SCAN}}       # true to require pre-change scan
+
+  # Linked artifacts for full traceability
+  linkedArtifacts:
+    {{#LINKED_ARTIFACTS}}
+    - type: "{{TYPE}}"      # brief, prd, architecture, test-plan
+      path: "{{PATH}}"      # Path to artifact
+      version: "{{VERSION}}" # Artifact version
+    {{/LINKED_ARTIFACTS}}
+---
+
+# Story {{STORY_ID}}: {{STORY_TITLE}}
+
+## Status
+{{STORY_STATUS}}  # Draft, In Progress, Review, Done
+
+## Priority
+{{STORY_PRIORITY}}  # Critical, High, Medium, Low
+
+## Story
+As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
+
+## Context
+{{STORY_CONTEXT}}  # Background information and current state
+
+## Acceptance Criteria
+{{#ACCEPTANCE_CRITERIA_DETAILED}}
+{{ID}}. **{{TITLE}}**
+   - Given: {{GIVEN}}
+   - When: {{WHEN}}
+   - Then: {{THEN}}
+   - Verification: {{VERIFICATION_METHOD}}
+{{/ACCEPTANCE_CRITERIA_DETAILED}}
+
+## Tasks / Subtasks
+# This section is rendered from StoryContract.workBreakdown to ensure 1:1 human+machine alignment
+{{#WB_TASKS}}
+- [ ] {{ID}}: {{TITLE}} (AC: {{#AC_REFS}}{{.}} {{/AC_REFS}})(files: {{#CHANGES_FILES}}{{PATH}} {{/CHANGES_FILES}})(tests: {{#TESTS_MUST_ADD}}{{PATH}} {{/TESTS_MUST_ADD}})
+  {{#SUBTASKS}}
+  - [ ] {{ID}} {{DESCRIPTION}} → outcome: {{OUTCOME}}
+  {{/SUBTASKS}}
+{{/WB_TASKS}}
+
+## Technical Requirements
+### Dependencies
+{{#DEPENDENCIES}}
+- {{TYPE}}: {{IDENTIFIER}} ({{VERSION}})  # package, service, file
+{{/DEPENDENCIES}}
+
+### Performance Criteria
+{{#PERFORMANCE_CRITERIA}}
+- {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
+{{/PERFORMANCE_CRITERIA}}
+
+### Security Requirements
+{{#SECURITY_REQUIREMENTS}}
+- {{REQUIREMENT}}  # Authentication, authorization, data protection
+{{/SECURITY_REQUIREMENTS}}
+
+## Implementation Plan
+### Files to Create
+{{#FILES_TO_CREATE}}
+- `{{PATH}}`: {{PURPOSE}}
+{{/FILES_TO_CREATE}}
+
+### Files to Modify
+{{#FILES_TO_MODIFY_DETAILED}}
+- `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
+{{/FILES_TO_MODIFY_DETAILED}}
+
+### Test Requirements
+{{#TEST_REQUIREMENTS}}
+- {{TEST_TYPE}}: {{DESCRIPTION}}
+  - File: `{{TEST_FILE}}`
+  - Coverage: {{COVERAGE_TARGET}}%
+{{/TEST_REQUIREMENTS}}
+
+## Risk Assessment
+**Risk Level**: {{RISK_LEVEL}}  # Low, Medium, High, Critical
+
+### Identified Risks
+{{#RISKS}}
+- **{{RISK_TYPE}}**: {{DESCRIPTION}}
+  - Probability: {{PROBABILITY}}  # Low, Medium, High
+  - Impact: {{IMPACT}}            # Low, Medium, High
+  - Mitigation: {{MITIGATION}}
+{{/RISKS}}
+
+### Rollback Plan
+{{ROLLBACK_PLAN}}
+
+## Definition of Done
+{{#DEFINITION_OF_DONE}}
+- [ ] {{CRITERION}}  # Specific, measurable completion criteria
+{{/DEFINITION_OF_DONE}}
+
+## Traceability
+- **Epic**: [{{EPIC_ID}}]({{EPIC_LINK}})
+- **Requirements**: {{REQUIREMENTS_TRACEABILITY}}
+- **Architecture**: [{{ARCHITECTURE_DOC}}]({{ARCHITECTURE_LINK}})
+- **Tests**: {{TEST_TRACEABILITY}}
+
+## Generation Metadata
+- **Template Version**: {{TEMPLATE_VERSION}}
+- **Generated At**: {{GENERATION_TIMESTAMP}}
+- **Generated By**: {{GENERATOR_AGENT}}
+- **Generation Seed**: {{GENERATION_SEED}}
+- **Temperature**: {{GENERATION_TEMPERATURE}}
+
+---
+# END OF DETERMINISTIC STORY TEMPLATE
 ==================== END: .bmad-core/templates/story-tmpl.yaml ====================
+
+==================== START: .bmad-core/templates/acceptance-test-matrix.example.yaml ====================
+---
+# Standardized Acceptance Test Matrix Example
+# Copy this block under StoryContract.acceptanceTestMatrix in new stories.
+
+acceptanceTestMatrix:
+  policy:
+    test_runner: "jest"
+    max_tests_per_ac: 3
+    must_cover:
+      - "1 happy path per AC"
+      - "1 key failure path per AC"
+    skip_criteria:
+      - "pure presentation change with no logic"
+      - "redundant test already covered in broader integration"
+    rationale_required: true
+  globals:
+    base_url: "http://localhost:3000"
+    auth:
+      required: true
+      roles: ["user"]
+  items:
+    # AC-1: User can sign up successfully
+    - ac_id: "AC-1"
+      title: "Signup creates user (201)"
+      type: "api"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions:
+        - "DB has no user with email alice@example.com"
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Alice", email: "alice@example.com", password: "S3cure!pass" }
+      assertions:
+        - status: 201
+        - json_schema_ref: "UserResponse"
+        - db_effect: "users.count +1; users[?email==alice@example.com] exists"
+      test_files:
+        - path: "tests/integration/users.signup.success.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Proves core success path and persistence per AC-1"
+
+    # AC-2: Duplicate email is rejected
+    - ac_id: "AC-2"
+      title: "Reject duplicate email (409)"
+      type: "api-negative"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions:
+        - "Existing user with email alice@example.com"
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Alice2", email: "alice@example.com", password: "S3cure!pass" }
+      assertions:
+        - status: 409
+        - error_code: "EMAIL_EXISTS"
+      test_files:
+        - path: "tests/integration/users.signup.duplicate.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Prevents data integrity issues; matches AC-2"
+
+    # AC-3: Email format validation
+    - ac_id: "AC-3"
+      title: "Reject invalid email (422)"
+      type: "api-negative"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions: []
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Bob", email: "not-an-email", password: "S3cure!pass" }
+      assertions:
+        - status: 422
+        - error_code: "INVALID_EMAIL"
+      test_files:
+        - path: "tests/integration/users.signup.validation.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Demonstrates contract-level input validation per AC-3"
+
+    # MODEL: user schema constraints (only when dataModels specify User)
+    - ac_id: "MODEL-User"
+      title: "User schema validity"
+      type: "model"
+      model_ref: "User"
+      checks:
+        required_fields: ["id", "name", "email"]
+        formats: { email: "email" }
+        constraints:
+          - "password.length >= 8"
+      test_files:
+        - path: "tests/unit/models/user.schema.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Guards data integrity for persisted users"
+
+developmentPolicy:
+  tdd: true
+  test_source: "acceptanceTestMatrix"
+  required_sequence:
+    - write_tests_from_matrix
+    - run_tests_expect_fail
+    - implement_until_green
+  max_tests_per_ac: 3
+  skip_criteria:
+    - "pure presentation change with no logic"
+    - "redundant behavior already covered by an existing integration test"
+  rationale_required: true
+
+qaValidationPolicy:
+  enforce_tdd: true
+  checks:
+    - "Every matrix item has its test_files added/updated in the PR"
+    - "Tests authored before or alongside implementation commits"
+    - "Each test has a rationale tied to its AC"
+  exceptions_allowed:
+    - "UI-only cosmetic changes with no logic"
+  exception_requires: "explicit rationale in story"
+==================== END: .bmad-core/templates/acceptance-test-matrix.example.yaml ====================
 
 ==================== START: .bmad-core/templates/front-end-spec-tmpl.yaml ====================
 template:

@@ -89,12 +89,27 @@ persona:
 
 commands:
   - help: Show these listed commands in a numbered list
+  - sm-review-stories: "Run Scrum Master story template review across docs/stories via CLI: node tools/workflow-orchestrator.js sm-review-stories → tracker.log('SM review executed', 'info')"
+  - sm-normalize-stories: "Normalize stories to SM template (create/repair StoryContract; ensure sections). CLI: node tools/workflow-orchestrator.js sm-normalize-stories [--file <path>] [--dry-run] → tracker.log('SM normalize executed', 'info')"
+  - dev-qa-iterative: "Run iterative Dev↔QA flow (CLI only). CLI: node tools/workflow-orchestrator.js dev-qa-iterative --story <pathOrId> [--max <n>] [--codex] → tracker.log('Iterative Dev↔QA flow executed', 'info')"
+  - dev-qa-iterative-session: "Run iterative Dev↔QA flow fully in-session (no external processes). Use TaskRunner to execute dev-qa-iterative-session.yaml with inputs: story=<pathOrId>, maxIterations=<n>. Example: *dev-qa-iterative-session @docs/stories/STORY.md → tracker.log('In-session Dev↔QA flow executed', 'info')"
   - workflow {name}: "Execute a specific workflow (no name = list available workflows) → tracker.log('Executing workflow', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Workflow execution completed' → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator 'Workflow execution approach selected' 'Decision reasoning' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Workflow execution patterns established' → tracker.completeCurrentTask('workflow executed')"
   - agents: "List available agents and their purposes → tracker.log('Listing agents', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Agent coordination overview provided' → tracker.completeCurrentTask('agents listed')"
   - status: Show current workflow status and active agents
+  - reverse-align: "Run reverse alignment pipeline and handoff to PM/Architect → execute: node tools/workflow-orchestrator.js reverse-align --handoff-human → tracker.log('Reverse alignment run with handoff', 'info')"
+  - refresh-manifest: "Refresh documentation manifest from code → execute: node tools/workflow-orchestrator.js refresh-manifest → tracker.log('Manifest refreshed', 'info')"
+  - pm-update-prd: "Update PRD from implementation → execute: node tools/workflow-orchestrator.js pm-update-prd → tracker.log('PRD updated by PM', 'info')"
+  - architect-rewrite: "Rewrite Architecture from implementation → execute: node tools/workflow-orchestrator.js architect-rewrite → tracker.log('Architecture updated by Architect', 'info')"
+  - generate-stories: "Generate story candidates → execute: node tools/workflow-orchestrator.js generate-stories --cap 10 → tracker.log('Story candidates generated', 'info')"
+  - reverse-quality-gate: "Run reverse-align quality gate → execute: node tools/workflow-orchestrator.js reverse-quality-gate → tracker.log('Reverse quality gate executed', 'info')"
   - context: Display current workflow context
   - handoff {agent}: "Hand off control to another agent with context → tracker.log('Handing off to agent', 'info') → execute: node .bmad-core/utils/track-progress.js decision bmad-orchestrator 'Agent handoff executed with context' 'Handoff reasoning' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-orchestrator 'Agent handoff patterns applied' → tracker.completeCurrentTask('handoff completed')"
   - kb: "Toggle KB mode for workflow knowledge → tracker.log('KB mode toggled', 'info') → execute: node .bmad-core/utils/track-progress.js observation bmad-orchestrator 'Knowledge base accessed for workflow guidance' → tracker.completeCurrentTask('KB accessed')"
+  - cleanup-docs: "Clean docs directory keeping only core docs (PRD, architecture, brief, workflow-orchestrator) → tracker.log('Docs cleanup', 'info')"
+  - validate-story-consistency: "Check recreated stories reference real files and align with implementation → tracker.log('Validated story consistency', 'info')"
+  - generate-alignment-report: "Generate combined alignment report in .ai/reports → tracker.log('Generated alignment report', 'info')"
+  - create-documentation-manifest: "Create .ai/documentation-manifest.json → tracker.log('Created documentation manifest', 'info')"
+  - reverse-align: "Run full reverse alignment pipeline (cleanup → analyze → rewrite architecture → update PRD → recreate stories → validate → report → manifest) → tracker.log('Reverse alignment complete', 'info')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - exit: Exit orchestrator mode (confirm)
 

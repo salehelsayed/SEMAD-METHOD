@@ -29,7 +29,7 @@ steps:
     actions:
       - description: Load the dependency-impact-checker utility
         elicit: false
-      - description: For each modified file, call checkFileImpact() to analyze potential impacts
+      - description: For each modified file, call checkFileImpact() to analyze potential impacts (execute concurrently up to maxParallel=4)
         elicit: false
       - description: Use analyzeBatchImpact() to get a comprehensive analysis of all changes
         elicit: false
@@ -162,3 +162,4 @@ notes: |
   - Breaking changes must be explicitly acknowledged and documented
   - The task will halt for user input if concerning impacts are detected
   - Consider running this task incrementally for large stories with multiple files
+  - Performance: Prefer bounded concurrency when analyzing multiple files to reduce overall latency without overloading the environment

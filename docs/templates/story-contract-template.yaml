@@ -1,0 +1,90 @@
+type: StoryContract
+schemaVersion: 1.1
+
+story:
+  storyId: ST-XXX
+  title: "Thin vertical slice title"
+  epicId: EP-XXX
+  status: draft # draft | in_progress | implemented | verified | done
+  owner: "Assignee or team"
+  links:
+    design: ["figma://..."]
+    relatedADRs: ["docs/adr/ADR-001.md"]
+
+traceability:
+  reqIds: ["REQ-001"]              # must exist in EpicContract
+  flowIds: ["FLOW-A"]              # must exist in EpicContract
+  integrationPointIds: ["INT-1"]   # must exist in EpicContract
+  successCriteriaRefs: ["SC-1"]    # if story contributes to SCs
+
+acceptanceCriteria:
+  - id: AC-1
+    scenario:
+      given: "User on Forgot Password page"
+      when: "User submits valid email"
+      then: "Reset email sent and UI confirms"
+  - id: AC-2
+    scenario:
+      given: "6th request within an hour"
+      when: "User submits"
+      then: "API responds 429; UI shows generic success"
+
+nfrImpacts:
+  performance: "Endpoint p95 < 300ms"
+  securityControls: ["authz: public endpoint w/ captcha","rate-limit"]
+  operability: ["emit logFields req_id,user_id,flow_id"]
+  accessibility: ["forms labeled; keyboard navigable"]
+
+featureFlag:
+  name: "auth_reset_v1"
+  defaultState: "off"   # off | on
+  killSwitch: true
+
+telemetryEvents:
+  - "EV_RESET_REQUESTED"
+  - "EV_RESET_RATE_LIMITED"
+
+risks:
+  riskRefs: ["R-1"]
+assumptions:
+  assumptionRefs: ["A-1"]
+
+testPlan:
+  unit:
+    - "Validate handler returns 200 on valid email"
+  integration:
+    - "Contract test for POST /v1/auth/reset (INT-1)"
+  e2e:
+    - "E2E-1 passes in staging"
+    - "E2E-2 abuse path validated"
+  testData:
+    - "Seed user with verified email"
+    - "Clock skew scenarios ±5m"
+
+implementationNotes:
+  tasks:
+    - "Add endpoint POST /v1/auth/reset"
+    - "Publish email.reset.send event"
+  dependencies:
+    - "email-service availability"
+  outOfScope:
+    - "Reset token redemption flow"
+
+definitionOfReady:
+  - "reqIds/flowIds/integrationPointIds present"
+  - "Acceptance criteria testable"
+  - "Telemetry events listed if SC-refs present"
+  - "Test data defined"
+
+definitionOfDone:
+  - "All AC pass with automated tests"
+  - "Contract tests passing for integrationPointIds"
+  - "Feature flag guarded and defaultState respected"
+  - "Telemetry emitting; logs include required fields"
+  - "No open P0/P1 defects"
+
+audit:
+  createdAt: "YYYY-MM-DD"
+  updatedAt: "YYYY-MM-DD"
+  reviewers: ["QA Lead","SM"]
+

@@ -1,0 +1,75 @@
+name: Reverse-Align MVP
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  reverse-align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit --no-fund
+
+      # Baseline step: compute coverage from the PR base ref for delta-only comparison
+      - name: Checkout base ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Compute baseline coverage (base ref)
+        # Run reverse-align on base to capture docs-code alignment as baseline
+        run: |
+          node tools/workflow-orchestrator.js reverse-align --directory "$GITHUB_WORKSPACE/base"
+          mkdir -p .ai/reports
+          cp "$GITHUB_WORKSPACE/base/.ai/reports/docs-code-alignment.json" .ai/reports/coverage-baseline.json || true
+
+      # Main step: run reverse-align on the PR HEAD to generate manifest, reports, and shards
+      - name: Run reverse-align
+        run: |
+          node tools/workflow-orchestrator.js reverse-align --directory "$GITHUB_WORKSPACE"
+
+      # Gate step: enforce coverage threshold and ensure drift (missing coverage) did not increase
+      # Threshold (0.85) can be adjusted per repo via workflow inputs or env vars
+      - name: Quality gate (coverage + delta)
+        run: |
+          node tools/workflow-orchestrator.js quality-gate --coverage 0.85 --delta-only --directory "$GITHUB_WORKSPACE"
+
+      # Sanity check: validate the structure of generated outputs (no brittle snapshots)
+      - name: Validate golden outputs (structure)
+        run: |
+          node scripts/validate-golden.js
+
+      # Artifacts: make reports available in the PR for inspection
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reverse-align-reports
+          path: |
+            .ai/reports/**
+            .ai/documentation-manifest.json
+          if-no-files-found: warn
+
+      # Artifacts: upload generated PRD/ARCH shards for easy review in the PR
+      - name: Upload generated shards
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reverse-align-generated-shards
+          path: |
+            docs/prd.generated/**
+            docs/architecture.generated/**
+          if-no-files-found: warn

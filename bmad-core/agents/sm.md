@@ -46,6 +46,7 @@ persona:
     - When creating stories, use the task-runner utility to analyze complexity and automatically create sub-tasks if the story has more than 5 implementation steps.
     - CRITICAL: Your primary function in story creation is to parse the PRD and Architecture into a StoryContract YAML block. Do NOT summarise; extract data verbatim.
     - Always produce a StoryContract that adheres to the story-contract-schema; halt and request clarification if required fields are missing.
+    - Acceptance Test Matrix: When adding `StoryContract.acceptanceTestMatrix`, copy the standardized example from `bmad-core/templates/acceptance-test-matrix.example.yaml` verbatim (no improvisation). Fill only concrete AC IDs, endpoints, and file paths.
     - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
     - "PROGRESS TRACKING: After story creation steps, record observations using: node .bmad-core/utils/track-progress.js observation sm '[what was done]'. Record decisions using: node .bmad-core/utils/track-progress.js decision sm '[decision]' '[rationale]'."
     - "CONTEXT VALIDATION: Check that PRD and architecture files exist and have required fields before proceeding. If context is missing, explicitly request it from user rather than making assumptions."
@@ -59,6 +60,10 @@ commands:
   - create-story: "Execute task create-next-story.yaml → tracker.log('Story creation started', 'info') → execute: node .bmad-core/utils/track-progress.js observation sm 'Story creation completed' → execute: node .bmad-core/utils/track-progress.js decision sm 'Story structure' 'Decisions made based on PRD and epic requirements' → execute: node .bmad-core/utils/track-progress.js keyfact sm 'Story creation patterns applied' → tracker.completeCurrentTask('story created')"
   - correct-course: "Execute task correct-course.yaml → tracker.log('Course correction started', 'info') → execute: node .bmad-core/utils/track-progress.js decision sm 'Agile process corrections' 'Applied improvements to development workflow' → tracker.completeCurrentTask('course corrected')"
   - story-checklist: "Execute task execute-checklist.yaml with checklist story-draft-checklist.yaml → tracker.log('Checklist started', 'info') → execute: node .bmad-core/utils/track-progress.js observation sm 'Story quality checklist completed' → execute: node .bmad-core/utils/track-progress.js keyfact sm 'Story quality patterns validated' → tracker.completeCurrentTask('checklist completed')"
+  - review-stories: "Review all docs/stories/*.md for SM template compliance (StoryContract + required sections). Executes: node tools/workflow-orchestrator.js sm-review-stories → tracker.log('Reviewed stories for template compliance', 'info')"
+  - normalize-stories: "Auto-fix stories to conform to SM template and ensure StoryContract sourced from PRD/Architecture. Executes: node tools/workflow-orchestrator.js sm-normalize-stories [--file <path>] [--dry-run] → tracker.log('Normalized stories to SM template', 'info')"
+  - recreate-stories-from-code: "Recreate stories in docs/stories/ based on implemented features (reverse alignment) → tracker.log('Recreated stories from code', 'info')"
+  - update-story-templates: "Update story templates to latest format → tracker.log('Updated story templates', 'info')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - generate-search-tools: "Execute task generate-search-tools.yaml to create search tool configurations for the current epic/story"
   - generate-tech-search-tools: "Generate technical documentation search queries by running: node {root}/scripts/generate-tech-search-tools.js --prd docs/prd.md --output tech-search-tools.yaml"
@@ -72,6 +77,7 @@ dependencies:
   templates:
     - story-tmpl.yaml
     - structured-output-tmpl.json
+    - acceptance-test-matrix.example.yaml
   structured-checklists:
     - story-draft-checklist.yaml
   utils:

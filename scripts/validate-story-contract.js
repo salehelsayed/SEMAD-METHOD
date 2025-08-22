@@ -11,7 +11,7 @@ const glob = require('glob');
 const ModuleResolver = require('../bmad-core/utils/module-resolver');
 
 // Initialize AJV with strict mode
-const ajv = new Ajv({ strict: true, allErrors: true });
+const ajv = new Ajv({ strict: true, allErrors: true, allowUnionTypes: true });
 // Add format support including uri-reference
 addFormats(ajv);
 
@@ -53,6 +53,114 @@ function loadSchema() {
     console.error(`Error loading schema:`, error.message);
     process.exit(1);
   }
+}
+
+// Load the optional WorkBreakdown schema
+function loadWorkBreakdownSchema() {
+  const candidates = [
+    path.join(__dirname, '..', 'bmad-core', 'schemas', 'story-workbreakdown-schema.json'),
+    path.join(process.cwd(), 'bmad-core', 'schemas', 'story-workbreakdown-schema.json'),
+    path.join(process.cwd(), '.bmad-core', 'schemas', 'story-workbreakdown-schema.json')
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, 'utf8'));
+      } catch (e) {
+        console.error(`  ✗ Failed to load WorkBreakdown schema at ${p}: ${e.message}`);
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+// Extract AC IDs from contract
+function extractAcIds(contract) {
+  const set = new Set();
+  // From acceptanceCriteriaLinks: strings like "AC-1: Description"
+  if (Array.isArray(contract.acceptanceCriteriaLinks)) {
+    for (const entry of contract.acceptanceCriteriaLinks) {
+      if (typeof entry === 'string') {
+        const m = entry.match(/AC-[\w-]+/g);
+        if (m) m.forEach(id => set.add(id));
+        // If no explicit AC- prefix, take token before ':' as ID
+        if (!m) {
+          const id = entry.split(':')[0].trim();
+          if (id) set.add(id);
+        }
+      }
+    }
+  }
+  // From acceptanceTestMatrix.items[].ac_id
+  const atm = contract.acceptanceTestMatrix;
+  if (atm && Array.isArray(atm.items)) {
+    for (const item of atm.items) {
+      if (item && typeof item.ac_id === 'string' && item.ac_id.trim()) {
+        set.add(item.ac_id.trim());
+      }
+    }
+  }
+  return Array.from(set);
+}
+
+// Quick coverage checks between ACs, tasks, and tests
+function runCoverageChecks(contract) {
+  const issues = [];
+  const wb = contract.workBreakdown;
+  if (!wb || hasTemplatePlaceholders(wb)) return issues; // skip templates
+
+  const acIds = extractAcIds(contract);
+  const tasks = Array.isArray(wb.tasks) ? wb.tasks : [];
+  const policy = wb.coveragePolicy || {};
+  const minTestsPerAC = Number.isInteger(policy.minTestsPerAC) ? policy.minTestsPerAC : 1;
+
+  // Build lookup
+  const acCoveredByTask = new Map(acIds.map(id => [id, 0]));
+  const acCoveredByTests = new Map(acIds.map(id => [id, 0]));
+
+  // Orphan task refs check
+  if (policy.forbidOrphanTasks) {
+    for (const t of tasks) {
+      if (!t || !Array.isArray(t.acRefs)) continue;
+      for (const ref of t.acRefs) {
+        if (!acCoveredByTask.has(ref)) {
+          issues.push(`Orphan task AC ref: task ${t.id || '<no-id>'} references unknown AC '${ref}'`);
+        }
+      }
+    }
+  }
+
+  // Count coverage
+  for (const t of tasks) {
+    if (!t) continue;
+    const refs = Array.isArray(t.acRefs) ? t.acRefs : [];
+    for (const r of refs) {
+      if (acCoveredByTask.has(r)) acCoveredByTask.set(r, acCoveredByTask.get(r) + 1);
+    }
+    // tests.mustAdd[].covers
+    const tests = t.tests && Array.isArray(t.tests.mustAdd) ? t.tests.mustAdd : [];
+    for (const test of tests) {
+      const covers = Array.isArray(test.covers) ? test.covers : [];
+      for (const ac of covers) {
+        if (acCoveredByTests.has(ac)) acCoveredByTests.set(ac, acCoveredByTests.get(ac) + 1);
+      }
+    }
+  }
+
+  // Enforce policy
+  if (policy.requireTaskForEveryAC) {
+    for (const [ac, count] of acCoveredByTask.entries()) {
+      if (count === 0) issues.push(`AC not covered by any task: ${ac}`);
+    }
+  }
+  if (policy.requireTestForEveryAC) {
+    for (const [ac, count] of acCoveredByTests.entries()) {
+      if (count < minTestsPerAC) issues.push(`AC does not meet min test count (${minTestsPerAC}): ${ac} (got ${count})`);
+    }
+  }
+
+  return issues;
 }
 
 // Extract StoryContract from story file
@@ -129,6 +237,7 @@ function validateStoryFile(filePath, schema) {
   console.log(`\nValidating: ${filePath}`);
   
   try {
+    const content = fs.readFileSync(filePath, 'utf8');
     const contract = extractStoryContract(filePath);
     
     // Check if contract has template placeholders
@@ -139,15 +248,59 @@ function validateStoryFile(filePath, schema) {
     
     const result = validateContract(contract, schema);
     
-    if (result.valid) {
-      console.log('  ✓ Valid');
-      return true;
-    } else {
-      console.log('  ✗ Invalid');
+    let ok = true;
+    if (!result.valid) {
+      console.log('  ✗ Invalid StoryContract');
       console.log('  Errors:');
       console.log(formatErrors(result.errors));
-      return false;
+      ok = false;
     }
+
+    // Required section headings (H2) for consistency with template
+    const requiredH2 = [
+      '## Status',
+      '## Story',
+      '## Acceptance Criteria',
+      '## Technical Requirements',
+      '## Implementation Plan',
+      '## Test Requirements',
+      '## Risk Assessment',
+      '## Definition of Done',
+      '## Traceability'
+    ];
+    const missing = requiredH2.filter(h => !content.includes(h));
+    if (missing.length) {
+      console.log('  ✗ Missing required sections:');
+      missing.forEach(h => console.log(`    - ${h}`));
+      ok = false;
+    }
+
+    // Validate optional WorkBreakdown if present
+    const wbSchema = loadWorkBreakdownSchema();
+    if (ok && wbSchema && contract.workBreakdown && !hasTemplatePlaceholders(contract.workBreakdown)) {
+      const validateWB = ajv.compile(wbSchema);
+      const validWB = validateWB(contract.workBreakdown);
+      if (!validWB) {
+        console.log('  ✗ Invalid StoryContract.workBreakdown');
+        console.log('  Errors:');
+        console.log(formatErrors(validateWB.errors || []));
+        ok = false;
+      } else {
+        // Run fast coverage checks
+        const coverageIssues = runCoverageChecks(contract);
+        if (coverageIssues.length) {
+          console.log('  ✗ Coverage/Lint issues:');
+          coverageIssues.forEach(i => console.log(`    - ${i}`));
+          ok = false;
+        }
+      }
+    }
+
+    if (ok) {
+      console.log('  ✓ Valid');
+      return true;
+    }
+    return false;
   } catch (error) {
     console.log(`  ✗ Error: ${error.message}`);
     return false;

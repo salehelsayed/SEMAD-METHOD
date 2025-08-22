@@ -450,7 +450,9 @@ steps:
       - [Section Name 3](./section-name-3.md)
         ...
       ```
-    actions: []
+    actions:
+      - description: Create per-section files with bounded concurrency (suggested maxParallel=4) to optimize throughput while avoiding filesystem contention
+        elicit: false
     metadata:
       level: 3
       originalNumber: '4'

@@ -115,6 +115,7 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 - **[Workflows](WORKFLOWS.md)** → Two-phase workflow system
 - **[API Reference](API-REFERENCE.md)** → Complete API documentation
 - **[User Guide](bmad-core/user-guide.md)** → Complete workflow walkthrough
+- **[Reverse Alignment](docs/reverse-alignment.md)** → Keep docs and stories aligned to code
 
 ### What would you like to do?
 
@@ -220,6 +221,7 @@ The orchestrator will guide you through:
 - **[Getting Started Guide](GETTING-STARTED.md)** - Detailed setup instructions
 - **[Workflow Documentation](WORKFLOWS.md)** - Understanding the two-phase system
 - **[Agent Reference](AGENTS.md)** - All available agents and commands
+ - **[Reverse Alignment Guide](docs/reverse-alignment.md)** - Sync docs/stories to the codebase
 
 **Prerequisites**: 
 - [Node.js](https://nodejs.org) v20+ required
@@ -237,6 +239,124 @@ For browser-based usage without installation:
 5. **Switch to IDE**: After planning phase, move to IDE for implementation
 
 See the [User Guide](bmad-core/user-guide.md) for detailed workflow instructions.
+
+## Reverse‑Align MVP Quickstart
+
+- Generate dependency report (reachability, cycles, forbidden):
+  - `npm run dep:report`
+- Refresh manifest (single source of truth):
+  - `npm run reverse:manifest`
+- Generate docs from evidence (G‑PRD/G‑ARCH shards under `docs/*.generated/`):
+  - `npm run reverse:align`
+- Generate a capped list of StoryCandidates (non-destructive):
+  - `npm run reverse:stories`
+- Normalize existing stories (ensures StoryContract frontmatter; preserves prose):
+  - `npm run reverse:normalize`
+- Enforce coverage + delta-only drift gate:
+  - `npm run reverse:gate`
+- Validate golden outputs locally (structural checks):
+  - `npm run reverse:validate`
+
+Config Quickstart:
+- Suppress dynamic imports/false-positives: edit `.ai/extractor-suppress.json`
+- Ignore noisy StoryCandidates: edit `.ai/story-ignore.json`
+- Require 100% coverage for critical items: edit `.ai/critical-entities.json`
+
+Quality Gate Controls:
+- Default coverage threshold: `0.85` (override via `reverse:gate` args or workflow inputs)
+- Delta-only baseline: computed from the PR base ref in CI; first run is advisory if baseline missing
+
+## Monorepo Notes (Lightweight)
+
+- Entry points: run `npm run dep:report` at the repo root first. For large workspaces, also run per package:
+  - `node scripts/generate-dep-report.js packages/app-one packages/lib-core` (roots override)
+- Common excludes (already configured in `.dependency-cruiser.js`):
+  - `node_modules/`, `dist/`, test folders: `**/__tests__/**`, `**/tests/**`
+- Recommendations:
+  - Keep suppress globs tight (avoid `**/*`); prefer `**/generated/**`, `**/__mocks__/**`, `**/legacy/**`.
+  - If a package is mostly docs/assets, omit it from `dep:report` roots to reduce noise.
+  - Commit `.ai/dep-report.json` if your repo is stable to speed up local workflows (optional).
+
+## Troubleshooting & Safety
+
+- No features found:
+  - Ensure you ran `npm run dep:report` at the right root; check `includeOnly` in `.dependency-cruiser.js` matches your folders.
+  - Verify `.ai/extractor-suppress.json` isn’t hiding everything; start empty and add globs gradually.
+- False positives (dynamic imports/feature flags):
+  - Annotate hotspots with `@dynamic`/`@keep` in code when applicable; add specific globs to `.ai/extractor-suppress.json`.
+- Coverage drops unexpectedly:
+  - Confirm generated shards exist: `docs/prd.generated/PRD.generated.md`, `docs/architecture.generated/architecture.generated.md`.
+  - Mentions match by literal name; use consistent casing/wording and re-run `reverse:align`.
+- Gate fails but docs updated:
+  - Check `.ai/reports/docs-code-alignment.json` and `.ai/reports/simple-quality-gate.json` for the missing items list.
+- Baseline missing (delta-only):
+  - Local runs are advisory if baseline missing; CI computes baseline from the PR base ref before enforcing.
+- Data safety:
+  - Extractors never render env values; only keys/paths are recorded. Generated shards are replace-only areas; human prose remains untouched.
+
+## Performance Budget
+
+- Targets: ≤60s p95 for typical repos; ≤120s p99 for large monorepos.
+- Mitigations:
+  - Use `dep:report` roots to limit scope (per-package for large workspaces).
+  - Add precise suppress globs to skip vendor, generated, mocks, and legacy trees.
+  - Prefer incremental runs during development (CI already captures baseline + head efficiently).
+  - Keep CI Node at v20+ and use `npm ci --prefer-offline` for faster installs.
+
+### Config Matching Rules
+- `.ai/extractor-suppress.json`: repo‑relative glob paths; applied pre‑analysis to reduce false positives (e.g., `"**/generated/**"`, `"**/__mocks__/**"`).
+- `.ai/story-ignore.json`: case‑insensitive match on feature `key` or `name` to suppress StoryCandidates (e.g., `"ci_cd"`, `"metrics"`).
+- `.ai/critical-entities.json`: case‑insensitive match on feature `key` or `name`; require 100% coverage for these in G‑PRD/G‑ARCH (support coming to gate).
+
+Copy‑paste examples:
+```jsonc
+// .ai/extractor-suppress.json
+["**/generated/**", "**/__mocks__/**", "**/legacy/**"]
+
+// .ai/story-ignore.json
+["ci_cd", "metrics", "some noisy feature name"]
+
+// .ai/critical-entities.json
+["security", "api:/v1/users#GET", "payment processing"]
+```
+
+### Quality Gate Controls (Details)
+- Override threshold: `node tools/workflow-orchestrator.js quality-gate --coverage 0.9`
+- Enforce delta-only: `--delta-only` ensures the PR does not increase missing coverage vs base.
+- Artifacts for debugging:
+  - `.ai/reports/docs-code-alignment.json` (coverage details)
+  - `.ai/reports/simple-quality-gate.json` (gate result)
+  - `.ai/reports/coverage-baseline.json` (baseline snapshot in CI)
+
+### Using OpenAI Codex CLI
+
+Prefer terminal-based agent control? Use Codex CLI to activate SEMAD agents and run commands locally.
+
+- Install Codex CLI:
+  - `npm install -g @openai/codex`
+- Activate an agent and run a command:
+  - `codex "as dev agent, *help"`
+- Implement a story (story scanning happens only for story commands):
+  - `codex "as dev agent, execute *implement-next-story"`
+- Run an ad‑hoc task (no story scanning; loads baseline project files):
+  - `codex "as dev agent, execute *adhoc 'Refactor utils naming' --paths src/utils/legacy.ts src/index.ts"`
+- Verify results:
+  - Check logs in `.ai/history/dev_log.jsonl`
+  - Check ad‑hoc reports in `.ai/adhoc/`
+
+Notes
+- Always start with a clear activation phrase: “as dev agent …”, “activate dev agent …”.
+- Use the `*` prefix for agent commands.
+- The Dev agent respects `bmad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`).
+- More examples: see `docs/codex-integration.md`.
+
+### Minimal CLI Shim (no Codex)
+
+If you aren’t using Codex, use the shim to route agent-like commands locally:
+
+- Ad‑hoc tasks: `node tools/agent.js "/dev *adhoc 'Refactor utils' --paths src/utils/legacy.ts src/index.ts"`
+  - Writes logs to `.ai/history/dev_log.jsonl` and report to `.ai/adhoc/`.
+  - Only `/dev *adhoc` is supported in the shim (by design).
 
 ## 🌟 Beyond Software Development - Expansion Packs
 
@@ -365,3 +485,16 @@ MIT License - see [LICENSE](LICENSE) for details.
 <sub>SEMAD-METHOD is built on top of the excellent [BMad-Method](https://github.com/bmadcode/bmad-method) framework by BMadCode.</sub>  
 <sub>This fork focuses on structured engineering practices to reduce hallucination and improve reliability in multi-agent AI systems.</sub>  
 <sub>Built with ❤️ for the AI-assisted development community</sub>
+## Reverse-Align (CLI Quickstart)
+
+See `docs/reverse-alignment.md` for details. Common commands:
+
+- `bmad-orchestrator refresh-manifest` — Extract evidence and write `.ai/documentation-manifest.json` (+ alias).
+- `bmad-orchestrator reverse-align` — Analyze, generate G-PRD/G-ARCH, coverage report, and manifest.
+- `bmad-orchestrator generate-stories --cap 10` — Emit ranked, deduped StoryCandidates.
+- `bmad-orchestrator quality-gate --coverage 0.85 --delta-only` — Enforce coverage and drift gates.
+
+Flags:
+- `--dry-run` on `refresh-manifest`, `reverse-align`, `generate-stories`, and `quality-gate` computes analysis/reports without modifying docs or failing CI.
+- `--baseline-ref <ref>` lets `quality-gate` compare drift vs a Git ref.
+- `--critical-only` and `--critical-path` allow critical coverage checks via `.ai/critical-entities.json`.

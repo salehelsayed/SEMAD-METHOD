@@ -78,3 +78,24 @@ expansion-packs/
 - `dist/`: Contains web-ready bundles
 - Generated automatically by build process
 - Includes agent bundles, team compositions, and dependencies
+
+## Artifact Schemas
+
+The following JSON schemas define the structure of planning and execution artifacts:
+
+### Schema Files
+- `bmad-core/schemas/brief-schema.json` - Project brief structure
+- `bmad-core/schemas/prd-schema.json` - Product requirements document
+- `bmad-core/schemas/architecture-schema.json` - Architecture documentation
+- `bmad-core/schemas/sprint-plan-schema.json` - Sprint planning artifacts
+- `bmad-core/schemas/task-bundle-schema.json` - Task bundle manifests
+- `bmad-core/schemas/story-contract-schema.json` - Story contracts with traceability
+
+### Schema Validation
+Run `npm run schema:check` to validate all artifacts against their schemas.
+
+### Gate Enforcement
+Schemas are enforced at the following orchestrator gates:
+- **Planning → Development**: Brief, PRD, and Architecture schemas must validate
+- **Dev → QA**: Task bundles and story contracts must validate
+- **QA → Done**: Post-conditions defined in contracts must be verified

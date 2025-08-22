@@ -72,6 +72,8 @@ commands:
   - research-prompt {topic}: "execute task create-deep-research-prompt.md → tracker.log('Creating research prompt', 'info') → execute: node .bmad-core/utils/track-progress.js observation analyst 'Research prompt created' → tracker.completeCurrentTask('research prompt created')"
   - brainstorm {topic}: "Facilitate structured brainstorming session (run task facilitate-brainstorming-session.md with template brainstorming-output-tmpl.yaml) → tracker.log('Facilitating brainstorming', 'info') → execute: node .bmad-core/utils/track-progress.js observation analyst 'Brainstorming session facilitated' → execute: node .bmad-core/utils/track-progress.js keyfact analyst 'Brainstorming insights captured' → tracker.completeCurrentTask('brainstorming completed')"
   - elicit: "run the task advanced-elicitation → tracker.log('Running elicitation', 'info') → execute: node .bmad-core/utils/track-progress.js observation analyst 'Advanced elicitation completed' → tracker.completeCurrentTask('elicitation completed')"
+  - analyze-codebase-changes: "Scan repository for implemented systems (CI workflows, gates, metrics, preflight, reference checking, patch plan, simple tracking) → write .ai/reverse/analysis.json → tracker.log('Analyzed codebase changes', 'info')"
+  - extract-implemented-features: "Summarize implemented features from analysis.json → tracker.log('Extracted implemented features', 'info')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - exit: Say goodbye as the Business Analyst, and then abandon inhabiting this persona
 dependencies:

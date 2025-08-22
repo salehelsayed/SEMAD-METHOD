@@ -43,11 +43,21 @@ program
   .option('-d, --directory <path>', 'Installation directory')
   .option('-i, --ide <ide...>', 'Configure for specific IDE(s) - can specify multiple (cursor, claude-code, windsurf, trae, roo, cline, gemini, github-copilot, codex, other)')
   .option('-e, --expansion-packs <packs...>', 'Install specific expansion packs (can specify multiple)')
+  .option('--interactive', 'Force interactive prompts even with flags')
+  .option('--auto-install-deps', 'Run npm install at the end using a local cache')
   .action(async (options) => {
     try {
-      if (!options.full && !options.expansionOnly) {
+      if (options.interactive || (!options.full && !options.expansionOnly)) {
         // Interactive mode
         const answers = await promptInstallation();
+        // Respect provided directory flag if present
+        if (options.directory) answers.directory = options.directory;
+        // If --full was also passed, force full install type in answers
+        if (options.full) answers.installType = 'full';
+        // Pass through selected IDEs if provided via flags
+        if (options.ide && options.ide.length) answers.ides = options.ide;
+        // Pass auto-install flag
+        answers.autoInstallDeps = !!options.autoInstallDeps;
         if (!answers._alreadyInstalled) {
           await installer.install(answers);
           process.exit(0);
@@ -61,7 +71,8 @@ program
           installType,
           directory: options.directory || '.',
           ides: (options.ide || []).filter(ide => ide !== 'other'),
-          expansionPacks: options.expansionPacks || []
+          expansionPacks: options.expansionPacks || [],
+          autoInstallDeps: !!options.autoInstallDeps
         };
         await installer.install(config);
         process.exit(0);

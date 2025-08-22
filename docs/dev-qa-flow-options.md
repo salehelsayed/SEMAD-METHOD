@@ -366,3 +366,21 @@ Planned improvements for the Dev↔QA flow feature:
 3. **Metrics Dashboard**: Track iteration patterns and improvement rates
 4. **Custom Flow Types**: Define your own agent interaction patterns
 5. **Webhook Integration**: Notify external systems on iteration events
+# NPM Scripts (Convenience)
+
+You can run the iterative Dev↔QA loop directly via NPM scripts:
+
+```bash
+# Run iterative loop (passes args through to the script)
+npm run devqa:loop -- -s docs/stories/STORY.md -m 7
+
+# Run in stricter, non-interactive mode (skips elicit prompts) and loops until QA fixes are 100%
+npm run devqa:loop:strict -- -s PROJ-001 -m 10
+
+# Manually verify QA fix tracker completion (100% required for pass)
+npm run qa:verify-fixes
+```
+
+Notes:
+- The loop now requires both a QA gate pass and 100% fix verification from the QA fix tracker to exit successfully.
+- If tracking is missing, verification fails and the loop continues, ensuring all items are addressed.

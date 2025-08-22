@@ -1,0 +1,58 @@
+{
+  "id": "brief-001",
+  "version": "1.0.0",
+  "stakeholders": [
+    {
+      "name": "Product Owner",
+      "role": "Decision Maker",
+      "concerns": [
+        "ROI",
+        "Timeline",
+        "User Satisfaction"
+      ]
+    },
+    {
+      "name": "Tech Lead",
+      "role": "Technical Advisor",
+      "concerns": [
+        "Scalability",
+        "Security",
+        "Maintainability"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "All acceptance tests pass",
+    "Performance targets met",
+    "Security audit passed"
+  ],
+  "scope": {
+    "included": [
+      "User authentication",
+      "Data persistence",
+      "API endpoints"
+    ],
+    "excluded": [
+      "Payment processing",
+      "Mobile app"
+    ]
+  },
+  "nonFunctional": {
+    "performance": [
+      "Response time < 200ms",
+      "Support 1000 concurrent users"
+    ],
+    "security": [
+      "OAuth2 authentication",
+      "Data encryption at rest"
+    ],
+    "scalability": [
+      "Horizontal scaling support",
+      "Auto-scaling enabled"
+    ],
+    "maintainability": [
+      "90% code coverage",
+      "Documentation complete"
+    ]
+  }
+}

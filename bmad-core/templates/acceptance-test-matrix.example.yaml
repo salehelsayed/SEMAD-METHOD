@@ -1,0 +1,117 @@
+---
+# Standardized Acceptance Test Matrix Example
+# Copy this block under StoryContract.acceptanceTestMatrix in new stories.
+
+acceptanceTestMatrix:
+  policy:
+    test_runner: "jest"
+    max_tests_per_ac: 3
+    must_cover:
+      - "1 happy path per AC"
+      - "1 key failure path per AC"
+    skip_criteria:
+      - "pure presentation change with no logic"
+      - "redundant test already covered in broader integration"
+    rationale_required: true
+  globals:
+    base_url: "http://localhost:3000"
+    auth:
+      required: true
+      roles: ["user"]
+  items:
+    # AC-1: User can sign up successfully
+    - ac_id: "AC-1"
+      title: "Signup creates user (201)"
+      type: "api"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions:
+        - "DB has no user with email alice@example.com"
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Alice", email: "alice@example.com", password: "S3cure!pass" }
+      assertions:
+        - status: 201
+        - json_schema_ref: "UserResponse"
+        - db_effect: "users.count +1; users[?email==alice@example.com] exists"
+      test_files:
+        - path: "tests/integration/users.signup.success.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Proves core success path and persistence per AC-1"
+
+    # AC-2: Duplicate email is rejected
+    - ac_id: "AC-2"
+      title: "Reject duplicate email (409)"
+      type: "api-negative"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions:
+        - "Existing user with email alice@example.com"
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Alice2", email: "alice@example.com", password: "S3cure!pass" }
+      assertions:
+        - status: 409
+        - error_code: "EMAIL_EXISTS"
+      test_files:
+        - path: "tests/integration/users.signup.duplicate.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Prevents data integrity issues; matches AC-2"
+
+    # AC-3: Email format validation
+    - ac_id: "AC-3"
+      title: "Reject invalid email (422)"
+      type: "api-negative"
+      endpoint_ref: { method: "POST", path: "/api/users" }
+      preconditions: []
+      request:
+        headers: { "Content-Type": "application/json" }
+        body: { name: "Bob", email: "not-an-email", password: "S3cure!pass" }
+      assertions:
+        - status: 422
+        - error_code: "INVALID_EMAIL"
+      test_files:
+        - path: "tests/integration/users.signup.validation.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Demonstrates contract-level input validation per AC-3"
+
+    # MODEL: user schema constraints (only when dataModels specify User)
+    - ac_id: "MODEL-User"
+      title: "User schema validity"
+      type: "model"
+      model_ref: "User"
+      checks:
+        required_fields: ["id", "name", "email"]
+        formats: { email: "email" }
+        constraints:
+          - "password.length >= 8"
+      test_files:
+        - path: "tests/unit/models/user.schema.test.ts"
+          framework: "jest"
+      must_have: true
+      rationale: "Guards data integrity for persisted users"
+
+developmentPolicy:
+  tdd: true
+  test_source: "acceptanceTestMatrix"
+  required_sequence:
+    - write_tests_from_matrix
+    - run_tests_expect_fail
+    - implement_until_green
+  max_tests_per_ac: 3
+  skip_criteria:
+    - "pure presentation change with no logic"
+    - "redundant behavior already covered by an existing integration test"
+  rationale_required: true
+
+qaValidationPolicy:
+  enforce_tdd: true
+  checks:
+    - "Every matrix item has its test_files added/updated in the PR"
+    - "Tests authored before or alongside implementation commits"
+    - "Each test has a rationale tied to its AC"
+  exceptions_allowed:
+    - "UI-only cosmetic changes with no logic"
+  exception_requires: "explicit rationale in story"
+

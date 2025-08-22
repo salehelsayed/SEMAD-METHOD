@@ -1,0 +1,10 @@
+{
+  "riskLevel": "low",
+  "changes": [
+    {
+      "path": "non/existent/file.ts",
+      "operations": "modify",
+      "symbols": "add"
+    }
+  ]
+}

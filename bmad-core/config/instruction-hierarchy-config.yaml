@@ -1,0 +1,72 @@
+# Instruction Hierarchy Configuration
+# This file defines the instruction hierarchy and structured output requirements
+
+global:
+  priority: 1
+  scope: all-agents
+  overridable: false
+  instructions:
+    - "Follow SEMAD methodology principles throughout all workflows"
+    - "Maintain context integrity across agent interactions"
+    - "Use structured outputs for all formal communications"
+    - "Document decisions and rationale transparently"
+    - "Validate outputs against defined schemas before submission"
+
+framework:
+  priority: 2
+  scope: bmad-framework
+  overridable: true
+  instructions:
+    - "Reference bmad-core templates and workflows consistently"
+    - "Maintain agent dependency integrity during builds"
+    - "Follow expansion pack conventions for domain extensions"
+    - "Use semantic versioning for all releases"
+    - "Ensure backward compatibility when possible"
+
+team:
+  priority: 3
+  scope: agent-team
+  overridable: true
+  instructions:
+    - "Coordinate through story context and handoff protocols"
+    - "Share knowledge through structured documentation"
+    - "Escalate blockers through defined channels"
+
+agent:
+  priority: 4
+  scope: individual-agent
+  overridable: true
+  instructions:
+    - "Specialize in assigned domain while maintaining broader context"
+    - "Validate inputs and outputs according to agent specifications"
+    - "Document assumptions and limitations clearly"
+
+task:
+  priority: 5
+  scope: current-task
+  overridable: true
+  instructions:
+    - "Focus on task-specific requirements while maintaining system coherence"
+    - "Include traceability to parent requirements"
+    - "Verify completion criteria before marking complete"
+
+# Output Schema Enforcement
+schema_enforcement:
+  enabled: true
+  validation_level: strict  # strict, warning, disabled
+  required_schemas:
+    - story
+    - architecture_decision
+    - progress_report
+    - validation_result
+  
+# Compliance Monitoring
+compliance:
+  enabled: true
+  thresholds:
+    minimum_compliance_score: 0.8
+    critical_violation_threshold: 3
+  reporting:
+    generate_reports: true
+    report_frequency: daily
+    alert_on_violations: true

@@ -373,6 +373,34 @@ class Installer {
     const expansionFiles = await this.installExpansionPacks(installDir, config.expansionPacks, spinner, config);
     files.push(...expansionFiles);
 
+    // Install reverse-align orchestrator scripts and npm entries
+    if (config.installType !== "expansion-only") {
+      spinner.text = "Setting up reverse-align orchestrator scripts...";
+      const orchestratorFiles = await this.installReverseAlignToolkit(installDir);
+      files.push(...orchestratorFiles);
+      
+      // Ensure npm scripts exist in target package.json
+      await this.ensureNpmScripts(installDir, {
+        'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
+        'reverse:align:max': 'node tools/reverse-align-max.js',
+        'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate'
+      });
+      // Ensure required runtime dependencies for orchestrator
+      await this.ensureNpmDependencies(installDir, {
+        dependencies: {
+          'ajv': '^8.17.1',
+          'ajv-formats': '^2.1.1',
+          'chalk': '^4.1.2',
+          'commander': '^14.0.0',
+          'js-yaml': '^4.1.0',
+          'inquirer': '^8.2.6',
+          'ora': '^5.4.1',
+          'fs-extra': '^11.3.0',
+          'glob': '^11.0.3'
+        }
+      });
+    }
+
     // Install web bundles if requested
     if (config.includeWebBundles && config.webBundlesDirectory) {
       spinner.text = "Installing web bundles...";
@@ -408,6 +436,11 @@ class Installer {
 
     spinner.succeed("Installation complete!");
     this.showSuccessMessage(config, installDir, options);
+
+    // Optionally run npm install using a local cache to avoid permission issues
+    if (config.autoInstallDeps) {
+      await this.runNpmInstall(installDir);
+    }
   }
 
   async handleExistingV4Installation(config, installDir, state, spinner) {
@@ -703,6 +736,32 @@ class Installer {
 
       await this.performFreshInstall(config, installDir, spinner, { isUpdate: true });
       
+      // Ensure reverse-align toolkit and npm scripts are present after update
+      spinner.text = "Ensuring reverse-align scripts and npm entries...";
+      await this.installReverseAlignToolkit(installDir);
+      await this.installDevQaToolkit(installDir);
+      await this.ensureNpmScripts(installDir, {
+        'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
+        'reverse:align:max': 'node tools/reverse-align-max.js',
+        'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
+        'devqa:loop': 'bash tools/dev-qa-iterative.sh',
+        'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/dev-qa-iterative.sh',
+        'qa:verify-fixes': 'node .bmad-core/utils/verify-qa-fixes.js'
+      });
+      await this.ensureNpmDependencies(installDir, {
+        dependencies: {
+          'ajv': '^8.17.1',
+          'ajv-formats': '^2.1.1',
+          'chalk': '^4.1.2',
+          'commander': '^14.0.0',
+          'js-yaml': '^4.1.0',
+          'inquirer': '^8.2.6',
+          'ora': '^5.4.1',
+          'fs-extra': '^11.3.0',
+          'glob': '^11.0.3'
+        }
+      });
+      
       // Clean up .yml files that now have .yaml counterparts
       spinner.text = "Cleaning up legacy .yml files...";
       await this.cleanupLegacyYmlFiles(installDir, spinner);
@@ -780,7 +839,7 @@ class Installer {
       await this.cleanupLegacyYmlFiles(installDir, spinner);
       
       spinner.succeed("Repair completed successfully!");
-      
+
       // Show summary
       console.log(chalk.green("\n✓ Installation repaired!"));
       if (integrity.missing.length > 0) {
@@ -795,6 +854,37 @@ class Installer {
       if (ides.includes('cursor')) {
         console.log(chalk.yellow.bold("\n⚠️  IMPORTANT: Cursor Custom Modes Update Required"));
         console.log(chalk.yellow("Since agent files have been repaired, you need to update any custom agent modes configured in the Cursor custom agent GUI per the Cursor docs."));
+      }
+      
+      // Ensure reverse-align toolkit and npm scripts after repair
+      try {
+        spinner.start('Ensuring reverse-align scripts and npm entries...');
+        await this.installReverseAlignToolkit(installDir);
+        await this.installDevQaToolkit(installDir);
+        await this.ensureNpmScripts(installDir, {
+          'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
+          'reverse:align:max': 'node tools/reverse-align-max.js',
+          'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
+          'devqa:loop': 'bash tools/dev-qa-iterative.sh',
+          'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/dev-qa-iterative.sh',
+          'qa:verify-fixes': 'node .bmad-core/utils/verify-qa-fixes.js'
+        });
+        await this.ensureNpmDependencies(installDir, {
+          dependencies: {
+            'ajv': '^8.17.1',
+            'ajv-formats': '^2.1.1',
+            'chalk': '^4.1.2',
+            'commander': '^14.0.0',
+            'js-yaml': '^4.1.0',
+            'inquirer': '^8.2.6',
+            'ora': '^5.4.1',
+            'fs-extra': '^11.3.0',
+            'glob': '^11.0.3'
+          }
+        });
+        spinner.succeed('Reverse-align scripts ready');
+      } catch (_) {
+        spinner.warn('Could not finalize reverse-align scripts');
       }
       
     } catch (error) {
@@ -820,6 +910,32 @@ class Installer {
     spinner.text = "Cleaning up legacy .yml files...";
     await this.cleanupLegacyYmlFiles(installDir, spinner);
     
+    // Ensure reverse-align toolkit and npm scripts are present after reinstall
+    spinner.text = "Ensuring reverse-align scripts and npm entries...";
+    await this.installReverseAlignToolkit(installDir);
+    await this.installDevQaToolkit(installDir);
+    await this.ensureNpmScripts(installDir, {
+      'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
+      'reverse:align:max': 'node tools/reverse-align-max.js',
+      'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
+      'devqa:loop': 'bash tools/dev-qa-iterative.sh',
+      'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/dev-qa-iterative.sh',
+      'qa:verify-fixes': 'node .bmad-core/utils/verify-qa-fixes.js'
+    });
+    await this.ensureNpmDependencies(installDir, {
+      dependencies: {
+        'ajv': '^8.17.1',
+        'ajv-formats': '^2.1.1',
+        'chalk': '^4.1.2',
+        'commander': '^14.0.0',
+        'js-yaml': '^4.1.0',
+        'inquirer': '^8.2.6',
+        'ora': '^5.4.1',
+        'fs-extra': '^11.3.0',
+        'glob': '^11.0.3'
+      }
+    });
+
     return result;
   }
 
@@ -1024,6 +1140,213 @@ class Installer {
 
   async getAvailableTeams() {
     return configLoader.getAvailableTeams();
+  }
+
+  // Copy orchestrator toolkit files into target project and make them work with .bmad-core
+  async installReverseAlignToolkit(installDir) {
+    const copied = [];
+    const fs = require('fs');
+    const fsp = require('fs').promises;
+    const repoRoot = path.dirname(path.dirname(path.dirname(path.dirname(__filename))));
+
+    // Ensure tools directories
+    const toolsDir = path.join(installDir, 'tools');
+    const toolsOrchestratorDir = path.join(toolsDir, 'orchestrator');
+    await fileManager.ensureDirectory(toolsOrchestratorDir);
+
+    // Helper to copy with bmad-core -> .bmad-core adjustments
+    const copyWithCoreAdjust = async (src, dest) => {
+      const raw = await fsp.readFile(src, 'utf8');
+      // Replace path token usages for installed hidden core
+      let adjusted = raw
+        .replace(/bmad-core\//g, '.bmad-core/')
+        .replace(/['\"]bmad-core['\"]/g, "'.bmad-core'");
+      await fsp.writeFile(dest, adjusted, 'utf8');
+      copied.push(path.relative(installDir, dest));
+    };
+
+    // 1) Copy workflow-orchestrator.js (adjust core refs)
+    const srcOrchestrator = path.join(repoRoot, 'tools', 'workflow-orchestrator.js');
+    const destOrchestrator = path.join(toolsDir, 'workflow-orchestrator.js');
+    if (await fileManager.pathExists(srcOrchestrator)) {
+      await copyWithCoreAdjust(srcOrchestrator, destOrchestrator);
+    }
+
+    // 2) Copy reverse-align-max.js (adjust core refs via local orchestrator import)
+    const srcMax = path.join(repoRoot, 'tools', 'reverse-align-max.js');
+    const destMax = path.join(toolsDir, 'reverse-align-max.js');
+    if (await fileManager.pathExists(srcMax)) {
+      // Use as-is – it imports local workflow-orchestrator
+      await fileManager.copyFile(srcMax, destMax);
+      copied.push(path.relative(installDir, destMax));
+      try { await fsp.chmod(destMax, 0o755); } catch (_) {}
+    }
+
+    // 3) Copy tools/orchestrator/reverse-context.js (no core refs)
+    const srcRevCtx = path.join(repoRoot, 'tools', 'orchestrator', 'reverse-context.js');
+    const destRevCtx = path.join(toolsOrchestratorDir, 'reverse-context.js');
+    if (await fileManager.pathExists(srcRevCtx)) {
+      await fileManager.copyFile(srcRevCtx, destRevCtx);
+      copied.push(path.relative(installDir, destRevCtx));
+    }
+
+    // 3b) Copy local shims to handle missing memory modules
+    const shimFiles = ['agent-runner-shim.js', 'memory-health-shim.js'];
+    for (const f of shimFiles) {
+      const srcShim = path.join(repoRoot, 'tools', 'orchestrator', f);
+      const destShim = path.join(toolsOrchestratorDir, f);
+      if (await fileManager.pathExists(srcShim)) {
+        await fileManager.copyFile(srcShim, destShim);
+        copied.push(path.relative(installDir, destShim));
+      }
+    }
+
+    // 4) Create bmad-core → .bmad-core symlink for compatibility
+    const hiddenCore = path.join(installDir, '.bmad-core');
+    const visibleCore = path.join(installDir, 'bmad-core');
+    try {
+      if (!(await fileManager.pathExists(visibleCore)) && (await fileManager.pathExists(hiddenCore))) {
+        await fs.promises.symlink('.bmad-core', visibleCore, 'junction');
+        // Track symlink in manifest-like list (non-critical)
+      }
+    } catch (e) {
+      // Non-fatal; fall back to adjusted imports in copied files
+    }
+
+    return copied;
+  }
+
+  // Copy iterative Dev↔QA toolkit into target project and wire scripts
+  async installDevQaToolkit(installDir) {
+    const fsp = require('fs').promises;
+    const repoRoot = path.dirname(path.dirname(path.dirname(path.dirname(__filename))));
+
+    const toolsDir = path.join(installDir, 'tools');
+    const flowsDir = path.join(toolsDir, 'flows');
+    await fileManager.ensureDirectory(toolsDir);
+    await fileManager.ensureDirectory(flowsDir);
+
+    const srcFlow = path.join(repoRoot, 'tools', 'flows', 'dev-qa-iterative.sh');
+    const destFlow = path.join(flowsDir, 'dev-qa-iterative.sh');
+    if (await fileManager.pathExists(srcFlow)) {
+      let raw = await fsp.readFile(srcFlow, 'utf8');
+      raw = raw
+        .replace(/bmad-core\//g, '.bmad-core/')
+        .replace(/node bmad-core\/utils/g, 'node .bmad-core/utils');
+      await fsp.writeFile(destFlow, raw, 'utf8');
+      try { await fsp.chmod(destFlow, 0o755); } catch (_) {}
+    }
+
+    // Thin wrapper at tools/dev-qa-iterative.sh
+    const destWrapper = path.join(toolsDir, 'dev-qa-iterative.sh');
+    const wrapper = `#!/usr/bin/env bash\nset -euo pipefail\nSCRIPT_DIR=\"$(cd \"$(dirname \"$0\")\" && pwd)\"\nFLOW=\"$SCRIPT_DIR/flows/dev-qa-iterative.sh\"\nif [[ ! -x \"$FLOW\" ]]; then echo \"Error: Flow script not found at $FLOW\" >&2; exit 1; fi\nexec \"$FLOW\" \"$@\"\n`;
+    await fsp.writeFile(destWrapper, wrapper, 'utf8');
+    try { await fsp.chmod(destWrapper, 0o755); } catch (_) {}
+
+    // Ensure iterative workflow config exists
+    const wfPath = path.join(installDir, '.bmad-workflow.yaml');
+    if (!(await fileManager.pathExists(wfPath))) {
+      const wf = [
+        'flowType: iterative',
+        'maxIterations: 7',
+        'autoApproveOnNoIssues: true',
+        'persistIterationHistory: true',
+        'notifyOnIterationComplete: false',
+        '',
+        'qaReviewCriteria:',
+        '  checkCodeStyle: true',
+        '  checkTestCoverage: true',
+        '  checkDocumentation: true',
+        '  checkPerformance: false',
+        '  checkSecurity: false',
+        '',
+        'devFixStrategy: fix-all',
+        '',
+        'verbosity: true',
+        'verbosityLevel: detailed',
+        ''
+      ].join('\n');
+      await fsp.writeFile(wfPath, wf, 'utf8');
+    }
+
+    return true;
+  }
+
+  // Ensure npm scripts in target package.json without overwriting existing entries
+  async ensureNpmScripts(installDir, scriptsMap) {
+    const pkgPath = path.join(installDir, 'package.json');
+    let pkg = {};
+    try {
+      if (await fileManager.pathExists(pkgPath)) {
+        const raw = await fileManager.readFile(pkgPath);
+        pkg = JSON.parse(raw);
+      } else {
+        pkg = { name: path.basename(installDir), version: '1.0.0', private: true };
+      }
+    } catch (_) { pkg = { name: path.basename(installDir), version: '1.0.0', private: true }; }
+
+    pkg.scripts = pkg.scripts || {};
+    for (const [k, v] of Object.entries(scriptsMap)) {
+      if (!pkg.scripts[k]) pkg.scripts[k] = v;
+    }
+
+    await fileManager.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+    return true;
+  }
+
+  // Ensure npm dependencies in target package.json without downgrading
+  async ensureNpmDependencies(installDir, { dependencies = {}, devDependencies = {} } = {}) {
+    const pkgPath = path.join(installDir, 'package.json');
+    let pkg = {};
+    try {
+      if (await fileManager.pathExists(pkgPath)) {
+        const raw = await fileManager.readFile(pkgPath);
+        pkg = JSON.parse(raw);
+      } else {
+        pkg = { name: path.basename(installDir), version: '1.0.0', private: true };
+      }
+    } catch (_) { pkg = { name: path.basename(installDir), version: '1.0.0', private: true }; }
+
+    pkg.dependencies = pkg.dependencies || {};
+    pkg.devDependencies = pkg.devDependencies || {};
+
+    // Merge dependencies if not present
+    for (const [name, range] of Object.entries(dependencies)) {
+      if (!pkg.dependencies[name] && !pkg.devDependencies[name]) {
+        pkg.dependencies[name] = range;
+      }
+    }
+    for (const [name, range] of Object.entries(devDependencies)) {
+      if (!pkg.dependencies[name] && !pkg.devDependencies[name]) {
+        pkg.devDependencies[name] = range;
+      }
+    }
+
+    await fileManager.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+    
+    // Friendly reminder (no auto-install to avoid surprising users)
+    console.log(chalk.dim('→ Dependencies updated. Run "npm install" in the target project if needed.'));
+    return true;
+  }
+
+  async runNpmInstall(installDir) {
+    const { execSync } = require('child_process');
+    const cacheDir = path.join(installDir, '.npm-cache');
+    try {
+      await fileManager.ensureDirectory(cacheDir);
+    } catch (_) {}
+    console.log(chalk.cyan(`\nRunning npm install (local cache at ${cacheDir})...`));
+    try {
+      execSync('npm install', {
+        stdio: 'inherit',
+        cwd: installDir,
+        env: { ...process.env, NPM_CONFIG_CACHE: cacheDir }
+      });
+      console.log(chalk.green('✓ npm install completed'));
+    } catch (e) {
+      console.log(chalk.yellow('⚠️  npm install failed — you can run it manually:'));
+      console.log(chalk.yellow(`   NPM_CONFIG_CACHE='${cacheDir}' npm install`));
+    }
   }
 
   async installExpansionPacks(installDir, selectedPacks, spinner, config = {}) {

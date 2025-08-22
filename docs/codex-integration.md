@@ -73,8 +73,8 @@ codex "as dev agent, execute *implement-next-story"
 codex "activate dev agent and run *check-dependencies"
 
 # QA agent commands
-codex "use qa agent to *review-story"
-codex "as qa, execute *check-quality"
+codex "use qa agent to *review"
+codex "as qa agent, execute *analyze-code-quality"
 ```
 
 ### Workflow Examples
@@ -103,6 +103,31 @@ codex "activate analyst agent and help me create a PRD"
 
 # Create architecture
 codex "switch to architect agent and design the system"
+
+### Ad‑hoc Mode (Dev)
+
+Use the Dev agent for one-off tasks that don’t require a story. Ad‑hoc mode loads baseline project files from `devLoadAlwaysFiles` but does not scan `docs/stories`.
+
+Examples
+
+```bash
+# Quick refactor across specific files
+codex "as dev agent, execute *adhoc 'Refactor utils naming' --paths src/utils/legacy.ts src/index.ts"
+
+# Run an ad-hoc dependency impact check for a module
+codex "as dev agent, execute *adhoc 'Assess impact of auth service changes' --paths src/services/auth.ts"
+
+# Housekeeping without specific paths (skips impact analysis)
+codex "as dev agent, execute *adhoc 'Repository housekeeping'"
+```
+
+Verification
+- Check `.ai/history/dev_log.jsonl` for “Ad-hoc task started/completed”.
+- Check `.ai/adhoc/` for the generated report, which includes a “Baseline Context (devLoadAlwaysFiles)” section.
+
+Notes
+- Always activate: start commands with “as dev agent …”.
+- The Dev agent respects `bmad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`, `devStoryLocation`).
 ```
 
 ## Configuration
@@ -203,3 +228,36 @@ Codex CLI uses OpenAI's reasoning models. Default is `o4-mini` for cost efficien
 For issues or questions:
 - SEMAD-METHOD: [GitHub Issues](https://github.com/your-repo/semad-method/issues)
 - OpenAI Codex CLI: [OpenAI Support](https://help.openai.com)
+
+## Templates and Touchpoints
+
+- EpicContract template: `docs/templates/epic-contract-template.md`
+- StoryContract template: `docs/templates/story-contract-template.yaml`
+- Workflow touchpoints: `docs/workflow-touchpoints.md`
+
+Use the Scrum Master agent to create stories that reference EpicContract IDs (`epicId`, `REQ-*`, `FLOW-*`, `INT-*`) and have QA validate traceability via reverse-alignment before closing the epic.
+
+## Dev↔QA Orchestration (Loop)
+
+Automate Dev→QA→Dev until QA sets the story Status to "Done".
+
+Prerequisites
+- Install Codex CLI: `npm install -g @openai/codex`
+
+Run
+```bash
+# Accepts a story id (e.g., 1.3) or a story file path
+npm run devqa:loop:codex -- -s docs/stories/1.3-some-story.md
+# or
+npm run devqa:loop:codex -- -s 1.3
+```
+
+What it does
+- Dev: `codex "as dev agent, execute *develop-story @<story>"`
+- QA: `codex "as qa agent, execute *review @<story>"`
+- Dev: `codex "as dev agent, execute *address-qa-feedback @<story>"`
+- Repeats until the story’s `## Status` equals `Done`.
+
+Notes
+- QA agents must update the story’s `## Status` header to `Done` when ready.
+- Logs and artifacts are in `.ai/`.

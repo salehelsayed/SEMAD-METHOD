@@ -84,6 +84,20 @@ class AgentSimulator {
    * Simulate QA agent work - Review only, no implementation
    */
   simulateQAWork(action, context) {
+    if (action === 'validate-docs-code-alignment') {
+      return {
+        success: true,
+        action,
+        report: '.ai/reports/docs-code-alignment.json'
+      };
+    }
+    if (action === 'generate-coverage-report') {
+      return {
+        success: true,
+        action,
+        report: '.ai/reports/alignment-report.json'
+      };
+    }
     const iteration = context.iteration || 1;
     const issueChance = this.baseIssueChance * Math.pow(this.issueDecayRate, iteration - 1);
     
@@ -193,6 +207,21 @@ class AgentSimulator {
    * Simulate Analyst agent work
    */
   simulateAnalystWork(action, context) {
+    if (action === 'analyze-codebase-changes') {
+      return {
+        success: true,
+        action,
+        summary: 'Codebase analysis complete',
+        output: '.ai/reverse/analysis.json'
+      };
+    }
+    if (action === 'extract-implemented-features') {
+      return {
+        success: true,
+        action,
+        output: '.ai/reverse/analysis.json'
+      };
+    }
     return {
       success: true,
       documentCreated: 'project-brief.md',
@@ -206,6 +235,20 @@ class AgentSimulator {
    * Simulate PM agent work
    */
   simulatePMWork(action, context) {
+    if (action === 'update-prd-from-implementation') {
+      return {
+        success: true,
+        action,
+        documentUpdated: 'docs/prd/PRD.md'
+      };
+    }
+    if (action === 'document-missing-requirements') {
+      return {
+        success: true,
+        action,
+        missingRequirementsCaptured: true
+      };
+    }
     return {
       success: true,
       documentCreated: 'prd.md',
@@ -220,6 +263,20 @@ class AgentSimulator {
    * Simulate Architect agent work
    */
   simulateArchitectWork(action, context) {
+    if (action === 'reverse-engineer-architecture') {
+      return {
+        success: true,
+        action,
+        documentUpdated: 'docs/architecture/architecture.md'
+      };
+    }
+    if (action === 'document-design-decisions') {
+      return {
+        success: true,
+        action,
+        decisionsDocumented: true
+      };
+    }
     return {
       success: true,
       documentCreated: 'architecture.md',
@@ -277,6 +334,21 @@ class AgentSimulator {
           }
         };
       }
+    }
+    if (action === 'recreate-stories-from-code') {
+      return {
+        success: true,
+        action,
+        storiesRecreated: true,
+        outputDir: 'docs/stories/'
+      };
+    }
+    if (action === 'update-story-templates') {
+      return {
+        success: true,
+        action,
+        templatesUpdated: true
+      };
     }
     
     return {

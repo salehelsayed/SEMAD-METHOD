@@ -1,0 +1,110 @@
+{
+  "version": "1.0.0",
+  "description": "Deterministic generation configuration for consistent, predictable outputs",
+  "lastUpdated": "2025-08-13T22:34:06.417Z",
+  "models": {
+    "primary": {
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.1,
+      "maxTokens": 4000,
+      "topP": 0.9,
+      "frequencyPenalty": 0,
+      "presencePenalty": 0,
+      "seed": 42
+    },
+    "fallback": {
+      "provider": "openai",
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.2,
+      "maxTokens": 3000,
+      "topP": 0.9,
+      "frequencyPenalty": 0,
+      "presencePenalty": 0,
+      "seed": 42
+    }
+  },
+  "templates": {
+    "story": {
+      "path": "bmad-core/templates/story-tmpl.yaml",
+      "version": "1.0",
+      "requiredPlaceholders": [
+        "STORY_ID",
+        "STORY_TITLE",
+        "STORY_VERSION",
+        "EPIC_ID",
+        "PERSONA",
+        "FUNCTIONALITY",
+        "BUSINESS_VALUE",
+        "ACCEPTANCE_CRITERIA",
+        "PRECONDITIONS",
+        "POSTCONDITIONS"
+      ],
+      "optionalPlaceholders": [
+        "API_ENDPOINTS",
+        "FILES_TO_MODIFY",
+        "LINKED_ARTIFACTS",
+        "DEPENDENCIES",
+        "PERFORMANCE_CRITERIA",
+        "SECURITY_REQUIREMENTS"
+      ]
+    },
+    "test": {
+      "path": "bmad-core/templates/test-tmpl.md",
+      "version": "1.0",
+      "requiredPlaceholders": [
+        "TEST_FILE_PATH",
+        "STORY_ID",
+        "TEST_TYPE",
+        "ACCEPTANCE_CRITERIA_TESTS",
+        "COVERAGE_TARGET"
+      ],
+      "optionalPlaceholders": [
+        "PERFORMANCE_TESTS",
+        "ERROR_TESTS",
+        "MOCK_DEPENDENCIES"
+      ]
+    }
+  },
+  "generation": {
+    "deterministicMode": true,
+    "reproducibleSeeds": true,
+    "validatePlaceholders": true,
+    "enforceTraceability": true,
+    "requiredMetadata": [
+      "generation_timestamp",
+      "template_version",
+      "generator_agent",
+      "generation_seed"
+    ]
+  },
+  "quality": {
+    "minimumTemperature": 0,
+    "maximumTemperature": 0.3,
+    "enforceStructure": true,
+    "validateOutput": true,
+    "requireSignatures": true
+  },
+  "traceability": {
+    "enforceLinks": true,
+    "validateReferences": true,
+    "requireAcceptanceCriteria": true,
+    "mandatoryFields": [
+      "story_id",
+      "version",
+      "acceptanceCriteriaLinks",
+      "filesToModify"
+    ]
+  },
+  "prompts": {
+    "systemPrompt": "You are a deterministic code generation agent. Always use the exact template structure provided. Fill all required placeholders with precise, traceable values. Maintain consistency across all outputs. Use the provided seed for reproducible results.",
+    "constraints": [
+      "Always preserve template structure exactly",
+      "Fill all required placeholders",
+      "Maintain traceability to source requirements",
+      "Use deterministic language and specific values",
+      "Include generation metadata",
+      "Validate output against schema"
+    ]
+  }
+}

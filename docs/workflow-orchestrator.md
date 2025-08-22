@@ -47,6 +47,33 @@ npm run orchestrate -- --story-file stories/feature-xyz.md --flow-type linear
 - `--flow-type <type>`: Workflow type (`linear` or `iterative`)
 - `--directory <path>`: Project root directory (defaults to current directory)
 
+### Reverse-Alignment Utilities
+
+The orchestrator exposes helper commands for reverse-alignment workflows:
+
+```bash
+# Shard PRD and Architecture into component files (PO intent)
+bmad-orchestrator po-shard-docs
+
+# Full reverse-alignment pipeline (includes sharding when enabled)
+bmad-orchestrator reverse-align
+
+# Validate enriched docs and coverage (supports threshold)
+bmad-orchestrator reverse-quality-gate --threshold 0.9
+
+# Validate an EpicContract file (PO/PM shortcut)
+bmad-orchestrator validate-epic docs/prd/epics/epic-5.md
+```
+
+- `po-shard-docs`: Splits `docs/prd/PRD.md` and `docs/architecture/architecture.md` by H2 sections when sharding is enabled in `bmad-core/core-config.yaml`, and writes per-epic summaries under `docs/prd/epics/epic-*.md`.
+- `reverse-align`: Runs cleanup → analyze → rewrite → shard → recreate stories → validate → report → manifest.
+- `reverse-quality-gate`: Emits `.ai/reports/reverse-align-gate.json` and fails if coverage is below the threshold.
+- `validate-epic <path>`: Runs the EpicContract validator and emits a PO report in `.ai/adhoc/*` and a JSON artifact in `.ai/reports/*`.
+
+### Story Consistency & QA Findings
+- Story creation uses a deterministic structure aligned with the project story template (StoryContract as the single source of truth at the top).
+- QA reviews append findings into the same story file under `## QA Findings` (no new files created), including approval status, coverage, and issue list per iteration.
+
 ### Configuration
 
 The orchestrator persists metadata in `.bmad-orchestrator-metadata.json`:
@@ -239,6 +266,36 @@ orchestrator.saveMetadata(data)     // Persist metadata
 orchestrator.selectFlowType()       // Interactive flow selection
 ```
 
+## Reverse Alignment Commands
+
+Use the orchestrator to align documentation and stories to the codebase:
+
+```bash
+# Full pipeline
+node tools/workflow-orchestrator.js reverse-align
+
+# Individual steps
+node tools/workflow-orchestrator.js cleanup-docs
+node tools/workflow-orchestrator.js analyst-analyze
+node tools/workflow-orchestrator.js architect-rewrite
+node tools/workflow-orchestrator.js pm-update-prd
+node tools/workflow-orchestrator.js sm-recreate-stories
+node tools/workflow-orchestrator.js validate-story-consistency
+node tools/workflow-orchestrator.js qa-validate-alignment
+node tools/workflow-orchestrator.js generate-alignment-report
+node tools/workflow-orchestrator.js create-documentation-manifest
+```
+
+Validation helpers:
+
+```bash
+npm run preflight:schema
+npm run reference:check
+npm run gates:status
+```
+
+See the full guide: `docs/reverse-alignment.md`.
+
 ### Options Object
 
 ```javascript
@@ -265,3 +322,72 @@ When extending the orchestrator:
 - [BMad Workflows Guide](../bmad-core/docs/workflows.md)
 - [Agent Development Guide](../bmad-core/docs/agents.md)
 - [Story Contract Specification](../bmad-core/docs/story-contract.md)
+
+## Task Bundle Lifecycle
+
+Task bundles provide deterministic context assembly for story execution:
+
+### Bundle Creation
+1. Run `npm run context:bundle -- <storyId>` to create a bundle
+2. Bundle includes:
+   - Linked artifacts (PRD, Architecture, etc.) with versions and checksums
+   - Files to be modified with current checksums
+   - Related test files
+   - Overall bundle checksum
+
+### Bundle Invalidation
+Bundles are automatically invalidated when:
+- Any linked artifact version changes
+- File checksums don't match
+- New dependencies are added to the story
+
+### Bundle Usage
+1. Dev agents read bundles to understand context
+2. QA agents verify bundle completeness
+3. Orchestrator gates check bundle validity
+
+### Commands
+- `npm run context:index` - Build artifact index
+- `npm run context:bundle -- <storyId>` - Create/update task bundle
+
+
+## Orchestrator Gates
+
+Gates enforce quality checks at each workflow transition:
+
+### Gate Types
+1. **Planning → Development Gate**
+   - Validates brief, PRD, and architecture schemas
+   - Ensures version alignment
+   - Checks completeness of planning artifacts
+
+2. **Dev → QA Gate**
+   - Runs preflight:all checks
+   - Validates patch plan existence and signature
+   - Ensures grounding of all changes
+
+3. **QA → Done Gate**
+   - Verifies acceptance test results
+   - Checks post-conditions from story contract
+   - Validates coverage requirements
+
+### Gate Configuration
+Gates are configured in `orchestrator-config-example.js` with hooks for:
+- Before phase transition
+- On gate failure
+- Custom validation logic
+
+### Failure Handling
+When a gate fails:
+1. Clear error message with actionable items
+2. Workflow halts at current phase
+3. Failure logged to `.ai/gates/failures.log`
+4. Optional notifications sent
+
+### CLI Usage
+```bash
+# Check specific gates
+node tools/orchestrator/gates.js planning
+node tools/orchestrator/gates.js dev STORY-123
+node tools/orchestrator/gates.js qa STORY-123
+```

@@ -6,6 +6,27 @@ This document provides comprehensive documentation for all agents in the SEMAD-M
 
 SEMAD-METHOD uses specialized AI agents, each with specific roles and responsibilities in the software development lifecycle. Agents work collaboratively through structured artifacts and formal contracts.
 
+## Using With Codex CLI
+
+You can drive these agents from the terminal using OpenAI Codex CLI. This keeps work local while leveraging SEMAD’s agent workflows.
+
+- Install: `npm install -g @openai/codex`
+- Activation phrases: “as dev agent …”, “activate qa agent …”, “switch to sm agent …”.
+- Use the `*` prefix for commands (e.g., `*help`, `*implement-next-story`).
+- Quick examples:
+  - `codex "as dev agent, *help"`
+  - `codex "as sm agent, *create-story"`
+  - `codex "as qa agent, *review"`
+  - `codex "as dev agent, execute *implement-next-story"`
+  - `codex "as dev agent, execute *adhoc 'Fix lint errors in utils' --paths src/utils/index.ts"`
+
+Outputs and logs are written to `.ai/`:
+- Progress/history: `.ai/history/*_log.jsonl`
+- Ad‑hoc reports: `.ai/adhoc/*.md`
+- Story location: `docs/stories` (only read during story workflows)
+
+See `docs/codex-integration.md` for a full guide.
+
 ## Core Agent Architecture
 
 ### Agent Structure
@@ -49,6 +70,11 @@ Each agent consists of:
 - Workflow definitions
 - Progress tracking system
 
+**Reverse Alignment Quick Links**:
+- Full pipeline: `node tools/workflow-orchestrator.js reverse-align`
+- Steps: `cleanup-docs`, `analyst-analyze`, `architect-rewrite`, `pm-update-prd`, `sm-recreate-stories`, `validate-story-consistency`, `qa-validate-alignment`, `generate-alignment-report`, `create-documentation-manifest`
+- Guide: `docs/reverse-alignment.md`
+
 ---
 
 ### 2. Analyst (`/analyst`)
@@ -64,8 +90,13 @@ Each agent consists of:
 
 **Key Commands**:
 - `/analyst` - Activate analyst
-- `*create-brief` - Generate project brief
-- `*analyze-requirements` - Deep requirements analysis
+- `*create-project-brief` - Generate project brief
+- `*perform-market-research` - Deep requirements/market analysis
+- `*create-competitor-analysis` - Competitive analysis
+
+**Reverse Alignment Quick Links**:
+- `/analyst *analyze-codebase-changes`
+- `/analyst *extract-implemented-features`
 
 **Workflow Position**: First agent in planning phase
 
@@ -94,8 +125,13 @@ Each agent consists of:
 **Key Commands**:
 - `/pm` - Activate PM
 - `*create-prd` - Generate PRD
-- `*update-prd` - Modify existing PRD
-- `*prioritize-features` - Feature prioritization
+- `*create-brownfield-prd` - PRD for existing systems
+- `*update-prd-from-implementation` - Align PRD to implementation
+ - `*validate-epic <path>` - Validate an EpicContract file (runs `npm run validate:epic -- <path>`) 
+
+**Reverse Alignment Quick Links**:
+- `/pm *update-prd-from-implementation`
+- `/pm *document-missing-requirements`
 
 **Workflow Position**: Second agent in planning phase (after Analyst)
 
@@ -123,9 +159,14 @@ Each agent consists of:
 
 **Key Commands**:
 - `/architect` - Activate architect
-- `*create-architecture` - Generate architecture doc
-- `*design-system` - System design
-- `*update-architecture` - Modify architecture
+- `*create-full-stack-architecture` - Full-stack architecture doc
+- `*create-backend-architecture` - Backend architecture
+- `*create-front-end-architecture` - Frontend architecture
+- `*reverse-engineer-architecture` - From implementation
+
+**Reverse Alignment Quick Links**:
+- `/architect *reverse-engineer-architecture --from-implementation`
+- `/architect *document-design-decisions`
 
 **Workflow Position**: Third agent in planning phase (after PM)
 
@@ -155,9 +196,13 @@ Each agent consists of:
 
 **Key Commands**:
 - `/sm` - Activate Scrum Master
-- `*create-stories` - Generate stories from PRD
-- `*create-next-story` - Create single story
-- `*plan-sprint` - Sprint planning
+- `*create-story` - Create the next story
+- `*story-checklist` - Validate story quality
+- `*correct-course` - Process corrections
+
+**Reverse Alignment Quick Links**:
+- `/sm *recreate-stories-from-code`
+- `/sm *update-story-templates`
 
 **Workflow Position**: First agent in development phase
 
@@ -192,8 +237,8 @@ Each agent consists of:
 **Key Commands**:
 - `/dev` - Activate developer
 - `*implement-next-story` - Start next story
-- `*fix-bug` - Bug fixing mode
-- `*refactor` - Code refactoring
+- `*run-tests` - Linting and tests
+- `*adhoc` - One-off tasks
 
 **Workflow Position**: Second agent in development phase (after SM)
 
@@ -228,9 +273,13 @@ Each agent consists of:
 
 **Key Commands**:
 - `/qa` - Activate QA
-- `*validate-story` - Validate story implementation
-- `*run-tests` - Execute test suite
-- `*check-contracts` - Verify contract fulfillment
+- `*review` - Review story implementation
+- `*analyze-code-quality` - Analyze quality
+- `*validate-docs-code-alignment` - Docs/Code alignment
+
+**Reverse Alignment Quick Links**:
+- `/qa *validate-docs-code-alignment`
+- `/qa *generate-coverage-report`
 
 **Workflow Position**: Third agent in development phase (after Dev)
 
@@ -266,9 +315,8 @@ Each agent consists of:
 
 **Key Commands**:
 - `/ux` - Activate UX expert
-- `*create-designs` - Generate UI designs
-- `*review-ux` - UX review
-- `*create-style-guide` - Design system creation
+- `*create-front-end-spec` - Frontend spec
+- `*generate-ui-prompt` - AI UI prompt
 
 **Workflow Position**: Optional in planning phase (parallel with Architect)
 
@@ -295,10 +343,14 @@ Each agent consists of:
 - Prioritize backlog
 - Make business decisions
 
+Note: Story/Epic creation is deprecated for PO. Use SM for standard story creation and PM for brownfield story/epic creation.
+
 **Key Commands**:
 - `/po` - Activate Product Owner
-- `*review-requirements` - Review requirements
-- `*approve-release` - Approve for release
+- `*execute-checklist-po` - PO master checklist
+- `*shard-doc` - Shard documents
+- `*validate-story-draft` - Validate story draft
+ - `*validate-epic <path>` - Validate an EpicContract file against the template (runs `npm run validate:epic -- <path>`)
 
 **Workflow Position**: Advisory role throughout both phases
 
@@ -316,13 +368,35 @@ Each agent consists of:
 - Handle scaling
 
 **Key Commands**:
-- `/in` - Activate Infrastructure engineer
-- `*setup-pipeline` - Create CI/CD
-- `*configure-deployment` - Setup deployment
+- `/in` - Activate Integration Auditor
+- `*audit-integration` - System integration audit
+- `*verify-contracts` - Verify StoryContracts
+- `*generate-report` - Generate audit report
 
 **Workflow Position**: Parallel with development phase
 
 ## Agent Interaction Patterns
+
+### Reverse Alignment Flow
+- Purpose: Rebuild and validate core docs and stories from the codebase to ensure documentation reflects reality.
+- Involved agents: 
+  - Orchestrator: runs the pipeline and validations
+  - Analyst: analyze codebase changes, extract implemented features
+  - Architect: reverse-engineer architecture from implementation
+  - PM: update PRD from implementation, document missing requirements
+  - SM: recreate stories from code (mark as implemented)
+  - QA: validate docs-code alignment and generate coverage
+- Orchestrator commands:
+  - Single-shot: `node tools/workflow-orchestrator.js reverse-align`
+  - Steps: `cleanup-docs`, `analyst-analyze`, `architect-rewrite`, `pm-update-prd`, `sm-recreate-stories`, `validate-story-consistency`, `qa-validate-alignment`, `generate-alignment-report`, `create-documentation-manifest`
+- Agent actions (when invoked directly):
+  - `/analyst *analyze-codebase-changes`, `/analyst *extract-implemented-features`
+  - `/architect *reverse-engineer-architecture`, `/architect *document-design-decisions`
+  - `/pm *update-prd-from-implementation`, `/pm *document-missing-requirements`
+  - `/sm *recreate-stories-from-code`, `/sm *update-story-templates`
+  - `/qa *validate-docs-code-alignment`, `/qa *generate-coverage-report`
+- Outputs: `docs/architecture/architecture.md`, `docs/prd/PRD.md`, `docs/stories/*`, `.ai/reports/*`, `.ai/documentation-manifest.json`.
+- See the full guide: `docs/reverse-alignment.md`.
 
 ### Planning Phase Flow
 ```

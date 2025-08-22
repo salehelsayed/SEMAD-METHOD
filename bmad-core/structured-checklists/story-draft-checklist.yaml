@@ -86,6 +86,10 @@ categories:
         checked: false
       - description: Special testing considerations are noted (if applicable)
         checked: false
+      - description: Acceptance Test Matrix present and maps each AC to concrete, executable tests
+        checked: false
+      - description: Each listed test has clear rationale and is not redundant (per policy cap)
+        checked: false
     notes: >-
       Testing ensures the implementation actually works. Check:
 
@@ -99,6 +103,13 @@ categories:
       4. Special test considerations are noted
 
       5. Acceptance criteria in the story are testable
+
+      Acceptance Test Matrix discipline:
+
+      1. Keep tests meaningful: 1 happy path + 1 key failure per AC unless high risk
+      2. Avoid duplicates; if covered by an integration test, do not add redundant unit tests
+      3. Require brief rationale for each test explaining defect class prevented
+      4. Cap tests per AC using policy to avoid bloat
 
       FINAL STORY VALIDATION REPORT
 

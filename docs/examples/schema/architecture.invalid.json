@@ -1,0 +1,7 @@
+{
+  "id": 123,
+  "version": "1.0.0",
+  "apis": "/api/login",
+  "components": {},
+  "dataModels": []
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Documentation Manifest (v1) — Structural Schema",
+  "type": "object",
+  "required": ["generatedAt", "coreDocs", "features", "evidence", "toolsDetected", "repo"],
+  "properties": {
+    "generatedAt": { "type": "string" },
+    "coreDocs": {
+      "type": "object",
+      "required": ["prd", "architecture"],
+      "properties": {
+        "prd": { "type": "boolean" },
+        "architecture": { "type": "boolean" },
+        "brief": { "type": "boolean" },
+        "orchestrator": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "name", "present"],
+        "properties": {
+          "key": { "type": "string" },
+          "name": { "type": "string" },
+          "present": { "type": "boolean" },
+          "deprecated": { "type": "boolean" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence": { "type": "object" },
+    "decisions": { "type": "array" },
+    "toolsDetected": { "type": "object" },
+    "repo": { "type": "object" },
+    "coverage": { "type": ["object", "null"] }
+  },
+  "additionalProperties": true
+}
+

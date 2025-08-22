@@ -1,0 +1,9 @@
+---
+StoryContract:
+  version: "1.0"
+  story_id: "AH-001"
+  epic_id: "AH"
+  apiEndpoints: []
+  filesToModify: []
+  acceptanceCriteriaLinks: []
+---

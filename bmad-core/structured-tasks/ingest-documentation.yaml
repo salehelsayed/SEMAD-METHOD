@@ -28,7 +28,7 @@ steps:
     name: Fetch Documentation Content
     description: Fetch documentation from identified sources
     actions:
-      - description: For each documentation query, fetch the content
+      - description: For each documentation query, fetch the content (execute fetches concurrently up to a safe limit, e.g., maxParallel=4)
         action: |
           echo "Fetching documentation based on queries..."
           echo "This step would typically:"
@@ -42,7 +42,7 @@ steps:
     name: Process Documentation for Qdrant
     description: Convert documentation into vector embeddings
     actions:
-      - description: Process documentation content for vector storage
+      - description: Process documentation content for vector storage (chunk and process documents with bounded concurrency)
         action: |
           echo "Processing documentation for Qdrant..."
           echo "This would:"
@@ -84,3 +84,5 @@ metadata:
     - documentation
     - qdrant
     - ingestion
+  performance:
+    concurrency: Prefer bounded concurrency for fetch and processing steps to reduce total ingestion time without exhausting system/network resources

@@ -81,7 +81,21 @@ class QAReviewRunner {
     console.log(chalk.blue('🔍 Running QA Agent Review...\n'));
     
     try {
-      const AgentRunner = require('../bmad-core/utils/agent-runner');
+      let AgentRunner;
+      try {
+        AgentRunner = require('../bmad-core/utils/agent-runner');
+        // Verify memory deps exist; if not, use shim
+        const fs = require('fs');
+        const path = require('path');
+        const coreDir = fs.existsSync(path.join(this.rootDir, 'bmad-core')) ? 'bmad-core' : '.bmad-core';
+        const umm = path.join(this.rootDir, coreDir, 'utils', 'unified-memory-manager.js');
+        const mh = path.join(this.rootDir, coreDir, 'utils', 'memory-health.js');
+        if (!fs.existsSync(umm) || !fs.existsSync(mh)) {
+          AgentRunner = require('./orchestrator/agent-runner-shim');
+        }
+      } catch (e) {
+        AgentRunner = require('./orchestrator/agent-runner-shim');
+      }
       const runner = new AgentRunner({
         memoryEnabled: true,
         healthMonitoringEnabled: true,
@@ -144,16 +158,30 @@ class QAReviewRunner {
       // Update status
       content = content.replace(statusRegex, `$1${status}`);
 
-      // Add QA comments section if provided
+      // Append QA findings into a consistent section
       if (qaComments && qaComments.trim()) {
-        const qaSection = `\n## QA Review Comments\n\n${qaComments}\n\n**Review Date:** ${new Date().toISOString().split('T')[0]}\n`;
-        
-        // Insert QA section before Implementation Details if it exists
-        if (content.includes('## Implementation Details')) {
-          content = content.replace('## Implementation Details', qaSection + '## Implementation Details');
+        const lines = content.split('\n');
+        const header = '## QA Findings';
+        const ts = new Date().toISOString();
+        const block = [
+          '',
+          header,
+          `### Review ${ts}`,
+          qaComments,
+          ''
+        ];
+        const idx = lines.findIndex(l => l.trim() === header);
+        if (idx === -1) {
+          lines.push(...block);
         } else {
-          content += qaSection;
+          // Insert after header section
+          let insertAt = lines.length;
+          for (let i = idx + 1; i < lines.length; i++) {
+            if (/^##\s+/.test(lines[i])) { insertAt = i; break; }
+          }
+          lines.splice(insertAt, 0, ...block.slice(2)); // keep single header
         }
+        content = lines.join('\n');
       }
 
       fs.writeFileSync(storyPath, content, 'utf8');

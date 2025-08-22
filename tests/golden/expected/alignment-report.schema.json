@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Alignment Report — Structural Schema",
+  "type": "object",
+  "required": ["generatedAt", "docsCoverage"],
+  "properties": {
+    "generatedAt": { "type": "string" },
+    "stories": { "type": ["object", "null"] },
+    "docsCoverage": {
+      "type": "object",
+      "required": ["totalFeatures", "mentioned", "perDoc"],
+      "properties": {
+        "totalFeatures": { "type": "number" },
+        "mentioned": { "type": "number" },
+        "perDoc": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "missingFeatures": { "type": "array", "items": { "type": "string" } },
+    "decisions": { "type": "array" }
+  },
+  "additionalProperties": true
+}
+

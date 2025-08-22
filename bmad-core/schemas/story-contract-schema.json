@@ -1,102 +1,156 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://bmad-method.com/schemas/story-contract.json",
-  "title": "StoryContract Schema",
-  "description": "Comprehensive JSON Schema for validating BMad StoryContract blocks",
+  "title": "Story Contract Schema",
   "type": "object",
-  "required": ["version", "story_id", "epic_id", "apiEndpoints", "filesToModify", "acceptanceCriteriaLinks"],
+  "required": [
+    "version",
+    "story_id",
+    "epic_id",
+    "schemaVersion"
+  ],
   "properties": {
     "version": {
-      "type": "string",
-      "pattern": "^\\d+\\.\\d+$",
-      "description": "Version of the StoryContract format"
+      "type": "string"
     },
     "story_id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Unique identifier for the story"
+      "type": "string"
+    },
+    "acceptanceTestMatrix": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "type": "object",
+          "properties": {
+            "test_runner": { "type": "string" },
+            "max_tests_per_ac": { "type": ["number", "string"] },
+            "must_cover": { "type": "array", "items": { "type": "string" } },
+            "skip_criteria": { "type": "array", "items": { "type": "string" } },
+            "rationale_required": { "type": "boolean" }
+          },
+          "additionalProperties": true
+        },
+        "globals": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ac_id", "title", "test_files"],
+            "properties": {
+              "ac_id": { "type": "string" },
+              "title": { "type": "string" },
+              "type": { "type": "string" },
+              "endpoint_ref": { "type": "object", "additionalProperties": true },
+              "preconditions": { "type": "array", "items": { "type": "string" } },
+              "request": { "type": "object", "additionalProperties": true },
+              "assertions": { "type": "array", "items": { "type": ["string", "object", "number"] } },
+              "test_files": { "type": "array", "items": { "type": "object", "properties": { "path": { "type": "string" }, "framework": { "type": "string" } }, "required": ["path"] } },
+              "must_have": { "type": "boolean" },
+              "rationale": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "developmentPolicy": {
+      "type": "object",
+      "properties": {
+        "tdd": { "type": "boolean" },
+        "test_source": { "type": "string" },
+        "required_sequence": { "type": "array", "items": { "type": "string" } },
+        "max_tests_per_ac": { "type": ["number", "string"] },
+        "skip_criteria": { "type": "array", "items": { "type": "string" } },
+        "rationale_required": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "qaValidationPolicy": {
+      "type": "object",
+      "properties": {
+        "enforce_tdd": { "type": "boolean" },
+        "checks": { "type": "array", "items": { "type": "string" } },
+        "exceptions_allowed": { "type": "array", "items": { "type": "string" } },
+        "exception_requires": { "type": "string" }
+      },
+      "additionalProperties": true
     },
     "epic_id": {
+      "type": "string"
+    },
+    "schemaVersion": {
       "type": "string",
-      "minLength": 1,
-      "description": "Identifier of the parent epic"
+      "description": "Version of this schema"
+    },
+    "preConditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that must be met before story execution"
+    },
+    "postConditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that must be met after story completion"
+    },
+    "linkedArtifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "path",
+          "version"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Artifacts linked to this story"
     },
     "apiEndpoints": {
       "type": "array",
-      "description": "List of API endpoints to be implemented",
       "items": {
-        "type": "object",
-        "required": ["method", "path", "description"],
-        "properties": {
-          "method": {
-            "type": "string",
-            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
-            "description": "HTTP method"
-          },
-          "path": {
-            "type": "string",
-            "pattern": "^/",
-            "description": "API endpoint path"
-          },
-          "requestBody": {
-            "type": "object",
-            "description": "Schema for the request body"
-          },
-          "requestBodySchema": {
-            "type": "object",
-            "description": "JSON Schema for request body validation"
-          },
-          "successResponse": {
-            "type": "object",
-            "description": "Schema for the success response"
-          },
-          "responseSchema": {
-            "type": "object",
-            "description": "JSON Schema for response validation"
-          },
-          "description": {
-            "type": "string",
-            "description": "Description of the endpoint's purpose"
-          }
-        }
+        "type": "string"
       }
     },
     "filesToModify": {
       "type": "array",
-      "description": "List of files to be created or modified",
       "items": {
         "type": "object",
-        "required": ["path", "reason"],
+        "required": [
+          "path",
+          "reason"
+        ],
         "properties": {
           "path": {
-            "type": "string",
-            "minLength": 1,
-            "description": "File path relative to project root"
+            "type": "string"
           },
           "reason": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Explanation of why this file needs to be modified"
+            "type": "string"
           }
         }
       }
     },
     "acceptanceCriteriaLinks": {
       "type": "array",
-      "description": "Links to external acceptance criteria or test cases",
       "items": {
-        "type": "string",
-        "format": "uri-reference"
-      }
-    },
-    "dataModels": {
-      "type": "object",
-      "description": "Data models/schemas to be implemented",
-      "additionalProperties": {
-        "type": "object",
-        "description": "JSON Schema for each data model"
+        "type": "string"
       }
     }
-  },
-  "additionalProperties": false
+  }
 }

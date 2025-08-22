@@ -141,3 +141,4 @@ notes: |2
      - Note existing file references and descriptions
      - Note which folder it belongs to (if in a subfolder)
      - Note in the description that this is a multi-part document
+     - Performance: When scanning documentation and reading file contents, prefer bounded concurrency (e.g., 4–8 workers) to speed up indexing without overloading I/O

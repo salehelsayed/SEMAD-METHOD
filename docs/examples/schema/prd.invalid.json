@@ -1,0 +1,6 @@
+{
+  "id": "PRD-XYZ",
+  "features": "User auth, Dashboard",
+  "userStories": "US-1",
+  "acceptanceCriteria": {}
+}

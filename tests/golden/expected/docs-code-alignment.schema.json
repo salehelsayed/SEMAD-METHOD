@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Docs-Code Alignment Coverage — Structural Schema",
+  "type": "object",
+  "required": ["totalFeatures", "mentioned", "perDoc"],
+  "properties": {
+    "totalFeatures": { "type": "number" },
+    "mentioned": { "type": "number" },
+    "perDoc": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["exists", "mentions"],
+        "properties": {
+          "exists": { "type": "boolean" },
+          "mentions": { "type": "number" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
+

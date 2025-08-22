@@ -1,0 +1,67 @@
+{
+  "id": "arch-001",
+  "version": "1.0.0",
+  "components": [
+    {
+      "name": "API Gateway",
+      "type": "service",
+      "responsibilities": [
+        "Request routing",
+        "Authentication",
+        "Rate limiting"
+      ],
+      "dependencies": [
+        "Auth Service",
+        "Backend Services"
+      ]
+    },
+    {
+      "name": "Database",
+      "type": "datastore",
+      "responsibilities": [
+        "Data persistence",
+        "Query optimization"
+      ],
+      "dependencies": []
+    }
+  ],
+  "apis": [
+    {
+      "name": "User API",
+      "protocol": "REST",
+      "endpoints": [
+        "/users",
+        "/users/:id",
+        "/users/login"
+      ]
+    },
+    {
+      "name": "Admin API",
+      "protocol": "GraphQL",
+      "endpoints": [
+        "/graphql"
+      ]
+    }
+  ],
+  "dataModels": [
+    {
+      "name": "User",
+      "fields": {
+        "id": "string",
+        "email": "string",
+        "createdAt": "timestamp"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "ADR001",
+      "decision": "Use PostgreSQL for primary database",
+      "rationale": "ACID compliance and complex query support",
+      "alternatives": [
+        "MongoDB",
+        "DynamoDB"
+      ]
+    }
+  ]
+}

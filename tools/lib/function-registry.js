@@ -40,6 +40,9 @@ const simpleMemory = require(resolveModule('utils/simpleMemory', '../../bmad-cor
 const QAFindingsParser = require(resolveModule('utils/qa-findings-parser', '../../bmad-core/utils/qa-findings-parser'));
 const QAFixTracker = require(resolveModule('utils/qa-fix-tracker', '../../bmad-core/utils/qa-fix-tracker'));
 const { verifyQAFixes } = require(resolveModule('utils/verify-qa-fixes', '../../bmad-core/utils/verify-qa-fixes'));
+const fs = require('fs');
+const { execSync, execFileSync } = require('child_process');
+const path = require('path');
 
 // Create a singleton instance of the tracker
 let trackerInstance = null;
@@ -142,6 +145,121 @@ const FUNCTION_REGISTRY = {
   
   'qaTracker.verify': async (directory = '.ai') => {
     return verifyQAFixes(directory);
+  },
+
+  // Orchestrator: Fully in-session Dev↔QA iterative loop (no Codex/Claude)
+  'orchestrator.devQaIterativeSession': async (storyArg, maxIterations = 5, projectRoot = process.cwd()) => {
+    function resolveCore(rel) {
+      const p1 = path.join(projectRoot, '.bmad-core', rel);
+      if (fs.existsSync(p1)) return p1;
+      return path.join(projectRoot, 'bmad-core', rel);
+    }
+
+    function findStoryById(id) {
+      const storiesDir = path.join(projectRoot, 'docs', 'stories');
+      if (!fs.existsSync(storiesDir)) return null;
+      const walk = (dir) => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const e of entries) {
+          const p = path.join(dir, e.name);
+          if (e.isDirectory()) { const r = walk(p); if (r) return r; }
+          else if (e.isFile() && p.endsWith('.md')) {
+            const txt = fs.readFileSync(p, 'utf8');
+            const re = new RegExp(`(^|\n)\s*StoryContract:\\s*[\\s\\S]*?story_id:\\s*\"?${id}\"?`, 'm');
+            if (re.test(txt)) return p;
+          }
+        }
+        return null;
+      };
+      return walk(storiesDir);
+    }
+
+    function resolveStoryPath(arg) {
+      const abs = path.isAbsolute(arg) ? arg : path.join(projectRoot, arg);
+      if (fs.existsSync(abs)) return abs;
+      return findStoryById(String(arg));
+    }
+
+    function setStoryStatus(filePath, status) {
+      try {
+        let content = fs.readFileSync(filePath, 'utf8');
+        const re = /(##\s*Status\s*\n\s*)(.+)/i;
+        if (re.test(content)) {
+          content = content.replace(re, `$1${status}`);
+          fs.writeFileSync(filePath, content, 'utf8');
+          return true;
+        }
+        return false;
+      } catch (_) { return false; }
+    }
+
+    const storyPath = resolveStoryPath(storyArg);
+    if (!storyPath) {
+      return { success: false, error: `Could not resolve story from: ${storyArg}` };
+    }
+
+    // Helper: run structured task for Dev fixes if present
+    async function runDevFixes() {
+      const fixTask = resolveCore(path.join('structured-tasks', 'address-qa-feedback.yaml'));
+      if (!fs.existsSync(fixTask)) return { success: false, reason: 'no_task' };
+      try {
+        const TaskRunner = require(path.join(__dirname, '..', 'task-runner'));
+        const tr = new TaskRunner(projectRoot);
+        const res = await tr.executeTask('dev', fixTask, { storyPath, allowMissingUserInput: true });
+        return { success: !!res?.success };
+      } catch (e) { return { success: false, error: e.message }; }
+    }
+
+    function runQAGateStrict() {
+      const qaGateLocal = path.join(projectRoot, 'tools', 'orchestrator', 'gates', 'qa-gate.js');
+      const qaGateCore = resolveCore(path.join('tools', 'orchestrator', 'gates', 'qa-gate.js'));
+      try {
+        if (fs.existsSync(qaGateLocal)) {
+          execFileSync(process.execPath, [qaGateLocal, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot });
+          return true;
+        }
+        if (fs.existsSync(qaGateCore)) {
+          execFileSync(process.execPath, [qaGateCore, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot });
+          return true;
+        }
+        // Fallback to npm scripts
+        const pkg = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
+        if (pkg.scripts && pkg.scripts['gate:qa']) {
+          execSync('npm run -s gate:qa', { stdio: 'inherit', cwd: projectRoot });
+          return true;
+        }
+        if (pkg.scripts && pkg.scripts['test']) {
+          execSync('npm test --silent', { stdio: 'inherit', cwd: projectRoot });
+          return true;
+        }
+        return false;
+      } catch (_) { return false; }
+    }
+
+    function verifyFixesStrict() {
+      try {
+        const report = verifyQAFixes(path.join(projectRoot, '.ai'));
+        return !!(report && report.completionRate === 100);
+      } catch (_) { return false; }
+    }
+
+    const maxIters = Number(maxIterations) || 5;
+    for (let iter = 1; iter <= maxIters; iter++) {
+      // Dev phase (structured fixes if available)
+      await runDevFixes();
+
+      // Verify
+      const verified = verifyFixesStrict();
+
+      // QA phase
+      const qaPassed = runQAGateStrict();
+
+      if (qaPassed && verified) {
+        setStoryStatus(storyPath, 'Done');
+        return { success: true, iterations: iter, story: path.relative(projectRoot, storyPath) };
+      }
+    }
+    return { success: false, iterations: maxIters, story: path.relative(projectRoot, storyPath) };
   }
 };
 
@@ -256,7 +374,8 @@ function extractFunctionArguments(functionName, resolvedParameters) {
     'qaTracker.getReport': [],
     'qaTracker.save': ['directory'],
     'qaTracker.load': ['directory'],
-    'qaTracker.verify': ['directory']
+    'qaTracker.verify': ['directory'],
+    'orchestrator.devQaIterativeSession': ['storyArg', 'maxIterations', 'projectRoot']
   };
 
   const expectedParams = parameterMappings[functionName];

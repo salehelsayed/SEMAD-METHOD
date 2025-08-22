@@ -21,7 +21,7 @@ class TaskTracker {
       name: workflowName,
       tasks: tasks.map((task, index) => ({
         ...task,
-        id: task.id || `task-${index + 1}`,
+        id: task.id || ('task-' + (index + 1)),
         status: 'pending'
       })),
       currentIndex: 0,
@@ -30,9 +30,96 @@ class TaskTracker {
       agentName: null
     };
     
-    this.log(`Started workflow: ${workflowName} with ${tasks.length} tasks`);
+    this.log('Started workflow: ' + workflowName + ' with ' + tasks.length + ' tasks');
     return true;
   }
+
+  /**
+   * Backward-compatibility helper: add a task to the current workflow
+   * If no workflow exists, starts an 'adhoc' workflow with this single task.
+   * Accepts a string task name or a task object with a 'name' property.
+   * @param {string|Object} task - Task name or task object
+   * @returns {boolean} Success status
+   */
+  addTask(task) {
+    // Normalize input
+    const taskObj = typeof task === 'string' ? { name: task } : { ...(task || {}) };
+    if (!taskObj.name) {
+      this.log('addTask called without a task name', 'warning');
+      return false;
+    }
+
+    // If no workflow yet, create an adhoc workflow
+    if (!this.workflow) {
+      this.startWorkflow('adhoc', [taskObj]);
+      this.log('Initialized adhoc workflow with task: ' + taskObj.name, 'info');
+      return true;
+    }
+
+    // Append to existing workflow
+    const nextIndex = this.workflow.tasks.length + 1;
+    this.workflow.tasks.push({
+      ...taskObj,
+      id: taskObj.id || ('task-' + nextIndex),
+      status: 'pending'
+    });
+    this.log("Added task to workflow '" + this.workflow.name + "': " + taskObj.name, 'info');
+    return true;
+  }
+
+  /**
+   * Find task index by id or name
+   * @param {string} identifier - task id or name
+   * @returns {number} index or -1 if not found
+   */
+  _findTaskIndex(identifier) {
+    if (!this.workflow) return -1;
+    const idxById = this.workflow.tasks.findIndex(t => t.id === identifier);
+    if (idxById >= 0) return idxById;
+    const idxByName = this.workflow.tasks.findIndex(t => t.name === identifier);
+    return idxByName;
+  }
+
+  /**
+   * Backward-compat: update a task's status by id or name
+   * @param {string} identifier - task id or name
+   * @param {string} status - pending | in_progress | completed | skipped
+   * @param {string} notes - optional notes
+   * @returns {boolean}
+   */
+  updateTask(identifier, status = 'pending', notes = '') {
+    if (!this.workflow) {
+      // If no workflow, initialize adhoc with this single task
+      this.startWorkflow('adhoc', [{ name: typeof identifier === 'string' ? identifier : 'task' }]);
+    }
+    const idx = this._findTaskIndex(identifier);
+    if (idx < 0) {
+      // If not found, add then mark
+      this.addTask(typeof identifier === 'string' ? identifier : 'task');
+    }
+    const targetIdx = idx >= 0 ? idx : this.workflow.tasks.length - 1;
+    const task = this.workflow.tasks[targetIdx];
+    task.status = status;
+    if (status === 'in_progress') {
+      this.workflow.currentIndex = targetIdx;
+      this.log("Task '" + task.name + "' is now in progress", 'info');
+    } else if (status === 'completed') {
+      // Mirror completeCurrentTask behavior for this specific task
+      this.workflow.completed.push({ task, completedAt: new Date(), notes, duration: this.getTaskDuration() });
+      this.log('Completed task: ' + task.name, 'success');
+    } else if (status === 'skipped') {
+      task.skipReason = notes;
+      this.log('Skipped task: ' + task.name + ' - ' + (notes || 'no reason provided'), 'warning');
+    } else {
+      this.log("Updated task '" + task.name + "' status to " + status, 'info');
+    }
+    return true;
+  }
+
+  /** Start a task by id or name (alias) */
+  startTask(identifier, notes = '') { return this.updateTask(identifier, 'in_progress', notes); }
+  /** Complete a task by id or name (alias) */
+  completeTask(identifier, notes = '') { return this.updateTask(identifier, 'completed', notes); }
 
   /**
    * Set the agent name for the current workflow
@@ -58,7 +145,7 @@ class TaskTracker {
       task: task,
       index: this.workflow.currentIndex,
       total: this.workflow.tasks.length,
-      progress: `${this.workflow.currentIndex + 1}/${this.workflow.tasks.length}`,
+      progress: (this.workflow.currentIndex + 1) + '/' + this.workflow.tasks.length,
       percentComplete: Math.round((this.workflow.completed.length / this.workflow.tasks.length) * 100)
     };
   }
@@ -83,14 +170,14 @@ class TaskTracker {
       duration: this.getTaskDuration()
     });
     
-    this.log(`Completed task ${current.index + 1}: ${current.task.name}`, 'success');
+    this.log('Completed task ' + (current.index + 1) + ': ' + current.task.name, 'success');
     
     // Move to next task
     this.workflow.currentIndex++;
     
     // Check if workflow is complete
     if (this.workflow.currentIndex >= this.workflow.tasks.length) {
-      this.log(`Workflow '${this.workflow.name}' completed! All ${this.workflow.tasks.length} tasks done.`, 'success');
+      this.log("Workflow '" + this.workflow.name + "' completed! All " + this.workflow.tasks.length + ' tasks done.', 'success');
     }
     
     return true;
@@ -108,7 +195,7 @@ class TaskTracker {
     this.workflow.tasks[this.workflow.currentIndex].status = 'skipped';
     this.workflow.tasks[this.workflow.currentIndex].skipReason = reason;
     
-    this.log(`Skipped task ${current.index + 1}: ${current.task.name} - Reason: ${reason}`, 'warning');
+    this.log('Skipped task ' + (current.index + 1) + ': ' + current.task.name + ' - Reason: ' + reason, 'warning');
     
     this.workflow.currentIndex++;
     return true;
@@ -127,7 +214,7 @@ class TaskTracker {
       workflowContext: this.workflow ? {
         name: this.workflow.name,
         agent: this.workflow.agentName,
-        progress: `${this.workflow.completed.length}/${this.workflow.tasks.length}`,
+        progress: this.workflow.completed.length + '/' + this.workflow.tasks.length,
         currentTask: this.getCurrentTask()?.task?.name || 'None'
       } : null
     };
@@ -145,7 +232,7 @@ class TaskTracker {
     const resetColor = '\x1b[0m';
     const color = colors[type] || colors.info;
     
-    console.log(`${color}[${type.toUpperCase()}]${resetColor} ${message}`);
+    console.log(color + '[' + String(type).toUpperCase() + ']' + resetColor + ' ' + message);
   }
 
   /**
@@ -180,26 +267,26 @@ class TaskTracker {
     const progress = this.getProgress();
     if (!progress) return 'No active workflow';
     
-    let report = `\n=== Task Progress Report ===\n`;
-    report += `Workflow: ${progress.workflow}\n`;
-    report += `Agent: ${progress.agent || 'Not set'}\n`;
-    report += `Progress: ${progress.completedTasks}/${progress.totalTasks} tasks (${progress.percentComplete}%)\n`;
-    report += `Elapsed Time: ${progress.elapsedTime}\n`;
+    let report = '\n=== Task Progress Report ===\n';
+    report += 'Workflow: ' + progress.workflow + '\n';
+    report += 'Agent: ' + (progress.agent || 'Not set') + '\n';
+    report += 'Progress: ' + progress.completedTasks + '/' + progress.totalTasks + ' tasks (' + progress.percentComplete + '%)\n';
+    report += 'Elapsed Time: ' + progress.elapsedTime + '\n';
     
     if (progress.currentTask) {
-      report += `\nCurrent Task: ${progress.currentTask.task.name}\n`;
-      report += `Task Progress: ${progress.currentTask.progress}\n`;
+      report += '\nCurrent Task: ' + progress.currentTask.task.name + '\n';
+      report += 'Task Progress: ' + progress.currentTask.progress + '\n';
     }
     
     if (progress.skippedTasks > 0) {
-      report += `\nSkipped Tasks: ${progress.skippedTasks}\n`;
+      report += '\nSkipped Tasks: ' + progress.skippedTasks + '\n';
     }
     
     if (progress.estimatedTimeRemaining) {
-      report += `Estimated Time Remaining: ${progress.estimatedTimeRemaining}\n`;
+      report += 'Estimated Time Remaining: ' + progress.estimatedTimeRemaining + '\n';
     }
     
-    report += `===========================\n`;
+    report += '===========================\n';
     
     return report;
   }
@@ -219,7 +306,7 @@ class TaskTracker {
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `task-tracker_${this.workflow?.name || 'unknown'}_${timestamp}.json`;
+    const filename = 'task-tracker_' + ((this.workflow && this.workflow.name) || 'unknown') + '_' + timestamp + '.json';
     const filepath = path.join(directory, filename);
     
     const debugData = {
@@ -230,7 +317,7 @@ class TaskTracker {
     };
     
     fs.writeFileSync(filepath, JSON.stringify(debugData, null, 2));
-    this.log(`Debug log saved to: ${filepath}`, 'info');
+    this.log('Debug log saved to: ' + filepath, 'info');
     
     return filepath;
   }
@@ -248,11 +335,11 @@ class TaskTracker {
     const hours = Math.floor(minutes / 60);
     
     if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
+      return hours + 'h ' + (minutes % 60) + 'm';
     } else if (minutes > 0) {
-      return `${minutes}m ${seconds % 60}s`;
+      return minutes + 'm ' + (seconds % 60) + 's';
     } else {
-      return `${seconds}s`;
+      return String(seconds) + 's';
     }
   }
 
@@ -286,9 +373,9 @@ class TaskTracker {
     const hours = Math.floor(minutes / 60);
     
     if (hours > 0) {
-      return `~${hours}h ${minutes % 60}m`;
+      return '~' + hours + 'h ' + (minutes % 60) + 'm';
     } else {
-      return `~${minutes}m`;
+      return '~' + minutes + 'm';
     }
   }
 

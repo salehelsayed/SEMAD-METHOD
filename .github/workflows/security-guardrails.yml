@@ -1,0 +1,82 @@
+name: Security Guardrails
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  security-scan:
+    name: Security Guardrails
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Check for security override
+      id: check-override
+      run: |
+        # Check if PR has security-override label
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          HAS_OVERRIDE=$(gh pr view ${{ github.event.number }} --json labels --jq '.labels[].name' | grep -c "security-override" || echo "0")
+          echo "has_override=$HAS_OVERRIDE" >> $GITHUB_OUTPUT
+        else
+          echo "has_override=0" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Run secret scanning
+      id: secret-scan
+      run: |
+        chmod +x scripts/security/secret-scan.sh
+        scripts/security/secret-scan.sh
+      continue-on-error: true
+      
+    - name: Run dependency audit
+      id: deps-audit
+      run: |
+        chmod +x scripts/security/deps-audit.sh
+        scripts/security/deps-audit.sh
+      continue-on-error: true
+      
+    - name: Evaluate security results
+      run: |
+        SECRET_EXIT_CODE=${{ steps.secret-scan.outcome }}
+        DEPS_EXIT_CODE=${{ steps.deps-audit.outcome }}
+        HAS_OVERRIDE=${{ steps.check-override.outputs.has_override }}
+        
+        # Check if any security checks failed
+        if [[ "$SECRET_EXIT_CODE" == "failure" || "$DEPS_EXIT_CODE" == "failure" ]]; then
+          if [[ "$HAS_OVERRIDE" == "1" ]]; then
+            echo "⚠️ Security violations detected but overridden by security-override label"
+            echo "::warning::Security guardrails bypassed - ensure this is authorized"
+          else
+            echo "❌ Security violations detected. Add 'security-override' label to bypass if authorized."
+            echo "::error::Security guardrails failed - see remediation guidance in docs/validation-system.md"
+            exit 1
+          fi
+        else
+          echo "✅ All security guardrails passed"
+        fi
+        
+    - name: Upload security scan results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-scan-results
+        path: |
+          .ai/security-scan.log
+          .ai/deps-audit.log
+        retention-days: 30

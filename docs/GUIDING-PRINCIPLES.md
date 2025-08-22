@@ -89,3 +89,93 @@ Templates follow the [BMad Document Template](common/utils/bmad-doc-template.md)
 - Dev agents code, planning agents plan
 - Keep dev agents lean for maximum coding efficiency
 - Expansion packs handle specialized domains
+
+## Deterministic Generation Principles (AH-007)
+
+### Core Philosophy
+BMAD emphasizes predictable, traceable, and consistent code generation to ensure reliability and maintainability of AI-generated artifacts.
+
+### Deterministic Templates
+All generation must use structured templates with explicit placeholders:
+
+- **Required Placeholders**: Must be filled for valid output
+- **Optional Placeholders**: Can be omitted based on context
+- **Traceability Fields**: Link generated content to source requirements
+- **Metadata Fields**: Track generation process and versioning
+
+### Low-Temperature Generation
+- **Primary Temperature**: 0.1 (highly deterministic)
+- **Fallback Temperature**: 0.2 (slightly more creative if needed)
+- **Seed Values**: Fixed seeds (42) for reproducible results
+- **Token Limits**: Conservative limits to maintain focus
+
+### Template Structure Requirements
+1. **Version Control**: All templates must include version numbers
+2. **Traceability**: Explicit links to parent artifacts
+3. **Validation**: Built-in placeholders for validation criteria
+4. **Metadata**: Generation timestamp, agent, and settings
+
+### Generation Process
+1. **Load Configuration**: Use `scripts/generation/config.json`
+2. **Validate Input**: Ensure all required data is present
+3. **Apply Template**: Fill placeholders deterministically
+4. **Validate Output**: Check for completeness and consistency
+5. **Generate Metadata**: Include traceability information
+
+### When to Deviate
+Deterministic generation should be the default, but deviations are acceptable when:
+
+- **Creative Exploration**: Initial brainstorming or research phases
+- **Edge Case Handling**: Unusual requirements need adaptive solutions
+- **User Preference**: Explicit user request for more creative output
+- **Emergency Fixes**: Critical issues requiring rapid, non-standard solutions
+
+### Quality Assurance
+- **Template Validation**: Regular checks for template integrity
+- **Output Consistency**: Compare outputs across multiple generations
+- **Traceability Verification**: Ensure all links are valid and current
+- **Metadata Completeness**: Verify all required metadata is present
+
+### Integration Points
+- **Story Creation**: Use deterministic story templates
+- **Test Generation**: Apply consistent test patterns
+- **Documentation**: Maintain structured documentation templates
+- **Code Generation**: Follow predictable code patterns
+
+### Tools and Commands
+```bash
+# Generate story with deterministic template
+node scripts/generation/deterministic-generator.js story input.json output.md
+
+# Generate test with template
+node scripts/generation/deterministic-generator.js test test-data.json test-output.js
+
+# Validate template completeness
+npm run templates:validate
+
+# Check generation configuration
+npm run generation:config:check
+```
+
+### Configuration Management
+- **Central Config**: `scripts/generation/config.json` for all settings
+- **Template Registry**: Track all available templates and versions
+- **Model Settings**: Consistent model parameters across agents
+- **Seed Management**: Maintain seed values for reproducibility
+
+### Monitoring and Metrics
+- **Generation Consistency**: Track output variations across runs
+- **Template Usage**: Monitor which templates are most/least used
+- **Error Rates**: Identify common generation failures
+- **Traceability Coverage**: Ensure all outputs have proper links
+
+### Best Practices
+1. **Always use templates** for structured output
+2. **Set low temperature** for consistent results
+3. **Include traceability** in all generated content
+4. **Validate outputs** against expected structure
+5. **Version templates** and track changes
+6. **Document deviations** from deterministic approach
+7. **Regular template reviews** for improvements
+8. **Seed management** for reproducible results
+

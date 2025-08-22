@@ -62,6 +62,36 @@ class TaskRunner {
   }
 
   /**
+   * Roughly estimate token count for a task by character length.
+   * Heuristic: ~4 characters per token (OpenAI approximation)
+   * Includes task title/description and step/action descriptions.
+   * @param {Object} task
+   * @returns {number}
+   */
+  estimateTokenCountForTask(task) {
+    try {
+      let text = '';
+      if (!task) return 0;
+      if (task.title) text += ` ${task.title}`;
+      if (task.name) text += ` ${task.name}`;
+      if (task.description) text += ` ${task.description}`;
+      const steps = Array.isArray(task.steps) ? task.steps : [];
+      for (const step of steps) {
+        if (step.name) text += ` ${step.name}`;
+        if (step.description) text += ` ${step.description}`;
+        const actions = Array.isArray(step.actions) ? step.actions : [];
+        for (const action of actions) {
+          if (typeof action.description === 'string') text += ` ${action.description}`;
+        }
+      }
+      const approxTokens = Math.ceil((text || '').length / 4);
+      return approxTokens;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /**
    * Load core configuration to access validation schemas
    */
   loadCoreConfig() {
@@ -238,7 +268,8 @@ class TaskRunner {
 
       // Validate elicit requirements before proceeding
       const elicitValidation = this.validateElicitRequirements(task, context);
-      if (!elicitValidation.valid && !context.allowMissingUserInput) {
+      const allowMissingByEnv = (process.env.BMAD_ALLOW_MISSING_USER_INPUT === '1' || process.env.BMAD_ALLOW_MISSING_USER_INPUT === 'true' || process.env.BMAD_NONINTERACTIVE === '1' || process.env.BMAD_NONINTERACTIVE === 'true');
+      if (!elicitValidation.valid && !(context.allowMissingUserInput || allowMissingByEnv)) {
         // Return early with information about missing inputs
         return {
           success: false,
@@ -247,6 +278,9 @@ class TaskRunner {
           taskName: task.name,
           requiresUserInput: true
         };
+      }
+      if (!elicitValidation.valid && (context.allowMissingUserInput || allowMissingByEnv)) {
+        console.warn('\nℹ️  Proceeding in non-interactive mode: required user inputs will be skipped.');
       }
 
       // Get current working memory or initialize if it doesn't exist
@@ -303,10 +337,11 @@ class TaskRunner {
         await updateWorkingMemory(agentName, memory);
       }
 
-      // Apply dynamic plan adaptation
+      // Apply dynamic plan adaptation (pass context size estimate)
       let adaptedMemory;
       try {
-        adaptedMemory = planAdaptation(memory, task);
+        const tokenCount = this.estimateTokenCountForTask(task);
+        adaptedMemory = planAdaptation(memory, task, { tokenCount });
       } catch (planError) {
         throw new TaskExecutionError(
           `Failed to adapt plan for task: ${planError.message}`,

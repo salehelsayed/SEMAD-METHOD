@@ -1,0 +1,21 @@
+{
+  "id": "bundle-001",
+  "version": "1.0.0",
+  "artifacts": [
+    {
+      "type": "prd",
+      "path": "docs/prd/PRD.md",
+      "version": "1.0.0"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/index.js",
+      "checksum": "abc123def456"
+    }
+  ],
+  "tests": [
+    "test/unit/auth.test.js"
+  ],
+  "checksum": "fedcba654321"
+}

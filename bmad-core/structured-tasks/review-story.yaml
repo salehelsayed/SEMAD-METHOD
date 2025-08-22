@@ -31,6 +31,8 @@ steps:
         elicit: false
       - description: Assess test coverage and identify missing test scenarios
         elicit: false
+      - description: If executing tests during review, prefer bounded concurrency using the project's test runner (e.g., jest --maxWorkers=50%)
+        elicit: false
   - id: step3
     name: Code Quality Analysis
     description: Perform automated code quality analysis on implemented files

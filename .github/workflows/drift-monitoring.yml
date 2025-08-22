@@ -1,0 +1,52 @@
+name: Drift Detection & Rollback
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  drift-detection:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check for drift
+      id: drift
+      run: |
+        node tools/rollback/drift-detector.js > drift-report.json
+        echo "drift_detected=$(cat drift-report.json | jq -r '.severity')" >> $GITHUB_OUTPUT
+    
+    - name: Create rollback point on high drift
+      if: contains(steps.drift.outputs.drift_detected, 'high') || contains(steps.drift.outputs.drift_detected, 'critical')
+      run: node tools/rollback/rollback-manager.js create "drift-${{ github.sha }}"
+    
+    - name: Alert on critical drift
+      if: contains(steps.drift.outputs.drift_detected, 'critical')
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        text: 'Critical configuration drift detected in ${{ github.repository }}'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+    
+    - name: Upload drift report
+      uses: actions/upload-artifact@v3
+      with:
+        name: drift-report
+        path: drift-report.json

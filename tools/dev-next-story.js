@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const { program } = require('commander');
+const { spawnSync } = require('child_process');
 
 /**
  * Dev Agent 'Implement Next Story' Command
@@ -115,6 +116,35 @@ class DevNextStoryRunner {
   }
 
   /**
+   * Parse StoryContract YAML front matter from a story file
+   */
+  parseStoryContract(storyPath) {
+    try {
+      const raw = fs.readFileSync(storyPath, 'utf8');
+      const fm = /(^---[\s\S]*?\n---)/m;
+      const m = raw.match(fm);
+      if (!m) return null;
+      const yamlText = m[1].replace(/^---\n/, '').replace(/\n---$/, '');
+      const yaml = require('js-yaml');
+      const doc = yaml.load(yamlText);
+      return doc && doc.StoryContract ? doc.StoryContract : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Run dev guard with given args; returns { code }
+   */
+  runGuard(args, cwd) {
+    const res = spawnSync('node', ['tools/dev-guard.js', ...args], {
+      cwd: cwd || this.rootDir,
+      stdio: 'inherit'
+    });
+    return { code: res.status ?? res.code ?? 0 };
+  }
+
+  /**
    * Update story status after implementation
    */
   async updateStoryStatus(storyPath, status) {
@@ -182,11 +212,42 @@ class DevNextStoryRunner {
       console.log(chalk.blue('📝 Updating story status to "In Progress"...'));
       await this.updateStoryStatus(nextStory.filePath, 'In Progress');
 
+      // Decide guard behavior from StoryContract or CLI option
+      const contract = this.parseStoryContract(nextStory.filePath) || {};
+      const qualityGates = contract.qualityGates || {};
+      const cleanupRequired = contract.cleanupRequired || {};
+
+      // guardMode: contract | always | never
+      const guardMode = options.guard || 'contract';
+      const shouldPreImpact = guardMode === 'always' || (guardMode === 'contract' && !!qualityGates.runImpactScan);
+      const shouldPostCleanup = guardMode === 'always' || (guardMode === 'contract' && (cleanupRequired.removeUnused || qualityGates.zeroUnused));
+
+      // Pre-work impact scan
+      if (shouldPreImpact) {
+        const components = (contract.impactRadius && contract.impactRadius.components) || [];
+        const paths = components.length ? components : ['tools', 'scripts', 'bmad-core'];
+        console.log(chalk.blue('🛰️  Running pre-change impact scan via dev-guard...'));
+        const args = ['--impact-scan', '--report', '--paths', ...paths];
+        const { code } = this.runGuard(args, this.rootDir);
+        if (code !== 0) {
+          console.log(chalk.yellow('⚠️  Impact scan reported issues. Check .ai/reports/impact-map.json'));
+        }
+      }
+
       // Run dev agent implementation
       const result = await this.runDevAgent(nextStory.filePath, options);
 
       if (result && result.success) {
         console.log(chalk.green('\n✅ Implementation completed successfully!'));
+
+        // Post-work cleanup and report
+        if (shouldPostCleanup) {
+          console.log(chalk.blue('🧹 Running post-change cleanup and reporting via dev-guard...'));
+          const { code } = this.runGuard(['--cleanup', '--report'], this.rootDir);
+          if (code !== 0) {
+            console.log(chalk.yellow('⚠️  Cleanup scan found issues. See .ai/reports/cleanup-report.json'));
+          }
+        }
         
         // Update story status to Implemented
         await this.updateStoryStatus(nextStory.filePath, 'Implemented');
@@ -225,6 +286,7 @@ program
   .option('-a, --auto', 'Run automatically without confirmation prompts')
   .option('-v, --verbose', 'Show detailed execution logs')
   .option('-m, --mode <mode>', 'Implementation mode (implementation, review, test)', 'implementation')
+  .option('--guard <mode>', 'Guard mode: contract | always | never', 'contract')
   .parse(process.argv);
 
 async function main() {

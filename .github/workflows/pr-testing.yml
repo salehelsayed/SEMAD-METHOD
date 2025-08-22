@@ -1,0 +1,203 @@
+name: Pull Request Testing
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, synchronize, reopened ]
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: 'v1'
+
+jobs:
+  setup:
+    name: Setup and Cache
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache-deps.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache node modules
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci
+
+  examples:
+    name: Run Examples
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-
+
+      - name: Install dependencies if cache miss
+        if: needs.setup.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run examples
+        run: npm run examples:run
+        timeout-minutes: 10
+
+      - name: Upload examples artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: examples-failure-logs
+          path: |
+            scripts/examples/
+            .ai/
+          retention-days: 3
+
+  preflight:
+    name: Preflight Checks
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-
+
+      - name: Install dependencies if cache miss
+        if: needs.setup.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run preflight checks
+        run: npm run preflight:all
+        timeout-minutes: 15
+
+      - name: Upload preflight artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-failure-logs
+          path: |
+            scripts/preflight/
+            tools/patch-plan/
+            .ai/
+          retention-days: 3
+
+  metrics:
+    name: Collect Metrics
+    runs-on: ubuntu-latest
+    needs: [setup, examples, preflight]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ env.CACHE_VERSION }}-
+
+      - name: Install dependencies if cache miss
+        if: needs.setup.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Collect metrics
+        run: npm run metrics:collect
+        timeout-minutes: 5
+        continue-on-error: true
+
+      - name: Upload metrics report
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-report
+          path: |
+            tools/metrics/
+            .ai/
+          retention-days: 7
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [examples, preflight, metrics]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.examples.result }}" = "success" ]; then
+            echo "✅ Examples: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Examples: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.preflight.result }}" = "success" ]; then
+            echo "✅ Preflight Checks: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Preflight Checks: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.metrics.result }}" = "success" ]; then
+            echo "✅ Metrics Collection: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Metrics Collection: WARNING (non-blocking)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Status" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.examples.result }}" = "success" ] && [ "${{ needs.preflight.result }}" = "success" ]; then
+            echo "🎉 **All critical tests passed!** This PR is ready for review." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "🚫 **Critical tests failed.** Please review the failures above and fix them before merging." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

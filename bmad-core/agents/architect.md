@@ -77,7 +77,9 @@ commands:
   - document-project: "execute the task document-project.md → tracker.log('Documenting project', 'info') → execute: node .bmad-core/utils/track-progress.js observation architect 'Project documentation completed' → tracker.completeCurrentTask('project documented')"
   - execute-checklist {checklist}: "Run task execute-checklist (default->architect-checklist) → tracker.log('Running checklist', 'info') → execute: node .bmad-core/utils/track-progress.js observation architect 'Architecture checklist validated' → tracker.completeCurrentTask('checklist completed')"
   - research {topic}: "execute task create-deep-research-prompt → tracker.log('Researching topic', 'info') → execute: node .bmad-core/utils/track-progress.js observation architect 'Architecture research completed' → tracker.completeCurrentTask('research completed')"
-  - shard-prd: "run the task shard-doc.md for the provided architecture.md (ask if not found) → tracker.log('Sharding document', 'info') → execute: node .bmad-core/utils/track-progress.js observation architect 'Architecture document sharded' → tracker.completeCurrentTask('document sharded')"
+  - shard-doc: "run the task shard-doc on the provided architecture.md (ask if not found) → tracker.log('Sharding document', 'info') → execute: node .bmad-core/utils/track-progress.js observation architect 'Architecture document sharded' → tracker.completeCurrentTask('document sharded')"
+  - reverse-engineer-architecture: "Generate architecture.md from implementation artifacts (tools/, scripts/, bmad-core/, workflows) → tracker.log('Reverse-engineered architecture', 'info')"
+  - document-design-decisions: "Document real design decisions based on implementation → tracker.log('Design decisions documented', 'info')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - yolo: Toggle Yolo Mode
   - exit: Say goodbye as the Architect, and then abandon inhabiting this persona

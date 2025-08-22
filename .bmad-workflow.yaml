@@ -1,0 +1,18 @@
+flowType: iterative
+maxIterations: 7
+autoApproveOnNoIssues: true
+persistIterationHistory: true
+notifyOnIterationComplete: false
+
+qaReviewCriteria:
+  checkCodeStyle: true
+  checkTestCoverage: true
+  checkDocumentation: true
+  checkPerformance: false
+  checkSecurity: false
+
+devFixStrategy: fix-all
+
+verbosity: true
+verbosityLevel: detailed
+

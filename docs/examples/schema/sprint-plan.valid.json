@@ -1,0 +1,30 @@
+{
+  "id": "sprint-001",
+  "version": "1.0.0",
+  "stories": [
+    {
+      "id": "STORY-001",
+      "title": "Implement user login",
+      "points": 5,
+      "assignee": "dev-agent"
+    },
+    {
+      "id": "STORY-002",
+      "title": "Create dashboard UI",
+      "points": 8,
+      "assignee": "frontend-agent"
+    }
+  ],
+  "capacity": {
+    "total": 40,
+    "allocated": 13
+  },
+  "risks": [
+    {
+      "description": "Third-party API downtime",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Implement fallback mechanism"
+    }
+  ]
+}

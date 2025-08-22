@@ -7,7 +7,7 @@ const ModuleResolver = require('./module-resolver');
 
 class StoryContractValidator {
   constructor() {
-    this.ajv = new Ajv();
+    this.ajv = new Ajv({ allowUnionTypes: true });
     // Add format support including uri-reference
     addFormats(this.ajv);
     this.validate = null;

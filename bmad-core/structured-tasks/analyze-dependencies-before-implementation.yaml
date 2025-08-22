@@ -17,7 +17,7 @@ steps:
     name: Analyze File Dependencies
     description: Check what files and symbols depend on the files being modified
     actions:
-      - description: For each file in filesToModify, use dependency-impact-checker to find impacted files
+      - description: For each file in filesToModify, use dependency-impact-checker to find impacted files (fan-out with bounded concurrency; suggested maxParallel=4)
         elicit: false
       - description: Identify all symbols (classes, functions, methods) that would be affected
         elicit: false
@@ -86,3 +86,4 @@ notes: |
   - Helps prevent breaking changes by identifying impacts early
   - Critical for maintaining system stability during development
   - Results guide implementation approach and testing strategy
+  - Performance: Run per-file impact checks in parallel with a safe concurrency limit to reduce waiting time on large file sets

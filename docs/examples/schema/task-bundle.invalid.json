@@ -1,0 +1,6 @@
+{
+  "id": "BUNDLE-AH-001",
+  "storyId": 123,
+  "artifactRefs": {},
+  "files": "src/module/index.ts"
+}

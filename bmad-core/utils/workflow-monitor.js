@@ -146,7 +146,12 @@ class WorkflowMonitor {
   async loadWorkflow(workflowPath) {
     try {
       const content = await fs.readFile(workflowPath, 'utf8');
-      return yaml.load(content);
+      const obj = yaml.load(content) || {};
+      // Support both legacy (top-level) and current schema (workflow: { ... })
+      if (obj && typeof obj === 'object' && obj.workflow && typeof obj.workflow === 'object') {
+        return obj.workflow;
+      }
+      return obj;
     } catch (error) {
       if (error.name === 'YAMLException') {
         throw new Error(`Invalid YAML in workflow: ${error.message}`);
@@ -170,13 +175,14 @@ class WorkflowMonitor {
       warnings.push('Workflow missing name field');
     }
     
-    if (!workflow.steps || !Array.isArray(workflow.steps)) {
-      errors.push('Workflow must have a steps array');
+    const steps = Array.isArray(workflow.sequence) ? workflow.sequence : workflow.steps;
+    if (!steps || !Array.isArray(steps)) {
+      errors.push('Workflow must define steps (use sequence[] or steps[])');
     }
     
     // Validate steps
-    if (workflow.steps) {
-      workflow.steps.forEach((step, index) => {
+    if (steps) {
+      steps.forEach((step, index) => {
         if (!step.action && !step.workflow) {
           errors.push(`Step ${index + 1} missing action or workflow reference`);
         }
@@ -188,8 +194,8 @@ class WorkflowMonitor {
     }
     
     // Check for circular dependencies
-    if (workflow.steps) {
-      const subWorkflows = workflow.steps
+    if (steps) {
+      const subWorkflows = steps
         .filter(step => step.workflow)
         .map(step => step.workflow);
         

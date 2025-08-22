@@ -13,6 +13,7 @@ class FilePathResolver {
     this.rootDir = rootDir || process.cwd();
     this.configPath = path.join(this.rootDir, 'bmad-core', 'core-config.yaml');
     this.config = null;
+    this.quietDevLoadWarnings = false;
     this.loadConfig();
   }
 
@@ -90,11 +91,11 @@ class FilePathResolver {
    * Get development story location directory
    * @returns {string} Absolute path to stories directory
    */
-  getStoryLocation() {
+  getStoryLocation(mustExist = true) {
     return this._getConfiguredPath(
       'devStoryLocation',
       'devStoryLocation not configured in core-config.yaml',
-      true
+      mustExist
     );
   }
 
@@ -176,7 +177,9 @@ class FilePathResolver {
         return this.getAbsolutePath(filePath);
       } catch (error) {
         // Log warning but don't fail - some files might be optional
-        console.warn(`Warning: devLoadAlwaysFiles entry not found: ${filePath}`);
+        if (!this.quietDevLoadWarnings) {
+          console.warn(`Warning: devLoadAlwaysFiles entry not found: ${filePath}`);
+        }
         return null;
       }
     }).filter(Boolean); // Remove null entries
@@ -281,7 +284,8 @@ class FilePathResolver {
   getAllResolvedPaths() {
     try {
       return {
-        storyLocation: this.getStoryLocation(),
+        // Do not require story directory to exist; reverse-align cleanup removes it before recreation
+        storyLocation: this.getStoryLocation(false),
         prdFile: this.getPRDFile(false), // Don't require existence
         prdShardedLocation: this.isPRDSharded() ? this.getPRDShardedLocation(false) : null,
         architectureFile: this.getArchitectureFile(false), // Don't require existence
@@ -446,7 +450,12 @@ class FilePathResolver {
     try {
       // Validate required directories
       try {
-        this.getStoryLocation();
+        const loc = this.getStoryLocation(false);
+        // Warn if configured but missing; reverse-align may recreate later
+        const fs = require('fs');
+        if (!fs.existsSync(loc)) {
+          warnings.push(`Story location does not exist yet: ${loc}`);
+        }
       } catch (error) {
         errors.push(`Story location: ${error.message}`);
       }

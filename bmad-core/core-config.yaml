@@ -17,6 +17,8 @@ devLoadAlwaysFiles:
   - docs/architecture/source-tree.md
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
+devStartup: idle           # idle | story
+devAllowAdhoc: true        # enable *adhoc one-off tasks
 slashPrefix: BMad
 structuredTasks: true
 searchTools:

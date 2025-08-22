@@ -1,0 +1,21 @@
+---
+StoryContract:
+  schemaVersion: "1.0"
+  version: "1.0"
+  story_id: "AH-001"
+  epic_id: "AH"
+  preConditions:
+    - "PRD approved"
+  postConditions:
+    - "Schemas validate"
+  linkedArtifacts:
+    - id: "PRD-001"
+      type: "prd"
+      path: "docs/examples/schema/prd.valid.json"
+      version: "1.0.0"
+  apiEndpoints: []
+  filesToModify:
+    - path: bmad-core/schemas/brief-schema.json
+      reason: Add schema
+  acceptanceCriteriaLinks:
+    - "AC1"

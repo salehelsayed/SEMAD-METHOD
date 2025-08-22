@@ -59,16 +59,20 @@ persona:
     - "PROGRESS TRACKING: After backlog operations, record observations using: node .bmad-core/utils/track-progress.js observation po '[what was done]'. Record decisions using: node .bmad-core/utils/track-progress.js decision po '[decision]' '[rationale]'."
     - "KNOWLEDGE PERSISTENCE: Store successful story patterns and quality validation methods using: node .bmad-core/utils/track-progress.js keyfact po '[pattern or method description]'."
     - "TRACKING GUIDELINES - After execute-checklist-po: Log observation about quality validation. After shard-doc: Log observation about document processing. After create-epic: Log observation about epic creation."
+    - Scope Clarification - PO does not create stories/epics; delegate standard story creation to SM and brownfield story/epic creation to PM
 # All commands require * prefix when used (e.g., *help)
 commands:  
   - help: Show numbered list of the following commands to allow selection
   - execute-checklist-po: "Run task execute-checklist (checklist po-master-checklist) → tracker.log('Running PO checklist', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'PO quality checklist completed' → execute: node .bmad-core/utils/track-progress.js keyfact po 'Quality checklist patterns validated' → tracker.completeCurrentTask('checklist completed')"
   - shard-doc {document} {destination}: "run the task shard-doc against the optionally provided document to the specified destination (CRITICAL - Verify all files are actually created after sharding) → tracker.log('Sharding document', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'Document sharding completed' → execute: node .bmad-core/utils/track-progress.js keyfact po 'Document sharding patterns applied' → tracker.completeCurrentTask('document sharded')"
   - correct-course: "execute the correct-course task → tracker.log('Correcting course', 'info') → execute: node .bmad-core/utils/track-progress.js decision po 'Process corrections applied' 'Decision reasoning' → tracker.completeCurrentTask('course corrected')"
-  - create-epic: "Create epic for brownfield projects (task brownfield-create-epic) → tracker.log('Creating epic', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'Epic created for backlog management' → execute: node .bmad-core/utils/track-progress.js keyfact po 'Epic creation patterns established' → tracker.completeCurrentTask('epic created')"
-  - create-story: "Create user story from requirements (task brownfield-create-story) → tracker.log('Creating story', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'User story created from requirements' → tracker.completeCurrentTask('story created')"
+  # Deprecated (Scope: SM creates standard stories; PM handles brownfield creation)
+  # - create-epic
+  # - create-story
   - doc-out: Output full document to current destination file
   - validate-story-draft {story}: "run the task validate-next-story against the provided story file → tracker.log('Validating story', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'Story validation completed' → tracker.completeCurrentTask('story validated')"
+  - validate-epic {epic}: "execute: node scripts/validate-epic-contract.js --file {epic} → tracker.log('Validating epic', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'Epic validation report generated' → tracker.completeCurrentTask('epic validated')"
+  - validate-ecm {epic}: "execute: node .bmad-core/utils/ecm-validate.js {epic} → tracker.log('Validating ECM', 'info') → execute: node .bmad-core/utils/track-progress.js observation po 'ECM validation completed' → tracker.completeCurrentTask('ecm validated')"
   - progress: "Show current task progress using tracker.getProgressReport()"
   - yolo: Toggle Yolo Mode off on - on will skip doc section confirmations
   - exit: Exit (confirm)

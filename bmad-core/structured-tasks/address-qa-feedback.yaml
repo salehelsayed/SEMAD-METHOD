@@ -22,8 +22,24 @@ steps:
       - description: Generate .ai/qa_fixes_checklist.json with all items to fix
         elicit: false
       - description: Display summary of fixes needed by category (critical, major, minor, checklist)
-        elicit: true
+        elicit: false
       - description: Log fix tracking initialization using track-progress.js
+        elicit: false
+
+  - id: step1a
+    name: Analyze Dependency Impacts
+    description: Run dependency impact analysis for files affected by QA fixes before applying changes
+    actions:
+      - description: Aggregate affected files from QA findings and StoryContract.filesToModify
+        elicit: false
+      - description: Use dependency-impact-checker to analyze impacts for the aggregated file list (bounded concurrency; suggested maxParallel=4)
+        elicit: false
+      - description: Save detailed analysis to .ai/dependency_analysis_qa.json and a markdown summary to .ai/dependency_impact_report_qa.md
+        elicit: false
+      - description: If high-risk impacts detected (>10 impacted symbols or critical system files), prompt to continue or pause
+        elicit: false
+        format: "High-risk dependency impact detected. Continue with fixes? (yes/no)"
+      - description: Log dependency analysis completion using track-progress.js
         elicit: false
 
   - id: step2
@@ -40,6 +56,8 @@ steps:
         elicit: false
       - description: Update the story's Debug Log with details of each fix
         elicit: false
+      - description: Prefer bounded concurrency for independent fixes (group by file and run up to 3 in parallel); serialize dependent changes in the same file
+        elicit: false
 
   - id: step3
     name: Address Major Issues
@@ -47,7 +65,7 @@ steps:
     actions:
       - description: Get list of major issues from QAFixTracker
         elicit: false
-      - description: Implement fixes for each major issue
+      - description: Implement fixes for each major issue (run independent fixes concurrently up to 3 workers)
         elicit: false
       - description: Mark each fix as completed in tracker
         elicit: false
@@ -60,7 +78,7 @@ steps:
     actions:
       - description: Get uncompleted checklist items from tracker
         elicit: false
-      - description: Implement each checklist item (refactoring, tests, etc.)
+      - description: Implement each checklist item (refactoring, tests, etc.) with bounded concurrency when item scopes are disjoint
         elicit: false
       - description: Mark each item as completed with verification
         elicit: false
@@ -100,7 +118,7 @@ steps:
       - description: Run linting to ensure code style compliance
         elicit: false
       - description: Execute all unit tests to verify functionality
-        elicit: true
+        elicit: false
       - description: Run integration tests to ensure system integrity
         elicit: false
       - description: Verify no regressions introduced by fixes
@@ -113,7 +131,7 @@ steps:
       - description: Generate fix report using QAFixTracker.generateFixReport()
         elicit: false
       - description: Display completion summary with statistics
-        elicit: true
+        elicit: false
       - description: Save final fix report to .ai/qa_fix_report.json
         elicit: false
       - description: Verify ALL issues (critical, major, minor, and checklist items) have been addressed
@@ -126,7 +144,7 @@ steps:
       - description: Update the Completion Notes with QA fix summary from report
         elicit: false
       - description: Check off completed items in the Tasks/Subtasks section
-        elicit: true
+        elicit: false
       - description: Update the File List with any new or modified files
         elicit: false
       - description: Add comprehensive entry to Change Log with fix report summary
@@ -155,3 +173,4 @@ notes: |
   - Final report provides comprehensive summary of all fixes applied
   - ALL issues (critical, major, minor, and checklist items) must be fixed before marking story as ready
   - The tracker provides verification that all items have been addressed
+  - Concurrency: Execute independent fixes concurrently with a safe cap (suggested maxParallel=3) to speed up resolution while maintaining isolation for dependent changes

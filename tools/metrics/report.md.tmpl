@@ -1,0 +1,148 @@
+# BMad Method Metrics Report
+
+**Generated:** {{GENERATED_AT}}  
+**Period:** {{PERIOD}}
+
+## Executive Summary
+
+This report provides key performance indicators (KPIs) for the BMad Method validation system, tracking quality metrics, process efficiency, and system health.
+
+## Key Performance Indicators
+
+### 🎯 Contract Pass Rate
+- **Current Rate:** {{CONTRACT_PASS_RATE}}%
+- **Target:** ≥95%
+- **Status:** {{CONTRACT_STATUS}}
+
+The contract pass rate measures how often story contracts are successfully fulfilled without validation errors.
+
+### ⏱️ Time to Green
+- **Average:** {{AVG_TIME_TO_GREEN}}
+- **Target:** <5 minutes
+- **Status:** {{TIME_TO_GREEN_STATUS}}
+
+Time to green tracks how long it takes for changes to pass all validation checks and reach a deployable state.
+
+### 🔍 Reference Check Failure Rate
+- **Current Rate:** {{REFERENCE_FAILURE_RATE}}%
+- **Target:** <5%
+- **Status:** {{REFERENCE_CHECK_STATUS}}
+
+Reference check failure rate indicates how often code references to files or symbols cannot be resolved.
+
+### 🚨 System Health Indicators
+
+#### Drift Alarms (Last 24h)
+- **Count:** {{DRIFT_ALARMS_24H}}
+- **Target:** 0
+- **Status:** {{DRIFT_STATUS}}
+
+Drift alarms indicate when the system state diverges from expected configurations.
+
+#### Rollbacks (Last 7 days)
+- **Count:** {{ROLLBACKS_7D}}
+- **Target:** ≤1
+- **Status:** {{ROLLBACK_STATUS}}
+
+Rollback count tracks how often changes need to be reverted due to issues.
+
+## Gate Performance Metrics
+
+Gate performance measures how often each validation gate passes on first attempt.
+
+{{GATE_METRICS_TABLE}}
+
+### Gate Performance Analysis
+- **Planning Gate:** Validates architectural documents and PRDs before development
+- **Dev Gate:** Ensures code changes meet quality standards before QA
+- **QA Gate:** Verifies acceptance criteria are met before story completion
+
+## Preflight Check Performance
+
+Preflight checks run before code changes are accepted into the system.
+
+{{PREFLIGHT_METRICS_TABLE}}
+
+### Preflight Check Analysis
+- **Schema Check:** Validates artifacts against JSON schemas
+- **Contract Check:** Ensures story contracts are present and valid
+- **Grounding Check:** Verifies all referenced files/symbols exist
+- **Lint Check:** Runs project linters for code quality
+- **Type Check:** Runs TypeScript type checking
+- **Build Check:** Ensures the project builds successfully
+
+## Trends and Analysis
+
+### Quality Trends
+- Contract pass rates have {{CONTRACT_TREND}} over the reporting period
+- Reference check reliability is {{REFERENCE_TREND}}
+- Gate performance shows {{GATE_TREND}} pattern
+
+### Performance Trends
+- Time to green is {{PERFORMANCE_TREND}}
+- Build performance is {{BUILD_TREND}}
+- Overall system stability is {{STABILITY_TREND}}
+
+## Recommendations
+
+{{RECOMMENDATIONS}}
+
+## KPI Definitions and Targets
+
+### Contract Pass Rate
+**Definition:** Percentage of story contracts that complete successfully without validation errors.  
+**Calculation:** (Successful Completions / Total Attempts) × 100  
+**Target:** ≥95%  
+**Critical Threshold:** <85%
+
+### Time to Green
+**Definition:** Average time from code submission to successful validation completion.  
+**Calculation:** Mean of all validation completion times  
+**Target:** <5 minutes  
+**Critical Threshold:** >15 minutes
+
+### Diff Churn
+**Definition:** Average number of lines changed per story implementation.  
+**Calculation:** Total lines added/modified/deleted per story  
+**Target:** <500 lines per story  
+**Critical Threshold:** >1000 lines per story
+
+### Reference Check Failure Rate
+**Definition:** Percentage of reference checks that fail due to unresolved symbols or files.  
+**Calculation:** (Failed Reference Checks / Total Reference Checks) × 100  
+**Target:** <5%  
+**Critical Threshold:** >15%
+
+### Drift Alarms
+**Definition:** Count of system configuration drift alerts in the specified period.  
+**Calculation:** Count of drift detection events  
+**Target:** 0 per day  
+**Critical Threshold:** >3 per day
+
+### Rollback Count
+**Definition:** Number of deployments or changes that were reverted due to issues.  
+**Calculation:** Count of rollback operations  
+**Target:** ≤1 per week  
+**Critical Threshold:** >3 per week
+
+## Data Sources
+
+This report aggregates data from:
+- `.ai/test-logs/*` - Task execution and workflow logs
+- Preflight check outputs - Schema, contract, and grounding validation results
+- Gate enforcement logs - Planning, dev, and QA gate results
+- Reference checker outputs - Symbol and file resolution results
+- Rollback manager logs - System rollback events
+- Drift detector alerts - Configuration drift notifications
+
+## Notes
+
+- All timestamps are in UTC
+- Rates are calculated as percentages rounded to 2 decimal places
+- Time durations are displayed in the most appropriate unit (ms, s, m, h)
+- Trends require at least 7 days of historical data for meaningful analysis
+- This report reflects the state of the system at generation time
+
+---
+
+*Report generated by BMad Method Metrics Collector v1.0*
