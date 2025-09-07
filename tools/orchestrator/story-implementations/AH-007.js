@@ -336,7 +336,7 @@ function {{UTILITY_NAME}}({{PARAMETERS}}) {
     
     "templates": {
       "story": {
-        "path": "bmad-core/templates/story-tmpl.yaml",
+        "path": "semad-core/templates/story-tmpl.yaml",
         "version": "1.0",
         "requiredPlaceholders": [
           "STORY_ID", "STORY_TITLE", "STORY_VERSION", "EPIC_ID",
@@ -349,7 +349,7 @@ function {{UTILITY_NAME}}({{PARAMETERS}}) {
         ]
       },
       "test": {
-        "path": "bmad-core/templates/test-tmpl.md", 
+        "path": "semad-core/templates/test-tmpl.md", 
         "version": "1.0",
         "requiredPlaceholders": [
           "TEST_FILE_PATH", "STORY_ID", "TEST_TYPE",

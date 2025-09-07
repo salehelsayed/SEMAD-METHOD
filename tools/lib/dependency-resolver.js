@@ -7,7 +7,7 @@ const StructuredTaskLoader = require('./structured-task-loader');
 class DependencyResolver {
   constructor(rootDir) {
     this.rootDir = rootDir;
-    this.bmadCore = path.join(rootDir, 'bmad-core');
+    this.bmadCore = path.join(rootDir, 'semad-core');
     this.common = path.join(rootDir, 'common');
     this.cache = new Map();
     this.taskLoader = new StructuredTaskLoader(rootDir);
@@ -21,7 +21,7 @@ class DependencyResolver {
       agentContent = await fs.readFile(agentPath, 'utf8');
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Error(`Agent file not found: ${agentPath}\nMake sure the agent '${agentId}' exists in bmad-core/agents/`);
+        throw new Error(`Agent file not found: ${agentPath}\nMake sure the agent '${agentId}' exists in semad-core/agents/`);
       }
       throw error;
     }
@@ -85,7 +85,7 @@ class DependencyResolver {
       teamContent = await fs.readFile(teamPath, 'utf8');
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Error(`Team file not found: ${teamPath}\nMake sure the team '${teamId}' exists in bmad-core/agent-teams/`);
+        throw new Error(`Team file not found: ${teamPath}\nMake sure the team '${teamId}' exists in semad-core/agent-teams/`);
       }
       throw error;
     }
@@ -171,7 +171,7 @@ class DependencyResolver {
       if (structuredEnabled && (type === 'tasks' || type === 'checklists')) {
         const structuredType = type === 'tasks' ? 'structured-tasks' : 'structured-checklists';
         
-        // First try structured directories in bmad-core
+        // First try structured directories in semad-core
         try {
           // Add .yaml extension if not present for structured tasks
           const fileName = id.endsWith('.yaml') || id.endsWith('.md') ? id : `${id}.yaml`;
@@ -190,7 +190,7 @@ class DependencyResolver {
             structuredData = checklistData.data;
           }
         } catch (e) {
-          // console.debug(`Failed to load from bmad-core structured: ${e.message}`);
+          // console.debug(`Failed to load from semad-core structured: ${e.message}`);
           // Try structured directories in common
           try {
             // Add .yaml extension if not present for structured tasks
@@ -219,12 +219,12 @@ class DependencyResolver {
 
       // If not found in structured directories or structured not enabled, try regular locations
       if (!content) {
-        // First try bmad-core
+        // First try semad-core
         try {
           filePath = path.join(this.bmadCore, type, id);
           content = await fs.readFile(filePath, 'utf8');
         } catch (e) {
-          // If not found in bmad-core, try common folder
+          // If not found in semad-core, try common folder
           try {
             filePath = path.join(this.common, type, id);
             content = await fs.readFile(filePath, 'utf8');
@@ -239,7 +239,7 @@ class DependencyResolver {
         const actualType = (structuredEnabled && (type === 'tasks' || type === 'checklists')) ? 
           (type === 'tasks' ? 'structured-tasks' : 'structured-checklists') : type;
         console.warn(`⚠️  Resource not found: ${type}/${id}`);
-        console.warn(`   Searched in: bmad-core/${actualType} and common/${actualType}`);
+        console.warn(`   Searched in: semad-core/${actualType} and common/${actualType}`);
         return null;
       }
 

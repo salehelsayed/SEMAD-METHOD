@@ -9,7 +9,7 @@ async function debugTaskExecution() {
   console.log('Testing task execution with invalid story...\n');
   
   try {
-    const result = await taskRunner.executeTask('sm', 'bmad-core/structured-tasks/validate-story-contract.yaml', {
+    const result = await taskRunner.executeTask('sm', 'semad-core/structured-tasks/validate-story-contract.yaml', {
       inputs: { storyFilePath: 'tests/test-invalid-story.md' }
     });
     

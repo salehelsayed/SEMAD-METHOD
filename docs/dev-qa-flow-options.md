@@ -133,7 +133,7 @@ verbosityLevel: normal  # 'minimal', 'normal', or 'detailed'
 ### Programmatic Usage
 
 ```javascript
-const WorkflowExecutor = require('bmad-method/bmad-core/utils/workflow-executor');
+const WorkflowExecutor = require('semad-method/semad-core/utils/workflow-executor');
 
 // Create executor with iterative flow
 const executor = new WorkflowExecutor(rootDir, {
@@ -374,7 +374,10 @@ You can run the iterative Dev↔QA loop directly via NPM scripts:
 # Run iterative loop (passes args through to the script)
 npm run devqa:loop -- -s docs/stories/STORY.md -m 7
 
-# Run in stricter, non-interactive mode (skips elicit prompts) and loops until QA fixes are 100%
+# Run in stricter, non-interactive mode and loop until QA fixes are 100%
+# Note: Elicit steps are not auto-skipped by env flags.
+# To bypass elicit prompts in CI, the orchestrator must pass
+# context.allowMissingUserInput=true AND context.agentPolicy='override'.
 npm run devqa:loop:strict -- -s PROJ-001 -m 10
 
 # Manually verify QA fix tracker completion (100% required for pass)

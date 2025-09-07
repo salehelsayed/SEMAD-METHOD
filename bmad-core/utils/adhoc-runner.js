@@ -18,27 +18,29 @@ function ensureDir(p) {
 }
 
 function logObservation(message) {
-  try {
-    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
-  } catch (_) {
-    try {
-      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
-    } catch (e) {
-      console.warn('Could not record observation:', e.message);
-    }
+  const tries = [
+    ['.semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['.semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'observation', 'dev', message]
+  ];
+  for (const t of tries) {
+    try { spawnSync(process.execPath, t, { stdio: 'inherit' }); return; } catch {}
   }
+  console.warn('Could not record observation');
 }
 
 function logKeyfact(message) {
-  try {
-    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
-  } catch (_) {
-    try {
-      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
-    } catch (e) {
-      console.warn('Could not record keyfact:', e.message);
-    }
+  const tries = [
+    ['.semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['.semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'keyfact', 'dev', message]
+  ];
+  for (const t of tries) {
+    try { spawnSync(process.execPath, t, { stdio: 'inherit' }); return; } catch {}
   }
+  console.warn('Could not record keyfact');
 }
 
 function parseArgs(argv) {
@@ -65,8 +67,10 @@ function parseArgs(argv) {
 
 function loadCoreConfig() {
   const candidates = [
+    path.join(process.cwd(), 'semad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
     path.join(process.cwd(), 'bmad-core', 'core-config.yaml'),
-    path.join(process.cwd(), '.bmad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
     path.join(process.cwd(), 'core-config.yaml')
   ];
   for (const p of candidates) {

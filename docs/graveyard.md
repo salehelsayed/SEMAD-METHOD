@@ -1,9 +1,9 @@
 # Graveyard (Generated)
 
-Updated: 2025-08-18T11:22:27.384Z
+Updated: 2025-08-26T17:58:41.540Z
 
 ## Qdrant-based vector DB
-- Lifecycle: deprecated
+- Lifecycle: active
 - Evidence: qdrant_storage/
 - Safe-Delete Checklist:
   - [ ] Build passes without this code

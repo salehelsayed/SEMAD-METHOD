@@ -110,7 +110,7 @@ codeQuality:
     generateExamples: true
     prioritizeByImpact: true
   qualityGates:
-    blockOnCritical: false  # Don't block commits on quality issues
+    blockOnCritical: true  # Block on critical quality issues
     warnOnMajor: true
     reportMinor: true
   reporting:

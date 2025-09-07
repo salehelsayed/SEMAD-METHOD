@@ -6,6 +6,7 @@ Purpose
 
 Planning (Orchestrator → PM/PO → SM → QA)
 - PM/PO: Publish an EpicContract (DoR met): successCriteria (SC-*), requirements (REQ-*), flows (FLOW-*), integrationPoints (INT-*), NFR budgets, assumptions/risks.
+- PM: Run PM Integration Readiness checklist (contracts, SourceRef per INT, rollout plan) and validate ECM and EpicContract before SM slices.
 - SM: Slice into StoryContracts referencing epicId, reqIds, flowIds, integrationPointIds, successCriteriaRefs; add acceptanceCriteria and test plan.
 - QA: Pre-validate coverage and consistency across docs; flag missing IDs or weak ACs.
 - Orchestrator: Run validate-story-consistency and qa-validate-alignment checks on docs.
@@ -13,6 +14,7 @@ Planning (Orchestrator → PM/PO → SM → QA)
 Development (SM → Dev → QA)
 - SM: Start story only if Story DoR is satisfied (traceability fields present, test data, telemetry listed).
 - Dev: Implement vertical slice; write AC tests and contract tests for each integrationPointId; respect nfrBudgets and securityControls.
+- Slicing guidance (brownfield): Story 0 (feature flag + telemetry), Story 1 (probe/contract tests), then one INT × one flow per story with integration verification and rollback.
 - QA: Review against StoryContract; run tests; verify NFR impacts and security controls where applicable.
 
 Integration & Reverse Alignment (Orchestrator)
@@ -33,4 +35,3 @@ Artifacts
 - EpicContract template: docs/templates/epic-contract-template.md
 - StoryContract template: docs/templates/story-contract-template.yaml
 - Traceability report: .ai/reports/traceability.json (referenced by EpicContract.coverage.generatedBy)
-

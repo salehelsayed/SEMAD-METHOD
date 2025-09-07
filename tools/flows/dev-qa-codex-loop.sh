@@ -29,11 +29,11 @@ resolve_root() {
   script_dir="$(cd "$(dirname "$0")" && pwd)"; script_root="$(cd "$script_dir/../.." && pwd)"; cwd="$(pwd)"
   candidate="$script_dir"
   while [[ "$candidate" != "/" ]]; do
-    if [[ -f "$candidate/package.json" && ( -d "$candidate/bmad-core" || -d "$candidate/.bmad-core" ) ]]; then echo "$candidate"; return 0; fi
+    if [[ -f "$candidate/package.json" && ( -d "$candidate/semad-core" || -d "$candidate/.semad-core" || -d "$candidate/bmad-core" || -d "$candidate/.bmad-core" ) ]]; then echo "$candidate"; return 0; fi
     candidate="$(dirname "$candidate")"
   done
-  if [[ -f "$script_root/package.json" && ( -d "$script_root/bmad-core" || -d "$script_root/.bmad-core" ) ]]; then echo "$script_root"; return 0; fi
-  if [[ -f "$cwd/package.json" && ( -d "$cwd/bmad-core" || -d "$cwd/.bmad-core" ) ]]; then echo "$cwd"; return 0; fi
+  if [[ -f "$script_root/package.json" && ( -d "$script_root/semad-core" || -d "$script_root/.semad-core" || -d "$script_root/bmad-core" || -d "$script_root/.bmad-core" ) ]]; then echo "$script_root"; return 0; fi
+  if [[ -f "$cwd/package.json" && ( -d "$cwd/semad-core" || -d "$cwd/.semad-core" || -d "$cwd/bmad-core" || -d "$cwd/.bmad-core" ) ]]; then echo "$cwd"; return 0; fi
   echo "$script_root"
 }
 
@@ -44,7 +44,7 @@ resolve_stories_dir() {
   node -e '
     const fs=require("fs"), path=require("path");
     const root=process.cwd();
-    const c1=path.join(root,"bmad-core","core-config.yaml"), c2=path.join(root,"core-config.yaml");
+    const c1=path.join(root,"semad-core","core-config.yaml"), c2=path.join(root,"core-config.yaml");
     let p=null; if(fs.existsSync(c1)) p=c1; else if(fs.existsSync(c2)) p=c2;
     let dir="docs/stories";
     if(p){ try{ const yaml=require("js-yaml"); const cfg=yaml.load(fs.readFileSync(p,"utf8"))||{}; dir=(cfg.devStoryLocation||cfg.stories?.storyLocation||dir);}catch(e){} }
@@ -140,4 +140,3 @@ done
 echo "\n✗ Reached max iterations ($MAX_ITERS) without QA marking the story Done for $STORY_ID."
 echo "  - Next: run 'codex \"as dev agent, execute *address-qa-feedback @${STORY_ARG}\"' and re-run this script."
 exit 1
-

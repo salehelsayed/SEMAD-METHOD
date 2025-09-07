@@ -29,7 +29,7 @@ steps:
     name: Check Core Configuration
     description: Check if automatic sharding is enabled in core-config.yaml
     actions:
-      - description: Load .bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+      - description: Load .semad-core/core-config.yaml to check prdSharded and architectureSharded settings
         elicit: false
         metadata:
           originalIndent: 0
@@ -302,7 +302,7 @@ metadata:
     - Important Notes
   preservedContent:
     - type: special-note
-      content: '[[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
+      content: '[[LLM: First, check if markdownExploder is set to true in semad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
       lineNumber: 11
     - type: special-note
       content: '**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"'
@@ -339,7 +339,7 @@ metadata:
       content: Important Notes
       level: 2
 notes: |
-  [[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
+  [[LLM: First, check if markdownExploder is set to true in semad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
   **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
   CRITICAL AEGNT SHARDING RULES:
   CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]

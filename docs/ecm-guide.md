@@ -22,7 +22,7 @@ Validation rules (enforced by the script)
 - ECM table present with headers: `ECM ID, Capability, Component(s), Interface/Port, REQ IDs, INT IDs, Story ID, Delta, Status, SourceRef`.
 - `Delta` ∈ {existing, extend, new}.
 - 100% coverage: every REQ-* and INT-* in the epic frontmatter is referenced in ≥1 ECM row.
-- Warnings: Unknown REQ/INT references or missing `SourceRef` when Delta ≠ new.
+- Warnings: Unknown REQ/INT references or missing `SourceRef` when Delta ≠ new (required for existing/extend).
 
 Example
 - See `docs/templates/epic-contract-template.md` and `docs/templates/ecm-template.md` for a ready‑to‑copy ECM.
@@ -31,4 +31,3 @@ Tips
 - Keep ECM rows thin and testable; one capability per row.
 - Use consistent component names from architecture docs.
 - Add a short risk/note inline if the row hides a non‑functional constraint.
-

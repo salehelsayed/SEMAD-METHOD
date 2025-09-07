@@ -7,7 +7,7 @@ describe('Schema Structure Tests', () => {
   const ajv = new Ajv({ allErrors: true });
   addFormats(ajv);
   
-  const schemaDir = path.join(__dirname, '..', 'bmad-core', 'schemas');
+  const schemaDir = path.join(__dirname, '..', 'semad-core', 'schemas');
   
   test('all schema files should be valid JSON Schema', () => {
     const schemaFiles = [

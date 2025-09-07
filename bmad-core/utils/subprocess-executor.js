@@ -4,7 +4,7 @@
  * Subprocess Executor
  * 
  * Handles execution of BMad CLI tools with proper path resolution
- * for both development (bmad-core) and production (.bmad-core) environments.
+ * for both development (bmad-core) and production (.semad-core) environments.
  * 
  * This utility ensures proper error handling and propagation for subprocess execution.
  */
@@ -17,7 +17,7 @@ const ModuleResolver = require('./module-resolver');
 /**
  * Determines if we're in development or production environment
  * Development: bmad-core directory exists
- * Production: .bmad-core directory exists
+ * Production: .semad-core directory exists
  */
 function getBmadCoreDir() {
     const cwd = process.cwd();
@@ -28,10 +28,10 @@ function getBmadCoreDir() {
         return 'bmad-core';
     }
     
-    // Then check for .bmad-core (production/installed)
-    const prodPath = path.join(cwd, '.bmad-core');
+    // Then check for .semad-core (production/installed)
+    const prodPath = path.join(cwd, '.semad-core');
     if (fs.existsSync(prodPath) && fs.statSync(prodPath).isDirectory()) {
-        return '.bmad-core';
+        return '.semad-core';
     }
     
     // Use ModuleResolver as fallback
@@ -40,14 +40,14 @@ function getBmadCoreDir() {
         return path.basename(resolvedPath);
     }
     
-    // Default to .bmad-core for production
-    return '.bmad-core';
+    // Default to .semad-core for production
+    return '.semad-core';
 }
 
 /**
  * Execute a BMad CLI command with proper path resolution and error handling
  * 
- * @param {string} scriptPath - Relative path to the script within bmad-core/utils
+ * @param {string} scriptPath - Relative path to the script within semad-core/utils
  * @param {string[]} args - Command line arguments
  * @param {object} options - Additional options
  * @param {number} options.timeout - Command timeout in milliseconds
@@ -128,7 +128,7 @@ async function executeBmadCommand(scriptPath, args = [], options = {}) {
 /**
  * Execute a BMad CLI command synchronously (for backward compatibility)
  * 
- * @param {string} scriptPath - Relative path to the script within bmad-core/utils
+ * @param {string} scriptPath - Relative path to the script within semad-core/utils
  * @param {string[]} args - Command line arguments
  * @returns {string} - Command output
  */
@@ -176,7 +176,7 @@ async function executeMemoryCommand(command, agentName, ...args) {
 
 /**
  * Helper function to get the correct BMad command for agent use
- * This replaces hardcoded .bmad-core references in agent files
+ * This replaces hardcoded .semad-core references in agent files
  */
 function getBmadCommand(scriptName) {
     const bmadDir = getBmadCoreDir();

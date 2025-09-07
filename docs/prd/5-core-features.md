@@ -1,7 +1,7 @@
 # 5. Core Features
 
 
-### 5.1 Structured Task & Checklist System
+### 5.1 Structured Task & Checklist System [PRD-REQ-003]
 
 **Description**: Convert all tasks and checklists from markdown to YAML/JSON with explicit schemas
 
@@ -16,7 +16,7 @@
 - Enables automated validation
 - Supports tooling integration
 
-### 5.2 Working Memory & Scratchboard
+### 5.2 Working Memory & Scratchboard [PRD-REQ-004]
 
 **Description**: Implement persistent memory system for agent sessions
 
@@ -31,7 +31,7 @@
 - Provides debugging trail
 - Enables learning from past tasks
 
-### 5.3 Dynamic Plan Adaptation
+### 5.3 Dynamic Plan Adaptation [PRD-REQ-005]
 
 **Description**: Automatic decomposition of complex tasks using divide-and-conquer
 
@@ -46,7 +46,7 @@
 - Improves task completion rates
 - Enables parallel sub-task execution
 
-### 5.4 Automated Search Tool Generation
+### 5.4 Automated Search Tool Generation [PRD-REQ-006]
 
 **Description**: Generate contextual search queries from PRD content
 
@@ -61,7 +61,7 @@
 - Reduced manual research overhead
 - Context-aware knowledge base building
 
-### 5.5 StoryContract System
+### 5.5 StoryContract System [PRD-REQ-007]
 
 **Description**: Replace prose summaries with structured contracts
 
@@ -76,7 +76,7 @@
 - Creates traceable requirements
 - Enables automated test generation
 
-### 5.6 Automated Validation Framework
+### 5.6 Automated Validation Framework [PRD-REQ-008]
 
 **Description**: Schema-based validation at every workflow transition
 
@@ -92,7 +92,7 @@
 - Guaranteed schema compliance
 - Automated quality gates
 
-### 5.7 Enhanced Workflow Management
+### 5.7 Enhanced Workflow Management [PRD-REQ-009]
 
 **Description**: Flexible workflow options and improved agent coordination
 
@@ -109,7 +109,7 @@
 - Automated epic completion without manual oversight
 - Better user visibility into system operations
 
-### 5.8 Agent Role Clarification
+### 5.8 Agent Role Clarification [PRD-REQ-010]
 
 **Description**: Clear separation of responsibilities between agents
 
@@ -137,4 +137,3 @@
 **Benefits**:
 - Reduced risk of breaking changes
 - Comprehensive impact assessment
-- Proactive dependency management

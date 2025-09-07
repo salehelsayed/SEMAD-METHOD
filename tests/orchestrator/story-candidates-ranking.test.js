@@ -12,9 +12,9 @@ describe('StoryCandidates generator ranking and ignore', () => {
     fs.mkdirSync(storiesDir, { recursive: true });
     fs.mkdirSync(path.join(root, '.ai'), { recursive: true });
     // minimal core-config to satisfy FilePathResolver
-    fs.mkdirSync(path.join(root, 'bmad-core'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'semad-core'), { recursive: true });
     fs.writeFileSync(
-      path.join(root, 'bmad-core', 'core-config.yaml'),
+      path.join(root, 'semad-core', 'core-config.yaml'),
       [
         'devStoryLocation: docs/stories',
         'devDebugLog: .ai/dev-debug.log',

@@ -3,7 +3,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 describe('Workflow Search Tools Integration', () => {
-  const workflowDir = path.join(__dirname, '..', 'bmad-core', 'workflows');
+  const workflowDir = path.join(__dirname, '..', 'semad-core', 'workflows');
   const workflows = [
     'greenfield-fullstack.yaml',
     'greenfield-service.yaml',

@@ -12,7 +12,7 @@ const { program } = require('commander');
 class ConfigValidator {
   constructor(rootDir = process.cwd()) {
     this.rootDir = rootDir;
-    this.configPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
+    this.configPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
     this.errors = [];
     this.warnings = [];
   }
@@ -156,13 +156,13 @@ class ConfigValidator {
       console.log('');
     }
 
-    // Check for critical bmad-core directories
+    // Check for critical semad-core directories
     console.log(chalk.bold('🔧 BMad Core Directories:'));
     const coreDirectories = [
-      'bmad-core/agents',
-      'bmad-core/structured-tasks',
-      'bmad-core/templates',
-      'bmad-core/data'
+      'semad-core/agents',
+      'semad-core/structured-tasks',
+      'semad-core/templates',
+      'semad-core/data'
     ];
 
     coreDirectories.forEach(dir => {

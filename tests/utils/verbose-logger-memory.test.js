@@ -2,7 +2,7 @@
  * Memory leak prevention tests for VerboseLogger progress indicator
  */
 
-const VerboseLogger = require('../../bmad-core/utils/verbose-logger');
+const VerboseLogger = require('../../semad-core/utils/verbose-logger');
 const EventEmitter = require('events');
 
 describe('VerboseLogger - Memory Leak Prevention', () => {

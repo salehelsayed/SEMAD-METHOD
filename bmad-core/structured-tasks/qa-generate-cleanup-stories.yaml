@@ -1,0 +1,70 @@
+id: qa-generate-cleanup-stories
+name: QA Generate Cleanup Stories
+purpose: Convert QA report findings (orphans, dead code, refactor/merge suggestions) into precise, incremental Story files.
+inputs:
+  report:
+    description: Path to a QA report JSON (e.g., .ai/reports/qa/cleanup-orphans-<ts>.json). If omitted, the task will suggest known defaults.
+    type: string
+    required: false
+  storiesDir:
+    description: Target folder for generated stories
+    type: string
+    required: false
+    default: docs/stories
+  grouping:
+    description: Story grouping strategy: file | folder | symbol (default: file)
+    type: string
+    required: false
+    enum: [file, folder, symbol]
+    default: file
+steps:
+  - id: step0
+    name: Resolve Report
+    description: Detect common QA reports if no path provided and prompt for selection.
+    actions:
+      - description: If inputs.report not provided, look for latest under .ai/reports/qa/*.json and .ai/orphans-report.json; prompt user to choose
+        elicit: true
+  - id: step1
+    name: Parse Findings
+    description: Load JSON, extract actionable items (files/symbols) and propose minimal stories.
+    actions:
+      - description: Extract items (e.g., orphaned files, unused exports, dead code blocks) with paths/symbols
+        elicit: false
+      - description: Present summary counts by category and ask for confirmation to proceed
+        elicit: true
+  - id: step2
+    name: Story Planning (Incremental)
+    description: Plan thin, low‑risk stories with clear boundaries to avoid broad changes.
+    actions:
+      - description: Choose grouping strategy (file/folder/symbol) to control story granularity
+        elicit: true
+      - description: For each item, draft a story plan constrained to a single path or symbol (no cross‑cutting edits)
+        elicit: false
+  - id: step3
+    name: Generate Stories
+    description: Create Story files with StoryContract and precise tasks for each item.
+    actions:
+      - description: For each selected item create a story at `{storiesDir}/cleanup-<n>.story.md` with
+        elicit: false
+      - description: 'StoryContract.story.sliceType = adhoc; omit integrationPointIds; include acceptance that tests remain green and no behavior change'
+        elicit: false
+      - description: 'Tasks: delete unused file OR remove unused export symbol; update imports; run lint; run tests; update File List'
+        elicit: false
+      - description: Add rollback notes (git revert reference) and scope caveats
+        elicit: false
+  - id: step4
+    name: Validate Story Drafts
+    description: Validate DoR for generated stories and ensure minimal scope.
+    actions:
+      - description: Execute `validate-next-story.yaml` on a sample subset; fix template issues if found
+        elicit: true
+      - description: Show index of generated stories and where to review them
+        elicit: false
+outputs:
+  storyPaths:
+    description: List of generated stories
+    type: array
+metadata:
+  notes: |
+    - Keep each story minimal: a single file/symbol removal or a safe merge.
+    - No integration or runtime behavior changes in cleanup stories unless explicitly requested.

@@ -30,7 +30,7 @@ program
     try {
       // Validate root directory structure
       const fs = require('fs');
-      const requiredDirs = ['bmad-core', 'tools'];
+      const requiredDirs = ['semad-core', 'tools'];
       const missingDirs = requiredDirs.filter(dir => !fs.existsSync(path.join(process.cwd(), dir)));
       
       if (missingDirs.length > 0) {
@@ -129,7 +129,7 @@ program
       
       if (agents.length === 0) {
         console.warn(chalk.yellow('\u26a0\ufe0f  No agents found'));
-        console.log(chalk.dim('  Check that bmad-core/agents directory exists'));
+        console.log(chalk.dim('  Check that semad-core/agents directory exists'));
       } else {
         console.log(chalk.bold('Available agents:'));
         agents.forEach(agent => console.log(chalk.cyan(`  - ${agent}`)));
@@ -225,7 +225,7 @@ program
   .option('--stats', 'Show dependency database statistics after scan')
   .action(async (options) => {
     try {
-      const { scanRepository, watchRepository, getDependencyStats } = require('../bmad-core/utils/dependency-scanner');
+      const { scanRepository, watchRepository, getDependencyStats } = require('../semad-core/utils/dependency-scanner');
       
       const config = {
         rootDir: options.root || process.cwd(),
@@ -279,7 +279,7 @@ program
   .description('Show dependency database statistics')
   .action(async () => {
     try {
-      const { getDependencyStats } = require('../bmad-core/utils/dependency-analyzer');
+      const { getDependencyStats } = require('../semad-core/utils/dependency-analyzer');
       
       console.log(chalk.blue('Fetching dependency statistics...'));
       const stats = await getDependencyStats();

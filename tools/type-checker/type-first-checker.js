@@ -13,7 +13,7 @@ class TypeFirstChecker {
     };
     
     // Check if schemas exist before implementation
-    const schemasDir = path.join(projectDir, 'bmad-core', 'schemas');
+    const schemasDir = path.join(projectDir, 'semad-core', 'schemas');
     try {
       const schemas = await fs.readdir(schemasDir);
       results.schemasFirst = schemas.length > 0;

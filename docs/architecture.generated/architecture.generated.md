@@ -40,168 +40,12 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [ci_job] security-scan: active
   - id: .github/workflows/security.yml#job:security-scan
   - Evidence: .github/workflows/security.yml
-- [module] bmad-core/agents/index.js: active
-  - id: bmad-core/agents/index.js
-  - Evidence: bmad-core/agents/index.js
-- [module] bmad-core/errors/task-errors.js: active
-  - id: bmad-core/errors/task-errors.js
-  - Evidence: bmad-core/errors/task-errors.js
-- [module] bmad-core/scripts/convert-checklists.js: active
-  - id: bmad-core/scripts/convert-checklists.js
-  - Evidence: bmad-core/scripts/convert-checklists.js
-- [module] bmad-core/scripts/convert-tasks.js: active
-  - id: bmad-core/scripts/convert-tasks.js
-  - Evidence: bmad-core/scripts/convert-tasks.js
-- [module] bmad-core/scripts/init-memory.js: active
-  - id: bmad-core/scripts/init-memory.js
-  - Evidence: bmad-core/scripts/init-memory.js
-- [module] bmad-core/scripts/validate-story-contract.js: active
-  - id: bmad-core/scripts/validate-story-contract.js
-  - Evidence: bmad-core/scripts/validate-story-contract.js
-- [module] bmad-core/tests/dynamic-planner.test.js: active
-  - id: bmad-core/tests/dynamic-planner.test.js
-  - Evidence: bmad-core/tests/dynamic-planner.test.js
-- [module] bmad-core/tests/memory-integration.test.js: active
-  - id: bmad-core/tests/memory-integration.test.js
-  - Evidence: bmad-core/tests/memory-integration.test.js
-- [module] bmad-core/tools/dynamic-planner.js: active
-  - id: bmad-core/tools/dynamic-planner.js
-  - Evidence: bmad-core/tools/dynamic-planner.js
-- [module] bmad-core/utils/adhoc-runner.js: active
-  - id: bmad-core/utils/adhoc-runner.js
-  - Evidence: bmad-core/utils/adhoc-runner.js
-- [module] bmad-core/utils/agent-activator.js: active
-  - id: bmad-core/utils/agent-activator.js
-  - Evidence: bmad-core/utils/agent-activator.js
-- [module] bmad-core/utils/agent-permissions.js: active
-  - id: bmad-core/utils/agent-permissions.js
-  - Evidence: bmad-core/utils/agent-permissions.js
-- [module] bmad-core/utils/agent-runner.js: active
-  - id: bmad-core/utils/agent-runner.js
-  - Evidence: bmad-core/utils/agent-runner.js
-- [module] bmad-core/utils/agent-simulator.js: active
-  - id: bmad-core/utils/agent-simulator.js
-  - Evidence: bmad-core/utils/agent-simulator.js
-- [module] bmad-core/utils/cleanup-registry.js: active
-  - id: bmad-core/utils/cleanup-registry.js
-  - Evidence: bmad-core/utils/cleanup-registry.js
-- [module] bmad-core/utils/connection-manager.js: active
-  - id: bmad-core/utils/connection-manager.js
-  - Evidence: bmad-core/utils/connection-manager.js
-- [module] bmad-core/utils/context-validator.js: active
-  - id: bmad-core/utils/context-validator.js
-  - Evidence: bmad-core/utils/context-validator.js
-- [module] bmad-core/utils/datamodel-test-generator.js: active
-  - id: bmad-core/utils/datamodel-test-generator.js
-  - Evidence: bmad-core/utils/datamodel-test-generator.js
-- [module] bmad-core/utils/dependency-analysis-storage.js: active
-  - id: bmad-core/utils/dependency-analysis-storage.js
-  - Evidence: bmad-core/utils/dependency-analysis-storage.js
-- [module] bmad-core/utils/dependency-analyzer.js: active
-  - id: bmad-core/utils/dependency-analyzer.js
-  - Evidence: bmad-core/utils/dependency-analyzer.js
-- [module] bmad-core/utils/dependency-impact-checker.js: active
-  - id: bmad-core/utils/dependency-impact-checker.js
-  - Evidence: bmad-core/utils/dependency-impact-checker.js
-- [module] bmad-core/utils/dependency-parser.js: active
-  - id: bmad-core/utils/dependency-parser.js
-  - Evidence: bmad-core/utils/dependency-parser.js
-- [module] bmad-core/utils/dependency-scanner.js: active
-  - id: bmad-core/utils/dependency-scanner.js
-  - Evidence: bmad-core/utils/dependency-scanner.js
-- [module] bmad-core/utils/dependency-validator.js: active
-  - id: bmad-core/utils/dependency-validator.js
-  - Evidence: bmad-core/utils/dependency-validator.js
-- [module] bmad-core/utils/error-handler.js: active
-  - id: bmad-core/utils/error-handler.js
-  - Evidence: bmad-core/utils/error-handler.js
-- [module] bmad-core/utils/file-path-resolver.js: active
-  - id: bmad-core/utils/file-path-resolver.js
-  - Evidence: bmad-core/utils/file-path-resolver.js
-- [module] bmad-core/utils/find-next-story.js: active
-  - id: bmad-core/utils/find-next-story.js
-  - Evidence: bmad-core/utils/find-next-story.js
-- [module] bmad-core/utils/init-tracker.js: active
-  - id: bmad-core/utils/init-tracker.js
-  - Evidence: bmad-core/utils/init-tracker.js
-- [module] bmad-core/utils/json-safe-templating.js: active
-  - id: bmad-core/utils/json-safe-templating.js
-  - Evidence: bmad-core/utils/json-safe-templating.js
-- [module] bmad-core/utils/logger.js: active
-  - id: bmad-core/utils/logger.js
-  - Evidence: bmad-core/utils/logger.js
-- [module] bmad-core/utils/memory-health.js: active
-  - id: bmad-core/utils/memory-health.js
-  - Evidence: bmad-core/utils/memory-health.js
-- [module] bmad-core/utils/module-resolver.js: active
-  - id: bmad-core/utils/module-resolver.js
-  - Evidence: bmad-core/utils/module-resolver.js
-- [module] bmad-core/utils/qa-findings-parser.js: active
-  - id: bmad-core/utils/qa-findings-parser.js
-  - Evidence: bmad-core/utils/qa-findings-parser.js
-- [module] bmad-core/utils/qa-fix-tracker.js: active
-  - id: bmad-core/utils/qa-fix-tracker.js
-  - Evidence: bmad-core/utils/qa-fix-tracker.js
-- [module] bmad-core/utils/safe-file-operations.js: active
-  - id: bmad-core/utils/safe-file-operations.js
-  - Evidence: bmad-core/utils/safe-file-operations.js
-- [module] bmad-core/utils/shared-context-manager.js: active
-  - id: bmad-core/utils/shared-context-manager.js
-  - Evidence: bmad-core/utils/shared-context-manager.js
-- [module] bmad-core/utils/simple-task-tracker.js: active
-  - id: bmad-core/utils/simple-task-tracker.js
-  - Evidence: bmad-core/utils/simple-task-tracker.js
-- [module] bmad-core/utils/simpleMemory.js: active
-  - id: bmad-core/utils/simpleMemory.js
-  - Evidence: bmad-core/utils/simpleMemory.js
-- [module] bmad-core/utils/story-contract-validator.js: active
-  - id: bmad-core/utils/story-contract-validator.js
-  - Evidence: bmad-core/utils/story-contract-validator.js
-- [module] bmad-core/utils/story-loader.js: active
-  - id: bmad-core/utils/story-loader.js
-  - Evidence: bmad-core/utils/story-loader.js
-- [module] bmad-core/utils/subprocess-executor.js: active
-  - id: bmad-core/utils/subprocess-executor.js
-  - Evidence: bmad-core/utils/subprocess-executor.js
-- [module] bmad-core/utils/task-recovery.js: active
-  - id: bmad-core/utils/task-recovery.js
-  - Evidence: bmad-core/utils/task-recovery.js
-- [module] bmad-core/utils/timeout-wrapper.js: active
-  - id: bmad-core/utils/timeout-wrapper.js
-  - Evidence: bmad-core/utils/timeout-wrapper.js
-- [module] bmad-core/utils/track-progress.js: active
-  - id: bmad-core/utils/track-progress.js
-  - Evidence: bmad-core/utils/track-progress.js
-- [module] bmad-core/utils/unified-memory-manager.js: active
-  - id: bmad-core/utils/unified-memory-manager.js
-  - Evidence: bmad-core/utils/unified-memory-manager.js
-- [module] bmad-core/utils/update-agent-paths.js: active
-  - id: bmad-core/utils/update-agent-paths.js
-  - Evidence: bmad-core/utils/update-agent-paths.js
-- [module] bmad-core/utils/validation-enforcer.js: active
-  - id: bmad-core/utils/validation-enforcer.js
-  - Evidence: bmad-core/utils/validation-enforcer.js
-- [module] bmad-core/utils/validation-hooks.js: active
-  - id: bmad-core/utils/validation-hooks.js
-  - Evidence: bmad-core/utils/validation-hooks.js
-- [module] bmad-core/utils/verbose-logger.js: active
-  - id: bmad-core/utils/verbose-logger.js
-  - Evidence: bmad-core/utils/verbose-logger.js
-- [module] bmad-core/utils/verify-qa-fixes.js: active
-  - id: bmad-core/utils/verify-qa-fixes.js
-  - Evidence: bmad-core/utils/verify-qa-fixes.js
-- [module] bmad-core/utils/workflow-config-loader.js: active
-  - id: bmad-core/utils/workflow-config-loader.js
-  - Evidence: bmad-core/utils/workflow-config-loader.js
-- [module] bmad-core/utils/workflow-executor.js: active
-  - id: bmad-core/utils/workflow-executor.js
-  - Evidence: bmad-core/utils/workflow-executor.js
-- [module] bmad-core/utils/workflow-monitor.js: active
-  - id: bmad-core/utils/workflow-monitor.js
-  - Evidence: bmad-core/utils/workflow-monitor.js
-- [module] bmad-core/utils/workflow-validator.js: active
-  - id: bmad-core/utils/workflow-validator.js
-  - Evidence: bmad-core/utils/workflow-validator.js
+- [ci_job] preflight: active
+  - id: .github/workflows/semad-preflight.yml#job:preflight
+  - Evidence: .github/workflows/semad-preflight.yml
+- [ci_job] reverse-align: active
+  - id: .github/workflows/traceability-daily.yml#job:reverse-align
+  - Evidence: .github/workflows/traceability-daily.yml
 - [config] orchestrator-config: active
   - id: orchestrator-config.js
   - Evidence: orchestrator-config.js
@@ -211,19 +55,28 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] scripts/conversion-test.js: active
   - id: scripts/conversion-test.js
   - Evidence: scripts/conversion-test.js
-- [module] scripts/debug/debug-task-execution.js: active
+- [module] runTests: active
+  - id: scripts/conversion-test.js#runTests
+  - Evidence: scripts/conversion-test.js
+- [module] scripts/debug/debug-task-execution.js: unused
   - id: scripts/debug/debug-task-execution.js
   - Evidence: scripts/debug/debug-task-execution.js
-- [module] scripts/debug/debug-template-resolution.js: active
+- [module] scripts/debug/debug-template-resolution.js: unused
   - id: scripts/debug/debug-template-resolution.js
   - Evidence: scripts/debug/debug-template-resolution.js
-- [module] scripts/debug/test-datamodel-generation.js: active
+- [module] scripts/debug/test-datamodel-generation.js: unused
   - id: scripts/debug/test-datamodel-generation.js
   - Evidence: scripts/debug/test-datamodel-generation.js
+- [module] scripts/demo-plan-adaptation-address-qa.js: active
+  - id: scripts/demo-plan-adaptation-address-qa.js
+  - Evidence: scripts/demo-plan-adaptation-address-qa.js
+- [module] scripts/demo-plan-adaptation.js: active
+  - id: scripts/demo-plan-adaptation.js
+  - Evidence: scripts/demo-plan-adaptation.js
 - [module] scripts/dev-agent-datamodel-integration.js: active
   - id: scripts/dev-agent-datamodel-integration.js
   - Evidence: scripts/dev-agent-datamodel-integration.js
-- [module] scripts/examples/run-examples.js: active
+- [module] scripts/examples/run-examples.js: unused
   - id: scripts/examples/run-examples.js
   - Evidence: scripts/examples/run-examples.js
 - [module] scripts/generate-dep-report.js: active
@@ -232,26 +85,44 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] scripts/generate-search-tools.js: active
   - id: scripts/generate-search-tools.js
   - Evidence: scripts/generate-search-tools.js
-- [module] scripts/generation/deterministic-generator.js: active
+- [module] scripts/generation/deterministic-generator.js: unused
   - id: scripts/generation/deterministic-generator.js
+  - Evidence: scripts/generation/deterministic-generator.js
+- [module] DeterministicGenerator: unused
+  - id: scripts/generation/deterministic-generator.js#DeterministicGenerator
   - Evidence: scripts/generation/deterministic-generator.js
 - [module] scripts/ingest-to-qdrant.js: active
   - id: scripts/ingest-to-qdrant.js
   - Evidence: scripts/ingest-to-qdrant.js
-- [module] scripts/preflight/contract-check.js: active
+- [module] scripts/preflight/brand-compat-check.js: unused
+  - id: scripts/preflight/brand-compat-check.js
+  - Evidence: scripts/preflight/brand-compat-check.js
+- [module] scripts/preflight/contract-check.js: unused
   - id: scripts/preflight/contract-check.js
   - Evidence: scripts/preflight/contract-check.js
-- [module] scripts/preflight/grounding-check.js: active
+- [module] checkStoryContract: unused
+  - id: scripts/preflight/contract-check.js#checkStoryContract
+  - Evidence: scripts/preflight/contract-check.js
+- [module] runContractCheck: unused
+  - id: scripts/preflight/contract-check.js#runContractCheck
+  - Evidence: scripts/preflight/contract-check.js
+- [module] scripts/preflight/grounding-check.js: unused
   - id: scripts/preflight/grounding-check.js
   - Evidence: scripts/preflight/grounding-check.js
-- [module] scripts/preflight/run-patch-plan-validation.js: active
+- [module] runGroundingCheck: unused
+  - id: scripts/preflight/grounding-check.js#runGroundingCheck
+  - Evidence: scripts/preflight/grounding-check.js
+- [module] scripts/preflight/run-patch-plan-validation.js: unused
   - id: scripts/preflight/run-patch-plan-validation.js
   - Evidence: scripts/preflight/run-patch-plan-validation.js
-- [module] scripts/preflight/run-reference-check.js: active
+- [module] scripts/preflight/run-reference-check.js: unused
   - id: scripts/preflight/run-reference-check.js
   - Evidence: scripts/preflight/run-reference-check.js
-- [module] scripts/preflight/schema-check.js: active
+- [module] scripts/preflight/schema-check.js: unused
   - id: scripts/preflight/schema-check.js
+  - Evidence: scripts/preflight/schema-check.js
+- [module] runSchemaCheckValidOnly: unused
+  - id: scripts/preflight/schema-check.js#runSchemaCheckValidOnly
   - Evidence: scripts/preflight/schema-check.js
 - [module] scripts/review-elicit-changes.js: active
   - id: scripts/review-elicit-changes.js
@@ -277,17 +148,56 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] scripts/update-agent-deps.js: active
   - id: scripts/update-agent-deps.js
   - Evidence: scripts/update-agent-deps.js
+- [module] updateAgentDependencies: active
+  - id: scripts/update-agent-deps.js#updateAgentDependencies
+  - Evidence: scripts/update-agent-deps.js
 - [module] scripts/update-tasks-with-memory.js: active
   - id: scripts/update-tasks-with-memory.js
+  - Evidence: scripts/update-tasks-with-memory.js
+- [module] createMemoryLoadStep: active
+  - id: scripts/update-tasks-with-memory.js#createMemoryLoadStep
+  - Evidence: scripts/update-tasks-with-memory.js
+- [module] createMemorySaveStep: active
+  - id: scripts/update-tasks-with-memory.js#createMemorySaveStep
+  - Evidence: scripts/update-tasks-with-memory.js
+- [module] updateTaskFile: active
+  - id: scripts/update-tasks-with-memory.js#updateTaskFile
   - Evidence: scripts/update-tasks-with-memory.js
 - [module] scripts/validate-all.js: active
   - id: scripts/validate-all.js
   - Evidence: scripts/validate-all.js
+- [module] schemas: active
+  - id: scripts/validate-all.js#schemas
+  - Evidence: scripts/validate-all.js
+- [module] validateDirectory: active
+  - id: scripts/validate-all.js#validateDirectory
+  - Evidence: scripts/validate-all.js
+- [module] validateFile: active
+  - id: scripts/validate-all.js#validateFile
+  - Evidence: scripts/validate-all.js
+- [module] validators: active
+  - id: scripts/validate-all.js#validators
+  - Evidence: scripts/validate-all.js
+- [module] scripts/validate-epic-contract.js: active
+  - id: scripts/validate-epic-contract.js
+  - Evidence: scripts/validate-epic-contract.js
 - [module] scripts/validate-golden.js: active
   - id: scripts/validate-golden.js
   - Evidence: scripts/validate-golden.js
 - [module] scripts/validate-schemas.js: active
   - id: scripts/validate-schemas.js
+  - Evidence: scripts/validate-schemas.js
+- [module] validateAll: active
+  - id: scripts/validate-schemas.js#validateAll
+  - Evidence: scripts/validate-schemas.js
+- [module] validateChecklist: active
+  - id: scripts/validate-schemas.js#validateChecklist
+  - Evidence: scripts/validate-schemas.js
+- [module] validateStructuredTask: active
+  - id: scripts/validate-schemas.js#validateStructuredTask
+  - Evidence: scripts/validate-schemas.js
+- [module] validateTask: active
+  - id: scripts/validate-schemas.js#validateTask
   - Evidence: scripts/validate-schemas.js
 - [module] scripts/validate-search-tools.js: active
   - id: scripts/validate-search-tools.js
@@ -295,12 +205,607 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] scripts/validate-story-contract.js: active
   - id: scripts/validate-story-contract.js
   - Evidence: scripts/validate-story-contract.js
+- [module] errors: active
+  - id: scripts/validate-story-contract.js#errors
+  - Evidence: scripts/validate-story-contract.js
+- [module] schema);
+      return {
+        valid: active
+  - id: scripts/validate-story-contract.js#schema);
+      return {
+        valid
+  - Evidence: scripts/validate-story-contract.js
+- [module] validateStoryContract: active
+  - id: scripts/validate-story-contract.js#validateStoryContract
+  - Evidence: scripts/validate-story-contract.js
 - [module] scripts/verify-conversion-checklists.js: active
   - id: scripts/verify-conversion-checklists.js
+  - Evidence: scripts/verify-conversion-checklists.js
+- [module] verifyAll: active
+  - id: scripts/verify-conversion-checklists.js#verifyAll
+  - Evidence: scripts/verify-conversion-checklists.js
+- [module] verifyFile: active
+  - id: scripts/verify-conversion-checklists.js#verifyFile
   - Evidence: scripts/verify-conversion-checklists.js
 - [module] scripts/verify-conversion-tasks.js: active
   - id: scripts/verify-conversion-tasks.js
   - Evidence: scripts/verify-conversion-tasks.js
+- [module] semad-core/agents/index.js: unused
+  - id: semad-core/agents/index.js
+  - Evidence: semad-core/agents/index.js
+- [module] clearWorkingMemory: unused
+  - id: semad-core/agents/index.js#clearWorkingMemory
+  - Evidence: semad-core/agents/index.js
+- [module] getWorkingMemory: unused
+  - id: semad-core/agents/index.js#getWorkingMemory
+  - Evidence: semad-core/agents/index.js
+- [module] initializeWorkingMemory: unused
+  - id: semad-core/agents/index.js#initializeWorkingMemory
+  - Evidence: semad-core/agents/index.js
+- [module] recordObservation: unused
+  - id: semad-core/agents/index.js#recordObservation
+  - Evidence: semad-core/agents/index.js
+- [module] updateWorkingMemory: unused
+  - id: semad-core/agents/index.js#updateWorkingMemory
+  - Evidence: semad-core/agents/index.js
+- [module] semad-core/errors/task-errors.js: unused
+  - id: semad-core/errors/task-errors.js
+  - Evidence: semad-core/errors/task-errors.js
+- [module] ActionExecutionError: unused
+  - id: semad-core/errors/task-errors.js#ActionExecutionError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] ConfigurationError: unused
+  - id: semad-core/errors/task-errors.js#ConfigurationError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] DependencyError: unused
+  - id: semad-core/errors/task-errors.js#DependencyError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] MemoryStateError: unused
+  - id: semad-core/errors/task-errors.js#MemoryStateError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] TaskError: unused
+  - id: semad-core/errors/task-errors.js#TaskError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] TaskExecutionError: unused
+  - id: semad-core/errors/task-errors.js#TaskExecutionError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] ValidationError: unused
+  - id: semad-core/errors/task-errors.js#ValidationError
+  - Evidence: semad-core/errors/task-errors.js
+- [module] semad-core/scripts/convert-checklists.js: unused
+  - id: semad-core/scripts/convert-checklists.js
+  - Evidence: semad-core/scripts/convert-checklists.js
+- [module] parseChecklistMarkdown: unused
+  - id: semad-core/scripts/convert-checklists.js#parseChecklistMarkdown
+  - Evidence: semad-core/scripts/convert-checklists.js
+- [module] validateConversion: unused
+  - id: semad-core/scripts/convert-checklists.js#validateConversion
+  - Evidence: semad-core/scripts/convert-checklists.js
+- [module] semad-core/scripts/convert-tasks.js: unused
+  - id: semad-core/scripts/convert-tasks.js
+  - Evidence: semad-core/scripts/convert-tasks.js
+- [module] parseChecklistMarkdown: unused
+  - id: semad-core/scripts/convert-tasks.js#parseChecklistMarkdown
+  - Evidence: semad-core/scripts/convert-tasks.js
+- [module] parseTaskMarkdown: unused
+  - id: semad-core/scripts/convert-tasks.js#parseTaskMarkdown
+  - Evidence: semad-core/scripts/convert-tasks.js
+- [module] validateConversion: unused
+  - id: semad-core/scripts/convert-tasks.js#validateConversion
+  - Evidence: semad-core/scripts/convert-tasks.js
+- [module] semad-core/scripts/init-memory.js: unused
+  - id: semad-core/scripts/init-memory.js
+  - Evidence: semad-core/scripts/init-memory.js
+- [module] initializeAllMemory: unused
+  - id: semad-core/scripts/init-memory.js#initializeAllMemory
+  - Evidence: semad-core/scripts/init-memory.js
+- [module] semad-core/scripts/validate-story-contract.js: unused
+  - id: semad-core/scripts/validate-story-contract.js
+  - Evidence: semad-core/scripts/validate-story-contract.js
+- [module] semad-core/tests/dynamic-planner.test.js: unused
+  - id: semad-core/tests/dynamic-planner.test.js
+  - Evidence: semad-core/tests/dynamic-planner.test.js
+- [module] semad-core/tests/memory-integration.test.js: unused
+  - id: semad-core/tests/memory-integration.test.js
+  - Evidence: semad-core/tests/memory-integration.test.js
+- [module] semad-core/tools/dynamic-planner.js: unused
+  - id: semad-core/tools/dynamic-planner.js
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] _getMaxSteps: unused
+  - id: semad-core/tools/dynamic-planner.js#_getMaxSteps
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] _getRules: unused
+  - id: semad-core/tools/dynamic-planner.js#_getRules
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] // Export for testing purposes
+  _loadRules: unused
+  - id: semad-core/tools/dynamic-planner.js#// Export for testing purposes
+  _loadRules
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] insertSubTask: unused
+  - id: semad-core/tools/dynamic-planner.js#insertSubTask
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] MAX_STEPS: unused
+  - id: semad-core/tools/dynamic-planner.js#MAX_STEPS
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] planAdaptation: unused
+  - id: semad-core/tools/dynamic-planner.js#planAdaptation
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] processTaskRecursively: unused
+  - id: semad-core/tools/dynamic-planner.js#processTaskRecursively
+  - Evidence: semad-core/tools/dynamic-planner.js
+- [module] semad-core/utils/adhoc-debug-runner.js: unused
+  - id: semad-core/utils/adhoc-debug-runner.js
+  - Evidence: semad-core/utils/adhoc-debug-runner.js
+- [module] semad-core/utils/adhoc-runner.js: unused
+  - id: semad-core/utils/adhoc-runner.js
+  - Evidence: semad-core/utils/adhoc-runner.js
+- [module] semad-core/utils/agent-activator.js: unused
+  - id: semad-core/utils/agent-activator.js
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] activateAgent: unused
+  - id: semad-core/utils/agent-activator.js#activateAgent
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] loadHandoffContext: unused
+  - id: semad-core/utils/agent-activator.js#loadHandoffContext
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] monitorAgentExecution: unused
+  - id: semad-core/utils/agent-activator.js#monitorAgentExecution
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] prepareAgentCommand: unused
+  - id: semad-core/utils/agent-activator.js#prepareAgentCommand
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] saveHandoffContext: unused
+  - id: semad-core/utils/agent-activator.js#saveHandoffContext
+  - Evidence: semad-core/utils/agent-activator.js
+- [module] semad-core/utils/agent-permissions.js: active
+  - id: semad-core/utils/agent-permissions.js
+  - Evidence: semad-core/utils/agent-permissions.js
+- [module] semad-core/utils/agent-runner.js: active
+  - id: semad-core/utils/agent-runner.js
+  - Evidence: semad-core/utils/agent-runner.js
+- [module] semad-core/utils/agent-simulator.js: unused
+  - id: semad-core/utils/agent-simulator.js
+  - Evidence: semad-core/utils/agent-simulator.js
+- [module] semad-core/utils/ajv-factory.js: unused
+  - id: semad-core/utils/ajv-factory.js
+  - Evidence: semad-core/utils/ajv-factory.js
+- [module] createAjv: unused
+  - id: semad-core/utils/ajv-factory.js#createAjv
+  - Evidence: semad-core/utils/ajv-factory.js
+- [module] semad-core/utils/cleanup-registry.js: unused
+  - id: semad-core/utils/cleanup-registry.js
+  - Evidence: semad-core/utils/cleanup-registry.js
+- [module] CleanupRegistry: unused
+  - id: semad-core/utils/cleanup-registry.js#CleanupRegistry
+  - Evidence: semad-core/utils/cleanup-registry.js
+- [module] semad-core/utils/connection-manager.js: unused
+  - id: semad-core/utils/connection-manager.js
+  - Evidence: semad-core/utils/connection-manager.js
+- [module] semad-core/utils/context-validator.js: unused
+  - id: semad-core/utils/context-validator.js
+  - Evidence: semad-core/utils/context-validator.js
+- [module] formatValidationMessage: unused
+  - id: semad-core/utils/context-validator.js#formatValidationMessage
+  - Evidence: semad-core/utils/context-validator.js
+- [module] validateAgentContext: unused
+  - id: semad-core/utils/context-validator.js#validateAgentContext
+  - Evidence: semad-core/utils/context-validator.js
+- [module] validateGenericContext: unused
+  - id: semad-core/utils/context-validator.js#validateGenericContext
+  - Evidence: semad-core/utils/context-validator.js
+- [module] validateImplementationContext: unused
+  - id: semad-core/utils/context-validator.js#validateImplementationContext
+  - Evidence: semad-core/utils/context-validator.js
+- [module] validateReviewContext: unused
+  - id: semad-core/utils/context-validator.js#validateReviewContext
+  - Evidence: semad-core/utils/context-validator.js
+- [module] validateStoryCreationContext: unused
+  - id: semad-core/utils/context-validator.js#validateStoryCreationContext
+  - Evidence: semad-core/utils/context-validator.js
+- [module] semad-core/utils/datamodel-test-generator.js: active
+  - id: semad-core/utils/datamodel-test-generator.js
+  - Evidence: semad-core/utils/datamodel-test-generator.js
+- [module] semad-core/utils/dependency-analysis-storage.js: unused
+  - id: semad-core/utils/dependency-analysis-storage.js
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] archiveDependencyAnalyses: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#archiveDependencyAnalyses
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] ensureStorageDirectories: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#ensureStorageDirectories
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] generateAnalysisFilename: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#generateAnalysisFilename
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] getAnalysisPath: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#getAnalysisPath
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] getLatestDependencyAnalysis: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#getLatestDependencyAnalysis
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] listDependencyAnalyses: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#listDependencyAnalyses
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] saveDependencyAnalysis: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#saveDependencyAnalysis
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] STORAGE_CONFIG: unused
+  - id: semad-core/utils/dependency-analysis-storage.js#STORAGE_CONFIG
+  - Evidence: semad-core/utils/dependency-analysis-storage.js
+- [module] semad-core/utils/dependency-analyzer.js: active
+  - id: semad-core/utils/dependency-analyzer.js
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] getDependencyStats: active
+  - id: semad-core/utils/dependency-analyzer.js#getDependencyStats
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] initializeDependencyStorage: active
+  - id: semad-core/utils/dependency-analyzer.js#initializeDependencyStorage
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] queryImpactedSymbols: active
+  - id: semad-core/utils/dependency-analyzer.js#queryImpactedSymbols
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] querySymbolsInFile: active
+  - id: semad-core/utils/dependency-analyzer.js#querySymbolsInFile
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] removeFileSymbols: active
+  - id: semad-core/utils/dependency-analyzer.js#removeFileSymbols
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] searchSymbols: active
+  - id: semad-core/utils/dependency-analyzer.js#searchSymbols
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] storeSymbolDependency: active
+  - id: semad-core/utils/dependency-analyzer.js#storeSymbolDependency
+  - Evidence: semad-core/utils/dependency-analyzer.js
+- [module] semad-core/utils/dependency-impact-checker.js: unused
+  - id: semad-core/utils/dependency-impact-checker.js
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] analyzeBatchImpact: unused
+  - id: semad-core/utils/dependency-impact-checker.js#analyzeBatchImpact
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] checkFileImpact: unused
+  - id: semad-core/utils/dependency-impact-checker.js#checkFileImpact
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] checkSymbolImpact: unused
+  - id: semad-core/utils/dependency-impact-checker.js#checkSymbolImpact
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] generateImpactReport: unused
+  - id: semad-core/utils/dependency-impact-checker.js#generateImpactReport
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] quickRiskAssessment: unused
+  - id: semad-core/utils/dependency-impact-checker.js#quickRiskAssessment
+  - Evidence: semad-core/utils/dependency-impact-checker.js
+- [module] semad-core/utils/dependency-parser.js: active
+  - id: semad-core/utils/dependency-parser.js
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] analyzeCrossFileDependencies: active
+  - id: semad-core/utils/dependency-parser.js#analyzeCrossFileDependencies
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] getSupportedExtensions: active
+  - id: semad-core/utils/dependency-parser.js#getSupportedExtensions
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] isFileSupported: active
+  - id: semad-core/utils/dependency-parser.js#isFileSupported
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] parseFile: active
+  - id: semad-core/utils/dependency-parser.js#parseFile
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] parseJava: active
+  - id: semad-core/utils/dependency-parser.js#parseJava
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] parseJavaScript: active
+  - id: semad-core/utils/dependency-parser.js#parseJavaScript
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] parsePython: active
+  - id: semad-core/utils/dependency-parser.js#parsePython
+  - Evidence: semad-core/utils/dependency-parser.js
+- [module] semad-core/utils/dependency-scanner.js: active
+  - id: semad-core/utils/dependency-scanner.js
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] // Export for testing
+  getMemoryUsage // Export for monitoring: active
+  - id: semad-core/utils/dependency-scanner.js#// Export for testing
+  getMemoryUsage // Export for monitoring
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] DEFAULT_CONFIG: active
+  - id: semad-core/utils/dependency-scanner.js#DEFAULT_CONFIG
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] getFilesToScan: active
+  - id: semad-core/utils/dependency-scanner.js#getFilesToScan
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] processBatch: active
+  - id: semad-core/utils/dependency-scanner.js#processBatch
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] scanChangedFiles: active
+  - id: semad-core/utils/dependency-scanner.js#scanChangedFiles
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] scanFile: active
+  - id: semad-core/utils/dependency-scanner.js#scanFile
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] scanRepository: active
+  - id: semad-core/utils/dependency-scanner.js#scanRepository
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] watchRepository: active
+  - id: semad-core/utils/dependency-scanner.js#watchRepository
+  - Evidence: semad-core/utils/dependency-scanner.js
+- [module] semad-core/utils/dependency-validator.js: unused
+  - id: semad-core/utils/dependency-validator.js
+  - Evidence: semad-core/utils/dependency-validator.js
+- [module] semad-core/utils/ecm-validate.js: unused
+  - id: semad-core/utils/ecm-validate.js
+  - Evidence: semad-core/utils/ecm-validate.js
+- [module] semad-core/utils/error-handler.js: active
+  - id: semad-core/utils/error-handler.js
+  - Evidence: semad-core/utils/error-handler.js
+- [module] semad-core/utils/file-path-resolver.js: active
+  - id: semad-core/utils/file-path-resolver.js
+  - Evidence: semad-core/utils/file-path-resolver.js
+- [module] semad-core/utils/find-next-story.js: active
+  - id: semad-core/utils/find-next-story.js
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] findNextApprovedStory: active
+  - id: semad-core/utils/find-next-story.js#findNextApprovedStory
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] findNextApprovedStoryAsync: active
+  - id: semad-core/utils/find-next-story.js#findNextApprovedStoryAsync
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] findNextApprovedStoryInEpic: active
+  - id: semad-core/utils/find-next-story.js#findNextApprovedStoryInEpic
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] getAllStoriesStatus: active
+  - id: semad-core/utils/find-next-story.js#getAllStoriesStatus
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] getEpicStatus: active
+  - id: semad-core/utils/find-next-story.js#getEpicStatus
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] getStoriesForEpic: active
+  - id: semad-core/utils/find-next-story.js#getStoriesForEpic
+  - Evidence: semad-core/utils/find-next-story.js
+- [module] semad-core/utils/init-tracker.js: unused
+  - id: semad-core/utils/init-tracker.js
+  - Evidence: semad-core/utils/init-tracker.js
+- [module] semad-core/utils/json-safe-templating.js: unused
+  - id: semad-core/utils/json-safe-templating.js
+  - Evidence: semad-core/utils/json-safe-templating.js
+- [module] escapeForJson: unused
+  - id: semad-core/utils/json-safe-templating.js#escapeForJson
+  - Evidence: semad-core/utils/json-safe-templating.js
+- [module] processJsonTemplate: unused
+  - id: semad-core/utils/json-safe-templating.js#processJsonTemplate
+  - Evidence: semad-core/utils/json-safe-templating.js
+- [module] processYamlWithJsonTemplates: unused
+  - id: semad-core/utils/json-safe-templating.js#processYamlWithJsonTemplates
+  - Evidence: semad-core/utils/json-safe-templating.js
+- [module] validateJsonString: unused
+  - id: semad-core/utils/json-safe-templating.js#validateJsonString
+  - Evidence: semad-core/utils/json-safe-templating.js
+- [module] semad-core/utils/logger.js: active
+  - id: semad-core/utils/logger.js
+  - Evidence: semad-core/utils/logger.js
+- [module] LOG_LEVELS: active
+  - id: semad-core/utils/logger.js#LOG_LEVELS
+  - Evidence: semad-core/utils/logger.js
+- [module] logger: active
+  - id: semad-core/utils/logger.js#logger
+  - Evidence: semad-core/utils/logger.js
+- [module] Logger: active
+  - id: semad-core/utils/logger.js#Logger
+  - Evidence: semad-core/utils/logger.js
+- [module] semad-core/utils/memory-compatibility-wrapper.js: unused
+  - id: semad-core/utils/memory-compatibility-wrapper.js
+  - Evidence: semad-core/utils/memory-compatibility-wrapper.js
+- [module] getTracker: unused
+  - id: semad-core/utils/memory-compatibility-wrapper.js#getTracker
+  - Evidence: semad-core/utils/memory-compatibility-wrapper.js
+- [module] semad-core/utils/memory-health.js: active
+  - id: semad-core/utils/memory-health.js
+  - Evidence: semad-core/utils/memory-health.js
+- [module] getCurrentHealthStatus: active
+  - id: semad-core/utils/memory-health.js#getCurrentHealthStatus
+  - Evidence: semad-core/utils/memory-health.js
+- [module] performHealthCheck: active
+  - id: semad-core/utils/memory-health.js#performHealthCheck
+  - Evidence: semad-core/utils/memory-health.js
+- [module] SEVERITY: active
+  - id: semad-core/utils/memory-health.js#SEVERITY
+  - Evidence: semad-core/utils/memory-health.js
+- [module] startPeriodicMonitoring: active
+  - id: semad-core/utils/memory-health.js#startPeriodicMonitoring
+  - Evidence: semad-core/utils/memory-health.js
+- [module] semad-core/utils/memory-operation-validator.js: unused
+  - id: semad-core/utils/memory-operation-validator.js
+  - Evidence: semad-core/utils/memory-operation-validator.js
+- [module] semad-core/utils/memory-transaction.js: unused
+  - id: semad-core/utils/memory-transaction.js
+  - Evidence: semad-core/utils/memory-transaction.js
+- [module] MemoryTransaction: unused
+  - id: semad-core/utils/memory-transaction.js#MemoryTransaction
+  - Evidence: semad-core/utils/memory-transaction.js
+- [module] semad-core/utils/module-resolver.js: active
+  - id: semad-core/utils/module-resolver.js
+  - Evidence: semad-core/utils/module-resolver.js
+- [module] semad-core/utils/qa-findings-parser.js: unused
+  - id: semad-core/utils/qa-findings-parser.js
+  - Evidence: semad-core/utils/qa-findings-parser.js
+- [module] semad-core/utils/qa-fix-tracker.js: unused
+  - id: semad-core/utils/qa-fix-tracker.js
+  - Evidence: semad-core/utils/qa-fix-tracker.js
+- [module] semad-core/utils/safe-file-operations.js: unused
+  - id: semad-core/utils/safe-file-operations.js
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] // Constants
+  LOCK_TIMEOUT: unused
+  - id: semad-core/utils/safe-file-operations.js#// Constants
+  LOCK_TIMEOUT
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] acquireLock: unused
+  - id: semad-core/utils/safe-file-operations.js#acquireLock
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] atomicWrite: unused
+  - id: semad-core/utils/safe-file-operations.js#atomicWrite
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] cleanupExpiredLocks: unused
+  - id: semad-core/utils/safe-file-operations.js#cleanupExpiredLocks
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] getLockStatus: unused
+  - id: semad-core/utils/safe-file-operations.js#getLockStatus
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] MAX_RETRY_ATTEMPTS: unused
+  - id: semad-core/utils/safe-file-operations.js#MAX_RETRY_ATTEMPTS
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] releaseLock: unused
+  - id: semad-core/utils/safe-file-operations.js#releaseLock
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] RETRY_DELAY: unused
+  - id: semad-core/utils/safe-file-operations.js#RETRY_DELAY
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] safeJsonParse: unused
+  - id: semad-core/utils/safe-file-operations.js#safeJsonParse
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] safeRead: unused
+  - id: semad-core/utils/safe-file-operations.js#safeRead
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] safeReadJson: unused
+  - id: semad-core/utils/safe-file-operations.js#safeReadJson
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] safeWriteJson: unused
+  - id: semad-core/utils/safe-file-operations.js#safeWriteJson
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] updateJsonFile: unused
+  - id: semad-core/utils/safe-file-operations.js#updateJsonFile
+  - Evidence: semad-core/utils/safe-file-operations.js
+- [module] semad-core/utils/shared-context-manager.js: unused
+  - id: semad-core/utils/shared-context-manager.js
+  - Evidence: semad-core/utils/shared-context-manager.js
+- [module] semad-core/utils/simple-task-tracker.js: active
+  - id: semad-core/utils/simple-task-tracker.js
+  - Evidence: semad-core/utils/simple-task-tracker.js
+- [module] semad-core/utils/simpleMemory.js: unused
+  - id: semad-core/utils/simpleMemory.js
+  - Evidence: semad-core/utils/simpleMemory.js
+- [module] getProgress: unused
+  - id: semad-core/utils/simpleMemory.js#getProgress
+  - Evidence: semad-core/utils/simpleMemory.js
+- [module] getProgressReport: unused
+  - id: semad-core/utils/simpleMemory.js#getProgressReport
+  - Evidence: semad-core/utils/simpleMemory.js
+- [module] logEntry: unused
+  - id: semad-core/utils/simpleMemory.js#logEntry
+  - Evidence: semad-core/utils/simpleMemory.js
+- [module] saveContext: unused
+  - id: semad-core/utils/simpleMemory.js#saveContext
+  - Evidence: semad-core/utils/simpleMemory.js
+- [module] semad-core/utils/story-contract-validator.js: unused
+  - id: semad-core/utils/story-contract-validator.js
+  - Evidence: semad-core/utils/story-contract-validator.js
+- [module] semad-core/utils/story-loader.js: unused
+  - id: semad-core/utils/story-loader.js
+  - Evidence: semad-core/utils/story-loader.js
+- [module] StoryLoader: unused
+  - id: semad-core/utils/story-loader.js#StoryLoader
+  - Evidence: semad-core/utils/story-loader.js
+- [module] semad-core/utils/subprocess-executor.js: unused
+  - id: semad-core/utils/subprocess-executor.js
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] executeBmadCommand: unused
+  - id: semad-core/utils/subprocess-executor.js#executeBmadCommand
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] executeBmadCommandSync: unused
+  - id: semad-core/utils/subprocess-executor.js#executeBmadCommandSync
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] executeMemoryCommand: unused
+  - id: semad-core/utils/subprocess-executor.js#executeMemoryCommand
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] getBmadCommand: unused
+  - id: semad-core/utils/subprocess-executor.js#getBmadCommand
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] getBmadCoreDir: unused
+  - id: semad-core/utils/subprocess-executor.js#getBmadCoreDir
+  - Evidence: semad-core/utils/subprocess-executor.js
+- [module] semad-core/utils/task-recovery.js: unused
+  - id: semad-core/utils/task-recovery.js
+  - Evidence: semad-core/utils/task-recovery.js
+- [module] TaskRecovery: unused
+  - id: semad-core/utils/task-recovery.js#TaskRecovery
+  - Evidence: semad-core/utils/task-recovery.js
+- [module] semad-core/utils/timeout-wrapper.js: active
+  - id: semad-core/utils/timeout-wrapper.js
+  - Evidence: semad-core/utils/timeout-wrapper.js
+- [module] fireAndForget: active
+  - id: semad-core/utils/timeout-wrapper.js#fireAndForget
+  - Evidence: semad-core/utils/timeout-wrapper.js
+- [module] withTimeout: active
+  - id: semad-core/utils/timeout-wrapper.js#withTimeout
+  - Evidence: semad-core/utils/timeout-wrapper.js
+- [module] semad-core/utils/track-progress.js: unused
+  - id: semad-core/utils/track-progress.js
+  - Evidence: semad-core/utils/track-progress.js
+- [module] semad-core/utils/unified-memory-manager.js: active
+  - id: semad-core/utils/unified-memory-manager.js
+  - Evidence: semad-core/utils/unified-memory-manager.js
+- [module] getMemoryStatus: active
+  - id: semad-core/utils/unified-memory-manager.js#getMemoryStatus
+  - Evidence: semad-core/utils/unified-memory-manager.js
+- [module] loadMemoryConfig: active
+  - id: semad-core/utils/unified-memory-manager.js#loadMemoryConfig
+  - Evidence: semad-core/utils/unified-memory-manager.js
+- [module] loadMemoryForTask: active
+  - id: semad-core/utils/unified-memory-manager.js#loadMemoryForTask
+  - Evidence: semad-core/utils/unified-memory-manager.js
+- [module] saveAndCleanMemory: active
+  - id: semad-core/utils/unified-memory-manager.js#saveAndCleanMemory
+  - Evidence: semad-core/utils/unified-memory-manager.js
+- [module] semad-core/utils/update-agent-paths.js: unused
+  - id: semad-core/utils/update-agent-paths.js
+  - Evidence: semad-core/utils/update-agent-paths.js
+- [module] updateAgentPaths: unused
+  - id: semad-core/utils/update-agent-paths.js#updateAgentPaths
+  - Evidence: semad-core/utils/update-agent-paths.js
+- [module] semad-core/utils/validation-enforcer.js: unused
+  - id: semad-core/utils/validation-enforcer.js
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] checkMemorySystemHealth: unused
+  - id: semad-core/utils/validation-enforcer.js#checkMemorySystemHealth
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] enforceMemoryOperationValidation: unused
+  - id: semad-core/utils/validation-enforcer.js#enforceMemoryOperationValidation
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] enforceStoryContractValidation: unused
+  - id: semad-core/utils/validation-enforcer.js#enforceStoryContractValidation
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] logValidationFailure: unused
+  - id: semad-core/utils/validation-enforcer.js#logValidationFailure
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] withValidation: unused
+  - id: semad-core/utils/validation-enforcer.js#withValidation
+  - Evidence: semad-core/utils/validation-enforcer.js
+- [module] semad-core/utils/validation-hooks.js: unused
+  - id: semad-core/utils/validation-hooks.js
+  - Evidence: semad-core/utils/validation-hooks.js
+- [module] semad-core/utils/verbose-logger.js: active
+  - id: semad-core/utils/verbose-logger.js
+  - Evidence: semad-core/utils/verbose-logger.js
+- [module] semad-core/utils/verify-qa-fixes.js: unused
+  - id: semad-core/utils/verify-qa-fixes.js
+  - Evidence: semad-core/utils/verify-qa-fixes.js
+- [module] verifyQAFixes: unused
+  - id: semad-core/utils/verify-qa-fixes.js#verifyQAFixes
+  - Evidence: semad-core/utils/verify-qa-fixes.js
+- [module] semad-core/utils/workflow-config-loader.js: active
+  - id: semad-core/utils/workflow-config-loader.js
+  - Evidence: semad-core/utils/workflow-config-loader.js
+- [module] semad-core/utils/workflow-executor.js: active
+  - id: semad-core/utils/workflow-executor.js
+  - Evidence: semad-core/utils/workflow-executor.js
+- [module] semad-core/utils/workflow-monitor.js: active
+  - id: semad-core/utils/workflow-monitor.js
+  - Evidence: semad-core/utils/workflow-monitor.js
+- [module] semad-core/utils/workflow-validator.js: unused
+  - id: semad-core/utils/workflow-validator.js
+  - Evidence: semad-core/utils/workflow-validator.js
+- [module] tools/agent-help.js: active
+  - id: tools/agent-help.js
+  - Evidence: tools/agent-help.js
 - [module] tools/agent.js: active
   - id: tools/agent.js
   - Evidence: tools/agent.js
@@ -316,32 +821,83 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/bump-expansion-version.js: active
   - id: tools/bump-expansion-version.js
   - Evidence: tools/bump-expansion-version.js
+- [module] tools/claude-llm-handler-exec.js: active
+  - id: tools/claude-llm-handler-exec.js
+  - Evidence: tools/claude-llm-handler-exec.js
+- [module] default: active
+  - id: tools/claude-llm-handler-exec.js#default
+  - Evidence: tools/claude-llm-handler-exec.js
+- [module] tools/claude-llm-handler.js: active
+  - id: tools/claude-llm-handler.js
+  - Evidence: tools/claude-llm-handler.js
+- [module] default: active
+  - id: tools/claude-llm-handler.js#default
+  - Evidence: tools/claude-llm-handler.js
 - [module] tools/cli.js: active
   - id: tools/cli.js
   - Evidence: tools/cli.js
-- [module] tools/concurrency/concurrency-controller.js: active
+- [module] tools/concurrency/concurrency-controller.js: unused
   - id: tools/concurrency/concurrency-controller.js
+  - Evidence: tools/concurrency/concurrency-controller.js
+- [module] ConcurrencyController: unused
+  - id: tools/concurrency/concurrency-controller.js#ConcurrencyController
   - Evidence: tools/concurrency/concurrency-controller.js
 - [module] tools/context/build-task-bundle.js: active
   - id: tools/context/build-task-bundle.js
   - Evidence: tools/context/build-task-bundle.js
+- [module] buildTaskBundle: active
+  - id: tools/context/build-task-bundle.js#buildTaskBundle
+  - Evidence: tools/context/build-task-bundle.js
+- [module] readStoryContract: active
+  - id: tools/context/build-task-bundle.js#readStoryContract
+  - Evidence: tools/context/build-task-bundle.js
 - [module] tools/context/index-artifacts.js: active
   - id: tools/context/index-artifacts.js
+  - Evidence: tools/context/index-artifacts.js
+- [module] buildIndex: active
+  - id: tools/context/index-artifacts.js#buildIndex
+  - Evidence: tools/context/index-artifacts.js
+- [module] indexDirectory: active
+  - id: tools/context/index-artifacts.js#indexDirectory
   - Evidence: tools/context/index-artifacts.js
 - [module] tools/context/retrieve-context.js: active
   - id: tools/context/retrieve-context.js
   - Evidence: tools/context/retrieve-context.js
+- [module] retrieveContext: active
+  - id: tools/context/retrieve-context.js#retrieveContext
+  - Evidence: tools/context/retrieve-context.js
+- [module] tools/deps/generate-dep-report.js: active
+  - id: tools/deps/generate-dep-report.js
+  - Evidence: tools/deps/generate-dep-report.js
+- [module] generate: active
+  - id: tools/deps/generate-dep-report.js#generate
+  - Evidence: tools/deps/generate-dep-report.js
+- [module] tools/dev-develop-story.js: active
+  - id: tools/dev-develop-story.js
+  - Evidence: tools/dev-develop-story.js
 - [module] tools/dev-guard.js: active
   - id: tools/dev-guard.js
   - Evidence: tools/dev-guard.js
 - [module] tools/dev-next-story.js: active
   - id: tools/dev-next-story.js
   - Evidence: tools/dev-next-story.js
-- [module] tools/embedding-retrieval/embedding-retriever.js: active
+- [module] tools/ecm-validate.js: active
+  - id: tools/ecm-validate.js
+  - Evidence: tools/ecm-validate.js
+- [module] tools/embedding-retrieval/embedding-retriever.js: unused
   - id: tools/embedding-retrieval/embedding-retriever.js
   - Evidence: tools/embedding-retrieval/embedding-retriever.js
-- [module] tools/extractors/index.js: active
+- [module] EmbeddingRetriever: unused
+  - id: tools/embedding-retrieval/embedding-retriever.js#EmbeddingRetriever
+  - Evidence: tools/embedding-retrieval/embedding-retriever.js
+- [module] tools/extractors/index.js: deprecated
   - id: tools/extractors/index.js
+  - Evidence: tools/extractors/index.js
+- [module] extractEntities: deprecated
+  - id: tools/extractors/index.js#extractEntities
+  - Evidence: tools/extractors/index.js
+- [module] EXTRACTOR_VERSION: deprecated
+  - id: tools/extractors/index.js#EXTRACTOR_VERSION
   - Evidence: tools/extractors/index.js
 - [module] tools/generate-story.js: active
   - id: tools/generate-story.js
@@ -367,7 +923,7 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/installer/lib/installer.js: active
   - id: tools/installer/lib/installer.js
   - Evidence: tools/installer/lib/installer.js
-- [module] tools/installer/lib/memory-profiler.js: active
+- [module] tools/installer/lib/memory-profiler.js: unused
   - id: tools/installer/lib/memory-profiler.js
   - Evidence: tools/installer/lib/memory-profiler.js
 - [module] tools/installer/lib/module-manager.js: active
@@ -376,14 +932,26 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/installer/lib/resource-locator.js: active
   - id: tools/installer/lib/resource-locator.js
   - Evidence: tools/installer/lib/resource-locator.js
-- [module] tools/instruction-hierarchy/hierarchy-updater.js: active
+- [module] tools/installer/verify-install.js: active
+  - id: tools/installer/verify-install.js
+  - Evidence: tools/installer/verify-install.js
+- [module] tools/instruction-hierarchy/hierarchy-updater.js: unused
   - id: tools/instruction-hierarchy/hierarchy-updater.js
+  - Evidence: tools/instruction-hierarchy/hierarchy-updater.js
+- [module] HierarchyUpdater: unused
+  - id: tools/instruction-hierarchy/hierarchy-updater.js#HierarchyUpdater
   - Evidence: tools/instruction-hierarchy/hierarchy-updater.js
 - [module] tools/instruction-hierarchy/instruction-hierarchy-manager.js: active
   - id: tools/instruction-hierarchy/instruction-hierarchy-manager.js
   - Evidence: tools/instruction-hierarchy/instruction-hierarchy-manager.js
+- [module] InstructionHierarchyManager: active
+  - id: tools/instruction-hierarchy/instruction-hierarchy-manager.js#InstructionHierarchyManager
+  - Evidence: tools/instruction-hierarchy/instruction-hierarchy-manager.js
 - [module] tools/instruction-hierarchy/structured-output-validator.js: active
   - id: tools/instruction-hierarchy/structured-output-validator.js
+  - Evidence: tools/instruction-hierarchy/structured-output-validator.js
+- [module] StructuredOutputValidator: active
+  - id: tools/instruction-hierarchy/structured-output-validator.js#StructuredOutputValidator
   - Evidence: tools/instruction-hierarchy/structured-output-validator.js
 - [module] tools/instruction-hierarchy/validate-cli.js: active
   - id: tools/instruction-hierarchy/validate-cli.js
@@ -391,14 +959,41 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/interaction-analysis.js: active
   - id: tools/interaction-analysis.js
   - Evidence: tools/interaction-analysis.js
+- [module] csvLines: active
+  - id: tools/interaction-analysis.js#csvLines
+  - Evidence: tools/interaction-analysis.js
 - [module] tools/lib/dependency-resolver.js: active
   - id: tools/lib/dependency-resolver.js
   - Evidence: tools/lib/dependency-resolver.js
-- [module] tools/lib/function-registry-tracker-integration.js: active
+- [module] tools/lib/elicit-handler.js: active
+  - id: tools/lib/elicit-handler.js
+  - Evidence: tools/lib/elicit-handler.js
+- [module] createUserInputHandler: active
+  - id: tools/lib/elicit-handler.js#createUserInputHandler
+  - Evidence: tools/lib/elicit-handler.js
+- [module] tools/lib/function-registry-tracker-integration.js: unused
   - id: tools/lib/function-registry-tracker-integration.js
+  - Evidence: tools/lib/function-registry-tracker-integration.js
+- [module] TRACKER_FUNCTIONS: unused
+  - id: tools/lib/function-registry-tracker-integration.js#TRACKER_FUNCTIONS
+  - Evidence: tools/lib/function-registry-tracker-integration.js
+- [module] TRACKER_PARAM_MAPPINGS: unused
+  - id: tools/lib/function-registry-tracker-integration.js#TRACKER_PARAM_MAPPINGS
   - Evidence: tools/lib/function-registry-tracker-integration.js
 - [module] tools/lib/function-registry.js: active
   - id: tools/lib/function-registry.js
+  - Evidence: tools/lib/function-registry.js
+- [module] executeFunction: active
+  - id: tools/lib/function-registry.js#executeFunction
+  - Evidence: tools/lib/function-registry.js
+- [module] FUNCTION_REGISTRY: active
+  - id: tools/lib/function-registry.js#FUNCTION_REGISTRY
+  - Evidence: tools/lib/function-registry.js
+- [module] getAvailableFunctions: active
+  - id: tools/lib/function-registry.js#getAvailableFunctions
+  - Evidence: tools/lib/function-registry.js
+- [module] hasFunction: active
+  - id: tools/lib/function-registry.js#hasFunction
   - Evidence: tools/lib/function-registry.js
 - [module] tools/lib/structured-task-loader.js: active
   - id: tools/lib/structured-task-loader.js
@@ -406,11 +1001,20 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/lib/yaml-utils.js: active
   - id: tools/lib/yaml-utils.js
   - Evidence: tools/lib/yaml-utils.js
+- [module] extractYamlFromAgent: active
+  - id: tools/lib/yaml-utils.js#extractYamlFromAgent
+  - Evidence: tools/lib/yaml-utils.js
 - [module] tools/metrics/collect.js: active
   - id: tools/metrics/collect.js
   - Evidence: tools/metrics/collect.js
-- [module] tools/monitoring/metrics-collector.js: active
+- [module] MetricsCollector: active
+  - id: tools/metrics/collect.js#MetricsCollector
+  - Evidence: tools/metrics/collect.js
+- [module] tools/monitoring/metrics-collector.js: unused
   - id: tools/monitoring/metrics-collector.js
+  - Evidence: tools/monitoring/metrics-collector.js
+- [module] MetricsCollector: unused
+  - id: tools/monitoring/metrics-collector.js#MetricsCollector
   - Evidence: tools/monitoring/metrics-collector.js
 - [module] tools/orchestrator/agent-runner-shim.js: active
   - id: tools/orchestrator/agent-runner-shim.js
@@ -418,11 +1022,29 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/orchestrator/drift-alarms.js: active
   - id: tools/orchestrator/drift-alarms.js
   - Evidence: tools/orchestrator/drift-alarms.js
+- [module] DriftAlarmSystem: active
+  - id: tools/orchestrator/drift-alarms.js#DriftAlarmSystem
+  - Evidence: tools/orchestrator/drift-alarms.js
 - [module] tools/orchestrator/execute-agentic-hardening-v2.js: active
   - id: tools/orchestrator/execute-agentic-hardening-v2.js
   - Evidence: tools/orchestrator/execute-agentic-hardening-v2.js
+- [module] AgentPool: active
+  - id: tools/orchestrator/execute-agentic-hardening-v2.js#AgentPool
+  - Evidence: tools/orchestrator/execute-agentic-hardening-v2.js
+- [module] PhaseOrchestrator: active
+  - id: tools/orchestrator/execute-agentic-hardening-v2.js#PhaseOrchestrator
+  - Evidence: tools/orchestrator/execute-agentic-hardening-v2.js
+- [module] StoryExecutor: active
+  - id: tools/orchestrator/execute-agentic-hardening-v2.js#StoryExecutor
+  - Evidence: tools/orchestrator/execute-agentic-hardening-v2.js
 - [module] tools/orchestrator/execute-agentic-hardening.js: active
   - id: tools/orchestrator/execute-agentic-hardening.js
+  - Evidence: tools/orchestrator/execute-agentic-hardening.js
+- [module] executeStory: active
+  - id: tools/orchestrator/execute-agentic-hardening.js#executeStory
+  - Evidence: tools/orchestrator/execute-agentic-hardening.js
+- [module] orchestrate: active
+  - id: tools/orchestrator/execute-agentic-hardening.js#orchestrate
   - Evidence: tools/orchestrator/execute-agentic-hardening.js
 - [module] tools/orchestrator/gates.js: active
   - id: tools/orchestrator/gates.js
@@ -442,69 +1064,259 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/orchestrator/locks.js: active
   - id: tools/orchestrator/locks.js
   - Evidence: tools/orchestrator/locks.js
+- [module] lockManager: active
+  - id: tools/orchestrator/locks.js#lockManager
+  - Evidence: tools/orchestrator/locks.js
+- [module] LockManager: active
+  - id: tools/orchestrator/locks.js#LockManager
+  - Evidence: tools/orchestrator/locks.js
 - [module] tools/orchestrator/memory-health-shim.js: active
   - id: tools/orchestrator/memory-health-shim.js
+  - Evidence: tools/orchestrator/memory-health-shim.js
+- [module] getAggregatedHealthStatus: active
+  - id: tools/orchestrator/memory-health-shim.js#getAggregatedHealthStatus
   - Evidence: tools/orchestrator/memory-health-shim.js
 - [module] tools/orchestrator/qa-fixes-orchestrator.js: active
   - id: tools/orchestrator/qa-fixes-orchestrator.js
   - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] 'architect']: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#'architect']
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] 'architecture.json']: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#'architecture.json']
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] 'pm': active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#'pm'
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] 'PRD.json': active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#'PRD.json'
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] // Workflow phases
+  phases: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#// Workflow phases
+  phases
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] checkTestNaming: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#checkTestNaming
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] gate: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#gate
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] outputs: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#outputs
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
+- [module] retrieveContext: active
+  - id: tools/orchestrator/qa-fixes-orchestrator.js#retrieveContext
+  - Evidence: tools/orchestrator/qa-fixes-orchestrator.js
 - [module] tools/orchestrator/reverse-context.js: active
   - id: tools/orchestrator/reverse-context.js
+  - Evidence: tools/orchestrator/reverse-context.js
+- [module] loadReverseContext: active
+  - id: tools/orchestrator/reverse-context.js#loadReverseContext
   - Evidence: tools/orchestrator/reverse-context.js
 - [module] tools/orchestrator/rollback.js: active
   - id: tools/orchestrator/rollback.js
   - Evidence: tools/orchestrator/rollback.js
+- [module] RollbackOrchestrator: active
+  - id: tools/orchestrator/rollback.js#RollbackOrchestrator
+  - Evidence: tools/orchestrator/rollback.js
 - [module] tools/orchestrator/snapshots.js: active
   - id: tools/orchestrator/snapshots.js
+  - Evidence: tools/orchestrator/snapshots.js
+- [module] SnapshotManager: active
+  - id: tools/orchestrator/snapshots.js#SnapshotManager
   - Evidence: tools/orchestrator/snapshots.js
 - [module] tools/orchestrator/story-implementations/AH-001.js: active
   - id: tools/orchestrator/story-implementations/AH-001.js
   - Evidence: tools/orchestrator/story-implementations/AH-001.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-001.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-001.js
 - [module] tools/orchestrator/story-implementations/AH-002.js: active
   - id: tools/orchestrator/story-implementations/AH-002.js
+  - Evidence: tools/orchestrator/story-implementations/AH-002.js
+- [module] buildIndex: active
+  - id: tools/orchestrator/story-implementations/AH-002.js#buildIndex
+  - Evidence: tools/orchestrator/story-implementations/AH-002.js
+- [module] buildTaskBundle: active
+  - id: tools/orchestrator/story-implementations/AH-002.js#buildTaskBundle
+  - Evidence: tools/orchestrator/story-implementations/AH-002.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-002.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-002.js
+- [module] indexDirectory: active
+  - id: tools/orchestrator/story-implementations/AH-002.js#indexDirectory
+  - Evidence: tools/orchestrator/story-implementations/AH-002.js
+- [module] readStoryContract: active
+  - id: tools/orchestrator/story-implementations/AH-002.js#readStoryContract
   - Evidence: tools/orchestrator/story-implementations/AH-002.js
 - [module] tools/orchestrator/story-implementations/AH-003.js: active
   - id: tools/orchestrator/story-implementations/AH-003.js
   - Evidence: tools/orchestrator/story-implementations/AH-003.js
+- [module] checkStoryContract: active
+  - id: tools/orchestrator/story-implementations/AH-003.js#checkStoryContract
+  - Evidence: tools/orchestrator/story-implementations/AH-003.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-003.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-003.js
+- [module] runContractCheck: active
+  - id: tools/orchestrator/story-implementations/AH-003.js#runContractCheck
+  - Evidence: tools/orchestrator/story-implementations/AH-003.js
+- [module] runGroundingCheck: active
+  - id: tools/orchestrator/story-implementations/AH-003.js#runGroundingCheck
+  - Evidence: tools/orchestrator/story-implementations/AH-003.js
+- [module] runSchemaCheck: active
+  - id: tools/orchestrator/story-implementations/AH-003.js#runSchemaCheck
+  - Evidence: tools/orchestrator/story-implementations/AH-003.js
 - [module] tools/orchestrator/story-implementations/AH-004.js: active
   - id: tools/orchestrator/story-implementations/AH-004.js
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] 'architect']: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#'architect']
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] 'architecture.md']: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#'architecture.md']
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] 'pm': active
+  - id: tools/orchestrator/story-implementations/AH-004.js#'pm'
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] 'PRD.md': active
+  - id: tools/orchestrator/story-implementations/AH-004.js#'PRD.md'
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] // Workflow phases
+  phases: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#// Workflow phases
+  phases
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] gate: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#gate
+  - Evidence: tools/orchestrator/story-implementations/AH-004.js
+- [module] outputs: active
+  - id: tools/orchestrator/story-implementations/AH-004.js#outputs
   - Evidence: tools/orchestrator/story-implementations/AH-004.js
 - [module] tools/orchestrator/story-implementations/AH-005.js: active
   - id: tools/orchestrator/story-implementations/AH-005.js
   - Evidence: tools/orchestrator/story-implementations/AH-005.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-005.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-005.js
+- [module] validatePatchPlan: active
+  - id: tools/orchestrator/story-implementations/AH-005.js#validatePatchPlan
+  - Evidence: tools/orchestrator/story-implementations/AH-005.js
 - [module] tools/orchestrator/story-implementations/AH-006.js: active
   - id: tools/orchestrator/story-implementations/AH-006.js
+  - Evidence: tools/orchestrator/story-implementations/AH-006.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-006.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-006.js
+- [module] ReferenceChecker: active
+  - id: tools/orchestrator/story-implementations/AH-006.js#ReferenceChecker
   - Evidence: tools/orchestrator/story-implementations/AH-006.js
 - [module] tools/orchestrator/story-implementations/AH-007.js: active
   - id: tools/orchestrator/story-implementations/AH-007.js
   - Evidence: tools/orchestrator/story-implementations/AH-007.js
+- [module] DeterministicGenerator: active
+  - id: tools/orchestrator/story-implementations/AH-007.js#DeterministicGenerator
+  - Evidence: tools/orchestrator/story-implementations/AH-007.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-007.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-007.js
 - [module] tools/orchestrator/story-implementations/AH-008.js: active
   - id: tools/orchestrator/story-implementations/AH-008.js
+  - Evidence: tools/orchestrator/story-implementations/AH-008.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-008.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-008.js
+- [module] TypeFirstChecker: active
+  - id: tools/orchestrator/story-implementations/AH-008.js#TypeFirstChecker
   - Evidence: tools/orchestrator/story-implementations/AH-008.js
 - [module] tools/orchestrator/story-implementations/AH-009.js: active
   - id: tools/orchestrator/story-implementations/AH-009.js
   - Evidence: tools/orchestrator/story-implementations/AH-009.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-009.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-009.js
+- [module] TraceabilityEnforcer: active
+  - id: tools/orchestrator/story-implementations/AH-009.js#TraceabilityEnforcer
+  - Evidence: tools/orchestrator/story-implementations/AH-009.js
 - [module] tools/orchestrator/story-implementations/AH-010.js: active
   - id: tools/orchestrator/story-implementations/AH-010.js
+  - Evidence: tools/orchestrator/story-implementations/AH-010.js
+- [module] EmbeddingRetriever: active
+  - id: tools/orchestrator/story-implementations/AH-010.js#EmbeddingRetriever
+  - Evidence: tools/orchestrator/story-implementations/AH-010.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-010.js#execute
   - Evidence: tools/orchestrator/story-implementations/AH-010.js
 - [module] tools/orchestrator/story-implementations/AH-011.js: active
   - id: tools/orchestrator/story-implementations/AH-011.js
   - Evidence: tools/orchestrator/story-implementations/AH-011.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-011.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-011.js
 - [module] tools/orchestrator/story-implementations/AH-012.js: active
   - id: tools/orchestrator/story-implementations/AH-012.js
+  - Evidence: tools/orchestrator/story-implementations/AH-012.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-012.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-012.js
+- [module] MetricsCollector: active
+  - id: tools/orchestrator/story-implementations/AH-012.js#MetricsCollector
   - Evidence: tools/orchestrator/story-implementations/AH-012.js
 - [module] tools/orchestrator/story-implementations/AH-013.js: active
   - id: tools/orchestrator/story-implementations/AH-013.js
   - Evidence: tools/orchestrator/story-implementations/AH-013.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-013.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-013.js
+- [module] SecurityScanner: active
+  - id: tools/orchestrator/story-implementations/AH-013.js#SecurityScanner
+  - Evidence: tools/orchestrator/story-implementations/AH-013.js
 - [module] tools/orchestrator/story-implementations/AH-014.js: active
   - id: tools/orchestrator/story-implementations/AH-014.js
+  - Evidence: tools/orchestrator/story-implementations/AH-014.js
+- [module] DriftDetector: active
+  - id: tools/orchestrator/story-implementations/AH-014.js#DriftDetector
+  - Evidence: tools/orchestrator/story-implementations/AH-014.js
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-014.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-014.js
+- [module] RollbackManager: active
+  - id: tools/orchestrator/story-implementations/AH-014.js#RollbackManager
   - Evidence: tools/orchestrator/story-implementations/AH-014.js
 - [module] tools/orchestrator/story-implementations/AH-015.js: active
   - id: tools/orchestrator/story-implementations/AH-015.js
   - Evidence: tools/orchestrator/story-implementations/AH-015.js
-- [module] tools/patch-plan/validate-patch-plan.js: active
+- [module] execute: active
+  - id: tools/orchestrator/story-implementations/AH-015.js#execute
+  - Evidence: tools/orchestrator/story-implementations/AH-015.js
+- [module] HierarchyUpdater: active
+  - id: tools/orchestrator/story-implementations/AH-015.js#HierarchyUpdater
+  - Evidence: tools/orchestrator/story-implementations/AH-015.js
+- [module] InstructionHierarchyManager: active
+  - id: tools/orchestrator/story-implementations/AH-015.js#InstructionHierarchyManager
+  - Evidence: tools/orchestrator/story-implementations/AH-015.js
+- [module] StructuredOutputValidator: active
+  - id: tools/orchestrator/story-implementations/AH-015.js#StructuredOutputValidator
+  - Evidence: tools/orchestrator/story-implementations/AH-015.js
+- [module] tools/patch-plan/validate-patch-plan.js: unused
   - id: tools/patch-plan/validate-patch-plan.js
   - Evidence: tools/patch-plan/validate-patch-plan.js
+- [module] PatchPlanValidator: unused
+  - id: tools/patch-plan/validate-patch-plan.js#PatchPlanValidator
+  - Evidence: tools/patch-plan/validate-patch-plan.js
+- [module] tools/qa-review-bridge.js: active
+  - id: tools/qa-review-bridge.js
+  - Evidence: tools/qa-review-bridge.js
+- [module] reviewStory: active
+  - id: tools/qa-review-bridge.js#reviewStory
+  - Evidence: tools/qa-review-bridge.js
+- [module] runClaude: active
+  - id: tools/qa-review-bridge.js#runClaude
+  - Evidence: tools/qa-review-bridge.js
 - [module] tools/qa-review.js: active
   - id: tools/qa-review.js
   - Evidence: tools/qa-review.js
@@ -517,41 +1329,62 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/qa/test-quality-gate.js: active
   - id: tools/qa/test-quality-gate.js
   - Evidence: tools/qa/test-quality-gate.js
-- [module] tools/reference-checker/check-references.js: active
+- [module] analyzeTestFile: active
+  - id: tools/qa/test-quality-gate.js#analyzeTestFile
+  - Evidence: tools/qa/test-quality-gate.js
+- [module] tools/reference-checker/check-references.js: unused
   - id: tools/reference-checker/check-references.js
   - Evidence: tools/reference-checker/check-references.js
-- [module] tools/reference-checker/parsers/javascript-parser.js: active
+- [module] ReferenceChecker: unused
+  - id: tools/reference-checker/check-references.js#ReferenceChecker
+  - Evidence: tools/reference-checker/check-references.js
+- [module] tools/reference-checker/parsers/javascript-parser.js: unused
   - id: tools/reference-checker/parsers/javascript-parser.js
   - Evidence: tools/reference-checker/parsers/javascript-parser.js
-- [module] tools/reference-checker/parsers/markdown-parser.js: active
+- [module] tools/reference-checker/parsers/markdown-parser.js: unused
   - id: tools/reference-checker/parsers/markdown-parser.js
   - Evidence: tools/reference-checker/parsers/markdown-parser.js
-- [module] tools/reference-checker/parsers/typescript-parser.js: active
+- [module] tools/reference-checker/parsers/typescript-parser.js: unused
   - id: tools/reference-checker/parsers/typescript-parser.js
   - Evidence: tools/reference-checker/parsers/typescript-parser.js
-- [module] tools/reference-checker/parsers/yaml-parser.js: active
+- [module] tools/reference-checker/parsers/yaml-parser.js: unused
   - id: tools/reference-checker/parsers/yaml-parser.js
   - Evidence: tools/reference-checker/parsers/yaml-parser.js
 - [module] tools/reverse-align-max.js: active
   - id: tools/reverse-align-max.js
   - Evidence: tools/reverse-align-max.js
-- [module] tools/rollback/drift-detector.js: active
+- [module] tools/rollback/drift-detector.js: unused
   - id: tools/rollback/drift-detector.js
   - Evidence: tools/rollback/drift-detector.js
-- [module] tools/rollback/rollback-manager.js: active
+- [module] DriftDetector: unused
+  - id: tools/rollback/drift-detector.js#DriftDetector
+  - Evidence: tools/rollback/drift-detector.js
+- [module] tools/rollback/rollback-manager.js: unused
   - id: tools/rollback/rollback-manager.js
+  - Evidence: tools/rollback/rollback-manager.js
+- [module] RollbackManager: unused
+  - id: tools/rollback/rollback-manager.js#RollbackManager
   - Evidence: tools/rollback/rollback-manager.js
 - [module] tools/scan-structured-tasks.js: active
   - id: tools/scan-structured-tasks.js
   - Evidence: tools/scan-structured-tasks.js
-- [module] tools/security/security-scanner.js: active
+- [module] tools/security/security-scanner.js: unused
   - id: tools/security/security-scanner.js
   - Evidence: tools/security/security-scanner.js
-- [module] tools/semantic-release-sync-installer.js: active
+- [module] SecurityScanner: unused
+  - id: tools/security/security-scanner.js#SecurityScanner
+  - Evidence: tools/security/security-scanner.js
+- [module] tools/semantic-release-sync-installer.js: unused
   - id: tools/semantic-release-sync-installer.js
+  - Evidence: tools/semantic-release-sync-installer.js
+- [module] prepare: unused
+  - id: tools/semantic-release-sync-installer.js#prepare
   - Evidence: tools/semantic-release-sync-installer.js
 - [module] tools/sync-installer-version.js: active
   - id: tools/sync-installer-version.js
+  - Evidence: tools/sync-installer-version.js
+- [module] syncInstallerVersion: active
+  - id: tools/sync-installer-version.js#syncInstallerVersion
   - Evidence: tools/sync-installer-version.js
 - [module] tools/task-runner.js: active
   - id: tools/task-runner.js
@@ -559,11 +1392,20 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] tools/traceability/test-naming-check.js: active
   - id: tools/traceability/test-naming-check.js
   - Evidence: tools/traceability/test-naming-check.js
-- [module] tools/traceability/traceability-enforcer.js: active
+- [module] checkTestNaming: active
+  - id: tools/traceability/test-naming-check.js#checkTestNaming
+  - Evidence: tools/traceability/test-naming-check.js
+- [module] tools/traceability/traceability-enforcer.js: unused
   - id: tools/traceability/traceability-enforcer.js
   - Evidence: tools/traceability/traceability-enforcer.js
-- [module] tools/type-checker/type-first-checker.js: active
+- [module] TraceabilityEnforcer: unused
+  - id: tools/traceability/traceability-enforcer.js#TraceabilityEnforcer
+  - Evidence: tools/traceability/traceability-enforcer.js
+- [module] tools/type-checker/type-first-checker.js: unused
   - id: tools/type-checker/type-first-checker.js
+  - Evidence: tools/type-checker/type-first-checker.js
+- [module] TypeFirstChecker: unused
+  - id: tools/type-checker/type-first-checker.js#TypeFirstChecker
   - Evidence: tools/type-checker/type-first-checker.js
 - [module] tools/update-expansion-version.js: active
   - id: tools/update-expansion-version.js
@@ -576,6 +1418,12 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
   - Evidence: tools/validate-config.js
 - [module] tools/version-bump.js: active
   - id: tools/version-bump.js
+  - Evidence: tools/version-bump.js
+- [module] bumpVersion: active
+  - id: tools/version-bump.js#bumpVersion
+  - Evidence: tools/version-bump.js
+- [module] getCurrentVersion: active
+  - id: tools/version-bump.js#getCurrentVersion
   - Evidence: tools/version-bump.js
 - [module] tools/workflow-orchestrator.js: active
   - id: tools/workflow-orchestrator.js
@@ -597,6 +1445,9 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
   - Evidence: tools/workflow-orchestrator.js
 - [cli] generate-alignment-report: active
   - id: tools/workflow-orchestrator.js#cli:generate-alignment-report
+  - Evidence: tools/workflow-orchestrator.js
+- [cli] generate-dep-report: active
+  - id: tools/workflow-orchestrator.js#cli:generate-dep-report
   - Evidence: tools/workflow-orchestrator.js
 - [cli] generate-stories: active
   - id: tools/workflow-orchestrator.js#cli:generate-stories
@@ -643,11 +1494,23 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [cli] status: active
   - id: tools/workflow-orchestrator.js#cli:status
   - Evidence: tools/workflow-orchestrator.js
+- [cli] validate-epic <epic>: active
+  - id: tools/workflow-orchestrator.js#cli:validate-epic <epic>
+  - Evidence: tools/workflow-orchestrator.js
 - [cli] validate-story-consistency: active
   - id: tools/workflow-orchestrator.js#cli:validate-story-consistency
   - Evidence: tools/workflow-orchestrator.js
 - [module] tools/yaml-format.js: active
   - id: tools/yaml-format.js
+  - Evidence: tools/yaml-format.js
+- [module] formatYamlContent: active
+  - id: tools/yaml-format.js#formatYamlContent
+  - Evidence: tools/yaml-format.js
+- [module] processMarkdownFile: active
+  - id: tools/yaml-format.js#processMarkdownFile
+  - Evidence: tools/yaml-format.js
+- [module] processYamlFile: active
+  - id: tools/yaml-format.js#processYamlFile
   - Evidence: tools/yaml-format.js
 
 <!-- END GENERATED -->

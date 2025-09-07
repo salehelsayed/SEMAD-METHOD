@@ -1,6 +1,6 @@
 # Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -8,13 +8,13 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 
 2. **Resource Navigation**: This bundle contains all resources you need. Resources are marked with tags like:
 
-- `==================== START: .bmad-core/folder/filename.md ====================`
-- `==================== END: .bmad-core/folder/filename.md ====================`
+- `==================== START: .semad-core/folder/filename.md ====================`
+- `==================== END: .semad-core/folder/filename.md ====================`
 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- The format is always the full path with dot prefix (e.g., `.semad-core/personas/analyst.md`, `.semad-core/structured-tasks/create-story.yaml`)
 - If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
@@ -29,17 +29,17 @@ dependencies:
 
 These references map directly to bundle sections:
 
-- `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
+- `utils: template-format` → Look for `==================== START: .semad-core/utils/template-format.md ====================`
+- `tasks: create-story` → Look for `==================== START: .semad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
 
-==================== START: .bmad-core/agents/in.md ====================
+==================== START: .semad-core/agents/in.md ====================
 # in
 
 CRITICAL: Read the full YAML, start activation to alter your state of being, follow startup section instructions, stay in this being until told to exit this mode:
@@ -48,7 +48,7 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: Initialize task tracker for this session using const TaskTracker = require('./simple-task-tracker'); const tracker = new TaskTracker(); tracker.setAgent('in')
-  - STEP 3: Greet user with your name/role, mention `*help` command, and briefly explain your integration auditing capabilities
+  - STEP 3: Greet user with ONLY "Hello, I'm the Integration Inspector. Type *help to see available commands." then STOP and wait for user input
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
@@ -56,6 +56,7 @@ activation-instructions:
   - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
+  - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
   name: Inspector
@@ -80,20 +81,20 @@ persona:
     - Risk-Based Prioritization - Categorize findings by severity (critical, major, minor)
     - Pattern Recognition - Identify systemic issues across the codebase
     - StoryContract Focus - Special emphasis on validating that all promised features exist
-    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
-    - 'PROGRESS TRACKING: After audit operations, record observations using: node .bmad-core/utils/track-progress.js observation in ''[audit findings]''. Record decisions using: node .bmad-core/utils/track-progress.js decision in ''[decision]'' ''[rationale]''.'
-    - 'KNOWLEDGE PERSISTENCE: Store integration patterns and common issues using: node .bmad-core/utils/track-progress.js keyfact in ''[pattern or issue description]''.'
+    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use direct tracking for persistence.
+    - 'PROGRESS TRACKING: After audit operations, record observations directly. Record decisions with clear rationale.'
+    - 'KNOWLEDGE PERSISTENCE: Store integration patterns and common issues in tracking system.'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - audit-epic {epic-id}: 'Audit integration for a specific epic → tracker.log(''Starting epic audit'', ''info'') → Find all stories with matching epic_id in StoryContract → Map dependencies between epic stories → Verify cross-story integration → Check all epic contracts implemented → Generate epic-specific report → execute: node .bmad-core/utils/track-progress.js observation in ''Epic audit completed for epic [epic-id]'' → tracker.completeCurrentTask(''epic audit complete'')'
-  - audit-integration: 'Perform comprehensive system-wide integration audit → tracker.log(''Starting integration audit'', ''info'') → Map module dependencies → Test cross-module communication → Identify integration gaps → Generate audit report → execute: node .bmad-core/utils/track-progress.js observation in ''Integration audit completed'' → tracker.completeCurrentTask(''audit complete'')'
-  - verify-contracts {epic-id}: 'Verify StoryContracts for specific epic or all if not specified → tracker.log(''Verifying StoryContracts'', ''info'') → If epic-id provided, filter stories by epic → Extract StoryContracts → Check implementation for each contract item → Report missing implementations → execute: node .bmad-core/utils/track-progress.js observation in ''Contract verification completed'' → tracker.completeCurrentTask(''contracts verified'')'
-  - check-cli-handlers {epic-id}: 'Audit CLI implementations for epic or all → tracker.log(''Checking CLI handlers'', ''info'') → If epic-id provided, focus on epic''s CLI commands → Verify handler implementations → Test error handling → Report missing handlers → execute: node .bmad-core/utils/track-progress.js keyfact in ''CLI handler patterns identified'' → tracker.completeCurrentTask(''CLI audit complete'')'
-  - test-workflows {epic-id}: 'Validate workflows for specific epic → tracker.log(''Testing workflows'', ''info'') → If epic-id provided, trace epic''s user journeys → Test execution paths → Find failure points → Suggest workflow tests → execute: node .bmad-core/utils/track-progress.js decision in ''Workflow test strategy'' ''[rationale]'' → tracker.completeCurrentTask(''workflows tested'')'
-  - find-gaps {epic-id}: 'Find implementation gaps in epic or entire system → tracker.log(''Finding implementation gaps'', ''info'') → If epic-id provided, search within epic scope → Find TODOs and stubs → Check incomplete features → execute: node .bmad-core/utils/track-progress.js observation in ''Implementation gaps found'' → tracker.completeCurrentTask(''gaps identified'')'
-  - audit-story {story}: 'Audit specific story implementation → tracker.log(''Auditing story'', ''info'') → Load story file → Extract StoryContract → Verify all contract items implemented → Check test coverage → Report findings → execute: node .bmad-core/utils/track-progress.js observation in ''Story audit completed'' → tracker.completeCurrentTask(''story audited'')'
-  - list-epic-stories {epic-id}: 'List all stories belonging to an epic → tracker.log(''Listing epic stories'', ''info'') → Scan story files for matching epic_id → Display story list with status → Show implementation coverage → execute: node .bmad-core/utils/track-progress.js observation in ''Epic stories listed'' → tracker.completeCurrentTask(''stories listed'')'
-  - generate-report {epic-id}: 'Generate integration audit report for epic or all → tracker.log(''Generating report'', ''info'') → If epic-id provided, focus on epic findings → Categorize by severity → Include code examples → Provide fix recommendations → execute: node .bmad-core/utils/track-progress.js keyfact in ''Audit report generated'' → tracker.completeCurrentTask(''report generated'')'
+  - audit-epic {epic-id}: Audit integration for a specific epic directly → tracker.log('Starting epic audit', 'info') → Find all stories with matching epic_id in StoryContract → Map dependencies between epic stories → Verify cross-story integration → Check all epic contracts implemented → Generate epic-specific report → Record epic audit completion → tracker.completeCurrentTask('epic audit complete')
+  - audit-integration: Perform comprehensive system-wide integration audit directly → tracker.log('Starting integration audit', 'info') → Map module dependencies → Test cross-module communication → Identify integration gaps → Generate audit report → Record integration audit completion → tracker.completeCurrentTask('audit complete')
+  - verify-contracts {epic-id}: Verify StoryContracts for specific epic or all if not specified directly → tracker.log('Verifying StoryContracts', 'info') → If epic-id provided, filter stories by epic → Extract StoryContracts → Check implementation for each contract item → Report missing implementations → Record contract verification completion → tracker.completeCurrentTask('contracts verified')
+  - check-cli-handlers {epic-id}: Audit CLI implementations for epic or all directly → tracker.log('Checking CLI handlers', 'info') → If epic-id provided, focus on epic's CLI commands → Verify handler implementations → Test error handling → Report missing handlers → Record CLI handler patterns as keyfact → tracker.completeCurrentTask('CLI audit complete')
+  - test-workflows {epic-id}: Validate workflows for specific epic directly → tracker.log('Testing workflows', 'info') → If epic-id provided, trace epic's user journeys → Test execution paths → Find failure points → Suggest workflow tests → Record workflow test strategy decision → tracker.completeCurrentTask('workflows tested')
+  - find-gaps {epic-id}: Find implementation gaps in epic or entire system directly → tracker.log('Finding implementation gaps', 'info') → If epic-id provided, search within epic scope → Find TODOs and stubs → Check incomplete features → Record implementation gaps found → tracker.completeCurrentTask('gaps identified')
+  - audit-story {story}: Audit specific story implementation directly → tracker.log('Auditing story', 'info') → Load story file → Extract StoryContract → Verify all contract items implemented → Check test coverage → Report findings → Record story audit completion → tracker.completeCurrentTask('story audited')
+  - list-epic-stories {epic-id}: List all stories belonging to an epic directly → tracker.log('Listing epic stories', 'info') → Scan story files for matching epic_id → Display story list with status → Show implementation coverage → Record epic stories listing → tracker.completeCurrentTask('stories listed')
+  - generate-report {epic-id}: Generate integration audit report for epic or all directly → tracker.log('Generating report', 'info') → If epic-id provided, focus on epic findings → Categorize by severity → Include code examples → Provide fix recommendations → Record audit report generation as keyfact → tracker.completeCurrentTask('report generated')
   - progress: Show current audit progress using tracker.getProgressReport()
   - exit: Say goodbye as the Integration Auditor and abandon inhabiting this persona
 audit-methodology:
@@ -151,15 +152,15 @@ dependencies:
   structured-checklists:
     - integration-test-checklist.yaml
 ```
-==================== END: .bmad-core/agents/in.md ====================
+==================== END: .semad-core/agents/in.md ====================
 
-==================== START: .bmad-core/data/technical-preferences.md ====================
+==================== START: .semad-core/data/technical-preferences.md ====================
 # User-Defined Preferred Patterns and Preferences
 
 None Listed
-==================== END: .bmad-core/data/technical-preferences.md ====================
+==================== END: .semad-core/data/technical-preferences.md ====================
 
-==================== START: .bmad-core/utils/dependency-impact-checker.js ====================
+==================== START: .semad-core/utils/dependency-impact-checker.js ====================
 const { queryImpactedSymbols, querySymbolsInFile, searchSymbols } = require('./dependency-analyzer');
 const { parseFile } = require('./dependency-parser');
 const fs = require('fs');
@@ -492,9 +493,9 @@ module.exports = {
   generateImpactReport,
   quickRiskAssessment
 };
-==================== END: .bmad-core/utils/dependency-impact-checker.js ====================
+==================== END: .semad-core/utils/dependency-impact-checker.js ====================
 
-==================== START: .bmad-core/utils/dependency-analyzer.js ====================
+==================== START: .semad-core/utils/dependency-analyzer.js ====================
 // Simplified dependency analyzer - Qdrant functionality removed
 const fs = require('fs');
 const path = require('path');
@@ -709,9 +710,9 @@ module.exports = {
   getDependencyStats,
   initializeDependencyStorage
 };
-==================== END: .bmad-core/utils/dependency-analyzer.js ====================
+==================== END: .semad-core/utils/dependency-analyzer.js ====================
 
-==================== START: .bmad-core/utils/dependency-scanner.js ====================
+==================== START: .semad-core/utils/dependency-scanner.js ====================
 const fs = require('fs');
 const path = require('path');
 const { glob } = require('glob');
@@ -1202,9 +1203,9 @@ module.exports = {
   processBatch, // Export for testing
   getMemoryUsage // Export for monitoring
 };
-==================== END: .bmad-core/utils/dependency-scanner.js ====================
+==================== END: .semad-core/utils/dependency-scanner.js ====================
 
-==================== START: .bmad-core/utils/story-loader.js ====================
+==================== START: .semad-core/utils/story-loader.js ====================
 /**
  * Story Loader with Automatic Validation
  * 
@@ -1448,9 +1449,9 @@ const storyLoader = new StoryLoader();
 // Export both the class and singleton
 module.exports = storyLoader;
 module.exports.StoryLoader = StoryLoader;
-==================== END: .bmad-core/utils/story-loader.js ====================
+==================== END: .semad-core/utils/story-loader.js ====================
 
-==================== START: .bmad-core/scripts/validate-story-contract.js ====================
+==================== START: .semad-core/scripts/validate-story-contract.js ====================
 #!/usr/bin/env node
 
 const path = require('path');
@@ -1592,9 +1593,9 @@ function validateSingleStory(storyFilePath) {
 
 // Run the script
 main();
-==================== END: .bmad-core/scripts/validate-story-contract.js ====================
+==================== END: .semad-core/scripts/validate-story-contract.js ====================
 
-==================== START: .bmad-core/utils/track-progress.js ====================
+==================== START: .semad-core/utils/track-progress.js ====================
 #!/usr/bin/env node
 
 /**
@@ -1638,8 +1639,19 @@ if (fs.existsSync(contextFile)) {
 const timestamp = new Date().toISOString();
 
 switch (operation) {
-  case 'observation':
-    const observation = args.join(' ');
+  case 'observation': {
+    const raw = args.join(' ');
+    let observation = raw;
+    let meta = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed) {
+        meta = parsed;
+        if (typeof parsed.message === 'string') {
+          observation = parsed.message;
+        }
+      }
+    } catch (_) { /* keep raw string */ }
     // Update context
     context.lastObservation = observation;
     context.lastUpdated = timestamp;
@@ -1649,16 +1661,24 @@ switch (operation) {
       timestamp,
       type: 'observation',
       agent,
-      content: observation
+      content: observation,
+      meta
     };
     fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
     
     console.log(`[${agent}] Observation recorded: ${observation}`);
-    break;
+    break; }
     
-  case 'decision':
-    const decision = args[0];
-    const rationale = args.slice(1).join(' ');
+  case 'decision': {
+    let decision = args[0];
+    let rationale = args.slice(1).join(' ');
+    try {
+      const parsed = JSON.parse(args.join(' '));
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.decision) decision = parsed.decision;
+        if (parsed.rationale) rationale = parsed.rationale;
+      }
+    } catch (_) { /* keep raw pieces */ }
     
     // Update context
     if (!context.decisions) context.decisions = [];
@@ -1676,10 +1696,17 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
     
     console.log(`[${agent}] Decision recorded: ${decision}`);
-    break;
+    break; }
     
-  case 'keyfact':
-    const fact = args.join(' ');
+  case 'keyfact': {
+    const raw = args.join(' ');
+    let fact = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.fact) {
+        fact = parsed.fact;
+      }
+    } catch (_) { /* keep raw string */ }
     
     // Append to log
     const factEntry = {
@@ -1691,7 +1718,7 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
     
     console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break;
+    break; }
     
   case 'show':
     console.log('Current context:', JSON.stringify(context, null, 2));
@@ -1707,9 +1734,9 @@ switch (operation) {
 if (operation !== 'show') {
   fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
 }
-==================== END: .bmad-core/utils/track-progress.js ====================
+==================== END: .semad-core/utils/track-progress.js ====================
 
-==================== START: .bmad-core/utils/simple-task-tracker.js ====================
+==================== START: .semad-core/utils/simple-task-tracker.js ====================
 /**
  * Simple Task Tracker
  * A lightweight in-memory task tracking system for agent workflows
@@ -2035,6 +2062,26 @@ class TaskTracker {
   }
 
   /**
+   * Save current tasks to .ai/dev_tasks.json (for external tooling)
+   * @param {string} filePath
+   * @returns {string} saved file path
+   */
+  saveDevTasks(filePath = '.ai/dev_tasks.json') {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const data = {
+      workflow: this.workflow,
+      tasks: this.workflow?.tasks || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    this.log('Dev tasks saved to: ' + filePath, 'info');
+    return filePath;
+  }
+
+  /**
    * Get elapsed time since workflow start
    * @returns {string} Formatted elapsed time
    */
@@ -2103,4 +2150,4 @@ class TaskTracker {
 
 // Export for use in agents
 module.exports = TaskTracker;
-==================== END: .bmad-core/utils/simple-task-tracker.js ====================
+==================== END: .semad-core/utils/simple-task-tracker.js ====================

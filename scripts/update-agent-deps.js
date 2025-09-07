@@ -6,7 +6,7 @@ const path = require('path');
 // Update agent files to use YAML task and checklist files
 function updateAgentDependencies() {
   const agentsDir = path.join(__dirname, '..', 'bmad-core', 'agents');
-  const agentFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md'));
+  const agentFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md') && !f.startsWith('AGENTS-'));
   
   console.log('Updating agent dependencies to use YAML files...\n');
   

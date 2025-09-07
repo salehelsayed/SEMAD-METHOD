@@ -8,7 +8,7 @@ const addFormats = require('ajv-formats');
 const chalk = require('chalk');
 
 // Use ModuleResolver for schema resolution
-const ModuleResolver = require('../bmad-core/utils/module-resolver');
+const ModuleResolver = require('../semad-core/utils/module-resolver');
 
 // Initialize AJV validator
 const ajv = new Ajv({ allErrors: true });
@@ -35,9 +35,9 @@ function loadSchema(schemaName, fallbackPath) {
 
 // Load all schemas
 const schemas = {
-  task: loadSchema('taskSchema', 'bmad-core/schemas/task-schema.json'),
-  structuredTask: loadSchema('structuredTaskSchema', 'bmad-core/schemas/structured-task-schema.json'),
-  checklist: loadSchema('checklistSchema', 'bmad-core/schemas/checklist-schema.json')
+  task: loadSchema('taskSchema', 'semad-core/schemas/task-schema.json'),
+  structuredTask: loadSchema('structuredTaskSchema', 'semad-core/schemas/structured-task-schema.json'),
+  checklist: loadSchema('checklistSchema', 'semad-core/schemas/checklist-schema.json')
 };
 
 // Compile validators

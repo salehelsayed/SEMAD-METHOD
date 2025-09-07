@@ -5,11 +5,11 @@ const {
   updateWorkingMemory, 
   recordObservation, 
   getWorkingMemory 
-} = require('../bmad-core/agents/index');
-const { storeMemorySnippet, retrieveMemory } = require('../bmad-core/utils/qdrant');
+} = require('../semad-core/agents/index');
+const { storeMemorySnippet, retrieveMemory } = require('../semad-core/utils/qdrant');
 
 const TEST_AGENT = 'test-agent';
-const MEMORY_DIR = path.join(__dirname, '..', 'bmad-core', 'ai');
+const MEMORY_DIR = path.join(__dirname, '..', 'semad-core', 'ai');
 const TEST_MEMORY_FILE = path.join(MEMORY_DIR, `working_memory_${TEST_AGENT}.json`);
 
 describe('Working Memory Functions', () => {

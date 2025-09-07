@@ -31,6 +31,32 @@ sections:
         columns: [Date, Version, Description, Author]
         instruction: Track document versions and changes
 
+  - id: feature-contract
+    title: Feature Contract
+    instruction: |
+      Define high-level features with unique IDs and acceptance criteria for traceability.
+      Use FEAT-<slug> format for feature IDs and AC-<feat>-<n> for acceptance criteria.
+    elicit: true
+    sections:
+      - id: features
+        title: Features
+        type: structured-list
+        instruction: Each feature must have id, title, description, acceptanceCriteria, priority, and risk
+        examples:
+          - id: FEAT-auth-session
+            title: User Authentication
+            description: Secure user authentication and session management
+            acceptanceCriteria:
+              - id: AC-auth-session-1
+                description: Users can log in with email/password
+              - id: AC-auth-session-2
+                description: Session expires after 24 hours of inactivity
+            priority: high
+            risk: medium
+            traceability:
+              epics: []
+              stories: []
+  
   - id: requirements
     title: Requirements
     instruction: Draft the list of functional and non functional requirements under the two child sections
@@ -40,9 +66,9 @@ sections:
         title: Functional
         type: numbered-list
         prefix: FR
-        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with FR
+        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with FR. Link to relevant FEAT-* IDs where applicable.
         examples:
-          - "FR6: The Todo List uses AI to detect and warn against potentially duplicate todo items that are worded differently."
+          - "FR6: The Todo List uses AI to detect and warn against potentially duplicate todo items that are worded differently. [FEAT-todo-ai]"
       - id: non-functional
         title: Non Functional
         type: numbered-list

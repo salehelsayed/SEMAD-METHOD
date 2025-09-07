@@ -82,7 +82,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 
 ## 5. Core Features
 
-### 5.1 Structured Task & Checklist System
+### 5.1 Structured Task & Checklist System [PRD-REQ-003]
 
 **Description**: Convert all tasks and checklists from markdown to YAML/JSON with explicit schemas
 
@@ -97,7 +97,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Enables automated validation
 - Supports tooling integration
 
-### 5.2 Working Memory & Scratchboard
+### 5.2 Working Memory & Scratchboard [PRD-REQ-004]
 
 **Description**: Implement persistent memory system for agent sessions
 
@@ -112,7 +112,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Provides debugging trail
 - Enables learning from past tasks
 
-### 5.3 Dynamic Plan Adaptation
+### 5.3 Dynamic Plan Adaptation [PRD-REQ-005]
 
 **Description**: Automatic decomposition of complex tasks using divide-and-conquer
 
@@ -127,7 +127,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Improves task completion rates
 - Enables parallel sub-task execution
 
-### 5.4 Automated Search Tool Generation
+### 5.4 Automated Search Tool Generation [PRD-REQ-006]
 
 **Description**: Generate contextual search queries from PRD content
 
@@ -142,7 +142,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Reduced manual research overhead
 - Context-aware knowledge base building
 
-### 5.5 StoryContract System
+### 5.5 StoryContract System [PRD-REQ-007]
 
 **Description**: Replace prose summaries with structured contracts
 
@@ -157,7 +157,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Creates traceable requirements
 - Enables automated test generation
 
-### 5.6 Automated Validation Framework
+### 5.6 Automated Validation Framework [PRD-REQ-008]
 
 **Description**: Schema-based validation at every workflow transition
 
@@ -173,7 +173,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Guaranteed schema compliance
 - Automated quality gates
 
-### 5.7 Enhanced Workflow Management
+### 5.7 Enhanced Workflow Management [PRD-REQ-009]
 
 **Description**: Flexible workflow options and improved agent coordination
 
@@ -190,7 +190,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 - Automated epic completion without manual oversight
 - Better user visibility into system operations
 
-### 5.8 Agent Role Clarification
+### 5.8 Agent Role Clarification [PRD-REQ-010]
 
 **Description**: Clear separation of responsibilities between agents
 
@@ -218,6 +218,39 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 **Benefits**:
 - Reduced risk of breaking changes
 - Comprehensive impact assessment
+
+## Requirements Index (PRD-REQ-*)
+
+Use stable IDs for all requirements and keep acceptance canonical here. Do not repurpose IDs; add new ones for material scope changes.
+
+| PRD ID       | Title                               | Acceptance (summary or anchor)       | Notes |
+|--------------|-------------------------------------|--------------------------------------|-------|
+| PRD-REQ-001  | Password reset request              | See Acceptance: AC-PRD-1             | Example row; replace with your scope |
+| PRD-REQ-002  | Rate limit reset requests           | See Acceptance: AC-PRD-1             | Example row; replace with your scope |
+
+## Glossary
+
+- **ADR**: Architecture Decision Record - documented architectural decision with context and consequences
+- **Agent**: AI-powered role (PM, Architect, Dev, QA, SM) executing specific workflow responsibilities  
+- **Coverage Matrix**: Table mapping PRD requirements to Epics, Stories, and acceptance criteria
+- **DoD**: Definition of Done - checklist confirming story/epic completion criteria
+- **DoR**: Definition of Ready - prerequisites before work can begin on a story
+- **ECM**: Epic Coverage Matrix - detailed mapping of capabilities to components and stories
+- **Epic Contract**: Structured specification linking PRD requirements to implementation stories
+- **Gate**: Quality checkpoint blocking progress until specific criteria are met
+- **NFR**: Non-Functional Requirement - performance, security, compliance, operability constraints
+- **Orphan**: Unmapped requirement or story lacking traceability to PRD
+- **PRD**: Product Requirements Document - canonical source of feature requirements
+- **Reset**: Initiate credential recovery via email link (not token redemption)
+- **Reverse Alignment**: Process of generating documentation from code implementation
+- **SEMAD**: Structured Engineering Method for AI Development
+- **Story Contract**: YAML specification linking story to PRD requirements and acceptance
+- **Traceability**: End-to-end linkage from PRD → Architecture → Epic → Story → Implementation
+
+## Change Control
+- Version PRD on each change; keep IDs immutable.
+- Log deltas in `.ai/observations/` with timestamp, PRD ID(s) affected, and rationale.
+- Mirror changes in `docs/coverage.md` and Architecture coverage table.
 - Proactive dependency management
 
 ## 6. Technical Architecture

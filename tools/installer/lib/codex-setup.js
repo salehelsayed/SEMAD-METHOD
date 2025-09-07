@@ -49,8 +49,9 @@ class CodexSetup {
     
     // Create .codex directory structure
     await this.setupCodexConfig(installDir, selectedAgent);
-    
-    // Create agent-specific AGENTS.md files in .bmad-core
+    // Remove any legacy helper docs from core agent directories
+    await this.cleanupLegacyAgentSpecificFiles(installDir);
+    // Create agent-specific helper docs in a separate help directory
     await this.createAgentSpecificFiles(installDir, selectedAgent);
     
     console.log(chalk.green("\n✓ OpenAI Codex CLI setup complete!"));
@@ -207,12 +208,15 @@ validate_on_save = true
     const agents = selectedAgent ? [selectedAgent] : await this.getAllAgentIds(installDir);
     
     for (const agentId of agents) {
+      // Skip generated helper docs to avoid recursive duplication
+      if (agentId.startsWith('AGENTS-')) continue;
       const agentPath = await this.findAgentPath(agentId, installDir);
       
       if (agentPath) {
-        // Create AGENTS.md in the agent's directory
-        const agentDir = path.dirname(agentPath);
-        const agentSpecificMdPath = path.join(agentDir, `AGENTS-${agentId}.md`);
+        // Write helper docs to a dedicated help directory to avoid polluting core agents
+        const helpDir = path.join(installDir, '.ai', 'agents-docs');
+        await fileManager.ensureDirectory(helpDir);
+        const agentSpecificMdPath = path.join(helpDir, `${agentId}.md`);
         
         const agentContent = await fileManager.readFile(agentPath);
         const agentInfo = this.extractAgentInfo(agentContent);
@@ -234,7 +238,7 @@ validate_on_save = true
         mdContent += `- Track tasks in \`.ai/${agentId}_tasks.json\`\n\n`;
         
         await fileManager.writeFile(agentSpecificMdPath, mdContent);
-        console.log(chalk.green(`✓ Created ${path.basename(agentSpecificMdPath)}`));
+        console.log(chalk.green(`✓ Created agent help doc: ${path.relative(installDir, agentSpecificMdPath)}`));
       }
     }
   }
@@ -294,10 +298,12 @@ validate_on_save = true
    * Find agent path
    */
   async findAgentPath(agentId, installDir) {
+    // Normalize in case a generated filename (e.g., AGENTS-analyst) is passed in
+    const normalizedId = agentId.startsWith('AGENTS-') ? agentId.replace(/^AGENTS-+/, '') : agentId;
     const possiblePaths = [
-      path.join(installDir, ".bmad-core", "agents", `${agentId}.md`),
-      path.join(installDir, "bmad-core", "agents", `${agentId}.md`),
-      path.join(installDir, "agents", `${agentId}.md`)
+      path.join(installDir, ".bmad-core", "agents", `${normalizedId}.md`),
+      path.join(installDir, "bmad-core", "agents", `${normalizedId}.md`),
+      path.join(installDir, "agents", `${normalizedId}.md`)
     ];
     
     for (const agentPath of possiblePaths) {
@@ -326,11 +332,40 @@ validate_on_save = true
     for (const location of locations) {
       if (await fileManager.pathExists(location)) {
         const agentFiles = glob.sync("*.md", { cwd: location });
-        allAgentIds.push(...agentFiles.map(file => path.basename(file, ".md")));
+        // Exclude generated helper docs (AGENTS-*.md) to prevent recursive duplication
+        const baseAgentFiles = agentFiles.filter(f => !/^AGENTS-/.test(f));
+        allAgentIds.push(...baseAgentFiles.map(file => path.basename(file, ".md")));
       }
     }
     
     return [...new Set(allAgentIds)];
+  }
+
+  /**
+   * Remove legacy AGENTS-* helper files from core agent directories
+   */
+  async cleanupLegacyAgentSpecificFiles(installDir) {
+    const glob = require('glob');
+    const targets = [
+      path.join(installDir, '.bmad-core', 'agents'),
+      path.join(installDir, 'bmad-core', 'agents'),
+      path.join(installDir, 'agents')
+    ];
+
+    for (const dir of targets) {
+      if (await fileManager.pathExists(dir)) {
+        const files = glob.sync('AGENTS-*.md', { cwd: dir });
+        for (const f of files) {
+          const full = path.join(dir, f);
+          try {
+            await fileManager.remove(full);
+            console.log(chalk.green(`✓ Removed legacy helper doc: ${path.relative(installDir, full)}`));
+          } catch (e) {
+            console.warn(chalk.yellow(`⚠️  Could not remove ${full}: ${e.message}`));
+          }
+        }
+      }
+    }
   }
 }
 

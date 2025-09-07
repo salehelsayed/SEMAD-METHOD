@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const { parseTaskMarkdown, parseChecklistMarkdown, validateConversion } = require('../bmad-core/scripts/convert-tasks-v2');
+const { parseTaskMarkdown, parseChecklistMarkdown, validateConversion } = require('../semad-core/scripts/convert-tasks-v2');
 
 // Test data directory
 const testDataDir = path.join(__dirname, 'test-data');

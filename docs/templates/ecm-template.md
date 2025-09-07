@@ -12,7 +12,7 @@ Required columns
 - Story ID: StoryContract ID that will implement this row (or TBA)
 - Delta: existing | extend | new
 - Status: planned | in_progress | done
-- SourceRef: Optional code anchor when Delta ≠ new (e.g., src/auth/login.ts#login)
+- SourceRef: Required when Delta ≠ new (e.g., src/auth/login.ts#login)
 
 Template
 
@@ -31,4 +31,3 @@ Usage
 - PO fills ECM using PRD + architecture + manifest (.ai/documentation-manifest.json) before story creation.
 - SM creates StoryContracts referencing the Story ID and underlying REQ/INT.
 - QA uses ECM as the checklist for validation.
-

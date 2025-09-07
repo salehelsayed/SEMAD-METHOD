@@ -121,7 +121,8 @@ class IdeSetup extends BaseIdeSetup {
     await fileManager.ensureDirectory(tasksDir);
 
     // Setup agents
-    for (const agentId of agentIds) {
+    for (const rawId of agentIds) {
+      const agentId = rawId.startsWith('AGENTS-') ? rawId.replace(/^AGENTS-+/, '') : rawId;
       // Find the agent file - for expansion packs, prefer the expansion pack version
       let agentPath;
       if (packageName !== "core") {
@@ -301,6 +302,8 @@ class IdeSetup extends BaseIdeSetup {
   }
 
   async findAgentPath(agentId, installDir) {
+    // Normalize any generated helper ID (AGENTS-*) back to the base agent id
+    agentId = agentId.startsWith('AGENTS-') ? agentId.replace(/^AGENTS-+/, '') : agentId;
     // Try to find the agent file in various locations
     const possiblePaths = [
       path.join(installDir, ".bmad-core", "agents", `${agentId}.md`),
@@ -335,7 +338,8 @@ class IdeSetup extends BaseIdeSetup {
     
     if (await fileManager.pathExists(agentsDir)) {
       const agentFiles = glob.sync("*.md", { cwd: agentsDir });
-      allAgentIds.push(...agentFiles.map((file) => path.basename(file, ".md")));
+      const baseAgentFiles = agentFiles.filter(f => !/^AGENTS-/.test(f));
+      allAgentIds.push(...baseAgentFiles.map((file) => path.basename(file, ".md")));
     }
     
     // Also check for expansion pack agents in dot folders
@@ -343,7 +347,8 @@ class IdeSetup extends BaseIdeSetup {
     for (const expDir of expansionDirs) {
       const fullExpDir = path.join(installDir, expDir);
       const expAgentFiles = glob.sync("*.md", { cwd: fullExpDir });
-      allAgentIds.push(...expAgentFiles.map((file) => path.basename(file, ".md")));
+      const baseAgentFiles = expAgentFiles.filter(f => !/^AGENTS-/.test(f));
+      allAgentIds.push(...baseAgentFiles.map((file) => path.basename(file, ".md")));
     }
     
     // Remove duplicates
@@ -362,7 +367,8 @@ class IdeSetup extends BaseIdeSetup {
     if (await fileManager.pathExists(agentsDir)) {
       const glob = require("glob");
       const agentFiles = glob.sync("*.md", { cwd: agentsDir });
-      allAgentIds.push(...agentFiles.map((file) => path.basename(file, ".md")));
+      const baseAgentFiles = agentFiles.filter(f => !/^AGENTS-/.test(f));
+      allAgentIds.push(...baseAgentFiles.map((file) => path.basename(file, ".md")));
     }
     
     return [...new Set(allAgentIds)];
@@ -602,7 +608,9 @@ class IdeSetup extends BaseIdeSetup {
     try {
       const glob = require("glob");
       const agentFiles = glob.sync("*.md", { cwd: agentsDir });
-      return agentFiles.map(file => path.basename(file, ".md"));
+      return agentFiles
+        .filter(f => !/^AGENTS-/.test(f))
+        .map(file => path.basename(file, ".md"));
     } catch (error) {
       console.warn(`Failed to read expansion pack agents from ${packPath}: ${error.message}`);
       return [];

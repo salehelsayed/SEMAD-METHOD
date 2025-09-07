@@ -8,7 +8,7 @@ const addFormats = require('ajv-formats');
 const glob = require('glob');
 
 // Import ModuleResolver for schema resolution
-const ModuleResolver = require('../bmad-core/utils/module-resolver');
+const ModuleResolver = require('../semad-core/utils/module-resolver');
 
 // Initialize AJV with strict mode
 const ajv = new Ajv({ strict: true, allErrors: true, allowUnionTypes: true });

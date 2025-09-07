@@ -20,11 +20,11 @@ steps:
     name: Load Core Configuration and Check Workflow
     description: ''
     actions:
-      - description: Load `.bmad-core/core-config.yaml` from the project root (HIDDEN directory with dot prefix)
+      - description: Load `.semad-core/core-config.yaml` from the project root (HIDDEN directory with dot prefix)
         elicit: false
         metadata:
           originalIndent: 0
-      - description: 'If the file does not exist, HALT and inform the user: ".bmad-core/core-config.yaml not found. This file is required for story creation. You can either: 1) Copy it from GITHUB .bmad-core/core-config.yaml and configure it for your project OR 2) Run the BMad installer against your project to upgrade and add the file automatically. Please add and configure .bmad-core/core-config.yaml before proceeding."'
+      - description: 'If the file does not exist, HALT and inform the user: ".semad-core/core-config.yaml not found. This file is required for story creation. You can either: 1) Copy it from GITHUB .semad-core/core-config.yaml and configure it for your project OR 2) Run the BMad installer against your project to upgrade and add the file automatically. Please add and configure .semad-core/core-config.yaml before proceeding."'
         elicit: false
         metadata:
           originalIndent: 0
@@ -60,9 +60,19 @@ steps:
       level: 3
       originalNumber: '0'
   - id: step2
-    name: Identify Next Story for Preparation
-    description: ''
-    actions: []
+    name: Identify Next Story for Preparation (ECM‑Aware)
+    description: Prefer EpicContract + ECM when available to drive thin, incremental slices. Fallback to sharded PRD flow when ECM is not present.
+    actions:
+      - description: Check for EpicContract files under docs/epics/ for the active epic; if present, parse frontmatter and ECM table
+        elicit: false
+      - description: If ECM present, select the next planned row (Status=planned, or without Story ID). Map REQ IDs and INT IDs from that row
+        elicit: true
+      - description: Determine slice type for this epic in order: (a) Story 0: feature flag + telemetry only (if not yet created), (b) Story 1: probe/contract tests for INTs (read‑only; no state change) if not yet created, (c) Next ECM row: 1 INT × 1 flow variant per story
+        elicit: true
+      - description: If no EpicContract/ECM found, proceed with legacy selection using sharded PRD files
+        elicit: false
+      - description: Announce chosen slice (flag/probe/ECM row) and story id context (epic, sequence) before drafting
+        elicit: true
     metadata:
       level: 3
       originalNumber: '1'
@@ -252,6 +262,8 @@ steps:
     name: Parse Story Requirements into StoryContract
     description: From the sharded PRD and architecture docs, extract endpoints, data models, file paths and acceptance criteria and construct a StoryContract YAML block.
     actions:
+      - description: If using ECM, set traceability.reqIds and traceability.integrationPointIds from the selected ECM row; set acceptanceCriteriaCovered from epic acceptanceScenarios that reference those reqIds/flowIds
+        elicit: false
       - description: Extract all API endpoints from architecture documents with their method, path, description, request body, and success response
         elicit: false
         metadata:
@@ -376,6 +388,18 @@ steps:
         elicit: true
         metadata:
           originalIndent: 2
+      - description: 'If sliceType is flag: include only feature flag scaffolding + telemetry tasks (no behavior changes)'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 'If sliceType is probe: include contract test/probe tasks for the INTs in scope; ensure no state changes are introduced'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 'If sliceType is ECM row: constrain to one integrationPoint and one flow variant; keep vertical slice thin'
+        elicit: true
+        metadata:
+          originalIndent: 2
       - description: Each task must reference relevant architecture documentation
         elicit: true
         metadata:
@@ -385,6 +409,10 @@ steps:
         metadata:
           originalIndent: 2
       - description: Link tasks to acceptance criteria from the contract (e.g., `Task 1 (AC-1, AC-3)`) so developers know exactly what to implement
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Add Integration Verification steps and a Rollback Plan in story sections for any slice that touches INTs
         elicit: true
         metadata:
           originalIndent: 2
@@ -463,6 +491,25 @@ steps:
         metadata:
           originalIndent: 2
       # Memory saving removed - no longer using memory functions
+  - id: dor-gate
+    name: DoR Sufficiency Gate (SM)
+    description: Enforce DoR-Mini with readiness scoring and stop rule. Locks story on pass.
+    actions:
+      - description: Execute DoR linter to compute readiness and lock story if ≥90; auto-spawn spike if <90 after 2 passes
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/sm/dor-gate.js
+          args: []
+        outputs:
+          exitCode: dorExitCode
+          stdout: dorStdout
+      - description: Halt if DoR gate fails (<90). If first failure (70–89), perform one revision then re-run manually; if still <90, spike is created.
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: {{dorExitCode !== 0}}
+          errorMessage: DoR gate not passed. See report: {{dorStdout}}
 inputs: {}
 outputs: {}
 metadata:

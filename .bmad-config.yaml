@@ -1,0 +1,40 @@
+agents:
+  analyst:
+    enabled: true
+    autoActivate: false
+  pm:
+    enabled: true
+    autoActivate: false
+    commands:
+      validateFeatureCoverage:
+        enabled: true
+  architect:
+    enabled: true
+    autoActivate: false
+  scrumMaster:
+    enabled: true
+    autoActivate: false
+  dev:
+    enabled: true
+    autoActivate: false
+  qa:
+    enabled: true
+    autoActivate: false
+
+agentSettings:
+  scrumMaster:
+    autoSplitStories: true
+    maxStoriesPerEpic: -1  # unlimited
+    complexityBudget: 5  # default story complexity budget
+  pm:
+    coverageThreshold: 100
+  qa:
+    minTestCoverage: 80
+
+features:
+  traceabilityTags: required
+  unlimitedBrownfieldSplit: true
+  coverageValidation:
+    enabled: true
+    enforceInCI: true
+    autoGenerateStories: true

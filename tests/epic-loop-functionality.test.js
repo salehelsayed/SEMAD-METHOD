@@ -13,7 +13,7 @@ const {
   getStoriesForEpic, 
   findNextApprovedStoryInEpic, 
   getEpicStatus 
-} = require('../bmad-core/utils/find-next-story');
+} = require('../semad-core/utils/find-next-story');
 
 describe('Epic Loop Functionality', () => {
   let tempDir;
@@ -27,7 +27,7 @@ describe('Epic Loop Functionality', () => {
     fs.mkdirSync(storyDir, { recursive: true });
 
     // Create test configuration directory structure
-    const bmadCoreDir = path.join(tempDir, 'bmad-core');
+    const bmadCoreDir = path.join(tempDir, 'semad-core');
     const utilsDir = path.join(bmadCoreDir, 'utils');
     fs.mkdirSync(utilsDir, { recursive: true });
 

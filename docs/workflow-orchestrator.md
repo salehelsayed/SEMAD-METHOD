@@ -63,12 +63,25 @@ bmad-orchestrator reverse-quality-gate --threshold 0.9
 
 # Validate an EpicContract file (PO/PM shortcut)
 bmad-orchestrator validate-epic docs/prd/epics/epic-5.md
+
+# Validate ECM coverage (PM/PO shortcut)
+node tools/ecm-validate.js docs/prd/epics/epic-5.md
 ```
 
-- `po-shard-docs`: Splits `docs/prd/PRD.md` and `docs/architecture/architecture.md` by H2 sections when sharding is enabled in `bmad-core/core-config.yaml`, and writes per-epic summaries under `docs/prd/epics/epic-*.md`.
+- `po-shard-docs`: Splits `docs/prd/PRD.md` and `docs/architecture/architecture.md` by H2 sections when sharding is enabled in `semad-core/core-config.yaml` (legacy `bmad-core/core-config.yaml` still supported), and writes per-epic summaries under `docs/prd/epics/epic-*.md`.
 - `reverse-align`: Runs cleanup → analyze → rewrite → shard → recreate stories → validate → report → manifest.
 - `reverse-quality-gate`: Emits `.ai/reports/reverse-align-gate.json` and fails if coverage is below the threshold.
 - `validate-epic <path>`: Runs the EpicContract validator and emits a PO report in `.ai/adhoc/*` and a JSON artifact in `.ai/reports/*`.
+- `ecm-validate <path>` (script): Validates the Epic Coverage Matrix inside an EpicContract; requires 100% REQ/INT coverage and SourceRef when Delta ≠ new.
+
+## Reverse‑Align Enhancements (QA/PM/SM Integration)
+
+Reverse‑align now supports optional gates aligned with PM/SM/QA updates:
+
+- `--epic-validate`: Validates all epics in `docs/epics` (ECM + EpicContract frontmatter).
+- `--integration-safety` (default on): Runs QA integration safety scan over stories and emits standardized QA reports under `.ai/reports/qa/integration-safety-<ts>.{json,md}`.
+- `--qa-normalize-reports` (default on): Normalizes QA outputs (e.g., `.ai/orphans-report.json`) into `.ai/reports/qa/*-<ts>.{json,md}`.
+- `--generate-cleanup-stories`: Converts normalized QA findings (e.g., orphaned files) into precise cleanup stories.
 
 ### Story Consistency & QA Findings
 - Story creation uses a deterministic structure aligned with the project story template (StoryContract as the single source of truth at the top).
@@ -147,7 +160,7 @@ orchestrator.callbacks = {
 
 ## Workflow Configuration
 
-Workflows are defined in YAML files under `bmad-core/workflows/`. The orchestrator automatically detects Dev→QA workflows by looking for:
+Workflows are defined in YAML files under `semad-core/workflows/` (legacy `bmad-core/workflows/` supported). The orchestrator automatically detects Dev→QA workflows by looking for:
 
 - Dev agent with `implement_story` action or `implementation_files` output
 - QA agent with `review_implementation` or `review_story` action
@@ -194,7 +207,7 @@ workflow:
 ### Common Issues
 
 1. **Workflow Not Found**
-   - Ensure workflow YAML files exist in `bmad-core/workflows/`
+   - Ensure workflow YAML files exist in `semad-core/workflows/`
    - Check file naming matches workflow ID
 
 2. **Metadata Persistence Issues**
@@ -319,9 +332,9 @@ When extending the orchestrator:
 
 ## Related Documentation
 
-- [BMad Workflows Guide](../bmad-core/docs/workflows.md)
-- [Agent Development Guide](../bmad-core/docs/agents.md)
-- [Story Contract Specification](../bmad-core/docs/story-contract.md)
+- [SEMAD Workflows Guide](../semad-core/docs/workflows.md)
+- [Agent Development Guide](../semad-core/docs/agents.md)
+- [Story Contract Specification](../semad-core/docs/story-contract.md)
 
 ## Task Bundle Lifecycle
 

@@ -33,5 +33,5 @@ outputs: {}
 notes: |
   - This task runs the Dev↔QA loop entirely in-process using the function registry.
   - It will attempt structured fixes via address-qa-feedback.yaml when present.
-  - QA pass is enforced via QA gate (local/tools or .bmad-core/tools), or npm scripts/test.
+  - QA pass is enforced via QA gate (local/tools or .semad-core/tools), or npm scripts/test.
   - Fix verification requires 100% completion via verify-qa-fixes.js.

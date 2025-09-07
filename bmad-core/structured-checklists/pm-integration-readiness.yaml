@@ -1,0 +1,60 @@
+id: pm-integration-readiness
+name: PM Integration Readiness (Brownfield)
+categories:
+  - name: Integration Contracts
+    items:
+      - description: All integrationPoints (INT-*) enumerated with ownerTeam and contract links
+        checked: false
+      - description: Each INT has a SourceRef to current code (file#symbol, route, or module)
+        checked: false
+      - description: Delta classification per INT set (existing | extend | new)
+        checked: false
+      - description: SourceRef is present for every INT where delta ≠ new
+        checked: false
+      - description: Minimal contract snapshot per INT (request/response, errors, idempotency, version)
+        checked: false
+  - name: ECM Coverage
+    items:
+      - description: Epic Coverage Matrix (ECM) table present in the EpicContract
+        checked: false
+      - description: Every REQ-* in the epic appears in ≥1 ECM row
+        checked: false
+      - description: Every INT-* in the epic appears in ≥1 ECM row
+        checked: false
+      - description: tools/ecm-validate.js passes without errors
+        checked: false
+  - name: Rollout & Observability
+    items:
+      - description: Feature flag and kill switch defined (default off)
+        checked: false
+      - description: Canary plan documented (e.g., 10% → 50% → 100%)
+        checked: false
+      - description: Observability hooks enumerated (SLOs, dashboards, alerts, logFields)
+        checked: false
+      - description: Rollback plan is feasible and documented
+        checked: false
+  - name: Story Slicing
+    items:
+      - description: Story 0 planned for feature flag scaffolding + telemetry only
+        checked: false
+      - description: Story 1 planned for contract tests/probe path (read-only; no state change)
+        checked: false
+      - description: Subsequent slices are one INT × one flow at a time
+        checked: false
+      - description: Negative and resiliency scenarios planned per INT
+        checked: false
+      - description: Each story includes Integration Verification steps for existing functionality
+        checked: false
+      - description: Each story includes rollback plan and performance budget check
+        checked: false
+  - name: Validation Gates
+    items:
+      - description: EpicContract validated via npm run validate:epic
+        checked: false
+      - description: Feature coverage validation planned (threshold 100%; report emitted)
+        checked: false
+      - description: QA docs-code alignment check planned before development handoff
+        checked: false
+result:
+  status: pending
+  notes: "Run this after drafting brownfield PRD/Epic; fix any unchecked items before SM handoff."

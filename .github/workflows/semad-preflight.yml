@@ -1,0 +1,21 @@
+name: SEMAD Preflight
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: SEMAD brand compatibility (non-blocking)
+        run: npm run preflight:brand
+        continue-on-error: true
+

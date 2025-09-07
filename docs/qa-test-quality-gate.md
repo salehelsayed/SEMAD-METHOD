@@ -50,3 +50,8 @@ TEST_COVERAGE_MIN=75 npm run test:quality
 
 - CI: Add `npm run test:quality` to your QA gate or preflight.
 - Orchestrator: Run before `gate:qa` to fail early on low-value tests.
+
+## Traceability Alignment
+
+- When StoryContracts include `acceptanceRef` and `qaHooks.acceptanceTestIds`, ensure tests reference these IDs in titles or metadata.
+- QA should sample that acceptance text mirrors PRD acceptance for the referenced PRD IDs.

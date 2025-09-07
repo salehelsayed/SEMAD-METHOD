@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { findNextApprovedStory, getAllStoriesStatus } = require('../bmad-core/utils/find-next-story');
+const { findNextApprovedStory, getAllStoriesStatus } = require('../semad-core/utils/find-next-story');
 
 describe('Find Next Story Utility', () => {
   const testStoriesDir = path.join(__dirname, 'test-stories');

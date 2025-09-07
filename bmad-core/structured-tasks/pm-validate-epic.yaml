@@ -1,0 +1,49 @@
+id: pm-validate-epic
+name: PM Validate Epic (ECM + Contract)
+purpose: Validate a newly created EpicContract by running ECM coverage validation and EpicContract field validation. Emits reports under .ai/.
+inputs:
+  epicPath:
+    description: Path to the EpicContract markdown file. If not supplied, the task will prompt or attempt to discover the latest file under docs/epics/.
+    type: string
+    required: false
+steps:
+  - id: step0
+    name: Resolve Epic Path
+    description: Determine which EpicContract file to validate.
+    actions:
+      - description: If inputs.epicPath provided and exists, use it
+        elicit: false
+      - description: If not provided, list files under docs/epics/*.md sorted by mtime and prompt user to select
+        elicit: true
+  - id: step1
+    name: Run ECM Validation
+    description: Validate ECM table coverage and SourceRef requirements.
+    actions:
+      - description: Execute ECM validator
+        elicit: false
+        function: execute
+        parameters:
+          command: node tools/ecm-validate.js {{epicPath}}
+  - id: step2
+    name: Run EpicContract Validation
+    description: Validate EpicContract frontmatter against required fields.
+    actions:
+      - description: Execute EpicContract validator (npm script)
+        elicit: false
+        function: execute
+        parameters:
+          command: npm run validate:epic -- --file {{epicPath}}
+  - id: step3
+    name: Summarize Results
+    description: Provide locations of generated reports and next steps.
+    actions:
+      - description: Print summary of validation outputs in .ai/reports and .ai/adhoc
+        elicit: false
+outputs:
+  epicPath:
+    description: Validated epic path
+    type: string
+metadata:
+  notes: |
+    - This task expects tools/ecm-validate.js and scripts/validate-epic-contract.js to exist.
+    - Run after creating or updating the epic to ensure DoR is met.

@@ -144,6 +144,14 @@ categories:
       agent needs to get the work down and not create a mess.
     metadata:
       originalName: 5. TESTING GUIDANCE
+  - name: INTEGRATION SAFETY (Brownfield)
+    items:
+      - description: If story touches `integrationPointIds`, `integrationVerification` section is present with IV1/IV2/IV3 checks
+        checked: false
+      - description: If story touches `integrationPointIds`, `rollbackPlan` is present with steps and verification
+        checked: false
+      - description: If `sliceType` is `int-flow`, confirm prior `flag` and `probe` slices exist or justification is recorded
+        checked: false
 result:
   status: pending
   notes: |-

@@ -50,7 +50,7 @@ class ConfigLoader {
               agents.push({
                 id: agentId,
                 name: agentConfig.title || agentConfig.name || agentId,
-                file: `bmad-core/agents/${entry.name}`,
+                file: `semad-core/agents/${entry.name}`,
                 description: agentConfig.whenToUse || 'No description available'
               });
             }

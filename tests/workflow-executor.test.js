@@ -1,17 +1,17 @@
-const WorkflowExecutor = require('../bmad-core/utils/workflow-executor');
-const WorkflowConfigLoader = require('../bmad-core/utils/workflow-config-loader');
+const WorkflowExecutor = require('../semad-core/utils/workflow-executor');
+const WorkflowConfigLoader = require('../semad-core/utils/workflow-config-loader');
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
 
 // Mock the error handler
-jest.mock('../bmad-core/utils/error-handler', () => ({
+jest.mock('../semad-core/utils/error-handler', () => ({
   handle: jest.fn(),
   warn: jest.fn()
 }));
 
 // Mock the workflow monitor
-jest.mock('../bmad-core/utils/workflow-monitor', () => {
+jest.mock('../semad-core/utils/workflow-monitor', () => {
   return jest.fn().mockImplementation(() => ({
     monitorExecution: jest.fn().mockResolvedValue({
       status: 'success',
@@ -24,7 +24,7 @@ jest.mock('../bmad-core/utils/workflow-monitor', () => {
 describe('WorkflowExecutor', () => {
   let executor;
   const testRootDir = path.join(__dirname, 'test-project');
-  const workflowsDir = path.join(testRootDir, 'bmad-core', 'workflows');
+  const workflowsDir = path.join(testRootDir, 'semad-core', 'workflows');
 
   beforeEach(async () => {
     // Create test directory structure

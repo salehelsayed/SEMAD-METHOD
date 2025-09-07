@@ -1,0 +1,65 @@
+name: Feature Coverage Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  coverage-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run feature coverage validation
+        run: npm run validate:coverage:strict
+        
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: |
+            .ai/reports/feature-coverage.json
+            .ai/reports/feature-coverage.md
+            
+      - name: Comment PR with coverage results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const coverageReport = JSON.parse(fs.readFileSync('.ai/reports/feature-coverage.json', 'utf8'));
+            const summary = coverageReport.summary;
+            const metrics = coverageReport.metrics;
+            
+            const comment = `## 📊 Feature Coverage Report
+            
+            **Overall Coverage**: ${summary.overallPct}% (threshold ${summary.threshold}%)
+            **Status**: ${summary.status === 'pass' ? '✅ PASS' : '❌ FAIL'}
+            
+            ### Metrics:
+            - Features with epics: ${metrics.featureCoveredByEpics}/${metrics.featureTotal} (${metrics.featureEpicCoveragePct}%)
+            - Features with stories: ${metrics.featureCoveredByStories}/${metrics.featureTotal} (${metrics.featureStoryCoveragePct}%)
+            - Features with code: ${metrics.featureCoveredByCode}/${metrics.featureTotal} (${metrics.featureCodeCoveragePct}%)
+            - Acceptance criteria with tests: ${metrics.acceptanceCoveredByTests}/${metrics.acceptanceTotal} (${metrics.acceptanceTestCoveragePct}%)
+            
+            ${summary.status === 'fail' ? '⚠️ Coverage check failed. Please add missing stories, tests, or annotations.' : ''}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

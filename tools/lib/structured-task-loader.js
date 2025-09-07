@@ -7,7 +7,15 @@ const addFormats = require('ajv-formats');
 class StructuredTaskLoader {
   constructor(rootDir) {
     this.rootDir = rootDir;
-    this.coreConfigPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
+    // Prefer new hidden `.semad-core`, then `semad-core`, then legacy
+    const candidates = [
+      path.join(rootDir, '.semad-core', 'core-config.yaml'),
+      path.join(rootDir, 'semad-core', 'core-config.yaml'),
+      path.join(rootDir, '.semad-core', 'core-config.yaml'),
+      path.join(rootDir, 'semad-core', 'core-config.yaml'),
+      path.join(rootDir, 'core-config.yaml')
+    ];
+    this.coreConfigPath = candidates.find(p => require('fs').existsSync(p)) || candidates[0];
     this.ajv = new Ajv();
     addFormats(this.ajv);
     this.taskValidator = null;
@@ -17,7 +25,7 @@ class StructuredTaskLoader {
   async initializeValidators() {
     try {
       // Load structured task schema
-      const schemaPath = path.join(this.rootDir, 'bmad-core', 'schemas', 'structured-task-schema.json');
+      const schemaPath = path.join(this.rootDir, 'semad-core', 'schemas', 'structured-task-schema.json');
       if (await this.fileExists(schemaPath)) {
         const schemaContent = await fs.readFile(schemaPath, 'utf8');
         const schema = JSON.parse(schemaContent);

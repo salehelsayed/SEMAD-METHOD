@@ -323,6 +323,26 @@ class TaskTracker {
   }
 
   /**
+   * Save current tasks to .ai/dev_tasks.json (for external tooling)
+   * @param {string} filePath
+   * @returns {string} saved file path
+   */
+  saveDevTasks(filePath = '.ai/dev_tasks.json') {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const data = {
+      workflow: this.workflow,
+      tasks: this.workflow?.tasks || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    this.log('Dev tasks saved to: ' + filePath, 'info');
+    return filePath;
+  }
+
+  /**
    * Get elapsed time since workflow start
    * @returns {string} Formatted elapsed time
    */

@@ -13,9 +13,9 @@ describe('Planned features do not affect active-entity coverage', () => {
     fs.mkdirSync(path.join(docsDir, 'architecture.generated'), { recursive: true });
     fs.mkdirSync(path.join(docsDir, 'prd.generated'), { recursive: true });
     // minimal core-config to satisfy FilePathResolver
-    fs.mkdirSync(path.join(root, 'bmad-core'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'semad-core'), { recursive: true });
     fs.writeFileSync(
-      path.join(root, 'bmad-core', 'core-config.yaml'),
+      path.join(root, 'semad-core', 'core-config.yaml'),
       [
         'devStoryLocation: docs/stories',
         'devDebugLog: .ai/dev-debug.log',

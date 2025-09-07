@@ -13,7 +13,7 @@ const { spawnSync } = require('child_process');
 class DevNextStoryRunner {
   constructor(rootDir = process.cwd()) {
     this.rootDir = rootDir;
-    this.configPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
+    this.configPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
   }
 
   /**
@@ -34,7 +34,7 @@ class DevNextStoryRunner {
    */
   findNextStory() {
     try {
-      const findNextStoryModule = require('../bmad-core/utils/find-next-story');
+      const findNextStoryModule = require('../semad-core/utils/find-next-story');
       const config = this.loadConfig();
       
       const storyLocation = config.devStoryLocation || 'docs/stories';
@@ -70,7 +70,7 @@ class DevNextStoryRunner {
     console.log(chalk.blue('🚀 Running Dev Agent Implementation...\n'));
     
     try {
-      const AgentRunner = require('../bmad-core/utils/agent-runner');
+      const AgentRunner = require('../semad-core/utils/agent-runner');
       const runner = new AgentRunner({
         memoryEnabled: true,
         healthMonitoringEnabled: true,
@@ -78,7 +78,7 @@ class DevNextStoryRunner {
       });
 
       // Load dev agent configuration
-      const devAgentPath = path.join(this.rootDir, 'bmad-core', 'agents', 'dev.md');
+      const devAgentPath = path.join(this.rootDir, 'semad-core', 'agents', 'dev.md');
       if (!fs.existsSync(devAgentPath)) {
         throw new Error(`Dev agent not found: ${devAgentPath}`);
       }
@@ -96,7 +96,7 @@ class DevNextStoryRunner {
       };
 
       // Run the structured task for implementing next story
-      const taskPath = path.join(this.rootDir, 'bmad-core', 'structured-tasks', 'implement-next-story.yaml');
+      const taskPath = path.join(this.rootDir, 'semad-core', 'structured-tasks', 'implement-next-story.yaml');
       
       if (fs.existsSync(taskPath)) {
         console.log(chalk.blue('🔧 Using structured task: implement-next-story.yaml'));
@@ -177,8 +177,29 @@ class DevNextStoryRunner {
     console.log(`📂 Project: ${this.rootDir}\n`);
 
     try {
-      // Find next story to implement
-      const nextStory = this.findNextStory();
+      // Resolve story to implement
+      let nextStory = null;
+      if (options.storyOverride) {
+        const spath = path.isAbsolute(options.storyOverride)
+          ? options.storyOverride
+          : path.join(this.rootDir, options.storyOverride);
+        if (!fs.existsSync(spath)) {
+          console.log(chalk.red('Provided --story not found:'), spath);
+          return 1;
+        }
+        // Derive minimal descriptor from file
+        const sc = this.parseStoryContract(spath) || {};
+        nextStory = {
+          storyId: sc.story_id || path.basename(spath, path.extname(spath)),
+          epicId: sc.epic_id || 'N/A',
+          title: sc.title || 'Untitled',
+          status: 'Approved',
+          filePath: spath
+        };
+      } else {
+        // Find next story to implement
+        nextStory = this.findNextStory();
+      }
       if (!nextStory) {
         return 1;
       }
@@ -225,7 +246,7 @@ class DevNextStoryRunner {
       // Pre-work impact scan
       if (shouldPreImpact) {
         const components = (contract.impactRadius && contract.impactRadius.components) || [];
-        const paths = components.length ? components : ['tools', 'scripts', 'bmad-core'];
+        const paths = components.length ? components : ['tools', 'scripts', 'semad-core'];
         console.log(chalk.blue('🛰️  Running pre-change impact scan via dev-guard...'));
         const args = ['--impact-scan', '--report', '--paths', ...paths];
         const { code } = this.runGuard(args, this.rootDir);
@@ -287,6 +308,7 @@ program
   .option('-v, --verbose', 'Show detailed execution logs')
   .option('-m, --mode <mode>', 'Implementation mode (implementation, review, test)', 'implementation')
   .option('--guard <mode>', 'Guard mode: contract | always | never', 'contract')
+  .option('--story <path>', 'Explicit story file path to implement (bypass finder)')
   .parse(process.argv);
 
 async function main() {
@@ -297,7 +319,8 @@ async function main() {
     const exitCode = await runner.run({
       auto: options.auto,
       verbose: options.verbose,
-      mode: options.mode
+      mode: options.mode,
+      storyOverride: options.story
     });
     process.exit(exitCode);
   } catch (error) {

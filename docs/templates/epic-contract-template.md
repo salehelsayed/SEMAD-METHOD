@@ -21,6 +21,21 @@ epic:
     qaReports: ".ai/reports/"
     manifest: ".ai/documentation-manifest.json"
 
+# PRD traceability: list the authoritative PRD requirement IDs this epic fulfills
+prdTraceability:
+  featureId: FEAT-XXX  # Link to PRD feature ID (e.g., FEAT-auth-session)
+  prdReqs: ["PRD-REQ-001", "PRD-REQ-002"]  # Legacy: PRD requirement IDs
+  acceptanceCriteriaMap:  # List of AC IDs this epic addresses
+    - AC-XXX-1
+    - AC-XXX-2
+  # Decomposition coverage: map each PRD requirement to the Story IDs implementing it
+  coverage:
+    PRD-REQ-001: ["ST-RESET-REQUEST", "ST-EMAIL-DISPATCH"]
+    PRD-REQ-002: ["ST-RESET-RATE"]
+    AC-XXX-1: ["ST-XXX-001", "ST-XXX-002"]
+    AC-XXX-2: ["ST-XXX-003"]
+  notes: "All PRD-REQs decomposed to ≥1 Story; no orphans"
+
 successCriteria:
   - id: SC-1
     metric: "Example: Signup conversion rate (%)"
@@ -87,6 +102,7 @@ integrationPoints:
     location: "auth-api"
     ownerTeam: "Identity"
     contract: "docs/apis/auth-reset.yaml"
+    sourceRef: "auth-api/src/routes/reset.ts#postReset" # file#symbol or route
     version: "v1"
   - id: INT-2
     kind: event
@@ -94,6 +110,7 @@ integrationPoints:
     location: "email-service"
     ownerTeam: "Platform"
     contract: "docs/events/email-reset.md"
+    sourceRef: "email-service/src/publishers/reset.ts#sendResetEvent"
     version: "v2"
 
 acceptanceScenarios:
@@ -132,6 +149,16 @@ risks:
     desc: "Email service throttle"
     mitigation: "Exponential backoff; queue buffering"
 
+# Architecture scope and decision anchors (bridge PRD → Architecture)
+archScope:
+  components: ["ARCH-COMP-auth-api", "ARCH-COMP-email-service"]
+  decisions: ["ADR-1"]
+  notes: "Ensure rate limiting baked into auth-api gateway"
+
+# Non‑functional requirement references and risk/decision anchors
+nonFunctionalsRefs: ["PRD-REQ-NFR-001"]
+risks_decisions: ["ADR-1", "ADR-2"]
+
 rolloutPlan:
   strategy: "feature-flagged; canary 10% → 50% → 100%"
   migration:
@@ -161,6 +188,10 @@ validation:
   epicDoR:
     - "Success Criteria (SC-*) defined: metric, target, method"
     - "All REQ-* and FLOW-* drafted; integrationPoints listed with owners/contracts"
+    - "ECM present and passes tools/ecm-validate.js (100% REQ-* and INT-* referenced)"
+    - "Feature flag and rollout plan specified; kill switch documented"
+    - "For every INT: contract link, ownerTeam, and sourceRef provided"
+    - "At least one negative and one resiliency acceptance scenario per INT"
     - "NFR budgets set; threat model started"
     - "Assumptions and Open Questions recorded"
   storyRules:

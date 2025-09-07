@@ -61,7 +61,7 @@ async function updateAgentFile(filePath) {
 async function main() {
   try {
     const files = await fs.readdir(agentsDir);
-    const agentFiles = files.filter(f => f.endsWith('.md'));
+    const agentFiles = files.filter(f => f.endsWith('.md') && !f.startsWith('AGENTS-'));
     
     console.log('Updating agent configurations to use CLI wrapper...\n');
     

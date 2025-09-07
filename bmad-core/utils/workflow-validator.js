@@ -25,14 +25,14 @@ class WorkflowValidator {
    */
   async loadAvailableResources() {
     // Load structured tasks (only source for tasks now)
-    const structuredTaskFiles = glob.sync(path.join(this.rootPath, 'bmad-core/structured-tasks/**/*.yaml'));
+    const structuredTaskFiles = glob.sync(path.join(this.rootPath, 'semad-core/structured-tasks/**/*.yaml'));
     for (const file of structuredTaskFiles) {
       const taskName = path.basename(file, '.yaml');
       this.availableTasks.add(taskName);
     }
 
     // Load agents (both .yaml and .md files)
-    const agentFiles = glob.sync(path.join(this.rootPath, 'bmad-core/agents/*.{yaml,md}'));
+    const agentFiles = glob.sync(path.join(this.rootPath, 'semad-core/agents/*.{yaml,md}'));
     for (const file of agentFiles) {
       const ext = path.extname(file);
       const agentName = path.basename(file, ext);
@@ -40,7 +40,7 @@ class WorkflowValidator {
     }
 
     // Load templates (both .yaml and .md files)
-    const templateFiles = glob.sync(path.join(this.rootPath, 'bmad-core/templates/**/*.{yaml,md}'));
+    const templateFiles = glob.sync(path.join(this.rootPath, 'semad-core/templates/**/*.{yaml,md}'));
     for (const file of templateFiles) {
       const ext = path.extname(file);
       const templateName = path.basename(file, ext);
@@ -48,7 +48,7 @@ class WorkflowValidator {
     }
 
     // Load checklists
-    const checklistFiles = glob.sync(path.join(this.rootPath, 'bmad-core/checklists/**/*.md'));
+    const checklistFiles = glob.sync(path.join(this.rootPath, 'semad-core/checklists/**/*.md'));
     for (const file of checklistFiles) {
       const checklistName = path.basename(file, '.md');
       this.availableChecklists.add(checklistName);
@@ -201,7 +201,7 @@ class WorkflowValidator {
   async validateAllWorkflows() {
     await this.loadAvailableResources();
 
-    const workflowFiles = glob.sync(path.join(this.rootPath, 'bmad-core/workflows/**/*.yaml'));
+    const workflowFiles = glob.sync(path.join(this.rootPath, 'semad-core/workflows/**/*.yaml'));
     
     const results = {
       totalWorkflows: workflowFiles.length,

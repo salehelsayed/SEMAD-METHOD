@@ -45,7 +45,7 @@ Each agent consists of:
 
 ## Primary Agents
 
-### 1. BMad Orchestrator (`/orchestrator`)
+### 1. SEMAD Orchestrator (`/orchestrator`)
 
 **Role**: Master coordinator managing the entire development workflow
 
@@ -126,8 +126,12 @@ Each agent consists of:
 - `/pm` - Activate PM
 - `*create-prd` - Generate PRD
 - `*create-brownfield-prd` - PRD for existing systems
+- `*create-epic` - Create a brownfield epic with incremental slicing and validations
+- `*validate-epic <path>` - Validate an EpicContract file against the template
+- `*validate-feature-coverage [--threshold 100] [--report .ai/reports/feature-coverage.json]` - Validate PRD→Epic→Story coverage
 - `*update-prd-from-implementation` - Align PRD to implementation
  - `*validate-epic <path>` - Validate an EpicContract file (runs `npm run validate:epic -- <path>`) 
+ - `*validate-feature-coverage [--threshold 100] [--report .ai/reports/feature-coverage.json]` - Validate PRD→Epic→Story→Test feature coverage and emit a report
 
 **Reverse Alignment Quick Links**:
 - `/pm *update-prd-from-implementation`
@@ -143,6 +147,11 @@ Each agent consists of:
 **Templates Used**:
 - `prd-template.md`
 - `user-story-template.md`
+
+**Brownfield PM Integration Steps**:
+- Run `*create-brownfield-prd` and complete the PM Integration Readiness checklist (contracts, SourceRef per INT, ECM coverage, rollout plan).
+- Create the epic via `*create-epic`; then validate ECM (`node tools/ecm-validate.js <epic.md>`) and EpicContract (`npm run validate:epic -- <epic.md>`).
+- Enforce incremental slicing: Story 0 (feature flag + telemetry), Story 1 (read‑only/contract tests), then one INT × one flow per story with integration verification and rollback.
 
 ---
 
@@ -199,6 +208,7 @@ Each agent consists of:
 - `*create-story` - Create the next story
 - `*story-checklist` - Validate story quality
 - `*correct-course` - Process corrections
+- `*scope-split <story-path>` - Split a story into scope-specific stories grouped by top-level directories and generate a clear schedule
 
 **Reverse Alignment Quick Links**:
 - `/sm *recreate-stories-from-code`
@@ -215,6 +225,7 @@ Each agent consists of:
 - Embeds StoryContracts in stories
 - Ensures full context in each story
 - Links requirements to implementation
+- ECM‑aware story creation for brownfield: prefers EpicContract + ECM rows; enforces incremental slicing (flag → probe → 1 INT × 1 flow) and requires integrationVerification and rollbackPlan sections.
 
 **Templates Used**:
 - `story-template.md`
@@ -237,8 +248,10 @@ Each agent consists of:
 **Key Commands**:
 - `/dev` - Activate developer
 - `*implement-next-story` - Start next story
+- `*devx3 <story-path>` - Run the same story through the Dev agent three times in a row with tests to ensure 100% completion
 - `*run-tests` - Linting and tests
 - `*adhoc` - One-off tasks
+ - `*adhoc-debug` - Thorough debug capture with evidence bundle
 
 **Workflow Position**: Second agent in development phase (after SM)
 
@@ -276,6 +289,14 @@ Each agent consists of:
 - `*review` - Review story implementation
 - `*analyze-code-quality` - Analyze quality
 - `*validate-docs-code-alignment` - Docs/Code alignment
+- `*validate-feature-coverage` - Validate feature and test coverage
+- `*validate-integration-safety` - Brownfield integration safety checks (integrationVerification, rollbackPlan, slice order, flag default off)
+ - `*normalize-reports` - Normalize QA outputs under `.ai/reports/qa` with consistent names
+ - `*generate-cleanup-stories --from <report>` - Generate precise, incremental cleanup/refactor stories from QA reports
+- `*analyze-dependencies` - Analyze dependency impacts
+- `*code-cleanup-analysis` - Comprehensive code cleanup analysis (orphans, dead code, TODOs, etc.)
+- `*cleanup` - Alias for code-cleanup-analysis
+- `*orphans` - Alias for code-cleanup-analysis
 
 **Reverse Alignment Quick Links**:
 - `/qa *validate-docs-code-alignment`
@@ -616,4 +637,6 @@ See [Expansion Packs Documentation](expansion-packs/) for domain-specific agents
 
 SEMAD-METHOD agents provide specialized expertise for every aspect of software development. By following the structured workflow and using formal contracts, teams achieve consistent, high-quality results with minimal hallucination and maximum efficiency.
 
-For more details on specific agents, check their individual documentation in `bmad-core/agents/`.
+For more details on specific agents, check their individual documentation in `semad-core/agents/`.
+
+BMAD compatibility: Existing references to `bmad-core/agents/` remain valid during migration. A mirror alias is provided so both `semad-core` and `bmad-core` work.

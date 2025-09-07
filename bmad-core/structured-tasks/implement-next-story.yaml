@@ -1,0 +1,78 @@
+id: implement-next-story
+name: Implement Next Story (TDD)
+purpose: Test-driven implementation loop for a single story using its StoryContract. Generates tests from acceptanceTestMatrix, runs them (expecting red), and prepares for implementation until green.
+steps:
+  - id: read-story
+    name: Read Story and Extract Contract
+    description: Load the story file content and extract the StoryContract YAML frontmatter
+    actions:
+      - description: Read story file content
+        elicit: false
+        action: file:read
+        inputs:
+          path: "{{storyPath}}"
+        outputs:
+          content: storyContent
+      - description: Extract StoryContract from frontmatter
+        elicit: false
+        action: yaml:extract-frontmatter
+        inputs:
+          content: "{{storyContent}}"
+          key: StoryContract
+        outputs:
+          contractData: storyContract
+
+  - id: generate-tests
+    name: Generate Tests From Contract
+    description: Create or update test files defined in StoryContract.acceptanceTestMatrix.items[].test_files[].
+    actions:
+      - description: Generate test files from acceptanceTestMatrix
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/generate-tests-from-contract.js
+          args:
+            - --story
+            - "{{storyPath}}"
+        outputs:
+          exitCode: genExit
+          stdout: genStdout
+      - description: Halt if test generation failed
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: {{genExit !== 0}}
+          errorMessage: Test generation failed. See details: {{genStdout}}
+
+  - id: run-tests-red
+    name: Run Tests (Expect Red)
+    description: Execute only the tests for this story; failures are expected in first pass of TDD.
+    actions:
+      - description: Run scoped tests for this story
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/run-story-tests.js
+          args:
+            - --story
+            - "{{storyPath}}"
+        outputs:
+          exitCode: testExit
+          stdout: testStdout
+      - description: Log test run result without halting (TDD expects failures initially)
+        elicit: false
+
+inputs:
+  storyPath:
+    type: string
+    required: true
+    description: Absolute or relative path to the story file
+
+outputs: {}
+
+notes: |
+  - This task is intentionally non-blocking on initial test failures to support TDD (red → green).
+  - Use DevX3 to run this task 3 times for time-bounded agents to converge on green.
+  - Tests are scoped to files referenced by acceptanceTestMatrix.
+  - Pair with QA later for full validation.
+

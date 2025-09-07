@@ -11,8 +11,8 @@ const { program } = require('commander');
 class StructuredTaskScanner {
   constructor(rootDir = process.cwd()) {
     this.rootDir = rootDir;
-    this.structuredTasksDir = path.join(rootDir, 'bmad-core', 'structured-tasks');
-    this.legacyTasksDir = path.join(rootDir, 'bmad-core', 'tasks');
+    this.structuredTasksDir = path.join(rootDir, 'semad-core', 'structured-tasks');
+    this.legacyTasksDir = path.join(rootDir, 'semad-core', 'tasks');
     this.issues = [];
     this.warnings = [];
     this.stats = {
@@ -28,7 +28,7 @@ class StructuredTaskScanner {
    * Scan for legacy task references in agents and other files
    */
   async scanForLegacyTaskReferences() {
-    const agentsDir = path.join(this.rootDir, 'bmad-core', 'agents');
+    const agentsDir = path.join(this.rootDir, 'semad-core', 'agents');
     const extensionsToScan = ['.md', '.yaml', '.yml', '.js', '.json'];
     
     console.log(chalk.blue('🔍 Scanning for legacy task references...\n'));
@@ -46,8 +46,8 @@ class StructuredTaskScanner {
 
     // Scan other relevant directories
     const dirsToScan = [
-      'bmad-core/agent-teams',
-      'bmad-core/workflows',
+      'semad-core/agent-teams',
+      'semad-core/workflows',
       'tools',
       'scripts'
     ];
@@ -92,8 +92,8 @@ class StructuredTaskScanner {
       
       // Look for legacy task references (avoiding false positives with structured-tasks)
       const legacyTaskPatterns = [
-        /bmad-core\/tasks\/[^/\s]+\.yaml/g,
-        /bmad-core\/tasks\/[^/\s]+\.md/g,
+        /semad-core\/tasks\/[^/\s]+\.yaml/g,
+        /semad-core\/tasks\/[^/\s]+\.md/g,
         /(?<!structured-)tasks\/[^/\s]+\.yaml/g,  // Use negative lookbehind to avoid structured-tasks
         /(?<!structured-)tasks\/[^/\s]+\.md/g,
         /"(?<!structured-)tasks\/[^"]+"/g,
@@ -102,7 +102,7 @@ class StructuredTaskScanner {
 
       // Look for structured task references
       const structuredTaskPatterns = [
-        /bmad-core\/structured-tasks\/[^/\s]+\.yaml/g,
+        /semad-core\/structured-tasks\/[^/\s]+\.yaml/g,
         /structured-tasks\/[^/\s]+\.yaml/g,
         /"structured-tasks\/[^"]+"/g,
         /'structured-tasks\/[^']+'/g
@@ -190,7 +190,7 @@ class StructuredTaskScanner {
       
       if (legacyFiles.length > 0) {
         this.issues.push({
-          file: 'bmad-core/tasks/',
+          file: 'semad-core/tasks/',
           type: 'legacy_directory_exists',
           message: `Legacy tasks directory contains ${legacyFiles.length} files`,
           files: legacyFiles,

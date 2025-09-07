@@ -1,0 +1,79 @@
+id: create-story-from-ecm
+name: Create Story From ECM (Brownfield)
+purpose: Create an incremental, integration-safe Story from an EpicContract + ECM row. Prefers flag → probe → 1 INT × 1 flow slicing.
+inputs:
+  epicPath:
+    description: Path to the EpicContract markdown file (optional; will prompt if not provided)
+    type: string
+    required: false
+  storiesDir:
+    description: Destination directory for story files
+    type: string
+    required: false
+    default: docs/stories
+  adhoc:
+    description: Ad‑hoc mode (create story independent of PRD/Epic; skips ECM)
+    type: boolean
+    required: false
+    default: false
+steps:
+  - id: step0
+    name: Select Epic (or Ad‑hoc)
+    description: Resolve epic path when not provided. Allow ad‑hoc story creation without PRD link.
+    actions:
+      - description: If inputs.adhoc is true, skip ECM and proceed to story scaffolding with minimal traceability (featureId/epicId optional)
+        elicit: false
+      - description: If inputs.epicPath missing, list files under docs/epics/*.md and prompt user to select one
+        elicit: true
+      - description: Load EpicContract frontmatter (epicId, prdTraceability, requirements, flows, integrationPoints)
+        elicit: false
+  - id: step1
+    name: Parse ECM and Recommend Slice
+    description: Read the ECM table to find the next planned row. Recommend slice ordering (flag → probe → 1 INT × 1 flow).
+    actions:
+      - description: Detect ECM table under "## Epic Coverage Matrix (ECM)"; parse header and rows
+        elicit: false
+      - description: Determine if Story 0 (feature flag + telemetry) exists for this epic; if not, recommend it
+        elicit: true
+      - description: Determine if Story 1 (probe/contract tests, read‑only) exists; if not, recommend it
+        elicit: true
+      - description: Otherwise, select next ECM row with Status=planned or empty Story ID; require one INT × one flow variant only
+        elicit: true
+  - id: step2
+    name: Assign Story ID (optional auto-assign)
+    description: Generate a new Story ID and optionally write it back to ECM.
+    actions:
+      - description: Generate next Story ID using epicId slug (e.g., ST-<epic-slug>-001)
+        elicit: false
+      - description: Offer to auto-assign Story ID into ECM using `node tools/ecm-assign-story-ids.js <epicPath>` (safe to run incrementally)
+        elicit: true
+  - id: step3
+    name: Scaffold Story (StoryContract first)
+    description: Create a thin, incremental story using the Story template, preferring integration safety.
+    actions:
+      - description: Create story file at `{storiesDir}/{epicNum}.{storyNum}.story.md` (or `story-<epic-slug>-<num>.md`)
+        elicit: false
+      - description: Populate StoryContract.traceability with `featureId`, `reqIds`, `flowIds`, `integrationPointIds` from ECM row (if ECM mode)
+        elicit: false
+      - description: Add integrationVerification section (IV1: existing functionality; IV2: INT contract behavior; IV3: performance budget)
+        elicit: false
+      - description: Add rollbackPlan (steps + verification). For flag/probe slices, ensure defaultState=off and no state changes for probe
+        elicit: false
+      - description: Keep slice thin (one INT × one flow). Defer broader coverage to subsequent stories
+        elicit: false
+  - id: step4
+    name: Validate Story Draft (Brownfield checks)
+    description: Run validation including brownfield integration safety checks.
+    actions:
+      - description: Execute `validate-next-story.yaml` on the new story file (ensures integrationVerification/rollbackPlan when touching INTs)
+        elicit: true
+      - description: If validation fails, stop and report issues; fix and re-run
+        elicit: true
+outputs:
+  storyPath:
+    description: Path to the generated story file
+    type: string
+metadata:
+  notes: |
+    - Ad‑hoc stories are supported (set inputs.adhoc=true); traceability fields may be omitted in that mode.
+    - When ECM present, prefer safe increments: feature flag → probe → one INT × one flow per story.

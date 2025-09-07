@@ -1,10 +1,9 @@
-const Ajv = require('ajv');
-const addFormats = require('ajv-formats');
+const { createAjv } = require('../semad-core/utils/ajv-factory');
 const fs = require('fs');
 const path = require('path');
 
 // Use ModuleResolver for schema resolution
-const ModuleResolver = require('../bmad-core/utils/module-resolver');
+const ModuleResolver = require('../semad-core/utils/module-resolver');
 
 describe('StoryContract Schema Validation', () => {
   let ajv;
@@ -17,34 +16,25 @@ describe('StoryContract Schema Validation', () => {
     
     // Fallback to direct path only if ModuleResolver fails
     if (!schemaPath) {
-      schemaPath = path.join(__dirname, '../bmad-core/schemas/story-contract-schema.json');
+      schemaPath = path.join(__dirname, '../semad-core/schemas/story-contract-schema.json');
     }
     
     const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
     
-    ajv = new Ajv();
-    // Add format support including uri-reference
-    addFormats(ajv);
+    ajv = createAjv();
     validate = ajv.compile(schema);
   });
 
   test('Valid StoryContract should pass validation', () => {
     const validContract = {
       version: "1.0",
+      schemaVersion: "1.0",
       story_id: "4.1",
       epic_id: "4",
-      apiEndpoints: [
-        {
-          method: "POST",
-          path: "/api/stories",
-          description: "Create a new story",
-          requestBody: { type: "object" },
-          successResponse: { type: "object" }
-        }
-      ],
+      apiEndpoints: ["POST /api/stories"],
       filesToModify: [
         {
-          path: "bmad-core/schemas/story-contract-schema.json",
+          path: "semad-core/schemas/story-contract-schema.json",
           reason: "Create the schema file"
         }
       ],

@@ -105,7 +105,7 @@ content`;
   // Test with valid story
   try {
     console.log('\nTesting with valid story...');
-    const result = await taskRunner.executeTask('sm', 'bmad-core/structured-tasks/validate-story-contract.yaml', {
+    const result = await taskRunner.executeTask('sm', 'semad-core/structured-tasks/validate-story-contract.yaml', {
       inputs: { storyFilePath: validStoryPath }
     });
     
@@ -124,7 +124,7 @@ content`;
   // Test with invalid story
   try {
     console.log('\nTesting with invalid story...');
-    const result = await taskRunner.executeTask('sm', 'bmad-core/structured-tasks/validate-story-contract.yaml', {
+    const result = await taskRunner.executeTask('sm', 'semad-core/structured-tasks/validate-story-contract.yaml', {
       inputs: { storyFilePath: invalidStoryPath }
     });
     

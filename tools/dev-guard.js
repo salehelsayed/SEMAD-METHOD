@@ -7,7 +7,7 @@
  *
  * Usage examples:
  *   node tools/dev-guard.js --impact-scan --cleanup --report
- *   node tools/dev-guard.js --impact-scan --paths tools scripts bmad-core
+ *   node tools/dev-guard.js --impact-scan --paths tools scripts semad-core
  */
 
 const { spawnSync } = require('node:child_process');
@@ -105,9 +105,14 @@ function main() {
   const wantImpact = args.includes('--impact-scan');
   const wantCleanup = args.includes('--cleanup');
   const wantReport = args.includes('--report');
+  const teamStoryIdx = args.indexOf('--team-story');
+  const teamStoryPath = teamStoryIdx >= 0 ? args[teamStoryIdx + 1] : null;
+  const checkFilesIdx = args.indexOf('--check-files');
+  const checkFilesCsv = checkFilesIdx >= 0 ? args[checkFilesIdx + 1] : null;
+  const wantScopeCheck = !!teamStoryPath;
   const pathsIdx = args.indexOf('--paths');
   const customPaths = pathsIdx >= 0 ? args.slice(pathsIdx + 1).filter((x) => !x.startsWith('--')) : [];
-  const scanPaths = customPaths.length ? customPaths : ['tools', 'scripts', 'bmad-core'];
+  const scanPaths = customPaths.length ? customPaths : ['tools', 'scripts', 'semad-core'];
 
   ensureDir(path.join('.ai', 'reports'));
 
@@ -138,6 +143,52 @@ function main() {
     results.summary = { outFile: path.join('.ai', 'reports', 'dev-guard-summary.json') };
   }
 
+  // Optional: Scope guard against team story file list
+  if (wantScopeCheck && teamStoryPath) {
+    try {
+      const abs = path.isAbsolute(teamStoryPath) ? teamStoryPath : path.join(process.cwd(), teamStoryPath);
+      const txt = fs.readFileSync(abs, 'utf-8');
+      const m = txt.match(/^---\n([\s\S]*?)\n---\n?/);
+      const body = txt.slice(m ? m[0].length : 0);
+      const allowed = new Set((() => {
+        // Reuse Files to Modify block in team story
+        const lines = body.split(/\r?\n/);
+        const out = [];
+        let inSec = false;
+        for (const line of lines) {
+          if (/^###\s+Files\s+to\s+Modify/i.test(line)) { inSec = true; continue; }
+          if (inSec && /^##\s+/.test(line)) break;
+          if (inSec) {
+            const m1 = line.match(/^\s*-\s+`?([^`:\n]+)`?\s*:/);
+            const m2 = line.match(/^\s*-\s+`?([^`\n]+)`?\s*$/);
+            const p = m1 ? m1[1].trim() : (m2 ? m2[1].trim() : null);
+            if (p) out.push(p);
+          }
+        }
+        return out;
+      })());
+
+      let checkList = [];
+      if (checkFilesCsv) {
+        checkList = checkFilesCsv.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      if (checkList.length) {
+        const outside = checkList.filter(p => !allowed.has(p));
+        if (outside.length) {
+          console.warn('[dev-guard] Scope warning: files outside team story scope:', outside.join(', '));
+          results.scopeGuard = { ok: false, outside };
+        } else {
+          results.scopeGuard = { ok: true };
+        }
+      } else {
+        results.scopeGuard = { ok: null, note: 'No --check-files provided' };
+      }
+    } catch (e) {
+      results.scopeGuard = { ok: null, error: e.message };
+    }
+  }
+
   results.finishedAt = new Date().toISOString();
   writeJSON(path.join('.ai', 'reports', 'dev-guard-run.json'), results);
 
@@ -153,4 +204,3 @@ function main() {
 }
 
 main();
-

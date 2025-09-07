@@ -3,18 +3,18 @@
  * Tests the agent execution wrapper with memory lifecycle management
  */
 
-const AgentRunner = require('../bmad-core/utils/agent-runner');
+const AgentRunner = require('../semad-core/utils/agent-runner');
 const { 
   loadMemoryForTask, 
   saveAndCleanMemory,
   getMemoryStatus 
-} = require('../bmad-core/utils/unified-memory-manager');
+} = require('../semad-core/utils/unified-memory-manager');
 
 // Mock dependencies
-jest.mock('../bmad-core/utils/unified-memory-manager');
-jest.mock('../bmad-core/utils/verbose-logger');
+jest.mock('../semad-core/utils/unified-memory-manager');
+jest.mock('../semad-core/utils/verbose-logger');
 
-const mockUnifiedMemoryManager = require('../bmad-core/utils/unified-memory-manager');
+const mockUnifiedMemoryManager = require('../semad-core/utils/unified-memory-manager');
 
 describe('Agent Runner', () => {
   let agentRunner;

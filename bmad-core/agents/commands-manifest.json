@@ -1,0 +1,102 @@
+{
+  "dev": {
+    "categories": [
+      {
+        "name": "Stories",
+        "commands": ["*implement-next-story", "*develop-story", "*devx3 <story-path>", "*address-qa-feedback"]
+      },
+      {
+        "name": "Quality",
+        "commands": ["*run-tests"]
+      },
+      {
+        "name": "Ad-hoc & Debug",
+        "commands": ["*adhoc", "*adhoc-debug"]
+      }
+    ]
+  },
+  "qa": {
+    "categories": [
+      {
+        "name": "Validation",
+        "commands": ["*review", "*validate-docs-code-alignment", "*validate-integration-safety", "*normalize-reports"]
+      },
+      {
+        "name": "Coverage & Reports",
+        "commands": ["*generate-coverage-report", "*analyze-code-quality", "*validate-feature-coverage", "*generate-cleanup-stories"]
+      },
+      {
+        "name": "Code Cleanup & Quality",
+        "commands": ["*code-cleanup-analysis", "*cleanup", "*orphans"]
+      },
+      {
+        "name": "Dependencies",
+        "commands": ["*analyze-dependencies"]
+      }
+    ]
+  },
+  "pm": {
+    "categories": [
+      {
+        "name": "PRD",
+        "commands": ["*create-prd", "*create-brownfield-prd", "*update-prd-from-implementation", "*document-missing-requirements"]
+      },
+      {
+        "name": "Epics",
+        "commands": ["*create-epic"]
+      },
+      {
+        "name": "Validation",
+        "commands": ["*validate-epic <path>", "*validate-feature-coverage"]
+      }
+    ]
+  },
+  "sm": {
+    "categories": [
+      {
+        "name": "Stories",
+        "commands": ["*create-story", "*create-story-from-ecm", "*story-checklist", "*correct-course", "*scope-split <story-path>"]
+      },
+      {
+        "name": "Reverse Alignment",
+        "commands": ["*recreate-stories-from-code", "*update-story-templates"]
+      }
+    ]
+  },
+  "analyst": {
+    "categories": [
+      {
+        "name": "Analysis",
+        "commands": ["*create-project-brief", "*perform-market-research", "*create-competitor-analysis"]
+      },
+      {
+        "name": "Reverse Alignment",
+        "commands": ["*analyze-codebase-changes", "*extract-implemented-features"]
+      }
+    ]
+  },
+  "architect": {
+    "categories": [
+      {
+        "name": "Architecture Docs",
+        "commands": ["*create-full-stack-architecture", "*create-backend-architecture", "*create-front-end-architecture"]
+      },
+      {
+        "name": "Reverse Engineering",
+        "commands": ["*reverse-engineer-architecture", "*document-design-decisions"]
+      }
+    ]
+  },
+  "orchestrator": {
+    "categories": [
+      {
+        "name": "Core",
+        "commands": ["*help", "*status", "create comprehensive plan", "start development phase", "show progress", "activate [agent]"]
+      },
+      {
+        "name": "Reverse Alignment",
+        "commands": ["reverse-align", "cleanup-docs", "analyst-analyze", "architect-rewrite", "pm-update-prd", "sm-recreate-stories", "validate-story-consistency", "qa-validate-alignment", "generate-alignment-report", "create-documentation-manifest"]
+      }
+    ]
+  }
+}

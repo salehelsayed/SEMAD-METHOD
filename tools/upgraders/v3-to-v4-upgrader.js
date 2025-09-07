@@ -33,7 +33,7 @@ class V3ToV4Upgrader {
       );
       console.log(chalk.cyan("What this tool does:"));
       console.log("- Creates a backup of your V3 files (.bmad-v3-backup/)");
-      console.log("- Installs the new V4 .bmad-core structure");
+      console.log("- Installs the new V4 .semad-core structure");
       console.log(
         "- Preserves your PRD, Architecture, and Stories in the new format\n"
       );
@@ -379,15 +379,15 @@ class V3ToV4Upgrader {
     const spinner = ora("Installing V4 structure...").start();
 
     try {
-      // Get the source bmad-core directory (without dot prefix)
-      const sourcePath = path.join(__dirname, "..", "..", "bmad-core");
-      const destPath = path.join(projectPath, ".bmad-core");
+      // Get the source semad-core directory (without dot prefix)
+      const sourcePath = path.join(__dirname, "..", "..", "semad-core");
+      const destPath = path.join(projectPath, ".semad-core");
 
-      // Copy .bmad-core
+      // Copy .semad-core
       await this.copyDirectory(sourcePath, destPath);
-      spinner.text = "✓ Copied fresh .bmad-core/ directory from V4";
+      spinner.text = "✓ Copied fresh .semad-core/ directory from V4";
       console.log(
-        chalk.green("\n✓ Copied fresh .bmad-core/ directory from V4")
+        chalk.green("\n✓ Copied fresh .semad-core/ directory from V4")
       );
 
       // Create docs directory
@@ -585,7 +585,7 @@ class V3ToV4Upgrader {
     console.log(chalk.bold.green("\n✓ Upgrade Complete!\n"));
     console.log(chalk.bold("Summary:"));
     console.log(`- V3 files backed up to: .bmad-v3-backup/`);
-    console.log(`- V4 structure installed: .bmad-core/ (fresh from V4)`);
+    console.log(`- V4 structure installed: .semad-core/ (fresh from V4)`);
 
     const totalDocs =
       (analysis.prdFile ? 1 : 0) +
@@ -739,16 +739,16 @@ class V3ToV4Upgrader {
     const fileManager = require("../installer/lib/file-manager");
     const { glob } = require("glob");
 
-    // Get all files in .bmad-core for the manifest
-    const bmadCorePath = path.join(projectPath, ".bmad-core");
+    // Get all files in .semad-core for the manifest
+    const bmadCorePath = path.join(projectPath, ".semad-core");
     const files = await glob("**/*", {
       cwd: bmadCorePath,
       nodir: true,
       ignore: ["**/.git/**", "**/node_modules/**"],
     });
 
-    // Prepend .bmad-core/ to file paths for manifest
-    const manifestFiles = files.map((file) => path.join(".bmad-core", file));
+    // Prepend .semad-core/ to file paths for manifest
+    const manifestFiles = files.map((file) => path.join(".semad-core", file));
 
     const config = {
       installType: "full",

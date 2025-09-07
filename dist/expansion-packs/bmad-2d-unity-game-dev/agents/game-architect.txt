@@ -1,6 +1,6 @@
 # Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -34,7 +34,7 @@ These references map directly to bundle sections:
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
@@ -783,7 +783,7 @@ steps:
     name: Check Core Configuration
     description: Check if automatic sharding is enabled in core-config.yaml
     actions:
-      - description: Load .bmad-core/core-config.yaml to check prdSharded and architectureSharded settings
+      - description: Load .semad-core/core-config.yaml to check prdSharded and architectureSharded settings
         elicit: false
         metadata:
           originalIndent: 0
@@ -1056,7 +1056,7 @@ metadata:
     - Important Notes
   preservedContent:
     - type: special-note
-      content: '[[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
+      content: '[[LLM: First, check if markdownExploder is set to true in semad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.'
       lineNumber: 11
     - type: special-note
       content: '**IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"'
@@ -1093,7 +1093,7 @@ metadata:
       content: Important Notes
       level: 2
 notes: |
-  [[LLM: First, check if markdownExploder is set to true in bmad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
+  [[LLM: First, check if markdownExploder is set to true in semad-core/core-config.yaml. If it is, attempt to run the command: `md-tree explode {input file} {output path}`.
   **IMPORTANT: STOP HERE - do not proceed with manual sharding until one of the above actions is taken.**"
   CRITICAL AEGNT SHARDING RULES:
   CRITICAL: Use proper parsing that understands markdown context. A ## inside a code block is NOT a section header.]]
@@ -4220,7 +4220,7 @@ npx bmad-method install
 
 **Verify Game Development Installation**:
 
-- `.bmad-core/` folder created with all core agents
+- `.semad-core/` folder created with all core agents
 - `.bmad-2d-unity-game-dev/` folder with game development agents
 - IDE-specific integration files created
 - Game development agents available with `/bmad2du` prefix (per config.yaml)
@@ -4263,8 +4263,8 @@ npx bmad-method install
 
 **CRITICAL RULE for Game Development**:
 
-- **ALWAYS use Game SM agent for story creation** - Never use bmad-master or bmad-orchestrator
-- **ALWAYS use Game Dev agent for Unity implementation** - Never use bmad-master or bmad-orchestrator
+- **ALWAYS use Game SM agent for story creation** - Never use bmad-master or semad-orchestrator
+- **ALWAYS use Game Dev agent for Unity implementation** - Never use bmad-master or semad-orchestrator
 - **Why this matters**: Game SM and Game Dev agents are specifically optimized for Unity workflows
 - **No exceptions**: Even if using bmad-master for design, switch to Game SM → Game Dev for implementation
 
@@ -4543,7 +4543,7 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic ga
 | `game-sm`        | Game Scrum Master | Game story creation, sprint planning        | Game project management, workflow           |
 | `game-architect` | Game Architect    | Unity system design, technical architecture | Complex Unity systems, performance planning |
 
-**Note**: For QA and other roles, use the core BMad agents (e.g., `@qa` from bmad-core).
+**Note**: For QA and other roles, use the core BMad agents (e.g., `@qa` from semad-core).
 
 ### Game Agent Interaction Commands
 

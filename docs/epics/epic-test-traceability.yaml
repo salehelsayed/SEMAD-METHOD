@@ -1,0 +1,229 @@
+---
+type: EpicContract
+schemaVersion: 1.1
+
+epic:
+  epicId: EP-TEST-001
+  title: "Test Epic for Traceability Validation"
+  goal: "Validate end-to-end traceability from PRD through implementation"
+  status: active
+  owner:
+    role: pm
+    name: "Test PM"
+    contact: "pm@test.com"
+  stakeholders:
+    - "Architecture: Test Architect"
+    - "QA: Test QA Lead"
+  links:
+    prd: "docs/prd/PRD.md#PRD-REQ-007"
+    architecture: "docs/architecture/architecture.md#PRD-REQ-007"
+    storiesDir: "docs/stories/ep-test-001/"
+    decisionLog: "docs/adr/"
+    qaReports: ".ai/reports/"
+    manifest: ".ai/documentation-manifest.json"
+
+# PRD traceability: Testing with StoryContract System requirement
+prdTraceability:
+  prdReqs: ["PRD-REQ-007"]  # StoryContract System requirement
+  coverage:
+    PRD-REQ-007: ["ST-TEST-001", "ST-TEST-002", "ST-TEST-003"]
+  notes: "Testing traceability with 3 stories implementing contract system"
+
+successCriteria:
+  - id: SC-TEST-1
+    metric: "Contract validation success rate (%)"
+    target: ">= 95%"
+    method: "Automated validation runs"
+    owner: "QA"
+
+scope:
+  in:
+    - "JSON Schema for story contracts"
+    - "Validation at story creation"
+    - "Contract-driven development workflow"
+  out:
+    - "Legacy markdown story format migration"
+
+nfrBudgets:
+  performance: "Validation < 100ms per contract"
+  availability: ">= 99.9% for validation service"
+  security: "Schema injection prevention"
+
+requirements:
+  - id: REQ-TEST-001
+    type: functional
+    title: "Define story contract schema"
+    description: "Create JSON Schema for story contracts with all required fields"
+    priority: must
+    rationale: "Enables structural validation"
+    acceptance:
+      - "Given a story contract, when validated, then schema errors are reported"
+    dependencies: []
+
+  - id: REQ-TEST-002
+    type: functional
+    title: "Implement validation service"
+    description: "Build service to validate contracts at creation time"
+    priority: must
+    acceptance:
+      - "Given invalid contract, when submitted, then creation is blocked"
+
+  - id: REQ-TEST-003
+    type: nfr
+    title: "Validation performance"
+    description: "Ensure validation completes quickly"
+    priority: should
+    acceptance:
+      - "Given contract validation, when executed, then completes < 100ms"
+
+flows:
+  - id: FLOW-TEST-A
+    title: "Story contract validation flow"
+    description: "End-to-end validation of story contract"
+    actors: ["Developer", "ValidationService"]
+    components: ["story-validator", "schema-engine"]
+    preconditions: "Valid JSON Schema defined"
+    postconditions: "Contract validated or errors reported"
+    mainScenario:
+      given: "Developer submits story contract"
+      when: "Validation service processes"
+      then: "Result returned with pass/fail status"
+
+integrationPoints:
+  - id: INT-TEST-1
+    kind: api
+    name: "POST /v1/contracts/validate"
+    location: "validation-service"
+    ownerTeam: "Platform"
+    contract: "docs/apis/contract-validation.yaml"
+    version: "v1"
+
+acceptanceScenarios:
+  - id: E2E-TEST-1
+    name: "Valid contract accepted"
+    reqIds: ["REQ-TEST-001", "REQ-TEST-002"]
+    flowIds: ["FLOW-TEST-A"]
+    scenario:
+      given: "Valid story contract"
+      when: "Submitted for validation"
+      then: "Contract accepted and stored"
+
+  - id: E2E-TEST-2
+    name: "Invalid contract rejected"
+    reqIds: ["REQ-TEST-002"]
+    flowIds: ["FLOW-TEST-A"]
+    scenario:
+      given: "Contract missing required fields"
+      when: "Submitted for validation"
+      then: "Validation fails with clear errors"
+
+  - id: E2E-TEST-3
+    name: "Performance target met"
+    reqIds: ["REQ-TEST-003"]
+    flowIds: ["FLOW-TEST-A"]
+    scenario:
+      given: "Large complex contract"
+      when: "Validated"
+      then: "Completes within 100ms"
+
+assumptions:
+  - id: A-TEST-1
+    statement: "JSON Schema v7 is sufficient for our needs"
+    validation: "Prototype testing confirmed"
+
+risks:
+  - id: R-TEST-1
+    desc: "Schema evolution breaking existing contracts"
+    mitigation: "Versioned schemas with backward compatibility"
+
+# Architecture scope and decision anchors
+archScope:
+  components: ["ARCH-COMP-contracts", "ARCH-COMP-validator"]
+  decisions: ["ADR-1"]
+  notes: "Leverages existing contract infrastructure"
+
+nonFunctionalsRefs: ["PRD-REQ-008"]  # Links to validation framework
+risks_decisions: ["ADR-1"]
+
+rolloutPlan:
+  strategy: "Phased: schema definition → validator → enforcement"
+  migration:
+    requires: true
+    steps: ["Define schema", "Build validator", "Enforce on new stories"]
+    rollback: "Disable enforcement flag"
+
+observability:
+  slos: ["validation-latency-p95<100ms", "validation-availability>99.9%"]
+  dashboards: ["grafana/contract-validation"]
+  alerts: ["pagerduty/platform-oncall"]
+  logFields: ["contract_id", "validation_time", "errors"]
+
+security:
+  threatModelLink: "docs/security/contract-validation-threats.md"
+  dataRetention: "contracts 90d; validation logs 30d"
+
+accessibility:
+  standard: "N/A - Backend service"
+  notes: ["Error messages follow accessibility guidelines"]
+
+changeControl:
+  decisionLog: "docs/adr/"
+  changePolicy: "Schema changes require migration plan"
+  schemaUrl: "docs/schemas/story-contract.schema.json"
+
+versioning:
+  compatibility: "Backward compatible within major version"
+
+validation:
+  epicDoR:
+    - "Success Criteria defined with metrics"
+    - "All requirements drafted with acceptance"
+    - "Integration points documented"
+  storyRules:
+    requireEpicId: true
+    requireReqIds: true
+    requireFlowIds: true
+    requireIntegrationPointIds: true
+  storyDoD:
+    - "All acceptance criteria pass"
+    - "Contract tests passing"
+    - "Metrics emitting"
+  epicDoneCriteria:
+    - "All requirements implemented"
+    - "E2E scenarios passing"
+    - "NFR targets met"
+    - "Reverse traceability clean"
+
+coverage:
+  generatedBy: ".ai/reports/traceability.json"
+
+audit:
+  createdAt: "2025-01-28"
+  updatedAt: "2025-01-28"
+  approvedBy: ["Test PM", "Test QA Lead"]
+---
+
+# Epic: Test Epic for Traceability Validation
+
+## Goal
+Validate end-to-end traceability from PRD through implementation
+
+## Success Criteria
+- Contract validation success rate: target >= 95% (method: Automated validation runs)
+
+## Scope
+- In: JSON Schema for story contracts, Validation at story creation, Contract-driven development workflow
+- Out: Legacy markdown story format migration
+
+## Epic Coverage Matrix (ECM)
+
+| ECM ID  | Capability               | Component(s)           | Interface/Port          | REQ IDs        | INT IDs     | Story ID    | Delta | Status  |
+|---------|-------------------------|------------------------|------------------------|----------------|-------------|-------------|-------|---------|
+| ECM-T01 | Define contract schema   | schema-engine          | JSON Schema def        | REQ-TEST-001   | -           | ST-TEST-001 | new   | planned |
+| ECM-T02 | Build validation service | validation-service     | POST /v1/contracts     | REQ-TEST-002   | INT-TEST-1  | ST-TEST-002 | new   | planned |
+| ECM-T03 | Performance optimization | validation-service     | Internal optimization  | REQ-TEST-003   | INT-TEST-1  | ST-TEST-003 | extend| planned |
+
+## Links
+- PRD: docs/prd/PRD.md#PRD-REQ-007
+- Architecture: docs/architecture/architecture.md#PRD-REQ-007
+- Stories: docs/stories/ep-test-001/

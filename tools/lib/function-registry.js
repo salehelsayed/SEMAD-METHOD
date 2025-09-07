@@ -10,8 +10,8 @@ const path = require('path');
 // Dynamic module resolution helper
 function resolveModule(moduleName, fallbackPath) {
   const possiblePaths = [
-    path.join(__dirname, '..', '..', 'bmad-core', moduleName),
-    path.join(__dirname, '..', '..', '.bmad-core', moduleName),
+    path.join(__dirname, '..', '..', 'semad-core', moduleName),
+    path.join(__dirname, '..', '..', '.semad-core', moduleName),
     path.join(__dirname, '..', '..', moduleName)
   ];
   
@@ -26,23 +26,23 @@ function resolveModule(moduleName, fallbackPath) {
   
   // Try as npm package
   try {
-    return require.resolve(`bmad-method/bmad-core/${moduleName}`);
+    return require.resolve(`semad-method/semad-core/${moduleName}`);
   } catch (e) {
     return fallbackPath;
   }
 }
 
 // Import simple tracker utilities
-const SimpleTaskTracker = require(resolveModule('utils/simple-task-tracker', '../../bmad-core/utils/simple-task-tracker'));
-const simpleMemory = require(resolveModule('utils/simpleMemory', '../../bmad-core/utils/simpleMemory'));
+const SimpleTaskTracker = require(resolveModule('utils/simple-task-tracker', '../../semad-core/utils/simple-task-tracker'));
+// simpleMemory removed - use simple-task-tracker directly
 
 // Import QA utilities
-const QAFindingsParser = require(resolveModule('utils/qa-findings-parser', '../../bmad-core/utils/qa-findings-parser'));
-const QAFixTracker = require(resolveModule('utils/qa-fix-tracker', '../../bmad-core/utils/qa-fix-tracker'));
-const { verifyQAFixes } = require(resolveModule('utils/verify-qa-fixes', '../../bmad-core/utils/verify-qa-fixes'));
+const QAFindingsParser = require(resolveModule('utils/qa-findings-parser', '../../semad-core/utils/qa-findings-parser'));
+const QAFixTracker = require(resolveModule('utils/qa-fix-tracker', '../../semad-core/utils/qa-fix-tracker'));
+const { verifyQAFixes } = require(resolveModule('utils/verify-qa-fixes', '../../semad-core/utils/verify-qa-fixes'));
+// Unified memory removed - use simple-task-tracker and track-progress instead
 const fs = require('fs');
 const { execSync, execFileSync } = require('child_process');
-const path = require('path');
 
 // Create a singleton instance of the tracker
 let trackerInstance = null;
@@ -66,21 +66,31 @@ const getQATracker = () => {
  * Registry of available functions that can be called from structured tasks
  */
 const FUNCTION_REGISTRY = {
-  // Simple memory functions for structured tasks
+  // Memory functions now use simple-task-tracker directly
   'simpleMemory.saveContext': async (params) => {
-    return await simpleMemory.saveContext(params);
+    // Replaced with simple tracker
+    const tracker = getTracker();
+    if (params.agentName) tracker.setAgent(params.agentName);
+    return { success: true };
   },
   
   'simpleMemory.logEntry': async (params) => {
-    return await simpleMemory.logEntry(params);
+    // Replaced with simple tracker
+    const tracker = getTracker();
+    tracker.log(params.content || '', params.type || 'info');
+    return { success: true };
   },
   
   'simpleMemory.getProgress': async () => {
-    return await simpleMemory.getProgress();
+    // Replaced with simple tracker
+    const tracker = getTracker();
+    return tracker.getProgressReport();
   },
   
   'simpleMemory.getProgressReport': async () => {
-    return await simpleMemory.getProgressReport();
+    // Replaced with simple tracker
+    const tracker = getTracker();
+    return tracker.getProgressReport();
   },
   
   // Direct tracker functions
@@ -147,12 +157,33 @@ const FUNCTION_REGISTRY = {
     return verifyQAFixes(directory);
   },
 
+  // Memory manager functions now use simple tracking
+  loadMemoryForTask: async (agentName, context) => {
+    // Simplified - just initialize tracker
+    const tracker = getTracker();
+    tracker.setAgent(agentName);
+    return { success: true, agentName, context };
+  },
+  saveAndCleanMemory: async (agentName, taskData) => {
+    // Simplified - just log completion
+    const tracker = getTracker();
+    if (taskData && taskData.observation) {
+      tracker.log(taskData.observation, 'info');
+    }
+    return { success: true, agentName };
+  },
+
   // Orchestrator: Fully in-session Dev↔QA iterative loop (no Codex/Claude)
   'orchestrator.devQaIterativeSession': async (storyArg, maxIterations = 5, projectRoot = process.cwd()) => {
     function resolveCore(rel) {
-      const p1 = path.join(projectRoot, '.bmad-core', rel);
-      if (fs.existsSync(p1)) return p1;
-      return path.join(projectRoot, 'bmad-core', rel);
+      const cands = [
+        path.join(projectRoot, '.semad-core', rel),
+        path.join(projectRoot, 'semad-core', rel),
+        path.join(projectRoot, '.semad-core', rel),
+        path.join(projectRoot, 'semad-core', rel)
+      ];
+      for (const p of cands) { if (fs.existsSync(p)) return p; }
+      return cands[0];
     }
 
     function findStoryById(id) {
@@ -375,7 +406,10 @@ function extractFunctionArguments(functionName, resolvedParameters) {
     'qaTracker.save': ['directory'],
     'qaTracker.load': ['directory'],
     'qaTracker.verify': ['directory'],
-    'orchestrator.devQaIterativeSession': ['storyArg', 'maxIterations', 'projectRoot']
+    'orchestrator.devQaIterativeSession': ['storyArg', 'maxIterations', 'projectRoot'],
+    // Unified memory functions
+    'loadMemoryForTask': ['agentName', 'context'],
+    'saveAndCleanMemory': ['agentName', 'taskData']
   };
 
   const expectedParams = parameterMappings[functionName];

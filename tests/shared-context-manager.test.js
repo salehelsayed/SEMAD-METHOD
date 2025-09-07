@@ -6,7 +6,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
-const SharedContextManager = require('../bmad-core/utils/shared-context-manager');
+const SharedContextManager = require('../semad-core/utils/shared-context-manager');
 
 describe('SharedContextManager', () => {
   let manager;

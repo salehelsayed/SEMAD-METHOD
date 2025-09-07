@@ -13,11 +13,11 @@ const {
   summarizeAndArchiveMemories,
   getMemoryStatus,
   loadMemoryConfig
-} = require('../bmad-core/utils/unified-memory-manager');
+} = require('../semad-core/utils/unified-memory-manager');
 
 // Mock dependencies
-jest.mock('../bmad-core/utils/agent-memory-manager');
-jest.mock('../bmad-core/utils/qdrant');
+jest.mock('../semad-core/utils/agent-memory-manager');
+jest.mock('../semad-core/utils/qdrant');
 jest.mock('fs', () => ({
   promises: {
     readFile: jest.fn(),
@@ -26,8 +26,8 @@ jest.mock('fs', () => ({
   }
 }));
 
-const mockAgentMemoryManager = require('../bmad-core/utils/agent-memory-manager');
-const mockQdrant = require('../bmad-core/utils/qdrant');
+const mockAgentMemoryManager = require('../semad-core/utils/agent-memory-manager');
+const mockQdrant = require('../semad-core/utils/qdrant');
 const mockFs = fs;
 
 describe('Unified Memory Manager', () => {

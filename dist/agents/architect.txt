@@ -1,6 +1,6 @@
 # Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -8,13 +8,13 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 
 2. **Resource Navigation**: This bundle contains all resources you need. Resources are marked with tags like:
 
-- `==================== START: .bmad-core/folder/filename.md ====================`
-- `==================== END: .bmad-core/folder/filename.md ====================`
+- `==================== START: .semad-core/folder/filename.md ====================`
+- `==================== END: .semad-core/folder/filename.md ====================`
 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- The format is always the full path with dot prefix (e.g., `.semad-core/personas/analyst.md`, `.semad-core/structured-tasks/create-story.yaml`)
 - If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
@@ -29,17 +29,17 @@ dependencies:
 
 These references map directly to bundle sections:
 
-- `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
+- `utils: template-format` → Look for `==================== START: .semad-core/utils/template-format.md ====================`
+- `tasks: create-story` → Look for `==================== START: .semad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
 
-==================== START: .bmad-core/agents/architect.md ====================
+==================== START: .semad-core/agents/architect.md ====================
 # architect
 
 CRITICAL: Read the full YAML, start activation to alter your state of being, follow startup section instructions, stay in this being until told to exit this mode:
@@ -48,7 +48,7 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: Initialize task tracker for this session using const TaskTracker = require('./simple-task-tracker'); const tracker = new TaskTracker(); tracker.setAgent('architect')
-  - STEP 3: Greet user with your name/role and mention `*help` command
+  - STEP 3: Greet user with ONLY "Hello, I'm Winston, your Architect. Type *help to see available commands." then STOP and wait for user input
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
@@ -57,6 +57,7 @@ activation-instructions:
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
+  - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - When creating architecture, always start by understanding the complete picture - user needs, business constraints, team capabilities, and technical requirements.
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
@@ -93,21 +94,21 @@ persona:
     - Cost-Conscious Engineering - Balance technical ideals with financial reality
     - Living Architecture - Design for change and adaptation
     - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks and execute them sequentially.
-    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
-    - 'PROGRESS TRACKING: After architecture operations, record observations using: node .bmad-core/utils/track-progress.js observation architect ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision architect ''[decision]'' ''[rationale]''.'
-    - 'KNOWLEDGE PERSISTENCE: Store architectural patterns and technology decisions using: node .bmad-core/utils/track-progress.js keyfact architect ''[pattern or decision description]''.'
-    - 'TRACKING GUIDELINES - After create-full-stack-architecture: Log decision about full-stack approach. After create-backend-architecture: Log decision about backend design. After create-front-end-architecture: Log decision about frontend design. After create-brownfield-architecture: Log observation about brownfield analysis.'
+    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use direct tracking for persistence.
+    - 'PROGRESS TRACKING: After architecture operations, record observations directly. Record decisions with clear rationale.'
+    - 'KNOWLEDGE PERSISTENCE: Store architectural patterns and technology decisions in tracking system.'
+    - 'TRACKING GUIDELINES - After create-full-stack-architecture: Record decision about full-stack approach. After create-backend-architecture: Record decision about backend design. After create-front-end-architecture: Record decision about frontend design. After create-brownfield-architecture: Record observation about brownfield analysis.'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - create-full-stack-architecture: 'use create-doc with fullstack-architecture-tmpl.yaml → tracker.log(''Creating full-stack architecture'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision architect ''Full-stack architecture approach selected'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact architect ''Full-stack pattern documented'' → tracker.completeCurrentTask(''full-stack architecture created'')'
-  - create-backend-architecture: 'use create-doc with architecture-tmpl.yaml → tracker.log(''Creating backend architecture'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision architect ''Backend design decisions made'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact architect ''Backend pattern established'' → tracker.completeCurrentTask(''backend architecture created'')'
-  - create-front-end-architecture: 'use create-doc with front-end-architecture-tmpl.yaml → tracker.log(''Creating frontend architecture'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision architect ''Frontend design approach selected'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact architect ''Frontend pattern defined'' → tracker.completeCurrentTask(''frontend architecture created'')'
-  - create-brownfield-architecture: 'use create-doc with brownfield-architecture-tmpl.yaml → tracker.log(''Creating brownfield architecture'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Brownfield architecture analysis completed'' → execute: node .bmad-core/utils/track-progress.js keyfact architect ''Brownfield patterns identified'' → tracker.completeCurrentTask(''brownfield architecture created'')'
+  - create-full-stack-architecture: use create-doc with fullstack-architecture-tmpl.yaml directly → tracker.log('Creating full-stack architecture', 'info') → Record full-stack architecture approach decision → Record full-stack pattern as keyfact → tracker.completeCurrentTask('full-stack architecture created')
+  - create-backend-architecture: use create-doc with architecture-tmpl.yaml directly → tracker.log('Creating backend architecture', 'info') → Record backend design decisions → Record backend pattern as keyfact → tracker.completeCurrentTask('backend architecture created')
+  - create-front-end-architecture: use create-doc with front-end-architecture-tmpl.yaml directly → tracker.log('Creating frontend architecture', 'info') → Record frontend design approach decision → Record frontend pattern as keyfact → tracker.completeCurrentTask('frontend architecture created')
+  - create-brownfield-architecture: use create-doc with brownfield-architecture-tmpl.yaml directly → tracker.log('Creating brownfield architecture', 'info') → Record brownfield architecture analysis observation → Record brownfield patterns as keyfact → tracker.completeCurrentTask('brownfield architecture created')
   - doc-out: Output full document to current destination file
-  - document-project: 'execute the task document-project.md → tracker.log(''Documenting project'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Project documentation completed'' → tracker.completeCurrentTask(''project documented'')'
-  - execute-checklist {checklist}: 'Run task execute-checklist (default->architect-checklist) → tracker.log(''Running checklist'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture checklist validated'' → tracker.completeCurrentTask(''checklist completed'')'
-  - research {topic}: 'execute task create-deep-research-prompt → tracker.log(''Researching topic'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture research completed'' → tracker.completeCurrentTask(''research completed'')'
-  - shard-doc: 'run the task shard-doc on the provided architecture.md (ask if not found) → tracker.log(''Sharding document'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation architect ''Architecture document sharded'' → tracker.completeCurrentTask(''document sharded'')'
+  - document-project: execute the task document-project.md directly → tracker.log('Documenting project', 'info') → Record project documentation completion → tracker.completeCurrentTask('project documented')
+  - execute-checklist {checklist}: Run task execute-checklist (default->architect-checklist) directly → tracker.log('Running checklist', 'info') → Record architecture checklist validation → tracker.completeCurrentTask('checklist completed')
+  - research {topic}: execute task create-deep-research-prompt directly → tracker.log('Researching topic', 'info') → Record architecture research completion → tracker.completeCurrentTask('research completed')
+  - shard-doc: run the task shard-doc on the provided architecture.md (ask if not found) directly → tracker.log('Sharding document', 'info') → Record architecture document sharding → tracker.completeCurrentTask('document sharded')
   - reverse-engineer-architecture: Generate architecture.md from implementation artifacts (tools/, scripts/, bmad-core/, workflows) → tracker.log('Reverse-engineered architecture', 'info')
   - document-design-decisions: Document real design decisions based on implementation → tracker.log('Design decisions documented', 'info')
   - progress: Show current task progress using tracker.getProgressReport()
@@ -132,9 +133,9 @@ dependencies:
     - track-progress.js
     - simple-task-tracker.js
 ```
-==================== END: .bmad-core/agents/architect.md ====================
+==================== END: .semad-core/agents/architect.md ====================
 
-==================== START: .bmad-core/templates/architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/architecture-tmpl.yaml ====================
 template:
   id: architecture-template-v2
   name: Architecture Document
@@ -264,7 +265,7 @@ sections:
     instruction: |
       This is the DEFINITIVE technology selection section. Work with the user to make specific choices:
       
-      1. Review PRD technical assumptions and any preferences from .bmad-core/data/technical-preferences.yaml or an attached technical-preferences
+      1. Review PRD technical assumptions and any preferences from .semad-core/data/technical-preferences.yaml or an attached technical-preferences
       2. For each category, present 2-3 viable options with pros/cons
       3. Make a clear recommendation based on project needs
       4. Get explicit user approval for each selection
@@ -788,9 +789,9 @@ sections:
           - Key UI requirements from PRD
           - Any frontend-specific decisions made here
           - Request for detailed frontend architecture
-==================== END: .bmad-core/templates/architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/front-end-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/front-end-architecture-tmpl.yaml ====================
 template:
   id: frontend-architecture-template-v2
   name: Frontend Architecture Document
@@ -1000,9 +1001,9 @@ sections:
           - Key import patterns
           - File naming conventions
           - Project-specific patterns and utilities
-==================== END: .bmad-core/templates/front-end-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/front-end-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/fullstack-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 template:
   id: fullstack-architecture-template-v2
   name: Fullstack Architecture Document
@@ -1811,9 +1812,9 @@ sections:
   - id: checklist-results
     title: Checklist Results Report
     instruction: Before running the checklist, offer to output the full architecture document. Once user confirms, execute the architect-checklist and populate results here.
-==================== END: .bmad-core/templates/fullstack-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/brownfield-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================
 template:
   id: brownfield-architecture-template-v2
   name: Brownfield Enhancement Architecture
@@ -2290,15 +2291,15 @@ sections:
           - Key technical decisions based on real project constraints
           - Existing system compatibility requirements with specific verification steps
           - Clear sequencing of implementation to minimize risk to existing functionality
-==================== END: .bmad-core/templates/brownfield-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/data/technical-preferences.md ====================
+==================== START: .semad-core/data/technical-preferences.md ====================
 # User-Defined Preferred Patterns and Preferences
 
 None Listed
-==================== END: .bmad-core/data/technical-preferences.md ====================
+==================== END: .semad-core/data/technical-preferences.md ====================
 
-==================== START: .bmad-core/utils/track-progress.js ====================
+==================== START: .semad-core/utils/track-progress.js ====================
 #!/usr/bin/env node
 
 /**
@@ -2342,8 +2343,19 @@ if (fs.existsSync(contextFile)) {
 const timestamp = new Date().toISOString();
 
 switch (operation) {
-  case 'observation':
-    const observation = args.join(' ');
+  case 'observation': {
+    const raw = args.join(' ');
+    let observation = raw;
+    let meta = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed) {
+        meta = parsed;
+        if (typeof parsed.message === 'string') {
+          observation = parsed.message;
+        }
+      }
+    } catch (_) { /* keep raw string */ }
     // Update context
     context.lastObservation = observation;
     context.lastUpdated = timestamp;
@@ -2353,16 +2365,24 @@ switch (operation) {
       timestamp,
       type: 'observation',
       agent,
-      content: observation
+      content: observation,
+      meta
     };
     fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
     
     console.log(`[${agent}] Observation recorded: ${observation}`);
-    break;
+    break; }
     
-  case 'decision':
-    const decision = args[0];
-    const rationale = args.slice(1).join(' ');
+  case 'decision': {
+    let decision = args[0];
+    let rationale = args.slice(1).join(' ');
+    try {
+      const parsed = JSON.parse(args.join(' '));
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.decision) decision = parsed.decision;
+        if (parsed.rationale) rationale = parsed.rationale;
+      }
+    } catch (_) { /* keep raw pieces */ }
     
     // Update context
     if (!context.decisions) context.decisions = [];
@@ -2380,10 +2400,17 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
     
     console.log(`[${agent}] Decision recorded: ${decision}`);
-    break;
+    break; }
     
-  case 'keyfact':
-    const fact = args.join(' ');
+  case 'keyfact': {
+    const raw = args.join(' ');
+    let fact = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.fact) {
+        fact = parsed.fact;
+      }
+    } catch (_) { /* keep raw string */ }
     
     // Append to log
     const factEntry = {
@@ -2395,7 +2422,7 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
     
     console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break;
+    break; }
     
   case 'show':
     console.log('Current context:', JSON.stringify(context, null, 2));
@@ -2411,9 +2438,9 @@ switch (operation) {
 if (operation !== 'show') {
   fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
 }
-==================== END: .bmad-core/utils/track-progress.js ====================
+==================== END: .semad-core/utils/track-progress.js ====================
 
-==================== START: .bmad-core/utils/simple-task-tracker.js ====================
+==================== START: .semad-core/utils/simple-task-tracker.js ====================
 /**
  * Simple Task Tracker
  * A lightweight in-memory task tracking system for agent workflows
@@ -2739,6 +2766,26 @@ class TaskTracker {
   }
 
   /**
+   * Save current tasks to .ai/dev_tasks.json (for external tooling)
+   * @param {string} filePath
+   * @returns {string} saved file path
+   */
+  saveDevTasks(filePath = '.ai/dev_tasks.json') {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const data = {
+      workflow: this.workflow,
+      tasks: this.workflow?.tasks || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    this.log('Dev tasks saved to: ' + filePath, 'info');
+    return filePath;
+  }
+
+  /**
    * Get elapsed time since workflow start
    * @returns {string} Formatted elapsed time
    */
@@ -2807,4 +2854,4 @@ class TaskTracker {
 
 // Export for use in agents
 module.exports = TaskTracker;
-==================== END: .bmad-core/utils/simple-task-tracker.js ====================
+==================== END: .semad-core/utils/simple-task-tracker.js ====================

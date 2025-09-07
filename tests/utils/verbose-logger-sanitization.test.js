@@ -2,7 +2,7 @@
  * Unit tests for VerboseLogger context sanitization
  */
 
-const VerboseLogger = require('../../bmad-core/utils/verbose-logger');
+const VerboseLogger = require('../../semad-core/utils/verbose-logger');
 
 describe('VerboseLogger - Context Sanitization', () => {
   let logger;

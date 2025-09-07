@@ -8,7 +8,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const AgentPermissionsValidator = require('../../bmad-core/utils/agent-permissions');
+const AgentPermissionsValidator = require('../../semad-core/utils/agent-permissions');
 
 console.log('🧪 Dev↔QA Workflow Integration Tests\n');
 

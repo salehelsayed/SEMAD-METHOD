@@ -74,7 +74,7 @@ describe('Validation System Integration Tests', () => {
     ];
     
     schemaFiles.forEach(file => {
-      const schemaPath = path.join(projectRoot, 'bmad-core', 'schemas', file);
+      const schemaPath = path.join(projectRoot, 'semad-core', 'schemas', file);
       const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
       
       expect(schema).toHaveProperty('$schema');
@@ -86,7 +86,7 @@ describe('Validation System Integration Tests', () => {
   });
   
   test('ModuleResolver should correctly resolve schema paths', () => {
-    const ModuleResolver = require(path.join(projectRoot, 'bmad-core', 'utils', 'module-resolver.js'));
+    const ModuleResolver = require(path.join(projectRoot, 'semad-core', 'utils', 'module-resolver.js'));
     
     const schemas = [
       'taskSchema',

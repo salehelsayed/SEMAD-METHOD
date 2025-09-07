@@ -41,8 +41,19 @@ if (fs.existsSync(contextFile)) {
 const timestamp = new Date().toISOString();
 
 switch (operation) {
-  case 'observation':
-    const observation = args.join(' ');
+  case 'observation': {
+    const raw = args.join(' ');
+    let observation = raw;
+    let meta = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed) {
+        meta = parsed;
+        if (typeof parsed.message === 'string') {
+          observation = parsed.message;
+        }
+      }
+    } catch (_) { /* keep raw string */ }
     // Update context
     context.lastObservation = observation;
     context.lastUpdated = timestamp;
@@ -52,16 +63,24 @@ switch (operation) {
       timestamp,
       type: 'observation',
       agent,
-      content: observation
+      content: observation,
+      meta
     };
     fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
     
     console.log(`[${agent}] Observation recorded: ${observation}`);
-    break;
+    break; }
     
-  case 'decision':
-    const decision = args[0];
-    const rationale = args.slice(1).join(' ');
+  case 'decision': {
+    let decision = args[0];
+    let rationale = args.slice(1).join(' ');
+    try {
+      const parsed = JSON.parse(args.join(' '));
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.decision) decision = parsed.decision;
+        if (parsed.rationale) rationale = parsed.rationale;
+      }
+    } catch (_) { /* keep raw pieces */ }
     
     // Update context
     if (!context.decisions) context.decisions = [];
@@ -79,10 +98,17 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
     
     console.log(`[${agent}] Decision recorded: ${decision}`);
-    break;
+    break; }
     
-  case 'keyfact':
-    const fact = args.join(' ');
+  case 'keyfact': {
+    const raw = args.join(' ');
+    let fact = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.fact) {
+        fact = parsed.fact;
+      }
+    } catch (_) { /* keep raw string */ }
     
     // Append to log
     const factEntry = {
@@ -94,7 +120,7 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
     
     console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break;
+    break; }
     
   case 'show':
     console.log('Current context:', JSON.stringify(context, null, 2));

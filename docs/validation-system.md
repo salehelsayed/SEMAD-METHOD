@@ -66,7 +66,7 @@ The original validation script, updated to support:
 ## Directory Structure
 
 ```
-bmad-core/
+semad-core/
 ├── schemas/
 │   ├── task-schema.json           # Regular task schema
 │   ├── structured-task-schema.json # Structured task schema
@@ -96,7 +96,7 @@ When validation fails, the system provides:
 
 Example error output:
 ```
-File: bmad-core/structured-tasks/example.yaml
+File: semad-core/structured-tasks/example.yaml
 Type: task
 Errors:
   • must have required property 'id'
@@ -137,7 +137,7 @@ Example GitHub Actions usage:
 ## Extending the Validation System
 
 To add a new schema:
-1. Create the schema JSON file in `bmad-core/schemas/`
+1. Create the schema JSON file in `semad-core/schemas/`
 2. Add the schema reference to `core-config.yaml`
 3. Update `ModuleResolver` schema mapping if needed
 4. Add validation logic to `validate-all.js`
@@ -627,4 +627,3 @@ The metrics system integrates with:
 - Gate enforcement for quality thresholds
 - Development workflows for continuous monitoring
 - Team dashboards for visibility into process health
-

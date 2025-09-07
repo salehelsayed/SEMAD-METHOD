@@ -7,20 +7,34 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const ora = require('ora');
 const { Command } = require('commander');
-const AgentSimulator = require('../bmad-core/utils/agent-simulator');
-const WorkflowConfigLoader = require('../bmad-core/utils/workflow-config-loader');
-const VerboseLogger = require('../bmad-core/utils/verbose-logger');
-const FilePathResolver = require('../bmad-core/utils/file-path-resolver');
-const SharedContextManager = require('../bmad-core/utils/shared-context-manager');
+function reqCore(rel) {
+  const tryPaths = [
+    path.join(__dirname, '..', '.semad-core', rel),
+    path.join(__dirname, '..', 'semad-core', rel),
+    path.join(__dirname, '..', 'bmad-core', rel)
+  ];
+  for (const p of tryPaths) {
+    try { return require(p); } catch (_) {}
+  }
+  throw new Error(`Unable to resolve core module: ${rel}`);
+}
+const AgentSimulator = reqCore('utils/agent-simulator');
+const WorkflowConfigLoader = reqCore('utils/workflow-config-loader');
+const VerboseLogger = reqCore('utils/verbose-logger');
+const FilePathResolver = reqCore('utils/file-path-resolver');
+const SharedContextManager = reqCore('utils/shared-context-manager');
 let AgentRunner;
 try {
-  AgentRunner = require('../bmad-core/utils/agent-runner');
+  AgentRunner = reqCore('utils/agent-runner');
 } catch (_) {
   try { AgentRunner = require('./orchestrator/agent-runner-shim'); } catch (_) {}
 }
 // Fallback to shim if memory modules are not available in installed package
 try {
-  const coreDir = fs.existsSync(path.join(process.cwd(), 'bmad-core')) ? 'bmad-core' : '.bmad-core';
+  const coreDir = fs.existsSync(path.join(process.cwd(), 'semad-core')) ? 'semad-core'
+    : fs.existsSync(path.join(process.cwd(), '.semad-core')) ? '.semad-core'
+    : fs.existsSync(path.join(process.cwd(), 'semad-core')) ? 'semad-core'
+    : '.semad-core';
   const umm = path.join(process.cwd(), coreDir, 'utils', 'unified-memory-manager.js');
   const mh = path.join(process.cwd(), coreDir, 'utils', 'memory-health.js');
   if (!fs.existsSync(umm) || !fs.existsSync(mh)) {
@@ -32,7 +46,7 @@ try {
 }
 let getAggregatedHealthStatus;
 try {
-  ({ getAggregatedHealthStatus } = require('../bmad-core/utils/memory-health'));
+  ({ getAggregatedHealthStatus } = reqCore('utils/memory-health'));
 } catch (_) {
   try { ({ getAggregatedHealthStatus } = require('./orchestrator/memory-health-shim')); } catch (_) {}
 }
@@ -40,7 +54,13 @@ try {
 class WorkflowOrchestrator {
   constructor(rootDir) {
     this.rootDir = rootDir || process.cwd();
-    this.workflowsDir = path.join(this.rootDir, 'bmad-core', 'workflows');
+    // Determine core directory based on what exists
+    const coreDir = fs.existsSync(path.join(this.rootDir, '.semad-core')) ? '.semad-core' 
+                  : fs.existsSync(path.join(this.rootDir, 'semad-core')) ? 'semad-core'
+                  : fs.existsSync(path.join(this.rootDir, 'bmad-core')) ? 'bmad-core'
+                  : 'semad-core'; // fallback
+    this.coreDir = coreDir;
+    this.workflowsDir = path.join(this.rootDir, coreDir, 'workflows');
     this.storyMetadataPath = path.join(this.rootDir, '.bmad-orchestrator-metadata.json');
     this.simulator = new AgentSimulator();
     this.configLoader = new WorkflowConfigLoader(this.rootDir);
@@ -212,7 +232,7 @@ class WorkflowOrchestrator {
 
     // Also preserve any devLoadAlwaysFiles from core-config.yaml so the Dev agent keeps its required docs
     try {
-      const coreConfigPath = path.join(this.rootDir, 'bmad-core', 'core-config.yaml');
+      const coreConfigPath = path.join(this.rootDir, 'semad-core', 'core-config.yaml');
       if (fs.existsSync(coreConfigPath)) {
         const cfgRaw = fs.readFileSync(coreConfigPath, 'utf8');
         const cfg = yaml.load(cfgRaw) || {};
@@ -239,11 +259,39 @@ class WorkflowOrchestrator {
       for (const entry of entries) {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-          // Remove entire stories directory; recreated later
+          // Stories directory: preserve team-split files even when not preserving stories
           if (full === path.join(docsRoot, 'stories')) {
             if (!this.preserveStories) {
-              await fsExtra.remove(full);
-              removed.push(full + '/');
+              // Try to preserve files matching team suffix "-<team>.md"
+              const root = this.rootDir;
+              let teams = [];
+              try {
+                const y = require('js-yaml');
+                const cand = [
+                  require('path').join(root, '.semad-core', 'teams.yaml'),
+                  require('path').join(root, 'bmad-core', 'teams.yaml'),
+                ];
+                for (const p of cand) {
+                  if (require('fs').existsSync(p)) { const obj = y.load(require('fs').readFileSync(p, 'utf8')) || {}; teams = Array.isArray(obj.teams) ? obj.teams : []; break; }
+                }
+              } catch (_) {}
+              const teamSuffixes = new Set(teams.map(t => '-' + String(t).toLowerCase() + '.md'));
+              try {
+                const entries2 = await fs.promises.readdir(full);
+                for (const f of entries2) {
+                  const p = path.join(full, f);
+                  if (f.endsWith('.md')) {
+                    // If filename ends with -<team>.md, keep it; else remove
+                    const lower = f.toLowerCase();
+                    const isTeam = [...teamSuffixes].some(suf => lower.endsWith(suf));
+                    if (!isTeam) { await fsExtra.remove(p); removed.push(p); } else { kept.push(p); }
+                  }
+                }
+              } catch (_) {
+                // Fallback: remove entire directory
+                await fsExtra.remove(full);
+                removed.push(full + '/');
+              }
             } else {
               kept.push(full + '/');
             }
@@ -329,8 +377,8 @@ class WorkflowOrchestrator {
 
     // Metrics collection system (memory health, logs)
     const metricsFiles = [
-      'bmad-core/utils/memory-health.js',
-      'bmad-core/utils/verbose-logger.js'
+      'semad-core/utils/memory-health.js',
+      'semad-core/utils/verbose-logger.js'
     ].filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
     analysis.features.push({ key: 'metrics', name: 'Metrics collection system', present: metricsFiles.length > 0 });
     analysis.evidence.metrics = metricsFiles;
@@ -342,16 +390,16 @@ class WorkflowOrchestrator {
 
     // Preflight checks and validation (file-path-resolver, config loader)
     const preflightFiles = [
-      'bmad-core/utils/file-path-resolver.js',
-      'bmad-core/utils/workflow-config-loader.js'
+      'semad-core/utils/file-path-resolver.js',
+      'semad-core/utils/workflow-config-loader.js'
     ].filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
     analysis.features.push({ key: 'preflight', name: 'Preflight checks and validation', present: preflightFiles.length > 0 });
     analysis.evidence.preflight = preflightFiles;
 
     // Reference checking system (dependency/scanner, find-next-story)
     const refFiles = [
-      'bmad-core/utils/dependency-scanner.js',
-      'bmad-core/utils/find-next-story.js'
+      'semad-core/utils/dependency-scanner.js',
+      'semad-core/utils/find-next-story.js'
     ].filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
     analysis.features.push({ key: 'reference_checking', name: 'Reference checking system', present: refFiles.length > 0 });
     analysis.evidence.reference_checking = refFiles;
@@ -366,7 +414,7 @@ class WorkflowOrchestrator {
     // Simple task tracking (no Qdrant)
     const trackingDirs = [
       '.ai/progress',
-      'bmad-core/agents/index.js' // working memory helpers
+      'semad-core/agents/index.js' // working memory helpers
     ].filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
     analysis.features.push({ key: 'simple_task_tracking', name: 'Simple task tracking (no Qdrant)', present: trackingDirs.length > 0 });
     analysis.evidence.simple_task_tracking = trackingDirs;
@@ -379,8 +427,8 @@ class WorkflowOrchestrator {
     // Observability (metrics/logging/reporting)
     const observabilityCandidates = [
       'tools/metrics',
-      'bmad-core/utils/verbose-logger.js',
-      'bmad-core/utils/memory-health.js',
+      'semad-core/utils/verbose-logger.js',
+      'semad-core/utils/memory-health.js',
       '.ai/reports'
     ];
     const observabilityFound = observabilityCandidates.filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
@@ -396,10 +444,10 @@ class WorkflowOrchestrator {
     analysis.features.push({ key: 'error_handling', name: 'Error handling & recovery patterns', present: errFound.length > 0 });
     analysis.evidence.error_handling = errFound;
 
-    // Data flow (heuristics: orchestrator, bmad-core, docs, .ai exist)
+    // Data flow (heuristics: orchestrator, semad-core, docs, .ai exist)
     const dataFlowCandidates = [
       'tools/workflow-orchestrator.js',
-      'bmad-core',
+      'semad-core',
       'docs',
       '.ai'
     ];
@@ -741,7 +789,7 @@ class WorkflowOrchestrator {
     // High-Level Overview + Diagram
     lines.push('## High-Level Overview');
     lines.push('- tools/: CLI, orchestrator, builders, QA and gates');
-    lines.push('- bmad-core/: agents, templates, utilities, workflows');
+    lines.push('- semad-core/: agents, templates, utilities, workflows');
     lines.push('- scripts/: validation and preflight scripts');
     lines.push('- docs/: PRD, architecture, stories, guides');
     lines.push('- .github/workflows/: CI/CD pipelines');
@@ -751,7 +799,7 @@ class WorkflowOrchestrator {
     lines.push('```mermaid');
     lines.push('graph TD');
     lines.push('  User[Developer/User] --> ORCH[Tools/Orchestrator CLI]');
-    lines.push('  ORCH --> CORE[bmad-core utils/agents]');
+    lines.push('  ORCH --> CORE[semad-core utils/agents]');
     lines.push('  ORCH --> DOCS[docs/* PRD, Architecture, Stories]');
     lines.push('  ORCH --> SCRIPTS[scripts/* validators]');
     lines.push('  ORCH --> AI[.ai/* reports, manifests]');
@@ -761,7 +809,7 @@ class WorkflowOrchestrator {
     // Component Breakdown
     lines.push('## Component Breakdown');
     lines.push('- Orchestrator CLI: `tools/workflow-orchestrator.js` (also exposed as `bmad-orchestrator`)');
-    lines.push('- Core Utilities and Agents: `bmad-core/*`');
+    lines.push('- Core Utilities and Agents: `semad-core/*`');
     lines.push('- Validators and Gates: `tools/orchestrator/gates/*`, `tools/reference-checker/*`');
     lines.push('- QA and Reports: `.ai/reports/*`');
     lines.push('- Story Artifacts: `docs/stories/*` with embedded StoryContracts');
@@ -805,7 +853,7 @@ class WorkflowOrchestrator {
     lines.push('## Source Tree');
     lines.push('- High-level overview of directories and responsibilities. See source-tree.md for details.');
     lines.push('- tools/: CLI, orchestrator, gates, utilities');
-    lines.push('- bmad-core/: agents, templates, utilities, structured tasks');
+    lines.push('- semad-core/: agents, templates, utilities, structured tasks');
     lines.push('- scripts/: validation and preflight scripts');
     lines.push('- docs/: PRD, architecture, stories, guides');
     lines.push('');
@@ -889,8 +937,8 @@ class WorkflowOrchestrator {
     };
 
     await ensureFile(codingStandardsPath, `# Coding Standards\n\nThis document captures coding conventions enforced in this repo.\n\n- Prefer small, single-responsibility modules.\n- Keep functions under the configured complexity thresholds.\n- Use explicit, auditable artifacts for workflows.\n`);
-    await ensureFile(techStackPath, `# Tech Stack\n\n- Node.js (>=20)\n- Jest for testing\n- BMad Method core utilities under bmad-core/\n- Orchestrator and scripts under tools/\n`);
-    await ensureFile(sourceTreePath, `# Source Tree\n\n- tools/: CLI, orchestrator, gates, utilities\n- bmad-core/: agents, templates, utilities, structured tasks\n- scripts/: validation and preflight scripts\n- docs/: PRD, architecture, stories, guides\n`);
+    await ensureFile(techStackPath, `# Tech Stack\n\n- Node.js (>=20)\n- Jest for testing\n- BMad Method core utilities under semad-core/\n- Orchestrator and scripts under tools/\n`);
+    await ensureFile(sourceTreePath, `# Source Tree\n\n- tools/: CLI, orchestrator, gates, utilities\n- semad-core/: agents, templates, utilities, structured tasks\n- scripts/: validation and preflight scripts\n- docs/: PRD, architecture, stories, guides\n`);
     return archPath;
   }
 
@@ -1120,6 +1168,48 @@ class WorkflowOrchestrator {
     return true;
   }
 
+  /**
+   * Recreate stories from code with coverage gap filling
+   * @param {Object} analysis - Code analysis results
+   * @param {Object} coverageGaps - Coverage gaps to fill (optional)
+   */
+  async recreateStoriesFromCodeWithCoverage(analysis, coverageGaps) {
+    await this.initialize();
+    await this.ensureDirs();
+    const storiesDir = path.join(this.rootDir, 'docs', 'stories');
+    const fsExtra = require('fs-extra');
+    
+    // First create standard stories
+    await this.recreateStoriesFromCode(analysis);
+    
+    // Then create additional stories for coverage gaps
+    if (coverageGaps) {
+      console.log(chalk.cyan('Creating additional stories for coverage gaps...'));
+      
+      // Features without stories
+      if (coverageGaps.featuresWithoutStories && coverageGaps.featuresWithoutStories.length > 0) {
+        for (const featureId of coverageGaps.featuresWithoutStories) {
+          console.log(`  Creating story for uncovered feature: ${featureId}`);
+          // Use SM agent to create story
+          try {
+            const { exec } = require('child_process');
+            const util = require('util');
+            const execAsync = util.promisify(exec);
+            await execAsync(`node tools/agent.js sm --command="brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+          } catch (e) {
+            console.log(chalk.yellow(`    Failed to create story for ${featureId}: ${e.message}`));
+          }
+        }
+      }
+      
+      // Acceptance criteria without tests
+      if (coverageGaps.acceptanceMissingTests && coverageGaps.acceptanceMissingTests.length > 0) {
+        console.log(`  Found ${coverageGaps.acceptanceMissingTests.length} acceptance criteria without test coverage`);
+        console.log(chalk.yellow('  Dev agent should add AC tags when implementing tests'));
+      }
+    }
+  }
+  
   async recreateStoriesFromCode(analysis) {
     await this.initialize();
     await this.ensureDirs();
@@ -1398,6 +1488,33 @@ class WorkflowOrchestrator {
       } else {
         lines.push('No new story candidates created.');
       }
+      // Append team story listings if any
+      try {
+        const all = await fs.promises.readdir(storiesDir);
+        const teamGroups = new Map();
+        for (const f of all) {
+          if (!f.endsWith('.md')) continue;
+          const m = f.match(/^(story-[^\.]+)\.(md)$/); // story-99-1.md
+          if (m) {
+            const base = path.join(storiesDir, f);
+            const prefix = path.basename(f, '.md');
+            // find team variants: story-99-1-<team>.md
+            for (const g of all) {
+              if (g.startsWith(prefix + '-') && g.endsWith('.md')) {
+                if (!teamGroups.has(f)) teamGroups.set(f, []);
+                teamGroups.get(f).push(g);
+              }
+            }
+          }
+        }
+        if (teamGroups.size) {
+          lines.push('', '## Team Variants');
+          for (const [base, variants] of teamGroups.entries()) {
+            lines.push(`- ${base}`);
+            for (const v of variants.sort()) lines.push(`  - ${v}`);
+          }
+        }
+      } catch (_) {}
       if (!options.dryRun) {
         await fs.promises.writeFile(indexPath, lines.join('\n') + '\n', 'utf8');
       }
@@ -1913,6 +2030,22 @@ class WorkflowOrchestrator {
           result.issues.push({ file: full, missing: rel });
         }
       }
+      // Brownfield integration safety: If story touches integrationPointIds, require integrationVerification and rollbackPlan sections
+      try {
+        const hasInt = /integrationPointIds\s*:\s*\[/i.test(content) || /integrationPointIds\s*:/i.test(content);
+        if (hasInt) {
+          const hasIV = /integrationVerification\s*:/i.test(content) || /##\s*Integration Verification/i.test(content);
+          const hasRollback = /rollbackPlan\s*:/i.test(content) || /##\s*Rollback Plan/i.test(content);
+          if (!hasIV) {
+            ok = false;
+            result.issues.push({ file: full, missing: 'integrationVerification section (required for INT stories)' });
+          }
+          if (!hasRollback) {
+            ok = false;
+            result.issues.push({ file: full, missing: 'rollbackPlan section (required for INT stories)' });
+          }
+        }
+      } catch (_) {}
       if (ok) result.valid++;
     }
     return result;
@@ -2171,6 +2304,7 @@ class WorkflowOrchestrator {
     lines.push('This file is generated from implementation evidence. Do not edit within BEGIN/END GENERATED blocks.');
     lines.push('');
     // Active entities summary (PRD-oriented: exclude low-level 'module' to reduce noise)
+    const normalize = (s) => typeof s === 'string' ? s.replace(/(^|\b)semad-core\//g, '$1semad-core/') : s;
     const entitiesAll = Array.isArray(analysis.entities) ? analysis.entities.filter(e => (e.lifecycle || 'active') === 'active') : [];
     const allowedTypes = new Set(['api', 'route', 'model', 'ci_job', 'cli', 'config', 'env']);
     const entities = entitiesAll.filter(e => allowedTypes.has(e.type));
@@ -2179,9 +2313,9 @@ class WorkflowOrchestrator {
       lines.push('- None detected');
     } else {
       for (const e of entities) {
-        const ev = Array.isArray(e.evidence) ? e.evidence.map(x => x.file).filter(Boolean) : [];
+        const ev = Array.isArray(e.evidence) ? e.evidence.map(x => normalize(x.file)).filter(Boolean) : [];
         const evTxt = ev.length ? ' — Evidence: ' + Array.from(new Set(ev)).join(', ') : '';
-        lines.push(`- [${e.type}] ${e.name} (id: ${e.id})${evTxt}`);
+        lines.push(`- [${e.type}] ${e.name} (id: ${normalize(e.id)})${evTxt}`);
       }
     }
     lines.push('');
@@ -2210,11 +2344,12 @@ class WorkflowOrchestrator {
     lines.push('This file is generated from implementation evidence. Do not edit within BEGIN/END GENERATED blocks.');
     lines.push('');
     lines.push('## Systems and Evidence');
+    const normalize = (s) => typeof s === 'string' ? s.replace(/(^|\b)semad-core\//g, '$1semad-core/') : s;
     const entities = Array.isArray(analysis.entities) ? analysis.entities : [];
     for (const e of entities) {
-      const ev = Array.isArray(e.evidence) ? e.evidence.map(x => x.file).filter(Boolean) : [];
+      const ev = Array.isArray(e.evidence) ? e.evidence.map(x => normalize(x.file)).filter(Boolean) : [];
       lines.push(`- [${e.type}] ${e.name}: ${(e.lifecycle || 'active')}`);
-      lines.push(`  - id: ${e.id}`);
+      lines.push(`  - id: ${normalize(e.id)}`);
       if (ev.length) lines.push(`  - Evidence: ${Array.from(new Set(ev)).join(', ')}`);
     }
     lines.push('');
@@ -2308,7 +2443,7 @@ class WorkflowOrchestrator {
     try {
       const cp = require('child_process');
       const yaml = require('js-yaml');
-      let paths = ['tools', 'scripts', 'bmad-core'];
+      let paths = ['tools', 'scripts', 'semad-core'];
       if (story && story.file && this.rootDir && fs.existsSync(story.file)) {
         try {
           const raw = fs.readFileSync(story.file, 'utf8');
@@ -2718,7 +2853,7 @@ class WorkflowOrchestrator {
       const availableEpics = Object.values(epicGroups)
         .filter(epic => epic.hasApproved)
         .map(epic => {
-          const { getEpicStatus } = require('../bmad-core/utils/find-next-story');
+          const { getEpicStatus } = require('../semad-core/utils/find-next-story');
           const status = getEpicStatus(this.resolvedPaths.storyLocation, epic.epicId);
           return {
             name: `Epic ${epic.epicId} (${status.completedStories}/${status.totalStories} completed, ${status.pendingStories} pending)`,
@@ -2756,7 +2891,7 @@ class WorkflowOrchestrator {
    * Get all stories status using resolved paths
    */
   getAllStoriesStatus() {
-    const { getAllStoriesStatus } = require('../bmad-core/utils/find-next-story');
+    const { getAllStoriesStatus } = require('../semad-core/utils/find-next-story');
     return getAllStoriesStatus(this.resolvedPaths.storyLocation);
   }
 
@@ -2848,7 +2983,7 @@ class WorkflowOrchestrator {
     
     this.logger.phaseStart('Epic Loop Workflow', `Processing all stories in Epic ${epicId} with ${flowType} flow`);
     
-    const { getEpicStatus, findNextApprovedStoryInEpic } = require('../bmad-core/utils/find-next-story');
+    const { getEpicStatus, findNextApprovedStoryInEpic } = require('../semad-core/utils/find-next-story');
     
     let epicCompleted = false;
     let processedStories = 0;
@@ -3451,7 +3586,7 @@ class WorkflowOrchestrator {
    * @returns {Object} Story information or null if none found
    */
   findNextApprovedStory() {
-    const findNextStory = require('../bmad-core/utils/find-next-story');
+    const findNextStory = require('../semad-core/utils/find-next-story');
     return findNextStory.findNextApprovedStory(this.resolvedPaths.storyLocation);
   }
 
@@ -3961,9 +4096,9 @@ program
 
     // Utility: find core path (prefer hidden core in installed projects)
     function corePath(rel) {
-      const p1 = path.join(root, '.bmad-core', rel);
+      const p1 = path.join(root, '.semad-core', rel);
       if (fs.existsSync(p1)) return p1;
-      const p2 = path.join(root, 'bmad-core', rel);
+      const p2 = path.join(root, 'semad-core', rel);
       return p2;
     }
 
@@ -4007,7 +4142,7 @@ program
     async function verifyFixes() {
       const scripts = [
         corePath(path.join('utils', 'verify-qa-fixes.js')),
-        path.join(root, 'bmad-core', 'utils', 'verify-qa-fixes.js')
+        path.join(root, 'semad-core', 'utils', 'verify-qa-fixes.js')
       ];
       const verifyScript = scripts.find(p => fs.existsSync(p));
       if (!verifyScript) {
@@ -4090,6 +4225,12 @@ program
   .option('--shard-only', 'Only shard PRD/Architecture per config and exit', false)
   .option('--rewrite-human', 'Also rewrite docs/architecture.md and docs/prd/PRD.md from implementation (destructive to human text)', false)
   .option('--handoff-human', 'Hand off to PM and Architect agents to write/update human PRD/Architecture from implementation', false)
+  .option('--coverage-threshold <number>', 'Minimum feature coverage percentage (default 100)', (v) => parseInt(v, 10), 100)
+  .option('--auto-split-stories', 'Enable automatic story splitting until coverage threshold is met', false)
+  .option('--epic-validate', 'Validate all EpicContracts (frontmatter + ECM) under docs/epics', false)
+  .option('--integration-safety', 'Run QA integration safety scan on stories and emit standardized QA reports', true)
+  .option('--qa-normalize-reports', 'Normalize QA outputs into .ai/reports/qa with consistent naming', true)
+  .option('--generate-cleanup-stories', 'Generate precise cleanup stories from normalized QA reports (e.g., orphans)', false)
   .option('--write', 'No-op; for CLI parity (writing is default)', false)
   .option('--dry-run', 'Compute analysis and reports only; do not write docs/manifest', false)
   .action(async (options) => {
@@ -4137,8 +4278,46 @@ program
       await orchestrator.shardDocuments();
       // Re-enable warnings after shard
       orchestrator.suppressDevLoadWarnings = false;
+      
+      // Run PM feature coverage validation BEFORE recreating stories
+      // This allows SM to auto-fill gaps when recreating stories
+      if (options.coverageThreshold) {
+        console.log(chalk.cyan('🔄 Running PM feature coverage validation before story recreation...'));
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        
+        try {
+          const coverageCmd = `node tools/feature-coverage.js --threshold ${options.coverageThreshold} --report .ai/reports/feature-coverage-pre.json --markdown .ai/reports/feature-coverage-pre.md`;
+          const { stdout } = await execAsync(coverageCmd);
+          console.log(stdout);
+          
+          // Check if coverage is below threshold
+          const coverageReport = JSON.parse(fs.readFileSync(path.join(orchestrator.rootDir, '.ai', 'reports', 'feature-coverage-pre.json'), 'utf8'));
+          const coveragePct = coverageReport.summary.overallPct;
+          
+          if (coveragePct < options.coverageThreshold) {
+            console.log(chalk.yellow(`⚠️  Pre-story coverage ${coveragePct}% is below threshold ${options.coverageThreshold}%`));
+            console.log(chalk.cyan('Story recreation will attempt to fill coverage gaps...'));
+            
+            // Store gaps for SM to use during story recreation
+            orchestrator.coverageGaps = coverageReport.gaps;
+          } else {
+            console.log(chalk.green(`✅ Pre-story coverage ${coveragePct}% meets threshold`));
+          }
+        } catch (e) {
+          console.log(chalk.yellow(`Pre-story coverage validation skipped: ${e.message}`));
+        }
+      }
+      
       if (!orchestrator.preserveStories) {
-        await orchestrator.recreateStoriesFromCode(analysis);
+        // Pass coverage gaps to story recreation if auto-split is enabled
+        if (options.autoSplitStories && orchestrator.coverageGaps) {
+          console.log(chalk.cyan('🔄 Recreating stories with auto-split to fill coverage gaps...'));
+          await orchestrator.recreateStoriesFromCodeWithCoverage(analysis, orchestrator.coverageGaps);
+        } else {
+          await orchestrator.recreateStoriesFromCode(analysis);
+        }
         await orchestrator.validateStoryConsistency(analysis);
       }
       // Ensure minimal generated PRD/Architecture shards exist before coverage
@@ -4180,6 +4359,129 @@ program
       } else {
         console.log(chalk.green('Docs mention all implemented features detected.'));
       }
+      await orchestrator.generateAlignmentReport(analysis);
+      await orchestrator.createDocumentationManifest(analysis);
+
+      // Optional: Validate Epics (EpicContract + ECM)
+      if (options.epicValidate) {
+        try {
+          const epicsDir = path.join(orchestrator.rootDir, 'docs', 'epics');
+          if (fs.existsSync(epicsDir)) {
+            const epicFiles = fs.readdirSync(epicsDir).filter(f => f.endsWith('.md'));
+            console.log(chalk.cyan(`🔎 Validating ${epicFiles.length} epic(s)...`));
+            const { spawnSync } = require('child_process');
+            for (const f of epicFiles) {
+              const epicPath = path.join(epicsDir, f);
+              spawnSync(process.execPath, ['tools/ecm-validate.js', epicPath], { cwd: orchestrator.rootDir, stdio: 'inherit' });
+              spawnSync(process.execPath, ['scripts/validate-epic-contract.js', '--file', epicPath], { cwd: orchestrator.rootDir, stdio: 'inherit' });
+            }
+          }
+        } catch (e) {
+          console.log(chalk.yellow(`Epic validation step failed: ${e.message}`));
+        }
+      }
+
+      // QA: Integration safety (standardized QA report)
+      if (options.integrationSafety) {
+        try {
+          console.log(chalk.cyan('🧪 QA: Integration safety scan...'));
+          const { spawnSync } = require('child_process');
+          const res = spawnSync(process.execPath, ['tools/qa/integration-safety.js'], { cwd: orchestrator.rootDir, stdio: 'inherit' });
+          if ((res.status ?? 0) !== 0) console.log(chalk.yellow('Integration safety reported issues. See .ai/reports/qa/*.json'));
+        } catch (e) {
+          console.log(chalk.yellow(`Integration safety scan failed: ${e.message}`));
+        }
+      }
+
+      // QA: Normalize reports
+      if (options.qaNormalizeReports) {
+        try {
+          console.log(chalk.cyan('🧪 QA: Normalizing reports...'));
+          const { spawnSync } = require('child_process');
+          spawnSync(process.execPath, ['tools/qa/normalize-reports.js'], { cwd: orchestrator.rootDir, stdio: 'inherit' });
+        } catch (e) {
+          console.log(chalk.yellow(`QA report normalization failed: ${e.message}`));
+        }
+      }
+
+      // Optional: Generate cleanup stories from normalized QA reports
+      if (options.generateCleanupStories) {
+        try {
+          // Find latest normalized orphans report
+          const qaDir = path.join(orchestrator.rootDir, '.ai', 'reports', 'qa');
+          let latest = null;
+          if (fs.existsSync(qaDir)) {
+            const files = fs.readdirSync(qaDir).filter(f => f.startsWith('cleanup-orphans-') && f.endsWith('.json'));
+            files.sort();
+            latest = files.length ? path.join(qaDir, files[files.length - 1]) : null;
+          }
+          if (latest) {
+            console.log(chalk.cyan(`🧩 Generating cleanup stories from ${path.basename(latest)}...`));
+            const { spawnSync } = require('child_process');
+            const cmd = ['tools/agent.js', '/qa *generate-cleanup-stories', '--from', latest];
+            const res = spawnSync(process.execPath, cmd, { cwd: orchestrator.rootDir, stdio: 'inherit' });
+            if ((res.status ?? 0) !== 0) console.log(chalk.yellow('Cleanup story generation returned non-zero status.')); 
+          } else {
+            console.log(chalk.yellow('No normalized orphans report found; skipping cleanup story generation.'));
+          }
+        } catch (e) {
+          console.log(chalk.yellow(`Cleanup story generation failed: ${e.message}`));
+        }
+      }
+      
+      // Run final PM feature coverage validation after story recreation
+      if (options.coverageThreshold) {
+        console.log(chalk.cyan('🔄 Running final PM feature coverage validation...'));
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        
+        try {
+          const coverageCmd = `node tools/feature-coverage.js --threshold ${options.coverageThreshold} --report .ai/reports/feature-coverage.json --markdown .ai/reports/feature-coverage.md`;
+          const { stdout, stderr } = await execAsync(coverageCmd);
+          console.log(stdout);
+          
+          // Check if coverage is below threshold
+          const coverageReport = JSON.parse(fs.readFileSync(path.join(orchestrator.rootDir, '.ai', 'reports', 'feature-coverage.json'), 'utf8'));
+          const coveragePct = coverageReport.summary.overallPct;
+          
+          if (coveragePct < options.coverageThreshold) {
+            console.log(chalk.yellow(`⚠️  Feature coverage ${coveragePct}% is below threshold ${options.coverageThreshold}%`));
+            
+            if (options.autoSplitStories) {
+              console.log(chalk.cyan('🔄 Auto-generating additional stories to improve coverage...'));
+              // Identify gaps and generate stories
+              const gaps = coverageReport.gaps;
+              if (gaps.featuresWithoutStories && gaps.featuresWithoutStories.length > 0) {
+                console.log(`Creating stories for ${gaps.featuresWithoutStories.length} features without coverage...`);
+                // Use SM agent to create stories for missing features
+                for (const featureId of gaps.featuresWithoutStories) {
+                  try {
+                    console.log(`  Creating story for feature: ${featureId}`);
+                    await execAsync(`node tools/agent.js sm --command="brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+                  } catch (e) {
+                    console.log(chalk.red(`    Failed to create story for ${featureId}: ${e.message}`));
+                  }
+                }
+                
+                // Re-run coverage check
+                console.log(chalk.cyan('🔄 Re-validating coverage after story generation...'));
+                await execAsync(coverageCmd);
+                const updatedReport = JSON.parse(fs.readFileSync(path.join(orchestrator.rootDir, '.ai', 'reports', 'feature-coverage.json'), 'utf8'));
+                const updatedPct = updatedReport.summary.overallPct;
+                console.log(chalk.green(`✅ Updated coverage: ${updatedPct}%`));
+              }
+            } else {
+              console.log(chalk.yellow('Tip: Use --auto-split-stories to automatically generate missing stories'));
+            }
+          } else {
+            console.log(chalk.green(`✅ Feature coverage ${coveragePct}% meets threshold ${options.coverageThreshold}%`));
+          }
+        } catch (e) {
+          console.log(chalk.red(`Feature coverage validation failed: ${e.message}`));
+        }
+      }
+      
       await orchestrator.generateAlignmentReport(analysis);
       await orchestrator.createDocumentationManifest(analysis);
       // Generate Graveyard for deprecated/unused
@@ -4358,7 +4660,7 @@ program
           
           // Show epic status if available
           try {
-            const { getEpicStatus } = require('../bmad-core/utils/find-next-story');
+            const { getEpicStatus } = require('../semad-core/utils/find-next-story');
             const epicStatus = getEpicStatus(orchestrator.resolvedPaths.storyLocation, metadata.epicId);
             console.log(`Epic Progress: ${epicStatus.completedStories}/${epicStatus.totalStories} completed`);
             console.log(`Pending Stories: ${epicStatus.pendingStories}`);
@@ -4483,7 +4785,7 @@ program
 
       console.log(chalk.bold('📚 Available Epics\n'));
       
-      const { getEpicStatus } = require('../bmad-core/utils/find-next-story');
+      const { getEpicStatus } = require('../semad-core/utils/find-next-story');
       
       Object.keys(epicGroups)
         .sort((a, b) => parseInt(a) - parseInt(b))

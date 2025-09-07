@@ -64,6 +64,8 @@ class ResourceLocator {
    * @returns {Promise<string|null>} Path to agent file or null if not found
    */
   async getAgentPath(agentId) {
+    // Normalize any generated helper ID (AGENTS-*) back to the base agent id
+    agentId = agentId && agentId.startsWith('AGENTS-') ? agentId.replace(/^AGENTS-+/, '') : agentId;
     const cacheKey = `agent:${agentId}`;
     
     if (this._pathCache.has(cacheKey)) {
@@ -111,6 +113,7 @@ class ResourceLocator {
     });
 
     for (const agentFile of coreAgents) {
+      if (/^AGENTS-/.test(path.basename(agentFile))) continue; // skip generated helper docs
       const content = await fs.readFile(
         path.join(this.getBmadCorePath(), agentFile),
         'utf8'

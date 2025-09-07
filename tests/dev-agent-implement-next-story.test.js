@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const { findNextApprovedStory } = require('../bmad-core/utils/find-next-story');
+const { findNextApprovedStory } = require('../semad-core/utils/find-next-story');
 
 describe('Dev Agent - Implement Next Story Command', () => {
   const testStoriesDir = path.join(__dirname, 'test-implement-stories');

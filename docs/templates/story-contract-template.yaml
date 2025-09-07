@@ -2,20 +2,44 @@ type: StoryContract
 schemaVersion: 1.1
 
 story:
-  storyId: ST-XXX
+  storyId: ST-XXX  # Format: ST-<epic>-<n> (e.g., ST-auth-001)
   title: "Thin vertical slice title"
-  epicId: EP-XXX
+  epicId: EP-XXX  # Format: EPIC-<feat>-<slug> (e.g., EPIC-auth-session-oauth)
+  featureId: FEAT-XXX  # Link to PRD feature (e.g., FEAT-auth-session)
   status: draft # draft | in_progress | implemented | verified | done
+  sliceType: flag # flag | probe | int-flow | adhoc
   owner: "Assignee or team"
   links:
     design: ["figma://..."]
     relatedADRs: ["docs/adr/ADR-001.md"]
 
 traceability:
-  reqIds: ["REQ-001"]              # must exist in EpicContract
+  # Feature and acceptance criteria coverage
+  featureId: FEAT-XXX  # Primary feature this story implements
+  acceptanceCriteriaCovered:  # List of AC IDs this story fulfills
+    - AC-XXX-1
+    - AC-XXX-2
+  
+  # Code and test expectations
+  codeTouchpoints:  # Files expected to be modified
+    - src/auth/AuthManager.js
+    - src/auth/SessionHandler.js
+  testExpectations:  # Test files that should cover ACs
+    - tests/auth/login.test.js
+    - tests/auth/session.test.js
+    
+  # Legacy PRD traceability (optional)
+  prdReqIds: ["PRD-REQ-001"]       # REQUIRED if using PRD-REQ format
+  reqIds: ["REQ-001"]              # (optional alias) if your EpicContract uses REQ-* already
   flowIds: ["FLOW-A"]              # must exist in EpicContract
   integrationPointIds: ["INT-1"]   # must exist in EpicContract
   successCriteriaRefs: ["SC-1"]    # if story contributes to SCs
+
+  # Architecture anchoring: stable component/decision references for design intent preservation
+  archRefs: ["ARCH-COMP-auth-api", "ADR-1"]
+  # Aliases (for plan parity):
+  # - source_reqs ≈ prdReqIds
+  # - arch_refs ≈ archRefs
 
 acceptanceCriteria:
   - id: AC-1
@@ -28,6 +52,12 @@ acceptanceCriteria:
       given: "6th request within an hour"
       when: "User submits"
       then: "API responds 429; UI shows generic success"
+
+# Acceptance alignment: reference the PRD acceptance source verbatim (do not paraphrase).
+acceptanceRef:
+  prdReqIds: ["PRD-REQ-001", "PRD-REQ-002"]   # which PRD acceptance this story fulfills
+  notes: "Acceptance mirrors PRD; see PRD.md#PRD-REQ-001"
+  # Alias: acceptance_ref ≈ acceptanceRef
 
 nfrImpacts:
   performance: "Endpoint p95 < 300ms"
@@ -61,6 +91,12 @@ testPlan:
     - "Seed user with verified email"
     - "Clock skew scenarios ±5m"
 
+# QA hooks: enumerate stable test IDs/fixtures that QA will verify at gates
+qaHooks:
+  acceptanceTestIds: ["T-acc-PRD-REQ-001-1", "T-acc-PRD-REQ-002-1"]
+  fixtures: ["user_verified.json", "rate_limit_state.yaml"]
+  # Alias: test_hooks ≈ qaHooks
+
 implementationNotes:
   tasks:
     - "Add endpoint POST /v1/auth/reset"
@@ -71,20 +107,42 @@ implementationNotes:
     - "Reset token redemption flow"
 
 definitionOfReady:
+  - "prdReqIds present and valid"
   - "reqIds/flowIds/integrationPointIds present"
   - "Acceptance criteria testable"
+  - "AcceptanceRef links to PRD acceptance"
+  - "archRefs present"
   - "Telemetry events listed if SC-refs present"
   - "Test data defined"
+  - "Integration verification steps present when touching INTs"
+  - "Rollback plan present when touching INTs"
 
 definitionOfDone:
   - "All AC pass with automated tests"
   - "Contract tests passing for integrationPointIds"
+  - "QA hooks implemented and green"
   - "Feature flag guarded and defaultState respected"
   - "Telemetry emitting; logs include required fields"
   - "No open P0/P1 defects"
+  - "Rollback plan tested (if applicable)"
 
 audit:
   createdAt: "YYYY-MM-DD"
   updatedAt: "YYYY-MM-DD"
   reviewers: ["QA Lead","SM"]
 
+# Brownfield integration verification and rollback
+integrationVerification:
+  - "IV1: Verify existing functionality unaffected (list smoke checks)"
+  - "IV2: Verify integration point contract behavior for this slice"
+  - "IV3: Verify performance budget not regressed (p95/p99)"
+
+rollbackPlan:
+  steps:
+    - "Toggle feature flag off to disable new path"
+    - "Revert config changes and clean up temporary artifacts"
+  verification: "Demonstrate rollback restores prior behavior with smoke tests"
+
+performanceBudget:
+  p95: "< 300ms"
+  p99: "< 600ms"

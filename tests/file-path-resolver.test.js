@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const FilePathResolver = require('../bmad-core/utils/file-path-resolver');
+const FilePathResolver = require('../semad-core/utils/file-path-resolver');
 
 // Mock project root for testing
 const testRootDir = '/Users/I560101/Project-Sat/SEMAD-METHOD';
@@ -127,7 +127,7 @@ describe('FilePathResolver Integration', () => {
   });
 
   test('should integrate with workflow executor', () => {
-    const WorkflowExecutor = require('../bmad-core/utils/workflow-executor');
+    const WorkflowExecutor = require('../semad-core/utils/workflow-executor');
     const executor = new WorkflowExecutor(testRootDir);
     
     expect(executor.filePathResolver).toBeDefined();

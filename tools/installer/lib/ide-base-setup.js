@@ -39,7 +39,8 @@ class BaseIdeSetup {
       packAgents.forEach(id => allAgents.add(id));
     }
     
-    const result = Array.from(allAgents);
+    // Filter out generated helper docs (AGENTS-*)
+    const result = Array.from(allAgents).filter(id => !/^AGENTS-/.test(id));
     this._agentCache.set(cacheKey, result);
     return result;
   }
@@ -57,7 +58,10 @@ class BaseIdeSetup {
     for (const agentsDir of corePaths) {
       if (await fileManager.pathExists(agentsDir)) {
         const files = await resourceLocator.findFiles("*.md", { cwd: agentsDir });
-        coreAgents.push(...files.map(file => path.basename(file, ".md")));
+        coreAgents.push(...files
+          .filter(f => !/^AGENTS-/.test(f))
+          .map(file => path.basename(file, ".md"))
+        );
         break; // Use first found
       }
     }
@@ -69,6 +73,8 @@ class BaseIdeSetup {
    * Find agent path with caching
    */
   async findAgentPath(agentId, installDir) {
+    // Normalize any generated helper ID (AGENTS-*) back to the base agent id
+    agentId = agentId.startsWith('AGENTS-') ? agentId.replace(/^AGENTS-+/, '') : agentId;
     const cacheKey = `agent-path:${agentId}:${installDir}`;
     if (this._pathCache.has(cacheKey)) {
       return this._pathCache.get(cacheKey);
@@ -173,7 +179,9 @@ class BaseIdeSetup {
     }
     
     const agentFiles = await resourceLocator.findFiles("*.md", { cwd: agentsDir });
-    return agentFiles.map(file => path.basename(file, ".md"));
+    return agentFiles
+      .filter(f => !/^AGENTS-/.test(f))
+      .map(file => path.basename(file, ".md"));
   }
 
   /**

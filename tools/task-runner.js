@@ -2,30 +2,14 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-// Import error classes
-const {
-  TaskError,
-  ValidationError,
-  TaskExecutionError,
-  MemoryStateError,
-  ActionExecutionError,
-  DependencyError,
-  ConfigurationError
-} = require('../bmad-core/errors/task-errors');
-
-// Import utilities
-const { MemoryTransaction } = require('../bmad-core/utils/memory-transaction');
-const { CleanupRegistry } = require('../bmad-core/utils/cleanup-registry');
-const { TaskRecovery } = require('../bmad-core/utils/task-recovery');
-
 // Dynamic module resolution helper
 function resolveModule(moduleName, fallbackPath) {
   const possiblePaths = [
-    path.join(__dirname, '..', 'bmad-core', moduleName),
-    path.join(__dirname, '..', '.bmad-core', moduleName),
+    path.join(__dirname, '..', 'semad-core', moduleName),
+    path.join(__dirname, '..', '.semad-core', moduleName),
     path.join(__dirname, '..', moduleName)
   ];
-  
+
   for (const modulePath of possiblePaths) {
     try {
       require.resolve(modulePath);
@@ -37,18 +21,34 @@ function resolveModule(moduleName, fallbackPath) {
   
   // Try as npm package
   try {
-    return require.resolve(`bmad-method/bmad-core/${moduleName}`);
+    return require.resolve(`semad-method/semad-core/${moduleName}`);
   } catch (e) {
     return fallbackPath;
   }
 }
 
-const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../bmad-core/tools/dynamic-planner'));
-const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../bmad-core/agents/index'));
+// Import error classes
+const {
+  TaskError,
+  ValidationError,
+  TaskExecutionError,
+  MemoryStateError,
+  ActionExecutionError,
+  DependencyError,
+  ConfigurationError
+} = require(resolveModule('errors/task-errors', '../semad-core/errors/task-errors'));
+
+// Import utilities
+const { MemoryTransaction } = require(resolveModule('utils/memory-transaction', '../semad-core/utils/memory-transaction'));
+const { CleanupRegistry } = require(resolveModule('utils/cleanup-registry', '../semad-core/utils/cleanup-registry'));
+const { TaskRecovery } = require(resolveModule('utils/task-recovery', '../semad-core/utils/task-recovery'));
+
+const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../semad-core/tools/dynamic-planner'));
+const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../semad-core/agents/index'));
 const StructuredTaskLoader = require('./lib/structured-task-loader');
-const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator'));
-const ModuleResolver = require(resolveModule('utils/module-resolver', '../bmad-core/utils/module-resolver'));
-const validationHooks = require(resolveModule('utils/validation-hooks', '../bmad-core/utils/validation-hooks'));
+const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../semad-core/utils/story-contract-validator'));
+const ModuleResolver = require(resolveModule('utils/module-resolver', '../semad-core/utils/module-resolver'));
+const validationHooks = require(resolveModule('utils/validation-hooks', '../semad-core/utils/validation-hooks'));
 
 class TaskRunner {
   constructor(rootDir) {
@@ -98,7 +98,10 @@ class TaskRunner {
     try {
       // Try multiple possible config locations
       const configPaths = [
-        path.join(this.rootDir, 'bmad-core', 'core-config.yaml'),
+        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
         path.join(this.rootDir, 'core-config.yaml')
       ];
       
@@ -268,8 +271,10 @@ class TaskRunner {
 
       // Validate elicit requirements before proceeding
       const elicitValidation = this.validateElicitRequirements(task, context);
-      const allowMissingByEnv = (process.env.BMAD_ALLOW_MISSING_USER_INPUT === '1' || process.env.BMAD_ALLOW_MISSING_USER_INPUT === 'true' || process.env.BMAD_NONINTERACTIVE === '1' || process.env.BMAD_NONINTERACTIVE === 'true');
-      if (!elicitValidation.valid && !(context.allowMissingUserInput || allowMissingByEnv)) {
+      // Agent policy: do not allow env-based bypass for elicit
+      const allowMissingByEnv = false;
+      const explicitOverride = (context.allowMissingUserInput === true && context.agentPolicy === 'override');
+      if (!elicitValidation.valid && !explicitOverride) {
         // Return early with information about missing inputs
         return {
           success: false,
@@ -279,8 +284,8 @@ class TaskRunner {
           requiresUserInput: true
         };
       }
-      if (!elicitValidation.valid && (context.allowMissingUserInput || allowMissingByEnv)) {
-        console.warn('\nℹ️  Proceeding in non-interactive mode: required user inputs will be skipped.');
+      if (!elicitValidation.valid && explicitOverride) {
+        console.warn('\nℹ️  Proceeding with explicit override: required user inputs will be skipped.');
       }
 
       // Get current working memory or initialize if it doesn't exist
@@ -288,7 +293,8 @@ class TaskRunner {
       if (!memory) {
         // Initialize memory using the centralized function
         try {
-          const { initializeWorkingMemory } = require('../bmad-core/agents/index');
+          const agentsIndexPath = resolveModule('agents/index', '../semad-core/agents/index');
+          const { initializeWorkingMemory } = require(agentsIndexPath);
           await initializeWorkingMemory(agentName);
           memory = await getWorkingMemory(agentName);
         } catch (initError) {
@@ -918,7 +924,7 @@ class TaskRunner {
    */
   async executeFileAction(action, inputs, outputs) {
     switch (action) {
-      case 'read':
+      case 'read': {
         if (!inputs.path) {
           throw new ActionExecutionError(
             'file:read requires a path input',
@@ -928,7 +934,12 @@ class TaskRunner {
           );
         }
         try {
-          const content = fs.readFileSync(inputs.path, 'utf8');
+          const base = path.resolve(this.rootDir);
+          const target = path.resolve(base, inputs.path);
+          if (!(target === base || target.startsWith(base + path.sep))) {
+            throw new Error('Path escapes project root');
+          }
+          const content = fs.readFileSync(target, 'utf8');
           if (outputs && outputs.content) {
             return { [outputs.content]: content };
           }
@@ -940,7 +951,7 @@ class TaskRunner {
             inputs,
             { path: inputs.path, error: error.message }
           );
-        }
+        } }
         
       default:
         throw new ActionExecutionError(
@@ -1017,56 +1028,42 @@ class TaskRunner {
    * Execute script-related actions
    */
   async executeScriptAction(action, inputs, outputs, context) {
-    const { exec } = require('child_process');
-    const util = require('util');
-    const execAsync = util.promisify(exec);
+    const { spawn } = require('child_process');
     
     switch (action) {
-      case 'execute':
+      case 'execute': {
         const scriptPath = path.join(this.rootDir, inputs.script);
         const args = inputs.args || [];
-        
+
         // Resolve template variables in args
-        const resolvedArgs = args.map(arg => 
+        const resolvedArgs = args.map(arg =>
           typeof arg === 'string' ? this.resolveTemplateValue(arg, context) : arg
         );
-        
-        const command = `node ${scriptPath} ${resolvedArgs.join(' ')}`;
-        
-        try {
-          const { stdout, stderr } = await execAsync(command, { cwd: this.rootDir });
-          
-          if (outputs) {
-            if (outputs.exitCode) {
-              context[outputs.exitCode] = 0;
-            }
-            if (outputs.stdout) {
-              context[outputs.stdout] = stdout;
-            }
-            if (outputs.stderr) {
-              context[outputs.stderr] = stderr;
-            }
+
+        // Execute via spawn to avoid shell interpolation
+        const child = spawn(process.execPath, [scriptPath, ...resolvedArgs], { cwd: this.rootDir });
+
+        let stdout = '';
+        let stderr = '';
+        child.stdout.on('data', d => { stdout += String(d); });
+        child.stderr.on('data', d => { stderr += String(d); });
+
+        const exitCode = await new Promise(resolve => child.on('close', code => resolve(code)));
+
+        if (outputs) {
+          if (outputs.exitCode) {
+            context[outputs.exitCode] = exitCode;
           }
-          
-          return { exitCode: 0, stdout, stderr };
-          
-        } catch (error) {
-          const exitCode = error.code || 1;
-          
-          if (outputs) {
-            if (outputs.exitCode) {
-              context[outputs.exitCode] = exitCode;
-            }
-            if (outputs.stdout) {
-              context[outputs.stdout] = error.stdout || '';
-            }
-            if (outputs.stderr) {
-              context[outputs.stderr] = error.stderr || error.message;
-            }
+          if (outputs.stdout) {
+            context[outputs.stdout] = stdout;
           }
-          
-          return { exitCode, stdout: error.stdout || '', stderr: error.stderr || error.message };
+          if (outputs.stderr) {
+            context[outputs.stderr] = stderr;
+          }
         }
+
+        return { exitCode, stdout, stderr };
+      }
         
       default:
         throw new ActionExecutionError(
@@ -1162,18 +1159,15 @@ class TaskRunner {
    * Safely evaluate expressions with context
    */
   evaluateExpression(expression, context) {
+    const { Script, createContext } = require('vm');
     // Replace template variables before evaluation
     const resolvedExpression = this.resolveTemplateValue(expression, context);
-    
-    // Use Function constructor for safer evaluation than eval
     try {
-      // Create a sandboxed context for evaluation
-      const contextKeys = Object.keys(context);
-      const contextValues = Object.values(context);
-      
-      // Build the function with proper parameter names
-      const func = new Function(...contextKeys, `return ${resolvedExpression}`);
-      return func(...contextValues);
+      // Create a minimal, frozen sandbox
+      const sandbox = Object.freeze({ ...context });
+      const vmContext = createContext(sandbox);
+      const script = new Script(`(function(){ return (${resolvedExpression}); })()`, { timeout: 50 });
+      return script.runInContext(vmContext, { timeout: 50 });
     } catch (error) {
       throw new ActionExecutionError(
         `Failed to evaluate expression: ${expression}\n${error.message}`,

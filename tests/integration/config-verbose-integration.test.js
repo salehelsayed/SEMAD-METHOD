@@ -2,7 +2,7 @@
  * Integration tests for VerboseLogger with configuration loading
  */
 
-const VerboseLogger = require('../../bmad-core/utils/verbose-logger');
+const VerboseLogger = require('../../semad-core/utils/verbose-logger');
 const fs = require('fs-extra');
 const path = require('path');
 const yaml = require('js-yaml');

@@ -28,8 +28,9 @@ Install SEMAD directly into your project:
 mkdir my-project
 cd my-project
 
-# Install SEMAD-METHOD
-npx bmad-method install
+# Install SEMAD-METHOD (SEMAD-first)
+npx semad-method install
+# Legacy alias still supported: npx bmad-method install
 ```
 
 This command:
@@ -54,7 +55,7 @@ npm install
 npm run build
 
 # Install to your project
-npm run install:bmad
+npm run install:semad
 ```
 
 ### Option 3: Web UI Setup
@@ -76,11 +77,12 @@ my-project/
 ├── .ai/                    # Session state and tracking
 │   ├── progress/          # Task progress logs
 │   └── observations/      # Decision tracking
-├── .bmad/                 # SEMAD framework files
-│   ├── agents/           # AI agent definitions
-│   ├── tasks/            # Structured task definitions
-│   ├── templates/        # Document templates
-│   └── workflows/        # Workflow definitions
+├── .semad-core/           # SEMAD framework files (SEMAD-first)
+│   ├── agents/            # AI agent definitions
+│   ├── structured-tasks/  # Structured task definitions (YAML/JSON)
+│   ├── templates/         # Document templates
+│   └── workflows/         # Workflow definitions
+├── semad-core/            # Core library (source)
 ├── docs/                  # Project documentation
 │   ├── stories/          # Development stories
 │   ├── prd.md           # Product requirements
@@ -92,7 +94,7 @@ my-project/
 
 ### Basic Configuration
 
-Create or edit `.bmad-config.yaml`:
+Create or edit `.bmad-config.yaml` (or `.semad-config.yaml` in SEMAD-first projects):
 
 ```yaml
 # Enable SEMAD features
@@ -120,9 +122,12 @@ Optional environment configuration:
 # For future semantic search features
 export OPENAI_API_KEY="your-api-key"
 
-# Custom paths
-export BMAD_HOME="/path/to/bmad"
-export BMAD_WORKSPACE="/path/to/workspace"
+# Custom paths (SEMAD-first; BMAD_* retained as aliases during migration)
+export SEMAD_HOME="/path/to/semad"
+export SEMAD_WORKSPACE="/path/to/workspace"
+# Legacy aliases still supported
+export BMAD_HOME="$SEMAD_HOME"
+export BMAD_WORKSPACE="$SEMAD_WORKSPACE"
 ```
 
 ## Your First Project
@@ -307,11 +312,11 @@ SEMAD uses lightweight file-based tracking:
 ### Viewing Progress
 
 ```bash
-# Check current progress
-node .bmad/utils/track-progress.js --status
+# Check current progress (initializes .ai/ if needed)
+node semad-core/utils/track-progress.js show dev
 
-# View observations
-cat .ai/observations/latest.json
+# View recent history entries
+tail -10 .ai/history/dev_log.jsonl
 ```
 
 ## Validation and Testing
@@ -430,7 +435,7 @@ Fix identified schema violations
 
 Now that you're set up:
 
-1. **Read the [User Guide](bmad-core/user-guide.md)** for detailed workflows
+1. **Read the [User Guide](semad-core/user-guide.md)** for detailed workflows
 2. **Explore [Agent Documentation](AGENTS.md)** to understand each agent
 3. **Learn about [Workflows](WORKFLOWS.md)** for advanced usage
 4. **Check [Architecture](ARCHITECTURE.md)** for technical details
@@ -461,8 +466,8 @@ npm test
 
 ### File Locations
 
-- **Agents**: `.bmad/agents/`
-- **Tasks**: `.bmad/tasks/`
+- **Agents**: `.semad-core/agents/` (or `.bmad/agents/` during migration)
+- **Tasks**: `.semad-core/structured-tasks/` (or `.bmad/tasks/`)
 - **Stories**: `docs/stories/`
 - **Progress**: `.ai/progress/`
 - **Logs**: `.ai/logs/`

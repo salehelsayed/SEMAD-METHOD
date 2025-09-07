@@ -1,6 +1,30 @@
 id: brownfield-create-epic
 name: Create Brownfield Epic Task
-purpose: Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture documentation process. This task is for isolated features or modifications that can be completed within a focused scope.
+purpose: Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture documentation process. This task is for isolated features or modifications that can be completed within a focused scope. Supports unlimited story splitting with automatic coverage validation to ensure all acceptance criteria are addressed.
+parameters:
+  - name: from
+    description: Path to brownfield brief or codebase to analyze
+    required: true
+    type: string
+  - name: auto-split
+    description: Enable automatic story splitting until all acceptance criteria are covered
+    required: false
+    type: boolean
+    default: true
+  - name: max-stories
+    description: Maximum number of stories to create (-1 for unlimited)
+    required: false
+    type: number
+    default: -1
+  - name: complexity-budget
+    description: Target complexity points per story (3-5 recommended)
+    required: false
+    type: number
+    default: 5
+  - name: link-feature
+    description: Feature ID to link this epic to (e.g., FEAT-auth-session)
+    required: false
+    type: string
 steps:
   - id: load-memory
     name: Load Memory and Initialize Context
@@ -76,6 +100,26 @@ steps:
     metadata:
       level: 3
       originalNumber: '1'
+  - id: step1a
+    name: Integration Survey and Contracts
+    description: |
+      Identify and document all integration surfaces before drafting the epic details.
+      For each integration point, capture owner team, contract location, and a concrete SourceRef in the current codebase.
+      Classify the delta for each integration as existing, extend, or new.
+    actions:
+      - description: Enumerate integrationPoints (INT-*) with ownerTeam and contract links
+        elicit: true
+      - description: For each INT, add SourceRef to current code (file#symbol, route path, or module export)
+        elicit: true
+      - description: Classify delta for each INT as existing | extend | new (SourceRef mandatory when delta ≠ new)
+        elicit: true
+      - description: Create minimal contract snapshot per INT (request/response, error codes, idempotency, version)
+        elicit: true
+      - description: Prepare Epic Coverage Matrix (ECM) rows for all REQ-* and INT-* (use docs/templates/ecm-template.md)
+        elicit: true
+    metadata:
+      level: 3
+      originalNumber: '1a'
   - id: step2
     name: Epic Creation
     description: |-
@@ -88,10 +132,18 @@ steps:
       **Existing System Context:**
       **Enhancement Details:**
       #### Stories
-      List 1-3 focused stories that complete the epic:
+      List all stories needed to fully cover the epic (no artificial cap). Prefer splitting by domain sub-capabilities and interface boundaries. Target 3–5 point stories; auto-split until all acceptance criteria are covered.
+      
+      {{if args.auto_split}}
+      AUTO-SPLIT CONFIGURATION:
+      - Max stories: {{args.max_stories || 'unlimited'}} 
+      - Complexity budget per story: {{args.complexity_budget || '3-5'}} points
+      - Linked feature: {{args.link_feature || 'auto-generated'}}
+      {{/if}}
       1. **Story 1:** {{Story title and brief description}}
       2. **Story 2:** {{Story title and brief description}}
       3. **Story 3:** {{Story title and brief description}}
+      4. **Story N:** {{Add as many as needed}}
       #### Compatibility Requirements
       #### Risk Mitigation
       #### Definition of Done
@@ -171,6 +223,26 @@ steps:
     metadata:
       level: 3
       originalNumber: '2'
+  - id: step2a
+    name: Incremental Slicing Rules
+    description: |
+      Define an incremental, reversible slicing plan to minimize integration risk.
+      Seed with a feature flag slice, then prove wiring via read-only/contract tests,
+      then enable one integration and one flow at a time.
+    actions:
+      - description: 'Story 0: Feature flag scaffolding + kill switch + telemetry (no behavior change)'
+        elicit: false
+      - description: 'Story 1: Contract tests/probe path for INTs (read-only; no state change)'
+        elicit: false
+      - description: 'Story 2+: One story per INT per flow variant (success, negative, resiliency)'
+        elicit: false
+      - description: Every story includes Integration Verification steps for existing functionality
+        elicit: false
+      - description: Every story includes a rollback plan and performance budget check
+        elicit: false
+    metadata:
+      level: 3
+      originalNumber: '2a'
   - id: step3
     name: Validation Checklist
     description: |-
@@ -179,7 +251,7 @@ steps:
       **Risk Assessment:**
       **Completeness Check:**
     actions:
-      - description: '[ ] Epic can be completed in 1-3 stories maximum'
+      - description: '[ ] Epic is decomposed into right-sized stories (3–5 points each); no hard cap on count'
         elicit: false
         metadata:
           originalIndent: 0
@@ -230,10 +302,48 @@ steps:
     metadata:
       level: 3
       originalNumber: '3'
+  - id: step3a
+    name: Epic Contract Validation
+    description: Validate ECM coverage and EpicContract structure before handoff
+    actions:
+      - description: Ask for or detect the generated EpicContract file path
+        elicit: true
+      - description: Run ECM validator and fix any coverage gaps (all REQ-* and INT-* referenced in ≥1 ECM row)
+        elicit: false
+        function: execute
+        parameters:
+          command: node tools/ecm-validate.js {{epicPath}}
+      - description: Validate EpicContract front matter against required fields
+        elicit: false
+        function: execute
+        parameters:
+          command: npm run validate:epic -- {{epicPath}}
+    metadata:
+      level: 3
+      originalNumber: '3a'
   - id: step4
+    name: Coverage Validation
+    description: Validate that all acceptance criteria are covered by stories
+    actions:
+      - description: Run feature coverage validation to ensure all acceptance criteria are covered
+        elicit: false
+        function: execute
+        parameters:
+          command: node tools/feature-coverage.js --epics docs/epics --stories docs/stories --threshold {{args.coverage_threshold || 100}} --report .ai/reports/feature-coverage-epic.json
+        metadata:
+          originalIndent: 0
+      - description: If coverage gaps exist and auto-split is enabled, create additional stories
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Continue splitting stories until coverage threshold is met or max-stories reached
+        elicit: true
+        metadata:
+          originalIndent: 0
+  - id: step5
     name: Handoff to Story Manager
     description: |-
-      Once the epic is validated, provide this handoff to the Story Manager:
+      Once the epic is validated and coverage confirmed, provide this handoff to the Story Manager:
       ---
       **Story Manager Handoff:**
       "Please develop detailed user stories for this brownfield epic. Key considerations:
@@ -269,11 +379,11 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
-      - description: This task is specifically for SMALL brownfield enhancements
+      - description: This task is suitable for brownfield enhancements of any size when decomposed into right-sized stories
         elicit: true
         metadata:
           originalIndent: 0
-      - description: If the scope grows beyond 3 stories, consider the full brownfield PRD process
+      - description: If decomposition reveals complex cross-cutting concerns, consider complementing with the full brownfield PRD process (optional)
         elicit: false
         metadata:
           originalIndent: 0
@@ -288,7 +398,7 @@ steps:
     notes: '- Critical compatibility requirements: {{key requirements}}'
     metadata:
       level: 3
-      originalNumber: '4'
+      originalNumber: '5'
   - id: save-memory
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup

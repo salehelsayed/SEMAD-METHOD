@@ -109,7 +109,7 @@ async function buildIndex() {
   
   // Index key directories
   const dirsToIndex = [
-    'bmad-core',
+    'semad-core',
     'docs',
     'tools',
     'scripts'

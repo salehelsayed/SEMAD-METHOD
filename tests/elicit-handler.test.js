@@ -4,7 +4,7 @@ const yaml = require('js-yaml');
 const TaskRunner = require('../tools/task-runner');
 
 // Mock modules
-jest.mock('../bmad-core/agents/index', () => ({
+jest.mock('../semad-core/agents/index', () => ({
   getWorkingMemory: jest.fn(),
   updateWorkingMemory: jest.fn(),
   initializeWorkingMemory: jest.fn()
@@ -154,7 +154,7 @@ describe('Elicit Flag Handler Tests', () => {
   });
 
   describe('executeTask with elicit validation', () => {
-    const { getWorkingMemory, updateWorkingMemory } = require('../bmad-core/agents/index');
+    const { getWorkingMemory, updateWorkingMemory } = require('../semad-core/agents/index');
 
     beforeEach(() => {
       // Mock memory operations

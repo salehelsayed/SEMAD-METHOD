@@ -14,7 +14,7 @@ class PatchPlanValidator {
 
   async initialize() {
     // Load patch plan schema
-    const schemaPath = path.join(__dirname, '..', '..', 'bmad-core', 'schemas', 'patch-plan-schema.json');
+    const schemaPath = path.join(__dirname, '..', '..', 'semad-core', 'schemas', 'patch-plan-schema.json');
     this.schema = JSON.parse(await fs.readFile(schemaPath, 'utf-8'));
     this.validator = this.ajv.compile(this.schema);
     

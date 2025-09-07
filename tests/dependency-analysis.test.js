@@ -1,13 +1,13 @@
-const { parseFile, isFileSupported } = require('../bmad-core/utils/dependency-parser');
+const { parseFile, isFileSupported } = require('../semad-core/utils/dependency-parser');
 const { 
   storeSymbolDependency, 
   queryImpactedSymbols, 
   ensureDependencyCollection 
-} = require('../bmad-core/utils/dependency-analyzer');
+} = require('../semad-core/utils/dependency-analyzer');
 const { 
   checkFileImpact, 
   generateImpactReport 
-} = require('../bmad-core/utils/dependency-impact-checker');
+} = require('../semad-core/utils/dependency-impact-checker');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -246,7 +246,7 @@ describe('Dependency Analysis System', () => {
 // Integration test with real BMad files (if they exist)
 describe('BMad Integration', () => {
   test('should parse BMad utility files', () => {
-    const bmadUtilsPath = path.join(__dirname, '../bmad-core/utils/dependency-analyzer.js');
+    const bmadUtilsPath = path.join(__dirname, '../semad-core/utils/dependency-analyzer.js');
     
     if (fs.existsSync(bmadUtilsPath)) {
       const result = parseFile(bmadUtilsPath);

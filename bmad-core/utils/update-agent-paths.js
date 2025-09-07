@@ -3,7 +3,7 @@
 /**
  * Update Agent Paths
  * 
- * Updates all agent files to use dynamic path resolution instead of hardcoded .bmad-core paths
+ * Updates all agent files to use dynamic path resolution instead of hardcoded .semad-core paths
  */
 
 const fs = require('fs');
@@ -19,22 +19,22 @@ async function updateAgentPaths() {
     // Pattern to match hardcoded memory commands
     const patterns = [
         {
-            // Match: execute: node .bmad-core/utils/persist-memory-cli.js
-            pattern: /execute:\s*node\s+\.bmad-core\/utils\/([\w-]+\.js)/g,
+            // Match: execute: node .semad-core/utils/persist-memory-cli.js
+            pattern: /execute:\s*node\s+\.semad-core\/utils\/([\w-]+\.js)/g,
             replacement: (match, scriptName) => {
                 return `execute: ${getBmadCommand(scriptName)}`;
             }
         },
         {
-            // Match: Execute: node .bmad-core/utils/persist-memory-cli.js
-            pattern: /Execute:\s*node\s+\.bmad-core\/utils\/([\w-]+\.js)/g,
+            // Match: Execute: node .semad-core/utils/persist-memory-cli.js
+            pattern: /Execute:\s*node\s+\.semad-core\/utils\/([\w-]+\.js)/g,
             replacement: (match, scriptName) => {
                 return `Execute: ${getBmadCommand(scriptName)}`;
             }
         },
         {
             // Match standalone references in documentation
-            pattern: /node\s+\.bmad-core\/utils\/([\w-]+\.js)/g,
+            pattern: /node\s+\.semad-core\/utils\/([\w-]+\.js)/g,
             replacement: (match, scriptName) => {
                 return `${getBmadCommand(scriptName)}`;
             }
@@ -77,7 +77,7 @@ async function updateAgentPaths() {
     
     console.log(`\n✅ Complete! Updated ${totalUpdates} references across all agent files`);
     console.log('\nNote: The subprocess-executor will automatically detect whether to use');
-    console.log('bmad-core (development) or .bmad-core (production) based on your environment.');
+    console.log('bmad-core (development) or .semad-core (production) based on your environment.');
 }
 
 // Run if called directly

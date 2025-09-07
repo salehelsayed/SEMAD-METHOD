@@ -2,8 +2,8 @@
 
 const path = require('path');
 const fs = require('fs');
-const DataModelTestGenerator = require('../bmad-core/utils/datamodel-test-generator');
-const StoryContractValidator = require('../bmad-core/utils/story-contract-validator');
+const DataModelTestGenerator = require('../semad-core/utils/datamodel-test-generator');
+const StoryContractValidator = require('../semad-core/utils/story-contract-validator');
 
 async function testDataModelGeneration() {
   console.log('🧪 Testing DataModel Test Generation\n');

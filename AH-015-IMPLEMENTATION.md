@@ -36,7 +36,7 @@ When instructions conflict:
 
 ### New Files
 
-1. **`bmad-core/templates/structured-output-tmpl.json`**
+1. **`semad-core/templates/structured-output-tmpl.json`**
    - Comprehensive JSON schema for all agent outputs
    - Required fields: type, storyId, inputs, outputs, decisions, assumptions, risks
    - Supports traceability and validation metadata
@@ -47,22 +47,22 @@ When instructions conflict:
 
 ### Modified Files
 
-1. **`bmad-core/agents/bmad-orchestrator.md`**
+1. **`semad-core/agents/semad-orchestrator.md`**
    - Added instruction hierarchy enforcement guidelines
    - Added escalation protocol documentation
    - Added structured-output-tmpl.json to dependencies
 
-2. **`bmad-core/agents/sm.md`**
+2. **`semad-core/agents/sm.md`**
    - Added instruction hierarchy principles
    - Added structured output requirements
    - Added no-invention rule compliance
 
-3. **`bmad-core/agents/dev.md`**
+3. **`semad-core/agents/dev.md`**
    - Added instruction hierarchy with StoryContract precedence
    - Added structured output for complex implementations
    - Added no-invention rule for implementation scope
 
-4. **`bmad-core/agents/pm.md`**
+4. **`semad-core/agents/pm.md`**
    - Added instruction hierarchy for PRD creation
    - Added structured output for strategic documents
    - Added no-invention rule for requirements

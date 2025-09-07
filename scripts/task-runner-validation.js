@@ -45,7 +45,7 @@ This is a test story for validation.
     console.log('Test 1: Valid StoryContract');
     console.log('-'.repeat(50));
     
-    const result = await taskRunner.executeTask('sm', 'bmad-core/structured-tasks/validate-story-contract.yaml', {
+    const result = await taskRunner.executeTask('sm', 'semad-core/structured-tasks/validate-story-contract.yaml', {
       inputs: {
         storyFilePath: testStoryPath
       }
@@ -75,7 +75,7 @@ StoryContract:
     fs.writeFileSync(testStoryPath, invalidStoryContent);
     
     try {
-      const invalidResult = await taskRunner.executeTask('sm', 'bmad-core/structured-tasks/validate-story-contract.yaml', {
+      const invalidResult = await taskRunner.executeTask('sm', 'semad-core/structured-tasks/validate-story-contract.yaml', {
         inputs: {
           storyFilePath: testStoryPath
         }

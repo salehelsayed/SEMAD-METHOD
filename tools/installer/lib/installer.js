@@ -237,24 +237,26 @@ class Installer {
 
     let files = [];
 
+    const DOT_CORE = ".semad-core";
+    const LEGACY_DOT_CORE = ".bmad-core";
     if (config.installType === "full") {
-      // Full installation - copy entire .bmad-core folder as a subdirectory
-      spinner.text = "Copying complete .bmad-core folder...";
+      // Full installation - copy entire semad-core folder as a subdirectory (legacy .bmad-core supported)
+      spinner.text = "Copying complete semad-core folder...";
       const sourceDir = resourceLocator.getBmadCorePath();
-      const bmadCoreDestDir = path.join(installDir, ".bmad-core");
-      await fileManager.copyDirectoryWithRootReplacement(sourceDir, bmadCoreDestDir, ".bmad-core");
+      const coreDestDir = path.join(installDir, DOT_CORE);
+      await fileManager.copyDirectoryWithRootReplacement(sourceDir, coreDestDir, DOT_CORE);
       
       // Copy common/ items to .bmad-core
       spinner.text = "Copying common utilities...";
-      await this.copyCommonItems(installDir, ".bmad-core", spinner);
+      await this.copyCommonItems(installDir, DOT_CORE, spinner);
 
       // Get list of all files for manifest
       const foundFiles = await resourceLocator.findFiles("**/*", {
-        cwd: bmadCoreDestDir,
+        cwd: coreDestDir,
         nodir: true,
         ignore: ["**/.git/**", "**/node_modules/**"],
       });
-      files = foundFiles.map((file) => path.join(".bmad-core", file));
+      files = foundFiles.map((file) => path.join(DOT_CORE, file));
     } else if (config.installType === "single-agent") {
       // Single agent installation
       spinner.text = `Installing ${config.agent} agent...`;
@@ -263,12 +265,12 @@ class Installer {
       const agentPath = configLoader.getAgentPath(config.agent);
       const destAgentPath = path.join(
         installDir,
-        ".bmad-core",
+        DOT_CORE,
         "agents",
         `${config.agent}.md`
       );
-      await fileManager.copyFileWithRootReplacement(agentPath, destAgentPath, ".bmad-core");
-      files.push(`.bmad-core/agents/${config.agent}.md`);
+      await fileManager.copyFileWithRootReplacement(agentPath, destAgentPath, DOT_CORE);
+      files.push(`${DOT_CORE}/agents/${config.agent}.md`);
 
       // Copy dependencies
       const { all: dependencies } = await resourceLocator.getAgentDependencies(
@@ -282,28 +284,28 @@ class Installer {
         if (dep.includes("*")) {
           // Handle glob patterns with {root} replacement
           const copiedFiles = await fileManager.copyGlobPattern(
-            dep.replace(".bmad-core/", ""),
+            dep.replace(`${LEGACY_DOT_CORE}/`, ""),
             sourceBase,
-            path.join(installDir, ".bmad-core"),
-            ".bmad-core"
+            path.join(installDir, DOT_CORE),
+            DOT_CORE
           );
-          files.push(...copiedFiles.map(f => `.bmad-core/${f}`));
+          files.push(...copiedFiles.map(f => `${DOT_CORE}/${f}`));
         } else {
           // Handle single files with {root} replacement if needed
           const sourcePath = path.join(
             sourceBase,
-            dep.replace(".bmad-core/", "")
+            dep.replace(`${LEGACY_DOT_CORE}/`, "")
           );
           const destPath = path.join(
             installDir,
-            dep
+            dep.replace(LEGACY_DOT_CORE, DOT_CORE)
           );
 
           const needsRootReplacement = dep.endsWith('.md') || dep.endsWith('.yaml') || dep.endsWith('.yml');
           let success = false;
           
           if (needsRootReplacement) {
-            success = await fileManager.copyFileWithRootReplacement(sourcePath, destPath, ".bmad-core");
+            success = await fileManager.copyFileWithRootReplacement(sourcePath, destPath, DOT_CORE);
           } else {
             success = await fileManager.copyFile(sourcePath, destPath);
           }
@@ -316,7 +318,7 @@ class Installer {
       
       // Copy common/ items to .bmad-core
       spinner.text = "Copying common utilities...";
-      const commonFiles = await this.copyCommonItems(installDir, ".bmad-core", spinner);
+      const commonFiles = await this.copyCommonItems(installDir, DOT_CORE, spinner);
       files.push(...commonFiles);
     } else if (config.installType === "team") {
       // Team installation
@@ -379,11 +381,45 @@ class Installer {
       const orchestratorFiles = await this.installReverseAlignToolkit(installDir);
       files.push(...orchestratorFiles);
       
+      // Install core scripts and docs/templates for local validation workflows
+      spinner.text = "Copying core scripts and templates...";
+      const scriptFiles = await this.installCoreScripts(installDir);
+      files.push(...scriptFiles);
+      const docFiles = await this.installCoreDocsAndTemplates(installDir);
+      files.push(...docFiles);
+      
+      // Copy AGENTS.md and AGENT-CLI-USAGE.md to root for reference
+      spinner.text = "Copying agent documentation...";
+      const agentDocFiles = await this.installAgentDocumentation(installDir);
+      files.push(...agentDocFiles);
+      
+      // Ensure compatibility symlinks for .bmad-core -> .semad-core
+      spinner.text = "Creating compatibility symlinks...";
+      await this.ensureCompatibilitySymlinks(installDir);
+      
       // Ensure npm scripts exist in target package.json
       await this.ensureNpmScripts(installDir, {
         'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
         'reverse:align:max': 'node tools/reverse-align-max.js',
-        'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate'
+        'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
+        'validate:epic': 'node scripts/validate-epic-contract.js --file',
+        'validate:contracts': 'node scripts/validate-story-contract.js --all',
+        'validate:schemas': 'node scripts/validate-schemas.js',
+        'find:orphans': 'node tools/find-orphans.js',
+        'orphans': 'node tools/find-orphans.js',
+        'orphans:verbose': 'node tools/find-orphans.js --verbose',
+        'orphans:json': 'node tools/find-orphans.js --json .ai/orphans-report.json',
+        'agent': 'node tools/agent.js',
+        'dev': 'node tools/agent.js "/dev',
+        'qa': 'node tools/agent.js "/qa',
+        'qa:auto': 'bash tools/qa-scripts/qa-auto-review.sh',
+        'qa:bridge': 'node tools/qa-review-bridge.js',
+        'qa:manual': 'bash tools/qa-scripts/qa-manual-with-workflow.sh',
+        'sm': 'node tools/agent.js "/sm',
+        'pm': 'node tools/agent.js "/pm',
+        'analyst': 'node tools/agent.js "/analyst',
+        'architect': 'node tools/agent.js "/architect',
+        'orchestrator': 'node tools/agent.js "/orchestrator'
       });
       // Ensure required runtime dependencies for orchestrator
       await this.ensureNpmDependencies(installDir, {
@@ -744,9 +780,21 @@ class Installer {
         'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
         'reverse:align:max': 'node tools/reverse-align-max.js',
         'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
-        'devqa:loop': 'bash tools/dev-qa-iterative.sh',
-        'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/dev-qa-iterative.sh',
-        'qa:verify-fixes': 'node .bmad-core/utils/verify-qa-fixes.js'
+        'find:orphans': 'node tools/find-orphans.js',
+        'orphans': 'node tools/find-orphans.js',
+        'orphans:verbose': 'node tools/find-orphans.js --verbose',
+        'orphans:json': 'node tools/find-orphans.js --json .ai/orphans-report.json',
+        'devqa:loop': 'bash tools/flows/dev-qa-iterative.sh',
+        'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/flows/dev-qa-iterative.sh',
+        'qa:verify-fixes': 'node .semad-core/utils/verify-qa-fixes.js',
+        'qa:auto': 'bash tools/qa-scripts/qa-auto-review.sh',
+        'qa:bridge': 'node tools/qa-review-bridge.js',
+        'qa:manual': 'bash tools/qa-scripts/qa-manual-with-workflow.sh',
+        'agent': 'node tools/agent.js',
+        'dev': 'node tools/agent.js "/dev',
+        'qa': 'node tools/agent.js "/qa',
+        'sm': 'node tools/agent.js "/sm',
+        'pm': 'node tools/agent.js "/pm'
       });
       await this.ensureNpmDependencies(installDir, {
         dependencies: {
@@ -918,9 +966,16 @@ class Installer {
       'reverse:align': 'node tools/workflow-orchestrator.js reverse-align',
       'reverse:align:max': 'node tools/reverse-align-max.js',
       'reverse:gate': 'node tools/workflow-orchestrator.js reverse-quality-gate',
-      'devqa:loop': 'bash tools/dev-qa-iterative.sh',
-      'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/dev-qa-iterative.sh',
-      'qa:verify-fixes': 'node .bmad-core/utils/verify-qa-fixes.js'
+      'devqa:loop': 'bash tools/flows/dev-qa-iterative.sh',
+      'devqa:loop:strict': 'BMAD_NONINTERACTIVE=1 bash tools/flows/dev-qa-iterative.sh',
+      'qa:verify-fixes': 'node .semad-core/utils/verify-qa-fixes.js',
+      'qa:auto': 'bash tools/qa-scripts/qa-auto-review.sh',
+      'qa:manual': 'bash tools/qa-scripts/qa-manual-with-workflow.sh',
+      'agent': 'node tools/agent.js',
+      'dev': 'node tools/agent.js "/dev',
+      'qa': 'node tools/agent.js "/qa',
+      'sm': 'node tools/agent.js "/sm',
+      'pm': 'node tools/agent.js "/pm'
     });
     await this.ensureNpmDependencies(installDir, {
       dependencies: {
@@ -1152,15 +1207,28 @@ class Installer {
     // Ensure tools directories
     const toolsDir = path.join(installDir, 'tools');
     const toolsOrchestratorDir = path.join(toolsDir, 'orchestrator');
+    const toolsQaDir = path.join(toolsDir, 'qa');
+    const toolsFlowsDir = path.join(toolsDir, 'flows');
     await fileManager.ensureDirectory(toolsOrchestratorDir);
+    await fileManager.ensureDirectory(toolsQaDir);
+    await fileManager.ensureDirectory(toolsFlowsDir);
 
-    // Helper to copy with bmad-core -> .bmad-core adjustments
+    // Helper to copy with path adjustments for .semad-core
     const copyWithCoreAdjust = async (src, dest) => {
       const raw = await fsp.readFile(src, 'utf8');
-      // Replace path token usages for installed hidden core
+      // Replace all core path references to use .semad-core
       let adjusted = raw
-        .replace(/bmad-core\//g, '.bmad-core/')
-        .replace(/['\"]bmad-core['\"]/g, "'.bmad-core'");
+        .replace(/(['"`])bmad-core\//g, '$1.semad-core/')
+        .replace(/(['"`])semad-core\//g, '$1.semad-core/')
+        .replace(/(['"`])\.bmad-core\//g, '$1.semad-core/')
+        .replace(/(['\"])bmad-core(['\"])/g, "$1.semad-core$2")
+        .replace(/(['\"])semad-core(['\"])/g, "$1.semad-core$2")
+        .replace(/(['\"])\.bmad-core(['\"])/g, "$1.semad-core$2")
+        // Also handle unquoted paths in command strings (e.g., node semad-core/utils/...)
+        .replace(/\bnode semad-core\//g, 'node .semad-core/')
+        .replace(/\bnode bmad-core\//g, 'node .semad-core/')
+        .replace(/require\('\.\/simple-task-tracker'\)/g, "require('./.semad-core/utils/simple-task-tracker')")
+        .replace(/require\('\.\/track-progress\.js'\)/g, "require('./.semad-core/utils/track-progress.js')");
       await fsp.writeFile(dest, adjusted, 'utf8');
       copied.push(path.relative(installDir, dest));
     };
@@ -1182,6 +1250,94 @@ class Installer {
       try { await fsp.chmod(destMax, 0o755); } catch (_) {}
     }
 
+    // 3) Copy agent.js - the universal agent CLI router
+    const srcAgent = path.join(repoRoot, 'tools', 'agent.js');
+    const destAgent = path.join(toolsDir, 'agent.js');
+    if (await fileManager.pathExists(srcAgent)) {
+      await copyWithCoreAdjust(srcAgent, destAgent);
+      try { await fsp.chmod(destAgent, 0o755); } catch (_) {}
+    }
+
+    // 4) Copy agent-help.js - agent help system
+    const srcAgentHelp = path.join(repoRoot, 'tools', 'agent-help.js');
+    const destAgentHelp = path.join(toolsDir, 'agent-help.js');
+    if (await fileManager.pathExists(srcAgentHelp)) {
+      await copyWithCoreAdjust(srcAgentHelp, destAgentHelp);
+      try { await fsp.chmod(destAgentHelp, 0o755); } catch (_) {}
+    }
+
+    // 5) Copy QA tools
+    const qaTools = ['qa-review.js'];
+    for (const tool of qaTools) {
+      const srcTool = path.join(repoRoot, 'tools', tool);
+      const destTool = path.join(toolsDir, tool);
+      if (await fileManager.pathExists(srcTool)) {
+        await copyWithCoreAdjust(srcTool, destTool);
+        try { await fsp.chmod(destTool, 0o755); } catch (_) {}
+      }
+    }
+
+    // 6) Copy QA subdirectory tools
+    const qaSubTools = ['run-test-quality.js', 'test-quality-gate.js'];
+    for (const tool of qaSubTools) {
+      const srcTool = path.join(repoRoot, 'tools', 'qa', tool);
+      const destTool = path.join(toolsQaDir, tool);
+      if (await fileManager.pathExists(srcTool)) {
+        await copyWithCoreAdjust(srcTool, destTool);
+        try { await fsp.chmod(destTool, 0o755); } catch (_) {}
+      }
+    }
+    
+    // 6b) Copy QA review scripts (shell scripts for manual/auto review)
+    const qaScriptsDir = path.join(toolsDir, 'qa-scripts');
+    await fileManager.ensureDirectory(qaScriptsDir);
+    const qaScripts = ['qa-auto-review.sh', 'qa-manual-with-workflow.sh', 'qa-auto-review-safe.sh', 'qa-auto-review-clean.sh', 'clean-corrupted-qa.sh', 'remove-qa-results.sh'];
+    for (const script of qaScripts) {
+      const srcScript = path.join(repoRoot, 'tools', 'qa-scripts', script);
+      const destScript = path.join(qaScriptsDir, script);
+      if (await fileManager.pathExists(srcScript)) {
+        await fileManager.copyFile(srcScript, destScript);
+        try { await fsp.chmod(destScript, 0o755); } catch (_) {}
+      }
+    }
+
+    // 6c) Copy QA Node.js bridge
+    const qaNodeTools = ['qa-review-bridge.js'];
+    for (const tool of qaNodeTools) {
+      const srcTool = path.join(repoRoot, 'tools', tool);
+      const destTool = path.join(toolsDir, tool);
+      if (await fileManager.pathExists(srcTool)) {
+        await fileManager.copyFile(srcTool, destTool);
+      }
+    }
+
+    // 7) Copy dev tools
+    const devTools = [
+      'dev-next-story.js',
+      'dev-develop-story.js',
+      'dev-guard.js',
+      'task-runner.js'
+    ];
+    for (const tool of devTools) {
+      const srcTool = path.join(repoRoot, 'tools', tool);
+      const destTool = path.join(toolsDir, tool);
+      if (await fileManager.pathExists(srcTool)) {
+        await copyWithCoreAdjust(srcTool, destTool);
+        try { await fsp.chmod(destTool, 0o755); } catch (_) {}
+      }
+    }
+
+    // 8) Copy flow scripts
+    const flowScripts = ['dev-qa-iterative.sh', 'dev-qa-codex-loop.sh'];
+    for (const script of flowScripts) {
+      const srcScript = path.join(repoRoot, 'tools', 'flows', script);
+      const destScript = path.join(toolsFlowsDir, script);
+      if (await fileManager.pathExists(srcScript)) {
+        await copyWithCoreAdjust(srcScript, destScript);
+        try { await fsp.chmod(destScript, 0o755); } catch (_) {}
+      }
+    }
+
     // 3) Copy tools/orchestrator/reverse-context.js (no core refs)
     const srcRevCtx = path.join(repoRoot, 'tools', 'orchestrator', 'reverse-context.js');
     const destRevCtx = path.join(toolsOrchestratorDir, 'reverse-context.js');
@@ -1201,6 +1357,13 @@ class Installer {
       }
     }
 
+    // 3c) Copy find-orphans.js tool for QA agent
+    const srcOrphans = path.join(repoRoot, 'tools', 'find-orphans.js');
+    const destOrphans = path.join(toolsDir, 'find-orphans.js');
+    if (await fileManager.pathExists(srcOrphans)) {
+      await copyWithCoreAdjust(srcOrphans, destOrphans);
+    }
+
     // 4) Create bmad-core → .bmad-core symlink for compatibility
     const hiddenCore = path.join(installDir, '.bmad-core');
     const visibleCore = path.join(installDir, 'bmad-core');
@@ -1214,6 +1377,124 @@ class Installer {
     }
 
     return copied;
+  }
+
+  // Copy the repository scripts folder into target project with minor path adjustments
+  async installCoreScripts(installDir) {
+    const fsp = require('fs').promises;
+    const repoRoot = path.dirname(path.dirname(path.dirname(path.dirname(__filename))));
+    const sourceDir = path.join(repoRoot, 'scripts');
+    const targetDir = path.join(installDir, 'scripts');
+    const copied = [];
+    
+    if (!(await fileManager.pathExists(sourceDir))) return copied;
+    await fileManager.ensureDirectory(targetDir);
+    
+    const files = await require('./resource-locator').findFiles('**/*', { cwd: sourceDir, nodir: true });
+    for (const rel of files) {
+      const src = path.join(sourceDir, rel);
+      const dest = path.join(targetDir, rel);
+      await fileManager.ensureDirectory(path.dirname(dest));
+      try {
+        let raw = await fsp.readFile(src, 'utf8');
+        // Adjust common core path patterns so scripts work even without symlink
+        raw = raw
+          .replace(/bmad-core\//g, '.bmad-core/')
+          .replace(/node bmad-core\/utils/g, 'node .bmad-core/utils');
+        await fsp.writeFile(dest, raw, 'utf8');
+        copied.push(path.relative(installDir, dest));
+      } catch (e) {
+        // If binary or non-text, fallback to raw copy
+        await fileManager.copyFile(src, dest);
+        copied.push(path.relative(installDir, dest));
+      }
+    }
+    return copied;
+  }
+
+  // Copy docs/templates and key guides useful for ECM and reverse alignment
+  async installCoreDocsAndTemplates(installDir) {
+    const fsp = require('fs').promises;
+    const repoRoot = path.dirname(path.dirname(path.dirname(path.dirname(__filename))));
+    const sourceDocs = path.join(repoRoot, 'docs');
+    const targetDocs = path.join(installDir, 'docs');
+    const copied = [];
+    
+    if (!(await fileManager.pathExists(sourceDocs))) return copied;
+    await fileManager.ensureDirectory(targetDocs);
+    
+    // 1) Copy docs/templates/**
+    const templates = await require('./resource-locator').findFiles('templates/**/*', { cwd: sourceDocs, nodir: true });
+    for (const rel of templates) {
+      const src = path.join(sourceDocs, rel);
+      const dest = path.join(targetDocs, rel);
+      await fileManager.ensureDirectory(path.dirname(dest));
+      await fileManager.copyFile(src, dest);
+      copied.push(path.relative(installDir, dest));
+    }
+    
+    // 2) Copy key guides if present
+    const guides = [
+      'ecm-guide.md',
+      'reverse-alignment.md',
+      'workflow-touchpoints.md'
+    ];
+    for (const g of guides) {
+      const src = path.join(sourceDocs, g);
+      if (await fileManager.pathExists(src)) {
+        const dest = path.join(targetDocs, g);
+        await fileManager.copyFile(src, dest);
+        copied.push(path.relative(installDir, dest));
+      }
+    }
+    return copied;
+  }
+
+  // Copy agent documentation files to project root
+  async installAgentDocumentation(installDir) {
+    const fsp = require('fs').promises;
+    const repoRoot = path.dirname(path.dirname(path.dirname(path.dirname(__filename))));
+    const copied = [];
+    
+    const docFiles = ['AGENTS.md', 'AGENT-CLI-USAGE.md'];
+    for (const docFile of docFiles) {
+      const src = path.join(repoRoot, docFile);
+      const dest = path.join(installDir, docFile);
+      if (await fileManager.pathExists(src)) {
+        await fileManager.copyFile(src, dest);
+        copied.push(path.relative(installDir, dest));
+      }
+    }
+    return copied;
+  }
+
+  // Create compatibility symlinks for tools that expect .bmad-core
+  async ensureCompatibilitySymlinks(installDir) {
+    const fs = require('fs').promises;
+    const semadCore = path.join(installDir, '.semad-core');
+    const bmadCore = path.join(installDir, '.bmad-core');
+    
+    // If .semad-core exists but .bmad-core doesn't have the subdirs, create symlinks
+    if (await fileManager.pathExists(semadCore)) {
+      const subdirs = ['agents', 'utils', 'structured-tasks', 'templates', 'workflows', 'tasks', 'checklists', 'data'];
+      
+      for (const subdir of subdirs) {
+        const semadSubdir = path.join(semadCore, subdir);
+        const bmadSubdir = path.join(bmadCore, subdir);
+        
+        if (await fileManager.pathExists(semadSubdir) && !(await fileManager.pathExists(bmadSubdir))) {
+          try {
+            // Create relative symlink
+            await fs.symlink(`../.semad-core/${subdir}`, bmadSubdir, 'junction');
+          } catch (e) {
+            // If symlink fails, try to copy instead (Windows compatibility)
+            if (e.code === 'EPERM' || e.code === 'EACCES') {
+              await fileManager.copyDirectory(semadSubdir, bmadSubdir);
+            }
+          }
+        }
+      }
+    }
   }
 
   // Copy iterative Dev↔QA toolkit into target project and wire scripts

@@ -200,7 +200,7 @@ describe('Schema Validation Tests', () => {
     
     test('all regular task files should be valid', () => {
       const taskDirs = [
-        path.join(projectRoot, 'bmad-core', 'tasks'),
+        path.join(projectRoot, 'semad-core', 'tasks'),
         path.join(projectRoot, 'common', 'tasks')
       ];
       
@@ -225,7 +225,7 @@ describe('Schema Validation Tests', () => {
     
     test('all structured task files should be valid', () => {
       const structuredTaskDirs = [
-        path.join(projectRoot, 'bmad-core', 'structured-tasks'),
+        path.join(projectRoot, 'semad-core', 'structured-tasks'),
         path.join(projectRoot, 'common', 'structured-tasks')
       ];
       
@@ -250,7 +250,7 @@ describe('Schema Validation Tests', () => {
     
     test('all checklist files should be valid', () => {
       const checklistDirs = [
-        path.join(projectRoot, 'bmad-core', 'structured-checklists'),
+        path.join(projectRoot, 'semad-core', 'structured-checklists'),
         path.join(projectRoot, 'common', 'structured-checklists')
       ];
       

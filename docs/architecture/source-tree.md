@@ -3,7 +3,7 @@
 ## Root Directory Structure
 ```
 SEMAD-METHOD/
-├── bmad-core/                  # Core framework components
+├── semad-core/                  # Core framework components (preferred; `bmad-core/` remains as compatibility)
 ├── tools/                      # Build and utility tools
 ├── expansion-packs/            # Domain-specific extensions
 ├── dist/                       # Built output for web distribution
@@ -12,9 +12,9 @@ SEMAD-METHOD/
 └── scripts/                    # Build and maintenance scripts
 ```
 
-## bmad-core/ Directory
+## semad-core/ Directory
 ```
-bmad-core/
+semad-core/
 ├── agents/                     # Individual AI agent definitions
 │   ├── analyst.md
 │   ├── architect.md
@@ -57,20 +57,20 @@ expansion-packs/
 ### Agent Files (*.md)
 - Markdown files with embedded YAML configuration
 - Contains persona definition, commands, and dependencies
-- Located in `bmad-core/agents/`
+- Located in `semad-core/agents/`
 
 ### Task Files (*.yaml)
 - YAML structure defining task steps and parameters
-- Located in `bmad-core/structured-tasks/`
+- Located in `semad-core/structured-tasks/`
 - Used by agents to execute specific workflows
 
 ### Template Files (*.yaml)
 - YAML-based templates for document generation
-- Located in `bmad-core/templates/`
+- Located in `semad-core/templates/`
 - Support variable substitution and conditional content
 
 ### Configuration Files
-- `bmad-core/core-config.yaml`: Main system configuration
+- `semad-core/core-config.yaml`: Main system configuration (`bmad-core/...` supported during migration)
 - `package.json`: NPM package configuration
 - Various schema files for validation
 
@@ -84,12 +84,12 @@ expansion-packs/
 The following JSON schemas define the structure of planning and execution artifacts:
 
 ### Schema Files
-- `bmad-core/schemas/brief-schema.json` - Project brief structure
-- `bmad-core/schemas/prd-schema.json` - Product requirements document
-- `bmad-core/schemas/architecture-schema.json` - Architecture documentation
-- `bmad-core/schemas/sprint-plan-schema.json` - Sprint planning artifacts
-- `bmad-core/schemas/task-bundle-schema.json` - Task bundle manifests
-- `bmad-core/schemas/story-contract-schema.json` - Story contracts with traceability
+- `semad-core/schemas/brief-schema.json` - Project brief structure
+- `semad-core/schemas/prd-schema.json` - Product requirements document
+- `semad-core/schemas/architecture-schema.json` - Architecture documentation
+- `semad-core/schemas/sprint-plan-schema.json` - Sprint planning artifacts
+- `semad-core/schemas/task-bundle-schema.json` - Task bundle manifests
+- `semad-core/schemas/story-contract-schema.json` - Story contracts with traceability
 
 ### Schema Validation
 Run `npm run schema:check` to validate all artifacts against their schemas.

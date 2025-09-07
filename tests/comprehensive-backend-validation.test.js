@@ -4,10 +4,10 @@ const yaml = require('js-yaml');
 const { execSync } = require('child_process');
 
 // Import system modules
-const { storeMemorySnippet, retrieveMemory } = require('../bmad-core/utils/qdrant');
-const { updateWorkingMemory, getWorkingMemory } = require('../bmad-core/agents/index');
-const { planAdaptation } = require('../bmad-core/tools/dynamic-planner');
-const StoryContractValidator = require('../bmad-core/utils/story-contract-validator');
+const { storeMemorySnippet, retrieveMemory } = require('../semad-core/utils/qdrant');
+const { updateWorkingMemory, getWorkingMemory } = require('../semad-core/agents/index');
+const { planAdaptation } = require('../semad-core/tools/dynamic-planner');
+const StoryContractValidator = require('../semad-core/utils/story-contract-validator');
 
 describe('Comprehensive Backend Validation - SEMAD-METHOD', () => {
   const rootDir = path.join(__dirname, '..');
@@ -29,8 +29,8 @@ describe('Comprehensive Backend Validation - SEMAD-METHOD', () => {
 
   describe('TC011: Parse and Validate Structured Tasks YAML', () => {
     test('structured tasks are parsed correctly and validated against schema', () => {
-      const structuredTasksDir = path.join(rootDir, 'bmad-core', 'structured-tasks');
-      const schemaPath = path.join(rootDir, 'bmad-core', 'schemas', 'structured-task-schema.json');
+      const structuredTasksDir = path.join(rootDir, 'semad-core', 'structured-tasks');
+      const schemaPath = path.join(rootDir, 'semad-core', 'schemas', 'structured-task-schema.json');
       
       expect(fs.existsSync(structuredTasksDir)).toBe(true);
       expect(fs.existsSync(schemaPath)).toBe(true);
@@ -259,8 +259,8 @@ describe('Comprehensive Backend Validation - SEMAD-METHOD', () => {
 
   describe('TC018: Prompt Generation from Structured Tasks', () => {
     test('prompts are generated correctly from structured tasks and checklists', () => {
-      const structuredTasksDir = path.join(rootDir, 'bmad-core', 'structured-tasks');
-      const checklistsDir = path.join(rootDir, 'bmad-core', 'structured-checklists');
+      const structuredTasksDir = path.join(rootDir, 'semad-core', 'structured-tasks');
+      const checklistsDir = path.join(rootDir, 'semad-core', 'structured-checklists');
       
       // Test structured task prompt generation
       const taskFiles = fs.readdirSync(structuredTasksDir)
@@ -374,8 +374,8 @@ description: "This is malformed
 
   describe('TC021: Custom Search Tool Mapping Overrides', () => {
     test('user-defined tool mappings override defaults', () => {
-      const configPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
-      const toolMappingsPath = path.join(rootDir, 'bmad-core', 'data', 'tool-mappings.yaml');
+      const configPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
+      const toolMappingsPath = path.join(rootDir, 'semad-core', 'data', 'tool-mappings.yaml');
       
       if (fs.existsSync(configPath)) {
         const configContent = fs.readFileSync(configPath, 'utf8');
@@ -544,8 +544,8 @@ description: "This is malformed
 
   describe('TC027: Validate All Structured Task and Checklist Directories', () => {
     test('all YAML files in directories are validated accurately', () => {
-      const structuredTasksDir = path.join(rootDir, 'bmad-core', 'structured-tasks');
-      const checklistsDir = path.join(rootDir, 'bmad-core', 'structured-checklists');
+      const structuredTasksDir = path.join(rootDir, 'semad-core', 'structured-tasks');
+      const checklistsDir = path.join(rootDir, 'semad-core', 'structured-checklists');
       
       let totalFiles = 0;
       let validFiles = 0;
@@ -671,7 +671,7 @@ description: "This is malformed
       expect(prdExists).toBe(true);
 
       // Phase 2: Task Structuring
-      const structuredTasksDir = path.join(rootDir, 'bmad-core', 'structured-tasks');
+      const structuredTasksDir = path.join(rootDir, 'semad-core', 'structured-tasks');
       let tasksExist = fs.existsSync(structuredTasksDir);
       expect(tasksExist).toBe(true);
 

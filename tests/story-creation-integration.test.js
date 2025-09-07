@@ -16,29 +16,29 @@ describe('Story Creation Integration Test', () => {
     tempDir = path.join(__dirname, 'temp-test-' + Date.now());
     fs.mkdirSync(tempDir, { recursive: true });
     
-    // Find source bmad-core directory dynamically
+    // Find source semad-core directory dynamically
     const possibleSourceDirs = [
-      path.join(__dirname, '..', 'bmad-core'),
-      path.join(__dirname, '..', '.bmad-core'),
+      path.join(__dirname, '..', 'semad-core'),
+      path.join(__dirname, '..', '.semad-core'),
       process.cwd()
     ];
     
     let sourceBmadCore = null;
     for (const dir of possibleSourceDirs) {
       if (fs.existsSync(path.join(dir, 'core-config.yaml')) || 
-          fs.existsSync(path.join(dir, 'bmad-core', 'core-config.yaml'))) {
-        sourceBmadCore = fs.existsSync(path.join(dir, 'bmad-core')) ? 
-          path.join(dir, 'bmad-core') : dir;
+          fs.existsSync(path.join(dir, 'semad-core', 'core-config.yaml'))) {
+        sourceBmadCore = fs.existsSync(path.join(dir, 'semad-core')) ? 
+          path.join(dir, 'semad-core') : dir;
         break;
       }
     }
     
     if (!sourceBmadCore) {
-      throw new Error('Could not find source bmad-core directory');
+      throw new Error('Could not find source semad-core directory');
     }
     
-    // Create bmad-core directory structure in temp
-    const bmadCoreDir = path.join(tempDir, 'bmad-core');
+    // Create semad-core directory structure in temp
+    const bmadCoreDir = path.join(tempDir, 'semad-core');
     fs.mkdirSync(path.join(bmadCoreDir, 'structured-tasks'), { recursive: true });
     fs.mkdirSync(path.join(bmadCoreDir, 'schemas'), { recursive: true });
     
@@ -188,7 +188,7 @@ src/
 
   test('should create story with valid StoryContract from real PRD', async () => {
     // Load the create-next-story task
-    const taskPath = path.join(tempDir, 'bmad-core', 'structured-tasks', 'create-next-story.yaml');
+    const taskPath = path.join(tempDir, 'semad-core', 'structured-tasks', 'create-next-story.yaml');
     const taskResult = await taskRunner.taskLoader.loadTask(taskPath);
     expect(taskResult).toBeDefined();
     expect(taskResult.type).toBe('structured');
@@ -423,7 +423,7 @@ Based on project structure [Source: architecture/unified-project-structure.md]:
     fs.rmSync(prdDir, { recursive: true, force: true });
     
     // Attempt to load task should still work
-    const taskPath = path.join(tempDir, 'bmad-core', 'structured-tasks', 'create-next-story.yaml');
+    const taskPath = path.join(tempDir, 'semad-core', 'structured-tasks', 'create-next-story.yaml');
     const taskResult = await taskRunner.taskLoader.loadTask(taskPath);
     expect(taskResult).toBeDefined();
     expect(taskResult.type).toBe('structured');

@@ -6,7 +6,7 @@ const { describe, test, expect, beforeEach, afterEach } = require('@jest/globals
 const { 
   getStoriesForEpic, 
   getAllStoriesStatus 
-} = require('../../bmad-core/utils/find-next-story');
+} = require('../../semad-core/utils/find-next-story');
 
 describe('Epic Loop Performance Tests', () => {
   let tempDir;

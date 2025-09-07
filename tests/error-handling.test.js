@@ -4,9 +4,9 @@
 
 const path = require('path');
 const fs = require('fs').promises;
-const ErrorHandler = require('../bmad-core/utils/error-handler');
-const WorkflowMonitor = require('../bmad-core/utils/workflow-monitor');
-const DependencyValidator = require('../bmad-core/utils/dependency-validator');
+const ErrorHandler = require('../semad-core/utils/error-handler');
+const WorkflowMonitor = require('../semad-core/utils/workflow-monitor');
+const DependencyValidator = require('../semad-core/utils/dependency-validator');
 
 // Mock console methods to capture output
 const mockConsole = {

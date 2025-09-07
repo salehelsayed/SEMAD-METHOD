@@ -20,7 +20,7 @@ class DriftAlarmSystem {
       'package-lock.json',
       '.bmadrc.yaml',
       'bmad.config.js',
-      'bmad-core/config/**',
+      'semad-core/config/**',
       '.ai/settings.json'
     ];
   }
@@ -447,7 +447,7 @@ class DriftAlarmSystem {
    */
   async scanDirectoryStructure() {
     const structure = {};
-    const baseDirs = ['bmad-core', 'tools', 'docs', 'scripts', '.ai'];
+    const baseDirs = ['semad-core', 'tools', 'docs', 'scripts', '.ai'];
     
     for (const baseDir of baseDirs) {
       try {

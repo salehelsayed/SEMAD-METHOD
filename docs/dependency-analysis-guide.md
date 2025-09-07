@@ -262,7 +262,7 @@ For large repositories:
 You can use the dependency utilities directly in custom scripts:
 
 ```javascript
-const { checkFileImpact, analyzeBatchImpact } = require('./bmad-core/utils/dependency-impact-checker');
+const { checkFileImpact, analyzeBatchImpact } = require('./semad-core/utils/dependency-impact-checker');
 
 // Check impact of a single file
 const impact = await checkFileImpact('src/utils/helpers.js');
@@ -287,7 +287,7 @@ MODIFIED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
 
 # Run dependency impact analysis
 node -e "
-const { analyzeBatchImpact } = require('./bmad-core/utils/dependency-impact-checker');
+const { analyzeBatchImpact } = require('./semad-core/utils/dependency-impact-checker');
 const files = process.argv[1].split('\n').filter(f => f.length > 0);
 
 analyzeBatchImpact(files).then(result => {

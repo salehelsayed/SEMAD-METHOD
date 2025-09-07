@@ -92,7 +92,7 @@ const defaultPrdPath = coreConfig.prd && coreConfig.prd.prdSharded && coreConfig
     : 'docs/prd.md');
 
 // Get default mappings and output paths from core-config
-const defaultMappingsPath = coreConfig.searchTools?.toolMappingsFile || 'bmad-core/data/tool-mappings.yaml';
+const defaultMappingsPath = coreConfig.searchTools?.toolMappingsFile || 'semad-core/data/tool-mappings.yaml';
 const defaultOutputPath = coreConfig.searchTools?.defaultOutputFile || 'search-tools.yaml';
 
 program

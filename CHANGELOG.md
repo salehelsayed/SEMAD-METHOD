@@ -1,3 +1,22 @@
+# 5.0.0 (SEMAD-first)
+
+Breaking changes:
+- Package renamed to `semad-method`; binaries `semad`, `semad-method`, `semad-orchestrator` added. Legacy `bmad*` retained as aliases temporarily.
+- Codebase now SEMAD-first: imports and paths use `semad-core/` and `.semad-core/`.
+
+Migration:
+- See `docs/migration/semad-migration.md` for a step-by-step guide (symlinks, config copy, import updates, preflight, and reverse-align).
+- Preflight (`npm run preflight:brand`) warns on legacy-only setups without failing builds.
+
+Enhancements:
+- Categorized `*help` output per agent; natural language command mapping via intent manifest.
+- New `*adhoc-debug` command produces thorough evidence bundles under `.ai/adhoc/debug/...`.
+- Reverse-align generators normalize output to `semad-core` paths.
+
+Installer & CI:
+- Installer writes to `.semad-core/` by default; legacy paths handled with warnings.
+- CI preflight workflow added to surface migration warnings.
+
 # [4.32.0](https://github.com/bmadcode/BMAD-METHOD/compare/v4.31.0...v4.32.0) (2025-07-30)
 
 ### Features

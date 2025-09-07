@@ -79,7 +79,7 @@ class ModuleResolver {
         return bmadCorePath;
       }
       
-      const hiddenBmadCorePath = path.join(currentDir, '.bmad-core');
+      const hiddenBmadCorePath = path.join(currentDir, '.semad-core');
       if (fs.existsSync(hiddenBmadCorePath) && fs.statSync(hiddenBmadCorePath).isDirectory()) {
         return hiddenBmadCorePath;
       }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Minimal dependency reachability report generator.
- * - Scans JS/TS files under typical roots (tools, scripts, bmad-core, src)
+ * - Scans JS/TS files under typical roots (tools, scripts, semad-core, src)
  * - Builds a local import graph (require/import/export from)
  * - Seeds entrypoints from:
  *   - tools/workflow-orchestrator.js
@@ -15,7 +15,7 @@ const path = require('path');
 
 function toPosix(p) { return String(p || '').replace(/\\/g, '/'); }
 
-function collectSourceFiles(rootDir, roots = ['tools', 'scripts', 'bmad-core', 'src']) {
+function collectSourceFiles(rootDir, roots = ['tools', 'scripts', 'semad-core', 'src']) {
   const files = [];
   for (const r of roots) {
     const abs = path.join(rootDir, r);

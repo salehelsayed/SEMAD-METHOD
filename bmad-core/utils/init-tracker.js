@@ -9,9 +9,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Determine if we're in a project directory or the framework directory
-const isProjectDir = fs.existsSync('.bmad-core');
+const isProjectDir = fs.existsSync('.semad-core');
 const trackerPath = isProjectDir 
-  ? path.join(process.cwd(), '.bmad-core', 'utils', 'simple-task-tracker')
+  ? path.join(process.cwd(), '.semad-core', 'utils', 'simple-task-tracker')
   : path.join(__dirname, 'simple-task-tracker');
 
 const TaskTracker = require(trackerPath);

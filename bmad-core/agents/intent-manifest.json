@@ -1,0 +1,72 @@
+{
+  "dev": {
+    "aliases": [
+      { "phrase": "implement next story", "command": "*implement-next-story" },
+      { "phrase": "next story", "command": "*implement-next-story" },
+      { "phrase": "address qa feedback", "command": "*address-qa-feedback" },
+      { "phrase": "ad hoc debug", "command": "*adhoc-debug" },
+      { "phrase": "debug", "command": "*adhoc-debug" },
+      { "phrase": "ad hoc", "command": "*adhoc" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "qa": {
+    "aliases": [
+      { "phrase": "review", "command": "*review" },
+      { "phrase": "validate implementation", "command": "*review" },
+      { "phrase": "validate integration safety", "command": "*validate-integration-safety" },
+      { "phrase": "normalize qa reports", "command": "*normalize-reports" },
+      { "phrase": "generate cleanup stories", "command": "*generate-cleanup-stories" },
+      { "phrase": "analyze code quality", "command": "*analyze-code-quality" },
+      { "phrase": "coverage", "command": "*generate-coverage-report" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "sm": {
+    "aliases": [
+      { "phrase": "create story", "command": "*create-story" },
+      { "phrase": "create story from ecm", "command": "*create-story-from-ecm" },
+      { "phrase": "story checklist", "command": "*story-checklist" },
+      { "phrase": "as sm agent", "command": "*help" },
+      { "phrase": "activate sm agent", "command": "*help" },
+      { "phrase": "switch to sm agent", "command": "*help" },
+      { "phrase": "scope split", "command": "*scope-split" },
+      { "phrase": "split by scope", "command": "*scope-split" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "pm": {
+    "aliases": [
+      { "phrase": "create prd", "command": "*create-prd" },
+      { "phrase": "create epic", "command": "*create-epic" },
+      { "phrase": "update prd from implementation", "command": "*update-prd-from-implementation" },
+      { "phrase": "validate epic", "command": "*validate-epic" },
+      { "phrase": "validate feature coverage", "command": "*validate-feature-coverage" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "analyst": {
+    "aliases": [
+      { "phrase": "create project brief", "command": "*create-project-brief" },
+      { "phrase": "perform market research", "command": "*perform-market-research" },
+      { "phrase": "competitor analysis", "command": "*create-competitor-analysis" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "architect": {
+    "aliases": [
+      { "phrase": "reverse engineer architecture", "command": "*reverse-engineer-architecture" },
+      { "phrase": "create backend architecture", "command": "*create-backend-architecture" },
+      { "phrase": "create front end architecture", "command": "*create-front-end-architecture" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  },
+  "orchestrator": {
+    "aliases": [
+      { "phrase": "create comprehensive plan", "command": "create comprehensive plan" },
+      { "phrase": "start development phase", "command": "start development phase" },
+      { "phrase": "status", "command": "*status" },
+      { "phrase": "help", "command": "*help" }
+    ]
+  }
+}

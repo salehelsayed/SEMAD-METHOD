@@ -1,4 +1,4 @@
-const DataModelTestGenerator = require('../bmad-core/utils/datamodel-test-generator');
+const DataModelTestGenerator = require('../semad-core/utils/datamodel-test-generator');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');

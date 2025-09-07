@@ -19,11 +19,11 @@ steps:
     name: Load Scrum Master Configuration
     description: Load Scrum Master agent configuration and adopt SM persona
     actions:
-      - description: Read bmad-core/agents/sm.md to understand Scrum Master behavior and adopt communication style
+      - description: Read semad-core/agents/sm.md to understand Scrum Master behavior and adopt communication style
         elicit: false
         metadata:
           configLoad: true
-      - description: Ensure all file paths are resolved from project root, looking for .bmad-core/core-config.yaml and docs/prd/
+      - description: Ensure all file paths are resolved from project root, looking for .semad-core/core-config.yaml and docs/prd/
         elicit: false
         metadata:
           pathResolution: true

@@ -177,6 +177,10 @@ states:
 **Planning → Development**:
 - Requirements: PRD and Architecture complete
 - Validation: Schema validation passed
+- Brownfield gate (if applicable):
+  - PM Integration Readiness checklist passed
+  - EpicContract validated (`npm run validate:epic -- <epic.md>`) and ECM validated (`node tools/ecm-validate.js <epic.md>`, 100% REQ/INT coverage)
+  - Rollout plan present (feature flag, canary, kill switch, observability)
 - Approval: User confirmation
 
 **Story → Implementation**:
@@ -198,6 +202,7 @@ docs/
 **Development Artifacts**:
 ```
 docs/stories/           # Scrum Master output
+docs/epics/             # EpicContracts (PM/PO)
 src/                   # Developer output
 tests/                 # QA output
 .ai/progress/          # Workflow tracking
@@ -337,7 +342,7 @@ logger.observe({
 
 ### Custom Workflow Definition
 
-Create `.bmad-workflow.yaml`:
+Create `.semad-workflow.yaml` (preferred). For compatibility, `.bmad-workflow.yaml` is still supported during migration.
 ```yaml
 name: "Custom Development Flow"
 type: "hybrid"
@@ -635,4 +640,4 @@ export workflow log
 
 SEMAD-METHOD's workflow system provides structure and reliability to AI-powered development. By separating planning from implementation and using formal contracts, teams achieve consistent, high-quality results. The flexible workflow system adapts to different project needs while maintaining the core benefits of structured development.
 
-For specific workflow configurations, see `.bmad-workflow.yaml` in your project root.
+For specific workflow configurations, see `.semad-workflow.yaml` in your project root. `.bmad-workflow.yaml` remains valid for existing projects.

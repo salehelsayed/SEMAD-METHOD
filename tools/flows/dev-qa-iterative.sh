@@ -27,7 +27,7 @@ if [[ -z "${STORY_ARG}" ]]; then
   exit 1
 fi
 
-# Robust project root detection: walk up from script dir until package.json and bmad-core exist
+# Robust project root detection: walk up from script dir until package.json and semad-core (or legacy bmad-core) exist
 # Resolve project root robustly
 resolve_root() {
   local script_dir script_root cwd candidate
@@ -35,23 +35,23 @@ resolve_root() {
   script_root="$(cd "$script_dir/../.." && pwd)"
   cwd="$(pwd)"
 
-  # 1) Walk up from script_dir to find dir with package.json and bmad-core/.bmad-core
+  # 1) Walk up from script_dir to find dir with package.json and semad-core/.semad-core (fallback: bmad-core/.bmad-core)
   candidate="$script_dir"
   while [[ "$candidate" != "/" ]]; do
-    if [[ -f "$candidate/package.json" && ( -d "$candidate/bmad-core" || -d "$candidate/.bmad-core" ) ]]; then
+    if [[ -f "$candidate/package.json" && ( -d "$candidate/semad-core" || -d "$candidate/.semad-core" || -d "$candidate/bmad-core" || -d "$candidate/.bmad-core" ) ]]; then
       echo "$candidate"
       return 0
     fi
     candidate="$(dirname "$candidate")"
   done
 
-  # 2) Use script_root if it contains bmad-core/.bmad-core
-  if [[ -f "$script_root/package.json" && ( -d "$script_root/bmad-core" || -d "$script_root/.bmad-core" ) ]]; then
+  # 2) Use script_root if it contains semad-core/.semad-core (fallback legacy)
+  if [[ -f "$script_root/package.json" && ( -d "$script_root/semad-core" || -d "$script_root/.semad-core" || -d "$script_root/bmad-core" || -d "$script_root/.bmad-core" ) ]]; then
     echo "$script_root"; return 0
   fi
 
   # 3) Try current working directory
-  if [[ -f "$cwd/package.json" && ( -d "$cwd/bmad-core" || -d "$cwd/.bmad-core" ) ]]; then
+  if [[ -f "$cwd/package.json" && ( -d "$cwd/semad-core" || -d "$cwd/.semad-core" || -d "$cwd/bmad-core" || -d "$cwd/.bmad-core" ) ]]; then
     echo "$cwd"; return 0
   fi
 
@@ -83,8 +83,8 @@ resolve_stories_dir() {
   node -e '
     const fs=require("fs"), path=require("path");
     function findCfg(root){
-      const c1=path.join(root,"bmad-core","core-config.yaml");
-      const c2=path.join(root,"core-config.yaml");
+    const c1=path.join(root,"semad-core","core-config.yaml");
+    const c2=path.join(root,"core-config.yaml");
       if(fs.existsSync(c1)) return c1; if(fs.existsSync(c2)) return c2; return null;
     }
     const root=process.cwd();
@@ -279,10 +279,10 @@ while [[ $iter -le $MAX_ITERS ]]; do
   verification_failed=0
   echo "Verifying QA fix completion (requires 100% fixes)..."
   VERIFY_SCRIPT=""
-  if [[ -f .bmad-core/utils/verify-qa-fixes.js ]]; then
-    VERIFY_SCRIPT=".bmad-core/utils/verify-qa-fixes.js"
-  elif [[ -f bmad-core/utils/verify-qa-fixes.js ]]; then
-    VERIFY_SCRIPT="bmad-core/utils/verify-qa-fixes.js"
+  if [[ -f .semad-core/utils/verify-qa-fixes.js ]]; then
+    VERIFY_SCRIPT=".semad-core/utils/verify-qa-fixes.js"
+  elif [[ -f semad-core/utils/verify-qa-fixes.js ]]; then
+    VERIFY_SCRIPT="semad-core/utils/verify-qa-fixes.js"
   fi
   if [[ -n "$VERIFY_SCRIPT" ]]; then
     if ! node "$VERIFY_SCRIPT"; then
@@ -290,7 +290,7 @@ while [[ $iter -le $MAX_ITERS ]]; do
       verification_failed=1
     fi
   else
-    echo "[WARN] Could not locate verify-qa-fixes.js under .bmad-core/ or bmad-core/. Treating verification as failed."
+    echo "[WARN] Could not locate verify-qa-fixes.js under .semad-core/ or semad-core/. Treating verification as failed."
     verification_failed=1
   fi
 

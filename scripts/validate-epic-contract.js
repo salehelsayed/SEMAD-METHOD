@@ -46,6 +46,26 @@ function validateEpic(epicData) {
   if (!req(epicData, ['epic', 'title'])) issues.push('epic.title missing');
   if (!req(epicData, ['epic', 'goal'])) issues.push('epic.goal missing');
 
+  // Traceability validation for new ID formats
+  const featureId = req(epicData, ['prdTraceability', 'featureId']);
+  const acceptanceCriteria = req(epicData, ['prdTraceability', 'acceptanceCriteriaMap']);
+  
+  if (!featureId) {
+    warnings.push('prdTraceability.featureId missing - required for feature coverage tracking');
+  } else if (!featureId.match(/^FEAT-[A-Za-z0-9_-]+$/)) {
+    warnings.push(`featureId '${featureId}' should follow format FEAT-<slug>`);
+  }
+  
+  if (!acceptanceCriteria || !Array.isArray(acceptanceCriteria)) {
+    warnings.push('prdTraceability.acceptanceCriteriaMap missing or not an array');
+  } else {
+    acceptanceCriteria.forEach(ac => {
+      if (!ac.match(/^AC-[A-Za-z0-9_-]+$/)) {
+        warnings.push(`Acceptance criteria ID '${ac}' should follow format AC-<feat>-<n>`);
+      }
+    });
+  }
+  
   // Success criteria
   const sc = req(epicData, ['successCriteria']);
   if (!Array.isArray(sc) || sc.length === 0) issues.push('successCriteria missing or empty');

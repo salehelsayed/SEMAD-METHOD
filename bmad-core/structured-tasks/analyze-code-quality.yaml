@@ -26,11 +26,11 @@ steps:
     name: Load Configuration and Identify Target Files
     description: Load quality metrics configuration and identify files to analyze
     actions:
-      - description: Load .bmad-core/core-config.yaml and check if codeQuality.enabled is true
+      - description: Load .semad-core/core-config.yaml and check if codeQuality.enabled is true
         elicit: false
       - description: If codeQuality.enabled is false or not configured, halt execution and inform user that code quality analysis is disabled
         elicit: false
-      - description: Load code quality configuration from .bmad-core/core-config.yaml codeQuality section
+      - description: Load code quality configuration from .semad-core/core-config.yaml codeQuality section
         elicit: false
       - description: Identify target files for analysis - either specified files or modified files from git status
         elicit: false
@@ -147,7 +147,7 @@ metadata:
     - ".ai/refactoring-plans/refactoring-plan-{{timestamp}}.md"
 notes: |
   This task provides comprehensive code quality analysis capabilities for both Dev and QA agents.
-  Configuration is loaded from .bmad-core/core-config.yaml codeQuality section.
+  Configuration is loaded from .semad-core/core-config.yaml codeQuality section.
   Analysis scope can be customized based on needs - story files, modified files, or specific file lists.
   When autoRefactor is enabled, detailed refactoring plans are generated with specific implementation steps.
   Quality metrics are tracked in agent memory for trend analysis across development sessions.

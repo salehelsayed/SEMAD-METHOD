@@ -130,7 +130,7 @@ npx bmad-method install
 
 **Verify Game Development Installation**:
 
-- `.bmad-core/` folder created with all core agents
+- `.semad-core/` folder created with all core agents
 - `.bmad-2d-unity-game-dev/` folder with game development agents
 - IDE-specific integration files created
 - Game development agents available with `/bmad2du` prefix (per config.yaml)
@@ -173,8 +173,8 @@ npx bmad-method install
 
 **CRITICAL RULE for Game Development**:
 
-- **ALWAYS use Game SM agent for story creation** - Never use bmad-master or bmad-orchestrator
-- **ALWAYS use Game Dev agent for Unity implementation** - Never use bmad-master or bmad-orchestrator
+- **ALWAYS use Game SM agent for story creation** - Never use bmad-master or semad-orchestrator
+- **ALWAYS use Game Dev agent for Unity implementation** - Never use bmad-master or semad-orchestrator
 - **Why this matters**: Game SM and Game Dev agents are specifically optimized for Unity workflows
 - **No exceptions**: Even if using bmad-master for design, switch to Game SM → Game Dev for implementation
 
@@ -453,7 +453,7 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic ga
 | `game-sm`        | Game Scrum Master | Game story creation, sprint planning        | Game project management, workflow           |
 | `game-architect` | Game Architect    | Unity system design, technical architecture | Complex Unity systems, performance planning |
 
-**Note**: For QA and other roles, use the core BMad agents (e.g., `@qa` from bmad-core).
+**Note**: For QA and other roles, use the core BMad agents (e.g., `@qa` from semad-core).
 
 ### Game Agent Interaction Commands
 

@@ -19,7 +19,7 @@ brew install codex
 ### Step 2: Install SEMAD-METHOD with Codex Support
 
 ```bash
-npx bmad-method install
+npx semad-method install
 ```
 
 When prompted for IDE selection, choose **"OpenAI Codex CLI"** from the list (use SPACEBAR to select).
@@ -38,7 +38,7 @@ The installation creates several files to enable Codex integration:
    - Detailed configuration for each agent
 
 3. **`~/.codex/instructions.md`** (Global)
-   - Global instructions for BMad projects
+   - Global instructions for SEMAD projects
    - Applied to all Codex sessions
 
 4. **`~/.codex/config.toml`** (Global)
@@ -121,13 +121,60 @@ codex "as dev agent, execute *adhoc 'Assess impact of auth service changes' --pa
 codex "as dev agent, execute *adhoc 'Repository housekeeping'"
 ```
 
+### Ad‑hoc Debug Mode (Dev)
+
+Use when you have a concrete error or failure to investigate and want a thorough, root‑cause oriented capture with artifacts.
+
+Examples
+
+```bash
+# Minimal (interactive-style capture)
+codex "as dev agent, execute *adhoc-debug 'Login 500 on /api/auth'"
+
+# With scope, paths, git window, and a deterministic repro run with profiling
+codex "as dev agent, execute *adhoc-debug 'User deletion fails intermittently' --scope backend --paths src/api/users.ts src/services/user.ts --since origin/main --repro 'npm test -- users.spec.ts -t \"deletes user\"' --runs 25 --profile cpu,heap --nettrace --audit --dbcheck --ci"
+
+# Custom output directory
+codex "as dev agent, execute *adhoc-debug 'Payment timeout' --output .ai/adhoc/debug/payment-timeout"
+```
+
+Artifacts
+- Summary at `.ai/adhoc/debug/<timestamp>/summary.md`
+- Structured findings at `.ai/adhoc/debug/<timestamp>/findings.json`
+- Evidence bundle under `logs/`, `reports/`, `profiles/`
+
 Verification
 - Check `.ai/history/dev_log.jsonl` for “Ad-hoc task started/completed”.
 - Check `.ai/adhoc/` for the generated report, which includes a “Baseline Context (devLoadAlwaysFiles)” section.
 
 Notes
 - Always activate: start commands with “as dev agent …”.
-- The Dev agent respects `bmad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`, `devStoryLocation`).
+- The Dev agent respects `semad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`, `devStoryLocation`).
+
+### Natural Language Commands
+
+You can omit the star command and just describe your intent; the CLI shim maps common phrases to commands using an intent manifest:
+
+```bash
+# Equivalent to: /dev *help
+node tools/agent.js "/dev help"
+
+# Equivalent to: /dev *implement-next-story
+node tools/agent.js "/dev implement next story"
+
+# Equivalent to: /dev *adhoc-debug "<error>"
+node tools/agent.js "/dev debug 'Checkout timeout'"
+```
+
+Behind the scenes, `semad-core/agents/intent-manifest.json` defines alias → command mappings per agent. Update it to add your own phrases.
+
+### Verify Installation
+
+Run after installation to confirm all required files are present:
+
+```bash
+npm run install:semad && npm run install:verify
+```
 ```
 
 ## Configuration
@@ -229,11 +276,45 @@ For issues or questions:
 - SEMAD-METHOD: [GitHub Issues](https://github.com/your-repo/semad-method/issues)
 - OpenAI Codex CLI: [OpenAI Support](https://help.openai.com)
 
+## Traceability Gate (PRD → Epic → Story)
+
+- Maintain `docs/coverage.md` as the one-page PRD coverage matrix.
+- Use templates in `docs/templates/` to include PRD IDs and architecture refs in Epic/Story contracts.
+- Validate alignment before planning/merges:
+  - `node tools/workflow-orchestrator.js reverse-align`
+  - `/qa *validate-docs-code-alignment`
+- Apply checklists in `docs/checklists/` and the gate guide `docs/gates/prd-coverage-gate.md`.
+
 ## Templates and Touchpoints
 
 - EpicContract template: `docs/templates/epic-contract-template.md`
 - StoryContract template: `docs/templates/story-contract-template.yaml`
 - Workflow touchpoints: `docs/workflow-touchpoints.md`
+
+## Brownfield PM Workflow (CLI)
+
+Recommended sequence for existing systems with small-to-medium enhancements:
+
+```bash
+# 1) Create a Brownfield PRD and run integration readiness
+codex "as pm agent, *create-brownfield-prd"
+# Follow the PM Integration Readiness checklist (contracts, SourceRef, ECM, rollout)
+
+# 2) Create the epic with incremental slicing scaffolding
+codex "as pm agent, *create-epic"
+
+# 3) Validate ECM and the EpicContract before SM handoff
+node tools/ecm-validate.js docs/epics/<your-epic>.md
+npm run validate:epic -- docs/epics/<your-epic>.md
+
+# 4) Validate feature coverage (target 100%)
+codex "as pm agent, *validate-feature-coverage --threshold 100 --report .ai/reports/feature-coverage.json"
+```
+
+Notes
+- The EpicContract must include `integrationPoints` with `ownerTeam`, `contract`, and `sourceRef` per INT.
+- ECM must reach 100% coverage of REQ-* and INT-*, validated via `tools/ecm-validate.js`.
+- Slicing pattern: Story 0 (flag), Story 1 (probe/contract tests), then one INT × one flow per story.
 
 Use the Scrum Master agent to create stories that reference EpicContract IDs (`epicId`, `REQ-*`, `FLOW-*`, `INT-*`) and have QA validate traceability via reverse-alignment before closing the epic.
 

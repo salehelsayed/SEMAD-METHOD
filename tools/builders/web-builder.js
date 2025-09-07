@@ -21,7 +21,7 @@ class WebBuilder {
     return yaml.load(content);
   }
 
-  convertToWebPath(filePath, bundleRoot = 'bmad-core') {
+  convertToWebPath(filePath, bundleRoot = 'semad-core') {
     // Convert absolute paths to web bundle paths with dot prefix
     // All resources get installed under the bundle root, so use that path
     const relativePath = path.relative(this.rootDir, filePath);
@@ -32,7 +32,7 @@ class WebBuilder {
       // For expansion packs, remove 'expansion-packs/packname' and use the rest
       resourcePath = pathParts.slice(2).join('/');
     } else {
-      // For bmad-core, common, etc., remove the first part
+      // For semad-core, common, etc., remove the first part
       resourcePath = pathParts.slice(1).join('/');
     }
     
@@ -41,16 +41,16 @@ class WebBuilder {
 
   generateWebInstructions(bundleType, packName = null) {
     // Generate dynamic web instructions based on bundle type
-    const rootExample = packName ? `.${packName}` : '.bmad-core';
-    const examplePath = packName ? `.${packName}/folder/filename.md` : '.bmad-core/folder/filename.md';
-    const personasExample = packName ? `.${packName}/personas/analyst.md` : '.bmad-core/personas/analyst.md';
-    const tasksExample = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.bmad-core/structured-tasks/create-story.yaml';
-    const utilsExample = packName ? `.${packName}/utils/template-format.md` : '.bmad-core/utils/template-format.md';
-    const tasksRef = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.bmad-core/structured-tasks/create-story.yaml';
+    const rootExample = packName ? `.${packName}` : '.semad-core';
+    const examplePath = packName ? `.${packName}/folder/filename.md` : '.semad-core/folder/filename.md';
+    const personasExample = packName ? `.${packName}/personas/analyst.md` : '.semad-core/personas/analyst.md';
+    const tasksExample = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.semad-core/structured-tasks/create-story.yaml';
+    const utilsExample = packName ? `.${packName}/utils/template-format.md` : '.semad-core/utils/template-format.md';
+    const tasksRef = packName ? `.${packName}/structured-tasks/create-story.yaml` : '.semad-core/structured-tasks/create-story.yaml';
 
     return `# Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -84,7 +84,7 @@ These references map directly to bundle sections:
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
@@ -107,7 +107,7 @@ These references map directly to bundle sections:
     const agents = await this.resolver.listAgents();
     
     if (agents.length === 0) {
-      throw new Error('No agents found in bmad-core/agents directory');
+      throw new Error('No agents found in semad-core/agents directory');
     }
 
     for (const agentId of agents) {
@@ -135,7 +135,7 @@ These references map directly to bundle sections:
     const teams = await this.resolver.listTeams();
     
     if (teams.length === 0) {
-      console.warn('  No teams found in bmad-core/agent-teams directory');
+      console.warn('  No teams found in semad-core/agent-teams directory');
       return;
     }
 
@@ -173,13 +173,13 @@ These references map directly to bundle sections:
     const sections = [template];
 
     // Add agent configuration
-    const agentPath = this.convertToWebPath(dependencies.agent.path, 'bmad-core');
-    sections.push(this.formatSection(agentPath, dependencies.agent.content, 'bmad-core'));
+    const agentPath = this.convertToWebPath(dependencies.agent.path, 'semad-core');
+    sections.push(this.formatSection(agentPath, dependencies.agent.content, 'semad-core'));
 
     // Add all dependencies
     for (const resource of dependencies.resources) {
-      const resourcePath = this.convertToWebPath(resource.path, 'bmad-core');
-      sections.push(this.formatSection(resourcePath, resource.content, 'bmad-core'));
+      const resourcePath = this.convertToWebPath(resource.path, 'semad-core');
+      sections.push(this.formatSection(resourcePath, resource.content, 'semad-core'));
     }
 
     return sections.join("\n");
@@ -198,19 +198,19 @@ These references map directly to bundle sections:
     const sections = [template];
 
     // Add team configuration
-    const teamPath = this.convertToWebPath(dependencies.team.path, 'bmad-core');
-    sections.push(this.formatSection(teamPath, dependencies.team.content, 'bmad-core'));
+    const teamPath = this.convertToWebPath(dependencies.team.path, 'semad-core');
+    sections.push(this.formatSection(teamPath, dependencies.team.content, 'semad-core'));
 
     // Add all agents
     for (const agent of dependencies.agents) {
-      const agentPath = this.convertToWebPath(agent.path, 'bmad-core');
-      sections.push(this.formatSection(agentPath, agent.content, 'bmad-core'));
+      const agentPath = this.convertToWebPath(agent.path, 'semad-core');
+      sections.push(this.formatSection(agentPath, agent.content, 'semad-core'));
     }
 
     // Add all deduplicated resources
     for (const resource of dependencies.resources) {
-      const resourcePath = this.convertToWebPath(resource.path, 'bmad-core');
-      sections.push(this.formatSection(resourcePath, resource.content, 'bmad-core'));
+      const resourcePath = this.convertToWebPath(resource.path, 'semad-core');
+      sections.push(this.formatSection(resourcePath, resource.content, 'semad-core'));
     }
 
     return sections.join("\n");
@@ -279,7 +279,7 @@ These references map directly to bundle sections:
     }
   }
 
-  formatSection(path, content, bundleRoot = 'bmad-core') {
+  formatSection(path, content, bundleRoot = 'semad-core') {
     const separator = "====================";
 
     // Process agent content if this is an agent file
@@ -486,7 +486,7 @@ These references map directly to bundle sections:
                   if (resourceType === 'tasks' && resourceName.endsWith('.yaml')) {
                     const structuredCorePath = path.join(
                       this.rootDir,
-                      "bmad-core",
+                      "semad-core",
                       "structured-tasks",
                       resourceName
                     );
@@ -504,7 +504,7 @@ These references map directly to bundle sections:
                     // Regular core lookup
                     const corePath = path.join(
                       this.rootDir,
-                      "bmad-core",
+                      "semad-core",
                       resourceType,
                       resourceName
                     );
@@ -569,7 +569,7 @@ These references map directly to bundle sections:
                 if (!found) {
                   const corePath = path.join(
                     this.rootDir,
-                    "bmad-core",
+                    "semad-core",
                     resourceType,
                     resourcePath
                   );
@@ -716,7 +716,7 @@ These references map directly to bundle sections:
       } else {
         // Use core BMad version
         try {
-          const coreAgentPath = path.join(this.rootDir, "bmad-core", "agents", `${agentId}.md`);
+          const coreAgentPath = path.join(this.rootDir, "semad-core", "agents", `${agentId}.md`);
           const coreAgentContent = await fs.readFile(coreAgentPath, "utf8");
           const coreAgentWebPath = this.convertToWebPath(coreAgentPath, packName);
           sections.push(this.formatSection(coreAgentWebPath, coreAgentContent, packName));
@@ -809,7 +809,7 @@ These references map directly to bundle sections:
       if (!found) {
         // For tasks with .yaml extension, check structured-tasks directory in core
         if (dep.type === 'tasks' && dep.name.endsWith('.yaml')) {
-          const structuredCorePath = path.join(this.rootDir, "bmad-core", "structured-tasks", dep.name);
+          const structuredCorePath = path.join(this.rootDir, "semad-core", "structured-tasks", dep.name);
           try {
             const content = await fs.readFile(structuredCorePath, "utf8");
             const coreWebPath = this.convertToWebPath(structuredCorePath, packName);
@@ -820,7 +820,7 @@ These references map directly to bundle sections:
           }
         } else {
           // Regular core lookup
-          const corePath = path.join(this.rootDir, "bmad-core", dep.type, dep.name);
+          const corePath = path.join(this.rootDir, "semad-core", dep.type, dep.name);
           try {
             const content = await fs.readFile(corePath, "utf8");
             const coreWebPath = this.convertToWebPath(corePath, packName);

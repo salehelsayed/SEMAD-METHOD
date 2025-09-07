@@ -52,7 +52,7 @@ class HierarchyUpdater {
   async scanAndUpdateAll() {
     console.log('[UPDATER] Scanning all agents and teams for instructions...');
     
-    const bmadCore = path.join(process.cwd(), 'bmad-core');
+    const bmadCore = path.join(process.cwd(), 'semad-core');
     
     // Scan agents
     const agentsDir = path.join(bmadCore, 'agents');

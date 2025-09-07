@@ -12,8 +12,8 @@ const yaml = require('js-yaml');
 class StoryGenerator {
   constructor(rootDir = process.cwd()) {
     this.rootDir = rootDir;
-    this.configPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
-    this.defaultTemplate = path.join(rootDir, 'bmad-core', 'templates', 'story-tmpl.yaml');
+    this.configPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
+    this.defaultTemplate = path.join(rootDir, 'semad-core', 'templates', 'story-tmpl.yaml');
   }
 
   /**
@@ -271,7 +271,7 @@ class StoryGenerator {
   }
 
   /**
-   * Deterministic story content aligned with bmad-core/templates/story-tmpl.yaml
+   * Deterministic story content aligned with semad-core/templates/story-tmpl.yaml
    */
   generateDeterministicStory(context) {
     const id = context.storyId || 'TBD';

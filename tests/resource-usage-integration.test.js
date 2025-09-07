@@ -3,7 +3,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 describe('Resource Usage Integration Tests', () => {
-  const bmadCoreDir = path.join(__dirname, '..', 'bmad-core');
+  const bmadCoreDir = path.join(__dirname, '..', 'semad-core');
   
   // Helper to load and parse YAML files
   const loadYamlFile = (filePath) => {

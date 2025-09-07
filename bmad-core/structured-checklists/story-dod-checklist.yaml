@@ -108,6 +108,18 @@ categories:
           Technical documentation (e.g., READMEs, system diagrams) updated if significant architectural changes were
           made.
         checked: false
+  - name: Brownfield Integration DoD
+    items:
+      - description: If story defines `featureFlag`, new behavior is fully guarded and defaultState is OFF
+        checked: false
+      - description: If `sliceType` is `probe`, confirm no state-changing writes were introduced
+        checked: false
+      - description: If touching `integrationPointIds`, `integrationVerification` checks (IV1/IV2/IV3) executed with evidence
+        checked: false
+      - description: If touching `integrationPointIds`, `rollbackPlan` executed (flag toggle) and prior behavior verified
+        checked: false
+      - description: Performance budget (p95/p99) validated where defined
+        checked: false
     notes: |-
       Be specific - list each requirement and whether it's complete
       Code quality matters for maintainability. Check each item carefully

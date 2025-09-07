@@ -41,8 +41,8 @@ describe('Epic Loop Integration Tests', () => {
     storyDir = path.join(tempDir, 'stories');
     fs.mkdirSync(storyDir, { recursive: true });
 
-    // Create bmad-core directory structure
-    const bmadCoreDir = path.join(tempDir, 'bmad-core');
+    // Create semad-core directory structure
+    const bmadCoreDir = path.join(tempDir, 'semad-core');
     const utilsDir = path.join(bmadCoreDir, 'utils');
     const workflowsDir = path.join(bmadCoreDir, 'workflows');
     fs.mkdirSync(utilsDir, { recursive: true });
@@ -197,7 +197,7 @@ maxConsecutiveFailures: 3
   describe('Configuration Integration', () => {
     test('should respect configuration limits', async () => {
       // Update configuration with restrictive limits
-      const coreConfigPath = path.join(tempDir, 'bmad-core', 'core-config.yaml');
+      const coreConfigPath = path.join(tempDir, 'semad-core', 'core-config.yaml');
       fs.writeFileSync(coreConfigPath, `
 devStoryLocation: '${storyDir}'
 verbosity: false

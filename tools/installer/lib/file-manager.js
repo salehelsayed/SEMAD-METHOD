@@ -350,7 +350,15 @@ class FileManager {
         const { Transform } = require('stream');
         const replaceStream = new Transform({
           transform(chunk, encoding, callback) {
-            const modified = chunk.toString().replace(/\{root\}/g, rootValue);
+            let modified = chunk.toString().replace(/\{root\}/g, rootValue);
+            // Also fix tracking utility paths for installed agents
+            if (destination.includes('/agents/') && destination.endsWith('.md')) {
+              modified = modified
+                .replace(/\bnode semad-core\//g, 'node .semad-core/')
+                .replace(/\bnode bmad-core\//g, 'node .semad-core/')
+                .replace(/require\('\.\/simple-task-tracker'\)/g, "require('./.semad-core/utils/simple-task-tracker')")
+                .replace(/require\('\.\/track-progress\.js'\)/g, "require('./.semad-core/utils/track-progress.js')");
+            }
             callback(null, modified);
           }
         });
@@ -363,8 +371,16 @@ class FileManager {
         );
       } else {
         // Regular approach for smaller files
-        const content = await fsPromises.readFile(source, 'utf8');
-        const updatedContent = content.replace(/\{root\}/g, rootValue);
+        let content = await fsPromises.readFile(source, 'utf8');
+        let updatedContent = content.replace(/\{root\}/g, rootValue);
+        // Also fix tracking utility paths for installed agents
+        if (destination.includes('/agents/') && destination.endsWith('.md')) {
+          updatedContent = updatedContent
+            .replace(/\bnode semad-core\//g, 'node .semad-core/')
+            .replace(/\bnode bmad-core\//g, 'node .semad-core/')
+            .replace(/require\('\.\/simple-task-tracker'\)/g, "require('./.semad-core/utils/simple-task-tracker')")
+            .replace(/require\('\.\/track-progress\.js'\)/g, "require('./.semad-core/utils/track-progress.js')");
+        }
         await this.ensureDirectory(path.dirname(destination));
         await fsPromises.writeFile(destination, updatedContent, 'utf8');
       }

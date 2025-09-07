@@ -1,0 +1,36 @@
+{
+  "extends": ["eslint:recommended"],
+  "env": {
+    "node": true,
+    "es2022": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022
+  },
+  "rules": {
+    "no-unused-vars": ["error", { 
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"],
+    "semad/traceability-annotations": "warn",
+    "semad/test-ac-tags": "warn"
+  },
+  "plugins": ["semad"],
+  "overrides": [
+    {
+      "files": ["*.test.js", "*.spec.js"],
+      "rules": {
+        "semad/test-ac-tags": "error"
+      }
+    },
+    {
+      "files": ["src/**/*.js", "lib/**/*.js", "tools/**/*.js"],
+      "rules": {
+        "semad/traceability-annotations": "error"
+      }
+    }
+  ]
+}

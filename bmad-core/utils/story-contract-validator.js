@@ -75,7 +75,7 @@ class StoryContractValidator {
     const paths = [];
     try {
       // Try to resolve as if it's an installed package
-      const packagePath = require.resolve('bmad-method/bmad-core/schemas/story-contract-schema.json');
+      const packagePath = require.resolve('bmad-method/semad-core/schemas/story-contract-schema.json');
       paths.push(packagePath);
     } catch (e) {
       // Not an npm package, that's OK

@@ -6,7 +6,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
-const AgentRunner = require('../../bmad-core/utils/agent-runner');
+const AgentRunner = require('../../semad-core/utils/agent-runner');
 
 // We'll create a minimal test environment
 const TEST_CONFIG = {
@@ -36,12 +36,12 @@ describe('Memory Integration Tests', () => {
   
   beforeAll(async () => {
     // Create test configuration
-    testConfigPath = path.join(__dirname, '../../bmad-core/core-config-test.yaml');
+    testConfigPath = path.join(__dirname, '../../semad-core/core-config-test.yaml');
     await fs.writeFile(testConfigPath, yaml.dump(TEST_CONFIG));
     
     // Mock the config path in the unified memory manager
-    jest.doMock('../../bmad-core/utils/unified-memory-manager', () => {
-      const originalModule = jest.requireActual('../../bmad-core/utils/unified-memory-manager');
+    jest.doMock('../../semad-core/utils/unified-memory-manager', () => {
+      const originalModule = jest.requireActual('../../semad-core/utils/unified-memory-manager');
       return {
         ...originalModule,
         loadMemoryConfig: jest.fn().mockResolvedValue(TEST_CONFIG.memory)

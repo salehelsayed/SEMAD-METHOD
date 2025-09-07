@@ -3,6 +3,23 @@ const fsPromises = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
 
+function extractStatus(content) {
+  try {
+    const headerMatch = content.match(/##\s*Status\s*\n+([^\n#]+)/i);
+    if (headerMatch && headerMatch[1]) {
+      const s = String(headerMatch[1]).trim();
+      if (s) return s;
+    }
+    const fm = content.match(/^---\n([\s\S]*?)\n---/);
+    if (fm) {
+      const y = yaml.load(fm[1]);
+      const v = (y && (y.status || y.Status)) ? String(y.status || y.Status).trim() : '';
+      if (v) return v;
+    }
+  } catch (_) { /* ignore */ }
+  return 'Unknown';
+}
+
 /**
  * Find the next approved story from the stories directory
  * @param {string} storiesDir - Path to the stories directory (pre-resolved from core-config.yaml)
@@ -77,10 +94,9 @@ function findNextApprovedStory(storiesDir) {
         
         const content = fs.readFileSync(fileInfo.path, 'utf8');
         
-        // Extract status from the story
-        // Regex: ##\s*Status\s*\n\s*(.+) matches "## Status" header followed by the status value on next line
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
-        if (statusMatch && statusMatch[1].trim().toLowerCase() === 'approved') {
+        // Extract status from the story (header or frontmatter)
+        const status = extractStatus(content);
+        if (status && status.toLowerCase() === 'approved') {
           // Extract StoryContract from YAML frontmatter
           // Regex: ^---\n([\s\S]*?)\n--- matches YAML frontmatter between --- delimiters
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
@@ -154,7 +170,7 @@ function getAllStoriesStatus(storiesDir) {
       const filePath = path.join(storiesDir, file);
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
+        const status = extractStatus(content);
         const titleMatch = content.match(/^#\s+(.+)/m);
         
         // Extract epic ID from filename (first number before the dot)
@@ -166,7 +182,7 @@ function getAllStoriesStatus(storiesDir) {
           file,
           path: filePath,
           title: titleMatch ? titleMatch[1] : file,
-          status: statusMatch ? statusMatch[1].trim() : 'Unknown',
+          status,
           epicId,
           storyId,
           fullStoryId: epicMatch ? `${epicId}.${storyId}` : file
@@ -227,7 +243,7 @@ function getStoriesForEpic(storiesDir, epicId) {
       const filePath = path.join(storiesDir, file);
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
+        const status = extractStatus(content);
         const titleMatch = content.match(/^#\s+(.+)/m);
         
         // Extract epic ID and story ID from filename
@@ -238,7 +254,7 @@ function getStoriesForEpic(storiesDir, epicId) {
           file,
           path: filePath,
           title: titleMatch ? titleMatch[1] : file,
-          status: statusMatch ? statusMatch[1].trim() : 'Unknown',
+          status,
           epicId: epicId.toString(),
           storyId: storyIdFromFile,
           fullStoryId: epicMatch ? `${epicId}.${storyIdFromFile}` : file
@@ -294,7 +310,7 @@ function findNextApprovedStoryInEpic(storiesDir, epicId) {
 
     // Find the first approved story in the epic
     const approvedStory = epicStories.find(story => 
-      story.status.toLowerCase() === 'approved'
+      (story.status || '').toLowerCase() === 'approved'
     );
 
     if (!approvedStory) {
@@ -480,8 +496,8 @@ async function findNextApprovedStoryAsync(storiesDir) {
         const content = await fsPromises.readFile(fileInfo.path, 'utf8');
         
         // Extract status from the story
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
-        if (statusMatch && statusMatch[1].trim().toLowerCase() === 'approved') {
+        const status = extractStatus(content);
+        if (status && status.toLowerCase() === 'approved') {
           // Extract StoryContract from YAML frontmatter
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
           let storyContract = null;

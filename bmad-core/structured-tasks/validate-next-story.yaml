@@ -26,7 +26,7 @@ steps:
     name: Load Core Configuration and Inputs
     description: ''
     actions:
-      - description: Load `.bmad-core/core-config.yaml`
+      - description: Load `.semad-core/core-config.yaml`
         elicit: false
         metadata:
           originalIndent: 0
@@ -54,7 +54,7 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      - description: '**Story template**: `bmad-core/templates/story-tmpl.yaml` for completeness validation'
+      - description: '**Story template**: `semad-core/templates/story-tmpl.yaml` for completeness validation'
         elicit: false
         metadata:
           originalIndent: 2
@@ -65,7 +65,7 @@ steps:
     name: Template Completeness Validation
     description: ''
     actions:
-      - description: Load `bmad-core/templates/story-tmpl.yaml` and extract all section headings from the template
+      - description: Load `semad-core/templates/story-tmpl.yaml` and extract all section headings from the template
         elicit: false
         metadata:
           originalIndent: 0
@@ -429,6 +429,25 @@ steps:
         metadata:
           memoryAction: true
           executionOrder: last
+  - id: dor-gate
+    name: DoR Sufficiency Gate
+    description: Enforce Definition of Ready (DoR-Mini) with scoring and stop rule.
+    actions:
+      - description: Execute SM DoR linter and update story readiness metadata (auto-detect latest story if not provided)
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/sm/dor-gate.js
+          args: []
+        outputs:
+          exitCode: dorExitCode
+          stdout: dorStdout
+      - description: Halt if DoR gate fails (<90) to prevent looping; SM must revise once or spawn spike per stop rule
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: {{dorExitCode !== 0}}
+          errorMessage: DoR gate not passed. See report: {{dorStdout}}
 inputs: {}
 outputs: {}
 metadata:
@@ -440,3 +459,25 @@ metadata:
       content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
       level: 2
   executionMode: SEQUENTIAL
+  - id: step10a
+    name: Brownfield Integration Safety Checks
+    description: Ensure stories that touch integration points are safe, incremental, and reversible.
+    actions:
+      - description: If `traceability.integrationPointIds` present, verify `integrationVerification` section exists with at least 3 checks (existing functionality, contract behavior, performance budget)
+        elicit: true
+      - description: If `traceability.integrationPointIds` present, verify `rollbackPlan` exists with steps and verification
+        elicit: true
+      - description: For early slices of an epic, verify `featureFlag` is declared and defaultState is off; probe slices must not change state
+        elicit: true
+      - description: Confirm story scope aligns to one INT × one flow variant (thin slice) unless justified
+        elicit: true
+  - id: step10b
+    name: Slice Order Sanity (Epic)
+    description: Warn if an 'int-flow' slice is being attempted before 'flag' and 'probe' slices exist for this epic.
+    actions:
+      - description: Parse this story's epicId and story.sliceType from the StoryContract
+        elicit: false
+      - description: If sliceType == 'int-flow', scan docs/stories/ for stories with the same epicId having sliceType 'flag' and 'probe'
+        elicit: false
+      - description: If required earlier slices are missing, emit a warning and recommend creating them first unless there is a documented justification
+        elicit: true

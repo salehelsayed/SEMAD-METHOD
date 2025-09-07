@@ -2,19 +2,19 @@ const path = require('path');
 
 /**
  * Helper function for resolving BMad module paths in tests
- * @param {string} moduleName - Module name relative to bmad-core (e.g., 'utils/story-contract-validator')
+ * @param {string} moduleName - Module name relative to semad-core (e.g., 'utils/story-contract-validator')
  * @param {string} baseDir - Base directory to search from (defaults to __dirname)
  * @returns {string} Resolved module path
  */
 function resolveBmadModule(moduleName, baseDir = __dirname) {
   const possiblePaths = [
     // Standard locations relative to test directory
-    path.join(baseDir, '..', '..', 'bmad-core', moduleName),
-    path.join(baseDir, '..', '..', '.bmad-core', moduleName),
+    path.join(baseDir, '..', '..', 'semad-core', moduleName),
+    path.join(baseDir, '..', '..', '.semad-core', moduleName),
     path.join(baseDir, '..', '..', moduleName),
     // Try one level up
-    path.join(baseDir, '..', 'bmad-core', moduleName),
-    path.join(baseDir, '..', '.bmad-core', moduleName),
+    path.join(baseDir, '..', 'semad-core', moduleName),
+    path.join(baseDir, '..', '.semad-core', moduleName),
     path.join(baseDir, '..', moduleName)
   ];
   
@@ -29,10 +29,10 @@ function resolveBmadModule(moduleName, baseDir = __dirname) {
   
   // Try as npm package
   try {
-    return require.resolve(`bmad-method/bmad-core/${moduleName}`);
+    return require.resolve(`semad-method/semad-core/${moduleName}`);
   } catch (e) {
     // Return the most common fallback
-    return path.join(baseDir, '..', '..', 'bmad-core', moduleName);
+    return path.join(baseDir, '..', '..', 'semad-core', moduleName);
   }
 }
 

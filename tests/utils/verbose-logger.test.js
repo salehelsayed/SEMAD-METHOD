@@ -2,7 +2,7 @@
  * Unit tests for VerboseLogger class
  */
 
-const VerboseLogger = require('../../bmad-core/utils/verbose-logger');
+const VerboseLogger = require('../../semad-core/utils/verbose-logger');
 
 // Mock chalk to avoid color codes in tests
 jest.mock('chalk', () => {

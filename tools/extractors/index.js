@@ -180,7 +180,7 @@ function extractEnvAndConfig(rootDir) {
   }
   // Scan code for env key usage and attach as evidence/relations
   try {
-    const files = collectSourceFiles(rootDir, ['tools', 'scripts', 'bmad-core', 'src']);
+    const files = collectSourceFiles(rootDir, ['tools', 'scripts', 'semad-core', 'src']);
     for (const full of files) {
       const relFile = toPosix(path.relative(rootDir, full));
       let text = '';
@@ -204,7 +204,7 @@ function extractEnvAndConfig(rootDir) {
 }
 
 // Collect candidate source files under key roots (avoids node_modules)
-function collectSourceFiles(rootDir, roots = ['tools', 'scripts', 'bmad-core'], onlyPaths = null) {
+function collectSourceFiles(rootDir, roots = ['tools', 'scripts', 'semad-core'], onlyPaths = null) {
   const files = [];
   for (const r of roots) {
     const abs = path.join(rootDir, r);
@@ -240,7 +240,7 @@ function extractModules(rootDir, { suppress = [], cache, onlyPaths } = {}) {
   const { minimatch } = require('glob');
   const mm = (a, b) => (typeof minimatch === 'function' ? minimatch(a, b) : a === b);
   const isSuppressed = (p) => suppress.some(g => mm(p, g));
-  const files = collectSourceFiles(rootDir, ['tools', 'scripts', 'bmad-core', 'src'], onlyPaths);
+  const files = collectSourceFiles(rootDir, ['tools', 'scripts', 'semad-core', 'src'], onlyPaths);
   for (const full of files) {
     const rel = toPosix(path.relative(rootDir, full));
     if (isSuppressed(rel)) continue;
@@ -360,7 +360,7 @@ function extractRoutes(rootDir, { suppress = [], cache, onlyPaths } = {}) {
   const { minimatch } = require('glob');
   const mm = (a, b) => (typeof minimatch === 'function' ? minimatch(a, b) : a === b);
   const isSuppressed = (p) => suppress.some(g => mm(p, g));
-  const files = collectSourceFiles(rootDir, ['tools', 'bmad-core', 'src'], onlyPaths);
+  const files = collectSourceFiles(rootDir, ['tools', 'semad-core', 'src'], onlyPaths);
   const routeRe = /(app|router)\.(get|post|put|delete|patch)\s*\(\s*['"]([^'\"]+)['"]/g;
   for (const full of files) {
     const rel = toPosix(path.relative(rootDir, full));
@@ -422,7 +422,7 @@ function extractAPIs(rootDir, { suppress = [], cache, onlyPaths } = {}) {
   const { minimatch } = require('glob');
   const mm = (a, b) => (typeof minimatch === 'function' ? minimatch(a, b) : a === b);
   const isSuppressed = (p) => suppress.some(g => mm(p, g));
-  const files = collectSourceFiles(rootDir, ['tools', 'bmad-core', 'src'], onlyPaths);
+  const files = collectSourceFiles(rootDir, ['tools', 'semad-core', 'src'], onlyPaths);
   const routeRe = /(app|router)\.(get|post|put|delete|patch)\s*\(\s*['"]([^'\"]+)['"]/g;
   for (const full of files) {
     const rel = toPosix(path.relative(rootDir, full));
@@ -486,7 +486,7 @@ function extractModels(rootDir, { suppress = [], cache, onlyPaths } = {}) {
   const { minimatch } = require('glob');
   const mm = (a, b) => (typeof minimatch === 'function' ? minimatch(a, b) : a === b);
   const isSuppressed = (p) => suppress.some(g => mm(p, g));
-  const files = collectSourceFiles(rootDir, ['tools', 'bmad-core', 'scripts', 'src'], onlyPaths);
+  const files = collectSourceFiles(rootDir, ['tools', 'semad-core', 'scripts', 'src'], onlyPaths);
   const patterns = [
     { kind: 'mongoose', re: /mongoose\.model\(\s*['"]([^'"]+)['"]/g },
     { kind: 'mongoose', re: /new\s+mongoose\.Schema\s*\(/g },

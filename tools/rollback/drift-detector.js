@@ -98,7 +98,7 @@ class DriftDetector {
   
   async getStructureSnapshot() {
     const structure = [];
-    const bmadConfig = path.join(process.cwd(), 'bmad-core');
+    const bmadConfig = path.join(process.cwd(), 'semad-core');
     
     if (await this.exists(bmadConfig)) {
       const agents = await this.getDirectoryStructure(path.join(bmadConfig, 'agents'));
@@ -134,7 +134,7 @@ class DriftDetector {
       '.bmadrc.yaml',
       'bmad.config.js',
       '.ai/settings.json',
-      'bmad-core/config/dynamic-plan-config.yaml'
+      'semad-core/config/dynamic-plan-config.yaml'
     ];
     
     for (const configFile of configFiles) {

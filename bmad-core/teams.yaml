@@ -1,0 +1,50 @@
+# Team Configuration for Story Splitting
+# Define your teams here. Stories will be split based on these team assignments.
+# The SM agent will analyze tasks and assign them to the most relevant team.
+
+teams:
+  - frontend
+  - backend
+  - database
+  - infrastructure
+  - api
+  - testing
+  
+# Optional: Define team responsibilities and keywords for better task assignment
+team_responsibilities:
+  frontend:
+    keywords: [UI, component, React, Vue, CSS, HTML, DOM, browser, client-side, user interface]
+    patterns: ["**/components/**", "**/pages/**", "**/styles/**", "**/*.jsx", "**/*.tsx"]
+    
+  backend:
+    keywords: [server, API, endpoint, route, controller, service, business logic, middleware]
+    patterns: ["**/controllers/**", "**/services/**", "**/routes/**", "**/api/**"]
+    
+  database:
+    keywords: [schema, migration, query, SQL, MongoDB, Redis, cache, data model, index]
+    patterns: ["**/migrations/**", "**/models/**", "**/schemas/**", "**/*.sql"]
+    
+  infrastructure:
+    keywords: [Docker, Kubernetes, CI/CD, deployment, AWS, cloud, monitoring, logging]
+    patterns: ["**/docker/**", "**/.github/**", "**/k8s/**", "**/*.yml", "**/*.yaml"]
+    
+  api:
+    keywords: [REST, GraphQL, webhook, integration, external service, third-party]
+    patterns: ["**/graphql/**", "**/webhooks/**", "**/integrations/**"]
+    
+  testing:
+    keywords: [test, spec, mock, fixture, coverage, unit test, integration test, e2e]
+    patterns: ["**/tests/**", "**/__tests__/**", "**/*.test.*", "**/*.spec.*"]
+
+# Assignment strategy when no clear team match is found
+default_assignment_strategy: "backend"  # Or "distribute" to spread evenly
+
+# Optional: scheduling behavior for team-split
+# If any conflicts (shared directories) are detected:
+#  - sequential_if_conflict: true → produce a clear sequential schedule (one slot per team)
+#  - single_slot_per_team: true → never split a team across multiple phases/groups
+# You can also tweak precedence for the sequential order.
+schedule:
+  sequential_if_conflict: true
+  single_slot_per_team: true
+  precedence: [database, backend, api, frontend, testing, infrastructure]

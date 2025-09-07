@@ -19,7 +19,7 @@ class OrchestratorGates {
   }
 
   async loadSchemas() {
-    const schemasDir = path.join(__dirname, '..', '..', 'bmad-core', 'schemas');
+    const schemasDir = path.join(__dirname, '..', '..', 'semad-core', 'schemas');
     
     const schemas = {
       'brief': 'brief-schema.json',

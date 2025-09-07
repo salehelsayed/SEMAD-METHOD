@@ -12,8 +12,8 @@ const yaml = require('js-yaml');
 // Try to use the module resolver if available
 let StoryContractValidator;
 try {
-  const ModuleResolver = require('../bmad-core/utils/module-resolver');
-  const validatorPath = ModuleResolver.resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator', __dirname);
+  const ModuleResolver = require('../semad-core/utils/module-resolver');
+  const validatorPath = ModuleResolver.resolveModule('utils/story-contract-validator', '../semad-core/utils/story-contract-validator', __dirname);
   StoryContractValidator = require(validatorPath);
 } catch (e) {
   // Fallback to direct resolution

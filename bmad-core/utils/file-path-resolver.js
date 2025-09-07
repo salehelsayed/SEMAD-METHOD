@@ -11,7 +11,22 @@ const yaml = require('js-yaml');
 class FilePathResolver {
   constructor(rootDir) {
     this.rootDir = rootDir || process.cwd();
-    this.configPath = path.join(this.rootDir, 'bmad-core', 'core-config.yaml');
+    // Check for both installed (.semad-core) and development (bmad-core) paths
+    const installedPath = path.join(this.rootDir, '.semad-core', 'core-config.yaml');
+    const devPath = path.join(this.rootDir, 'bmad-core', 'core-config.yaml');
+    
+    if (fs.existsSync(installedPath)) {
+      this.configPath = installedPath;
+      this.coreDir = '.semad-core';
+    } else if (fs.existsSync(devPath)) {
+      this.configPath = devPath;
+      this.coreDir = 'bmad-core';
+    } else {
+      // Default to bmad-core for error message
+      this.configPath = devPath;
+      this.coreDir = 'bmad-core';
+    }
+    
     this.config = null;
     this.quietDevLoadWarnings = false;
     this.loadConfig();
@@ -421,7 +436,7 @@ class FilePathResolver {
         'docs/prd.md': this.config?.prd?.prdFile,
         'docs/architecture.md': this.config?.architecture?.architectureFile,
         'docs/stories': this.config?.devStoryLocation,
-        'bmad-core/core-config.yaml': 'bmad-core/core-config.yaml'
+        'semad-core/core-config.yaml': 'semad-core/core-config.yaml'
       },
       
       // Patterns that should be resolved through configuration

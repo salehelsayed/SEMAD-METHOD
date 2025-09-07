@@ -1,0 +1,9 @@
+{
+  "name": "eslint-plugin-semad",
+  "version": "1.0.0",
+  "description": "ESLint rules for SEMAD Method traceability annotations",
+  "main": "index.js",
+  "keywords": ["eslint", "eslintplugin", "eslint-plugin", "semad", "traceability"],
+  "author": "SEMAD Method Team",
+  "license": "MIT"
+}

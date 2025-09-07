@@ -9,6 +9,11 @@
 
 SEMAD-METHOD is an enhanced fork of the BMad-Method framework that introduces structured engineering practices to multi-agent AI development. This fork focuses on reducing hallucination, improving agent reliability, and ensuring deterministic behavior through YAML/JSON-based task definitions, structured memory systems, and formal contract specifications.
 
+BMAD compatibility note:
+- Preferred core path is `semad-core/` (and `.semad-core/`).
+- Legacy `bmad-core/` and `.bmad-core/` are recognized during migration. In this repo, `semad-core` mirrors `bmad-core` to avoid breakage.
+- Prefer `.semad-workflow.yaml` for new projects; `.bmad-workflow.yaml` remains supported.
+
 ## 🚀 Key Improvements in SEMAD-METHOD
 
 This fork introduces eight major improvements over the original BMad-Method:
@@ -17,7 +22,7 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **What Changed**: Converted all free-form Markdown tasks to structured YAML format with explicit schemas
 - **Why**: Eliminates ambiguity and LLM interpretation errors
 - **Impact**: Deterministic task execution with validation support
-- **Files**: All tasks in `bmad-core/structured-tasks/`, validated by schemas in `bmad-core/schemas/`
+- **Files**: All tasks in `semad-core/structured-tasks/`, validated by schemas in `semad-core/schemas/`
 
 ### 2. **Simple Task Tracking System**
 - **What Changed**: Added lightweight task tracking for agent workflows
@@ -30,7 +35,7 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **What Changed**: Automatic task decomposition for complex operations
 - **Why**: Prevents monolithic processing of large instruction sets
 - **Impact**: Better handling of complex tasks through divide-and-conquer approach
-- **Files**: `bmad-core/tools/dynamic-planner.js`, `bmad-core/structured-tasks/dynamic-plan-rules.yaml`
+- **Files**: `semad-core/tools/dynamic-planner.js`, `semad-core/structured-tasks/dynamic-plan-rules.yaml`
 
 ### 4. **Automated Search Tools Generation**
 - **What Changed**: PRD-driven search query generation for documentation retrieval
@@ -42,7 +47,7 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **What Changed**: Formal contract blocks in story files replacing prose summaries
 - **Why**: Eliminates hallucination between PRD and story creation
 - **Impact**: Developers work from structured specifications, not interpretations
-- **Schema**: `bmad-core/schemas/story-contract-schema.json`
+- **Schema**: `semad-core/schemas/story-contract-schema.json`
 
 ### 6. **Contract-Driven Development**
 - **What Changed**: Dev agent uses StoryContract as single source of truth
@@ -65,7 +70,7 @@ This fork introduces eight major improvements over the original BMad-Method:
 - **What Changed**: Added choice between linear Dev→QA flow and iterative Dev↔QA loop
 - **Why**: Different projects need different quality assurance approaches
 - **Impact**: Teams can choose immediate iteration on QA findings or batch processing
-- **Usage**: `npm run orchestrate` or configure in `.bmad-workflow.yaml`
+- **Usage**: `npm run orchestrate` or configure in `.semad-workflow.yaml` (or `.bmad-workflow.yaml` during migration)
 
 ## 📊 Results
 
@@ -94,7 +99,7 @@ These improvements have transformed BMad-Method into a production-ready system:
 
 This enhanced approach eliminates **planning inconsistency**, **context loss**, and **hallucination** - the biggest problems in AI-assisted development. Your Dev agent opens a story file with a formal contract specification and complete understanding of what to build, how to build it, and why.
 
-**📖 [See the complete workflow in the User Guide](bmad-core/user-guide.md)** - Planning phase, development cycle, and all agent roles
+**📖 [See the complete workflow in the User Guide](semad-core/user-guide.md)** - Planning phase, development cycle, and all agent roles
 
 ## Quick Navigation
 
@@ -102,8 +107,8 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 
 **Before diving in, review these critical workflow diagrams that explain how SEMAD-METHOD works:**
 
-1. **[Planning Workflow (Web UI)](bmad-core/user-guide.md#the-planning-workflow-web-ui)** - How to create PRD and Architecture documents with structured validation
-2. **[Core Development Cycle (IDE)](bmad-core/user-guide.md#the-core-development-cycle-ide)** - How SM, Dev, and QA agents collaborate through StoryContract specifications
+1. **[Planning Workflow (Web UI)](semad-core/user-guide.md#the-planning-workflow-web-ui)** - How to create PRD and Architecture documents with structured validation
+2. **[Core Development Cycle (IDE)](semad-core/user-guide.md#the-core-development-cycle-ide)** - How SM, Dev, and QA agents collaborate through StoryContract specifications
 
 > ⚠️ **These diagrams explain 90% of SEMAD Method workflow confusion** - Understanding the PRD+Architecture creation, StoryContract generation, and the SM/Dev/QA workflow with formal contracts is essential - and also explains why this provides deterministic, hallucination-free development!
 
@@ -114,7 +119,8 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 - **[Agents Reference](AGENTS.md)** → All agents and their capabilities
 - **[Workflows](WORKFLOWS.md)** → Two-phase workflow system
 - **[API Reference](API-REFERENCE.md)** → Complete API documentation
-- **[User Guide](bmad-core/user-guide.md)** → Complete workflow walkthrough
+- **[User Guide](semad-core/user-guide.md)** → Complete workflow walkthrough
+- **[SEMAD Migration Guide](docs/migration/semad-migration.md)** → Switch from BMAD to SEMAD
 - **[Reverse Alignment](docs/reverse-alignment.md)** → Keep docs and stories aligned to code
 
 ### What would you like to do?
@@ -186,8 +192,8 @@ npm run build
 After cloning and building:
 
 ```bash
-# Install SEMAD to your project
-npm run install:bmad -- --target /path/to/your/project
+# Install SEMAD to your project (SEMAD-first)
+npm run install:semad -- --target /path/to/your/project
 ```
 
 For detailed installation instructions, see our **[Getting Started Guide](GETTING-STARTED.md)**.
@@ -221,7 +227,9 @@ The orchestrator will guide you through:
 - **[Getting Started Guide](GETTING-STARTED.md)** - Detailed setup instructions
 - **[Workflow Documentation](WORKFLOWS.md)** - Understanding the two-phase system
 - **[Agent Reference](AGENTS.md)** - All available agents and commands
- - **[Reverse Alignment Guide](docs/reverse-alignment.md)** - Sync docs/stories to the codebase
+- **[Reverse Alignment Guide](docs/reverse-alignment.md)** - Sync docs/stories to the codebase
+- **[Coverage Matrix](docs/coverage.md)** - PRD→Epic→Story→Test traceability
+- **[Traceability Guide](docs/traceability-guide.md)** - Alignment and gates
 
 **Prerequisites**: 
 - [Node.js](https://nodejs.org) v20+ required
@@ -238,7 +246,7 @@ For browser-based usage without installation:
 4. **Start planning**: Type `*help` to see commands or `/analyst` to begin
 5. **Switch to IDE**: After planning phase, move to IDE for implementation
 
-See the [User Guide](bmad-core/user-guide.md) for detailed workflow instructions.
+See the [User Guide](semad-core/user-guide.md) for detailed workflow instructions.
 
 ## Reverse‑Align MVP Quickstart
 
@@ -347,7 +355,7 @@ Prefer terminal-based agent control? Use Codex CLI to activate SEMAD agents and 
 Notes
 - Always start with a clear activation phrase: “as dev agent …”, “activate dev agent …”.
 - Use the `*` prefix for agent commands.
-- The Dev agent respects `bmad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`).
+- The Dev agent respects `semad-core/core-config.yaml` (e.g., `devStartup: idle`, `devLoadAlwaysFiles`).
 - More examples: see `docs/codex-integration.md`.
 
 ### Minimal CLI Shim (no Codex)
@@ -437,7 +445,7 @@ simpleTaskTracking: true      # Use simple task tracking system
 - 🤖 **[Agents Reference](AGENTS.md)** - All agents and their capabilities
 - 🔄 **[Workflows](WORKFLOWS.md)** - Two-phase workflow system
 - 🔧 **[API Reference](API-REFERENCE.md)** - Complete API documentation
-- 📚 **[User Guide](bmad-core/user-guide.md)** - Complete walkthrough
+- 📚 **[User Guide](semad-core/user-guide.md)** - Complete walkthrough
 - 🚀 **[Expansion Packs Guide](docs/expansion-packs.md)** - Extend to any domain
 - 🔄 **[Dev↔QA Flow Options](docs/dev-qa-flow-options.md)** - Development flow options
 
@@ -451,14 +459,14 @@ simpleTaskTracking: true      # Use simple task tracking system
 
 ### Key Files and Components Added/Modified:
 
-- **Structured Tasks**: `bmad-core/structured-tasks/*.yaml` - All tasks converted to YAML
-- **Schemas**: `bmad-core/schemas/` - JSON schemas for validation
-- **Dynamic Planner**: `bmad-core/tools/dynamic-planner.js` - Task decomposition engine
-- **Task Tracking**: `bmad-core/utils/simple-task-tracker.js` - Lightweight progress tracking
-- **Progress Logging**: `bmad-core/utils/track-progress.js` - Persistent observation logging
+-- **Structured Tasks**: `semad-core/structured-tasks/*.yaml` - All tasks converted to YAML
+-- **Schemas**: `semad-core/schemas/` - JSON schemas for validation
+-- **Dynamic Planner**: `semad-core/tools/dynamic-planner.js` - Task decomposition engine
+-- **Task Tracking**: `semad-core/utils/simple-task-tracker.js` - Lightweight progress tracking
+-- **Progress Logging**: `semad-core/utils/track-progress.js` - Persistent observation logging
 - **Search Tools**: `scripts/generate-search-tools.js` - PRD keyword extraction
 - **Validation**: `scripts/validate-all.js` - Comprehensive validation system
-- **Error Handling**: `bmad-core/utils/error-handler.js` - Centralized error management
+- **Error Handling**: `semad-core/utils/error-handler.js` - Centralized error management
 - **Test Suite**: 284 comprehensive tests ensuring reliability
 
 ### Performance Improvements:
@@ -489,10 +497,10 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 See `docs/reverse-alignment.md` for details. Common commands:
 
-- `bmad-orchestrator refresh-manifest` — Extract evidence and write `.ai/documentation-manifest.json` (+ alias).
-- `bmad-orchestrator reverse-align` — Analyze, generate G-PRD/G-ARCH, coverage report, and manifest.
-- `bmad-orchestrator generate-stories --cap 10` — Emit ranked, deduped StoryCandidates.
-- `bmad-orchestrator quality-gate --coverage 0.85 --delta-only` — Enforce coverage and drift gates.
+- `semad-orchestrator refresh-manifest` — Extract evidence and write `.ai/documentation-manifest.json` (+ alias).
+- `semad-orchestrator reverse-align` — Analyze, generate G-PRD/G-ARCH, coverage report, and manifest.
+- `semad-orchestrator generate-stories --cap 10` — Emit ranked, deduped StoryCandidates.
+- `semad-orchestrator quality-gate --coverage 0.85 --delta-only` — Enforce coverage and drift gates.
 
 Flags:
 - `--dry-run` on `refresh-manifest`, `reverse-align`, `generate-stories`, and `quality-gate` computes analysis/reports without modifying docs or failing CI.

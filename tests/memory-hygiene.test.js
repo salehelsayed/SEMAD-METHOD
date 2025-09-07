@@ -11,13 +11,13 @@ const {
   getMemoryHygieneStatus,
   analyzeMemoryUsage,
   loadHygieneConfig
-} = require('../bmad-core/utils/memory-hygiene');
+} = require('../semad-core/utils/memory-hygiene');
 const { 
   initializeWorkingMemory, 
   updateWorkingMemory, 
   loadWorkingMemory,
   performAgentMemoryHygiene
-} = require('../bmad-core/utils/agent-memory-manager');
+} = require('../semad-core/utils/agent-memory-manager');
 
 // Test configuration with low retention thresholds
 const testConfig = {

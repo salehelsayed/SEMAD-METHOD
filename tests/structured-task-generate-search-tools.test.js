@@ -3,7 +3,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 describe('Generate Search Tools Structured Task', () => {
-  const taskPath = path.join(__dirname, '..', 'bmad-core', 'structured-tasks', 'generate-search-tools.yaml');
+  const taskPath = path.join(__dirname, '..', 'semad-core', 'structured-tasks', 'generate-search-tools.yaml');
 
   test('structured task file should exist', () => {
     expect(fs.existsSync(taskPath)).toBe(true);
@@ -37,7 +37,7 @@ describe('Generate Search Tools Structured Task', () => {
     
     expect(task.inputs).toHaveProperty('mappingsPath');
     expect(task.inputs.mappingsPath).toHaveProperty('type', 'string');
-    expect(task.inputs.mappingsPath).toHaveProperty('default', 'bmad-core/data/tool-mappings.yaml');
+    expect(task.inputs.mappingsPath).toHaveProperty('default', 'semad-core/data/tool-mappings.yaml');
 
     // Check outputs
     expect(task).toHaveProperty('outputs');

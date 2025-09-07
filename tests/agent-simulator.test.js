@@ -1,4 +1,4 @@
-const AgentSimulator = require('../bmad-core/utils/agent-simulator');
+const AgentSimulator = require('../semad-core/utils/agent-simulator');
 
 describe('AgentSimulator', () => {
   let simulator;

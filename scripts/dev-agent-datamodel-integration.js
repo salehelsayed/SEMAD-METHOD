@@ -135,7 +135,7 @@ async function testDevAgentDataModelGeneration() {
         
         // 2. Execute the task
         console.log('\n2. Executing generate-datamodel-tests task...');
-        const DataModelTestGenerator = require('../bmad-core/utils/datamodel-test-generator');
+        const DataModelTestGenerator = require('../semad-core/utils/datamodel-test-generator');
         const generator = new DataModelTestGenerator();
         
         // Extract data models from story

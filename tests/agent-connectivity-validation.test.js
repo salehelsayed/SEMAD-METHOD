@@ -3,7 +3,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 describe('Agent Connectivity and Dependency Validation', () => {
-  const agentsDir = path.join(__dirname, '..', 'bmad-core', 'agents');
+  const agentsDir = path.join(__dirname, '..', 'semad-core', 'agents');
   const rootDir = path.join(__dirname, '..');
   
   let agentFiles;
@@ -70,7 +70,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies.tasks) {
           agent.config.dependencies.tasks.forEach(taskName => {
-            const taskPath = path.join(rootDir, 'bmad-core', 'tasks', taskName);
+            const taskPath = path.join(rootDir, 'semad-core', 'tasks', taskName);
             const alternativePath = path.join(rootDir, 'common', 'tasks', taskName);
             
             const taskExists = fs.existsSync(taskPath) || fs.existsSync(alternativePath);
@@ -85,7 +85,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies['structured-tasks']) {
           agent.config.dependencies['structured-tasks'].forEach(taskName => {
-            const taskPath = path.join(rootDir, 'bmad-core', 'structured-tasks', taskName);
+            const taskPath = path.join(rootDir, 'semad-core', 'structured-tasks', taskName);
             const alternativePath = path.join(rootDir, 'common', 'structured-tasks', taskName);
             
             const taskExists = fs.existsSync(taskPath) || fs.existsSync(alternativePath);
@@ -100,7 +100,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies.checklists) {
           agent.config.dependencies.checklists.forEach(checklistName => {
-            const checklistPath = path.join(rootDir, 'bmad-core', 'structured-checklists', checklistName);
+            const checklistPath = path.join(rootDir, 'semad-core', 'structured-checklists', checklistName);
             const alternativePath = path.join(rootDir, 'common', 'structured-checklists', checklistName);
             
             const checklistExists = fs.existsSync(checklistPath) || fs.existsSync(alternativePath);
@@ -115,7 +115,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies.templates) {
           agent.config.dependencies.templates.forEach(templateName => {
-            const templatePath = path.join(rootDir, 'bmad-core', 'templates', templateName);
+            const templatePath = path.join(rootDir, 'semad-core', 'templates', templateName);
             
             const templateExists = fs.existsSync(templatePath);
             expect(templateExists).toBe(true, 
@@ -129,7 +129,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies.data) {
           agent.config.dependencies.data.forEach(dataName => {
-            const dataPath = path.join(rootDir, 'bmad-core', 'data', dataName);
+            const dataPath = path.join(rootDir, 'semad-core', 'data', dataName);
             
             const dataExists = fs.existsSync(dataPath);
             expect(dataExists).toBe(true, 
@@ -149,7 +149,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
             utils.forEach(util => {
               if (typeof util === 'string') {
                 // Simple string reference
-                const utilPath = path.join(rootDir, 'bmad-core', 'utils', util);
+                const utilPath = path.join(rootDir, 'semad-core', 'utils', util);
                 const utilExists = fs.existsSync(utilPath);
                 expect(utilExists).toBe(true, 
                   `Util ${util} referenced by agent ${fileName} not found at ${utilPath}`);
@@ -195,7 +195,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
 
   describe('Agent Team Configuration Validation', () => {
     test('agent team files reference valid agents', () => {
-      const teamDir = path.join(rootDir, 'bmad-core', 'agent-teams');
+      const teamDir = path.join(rootDir, 'semad-core', 'agent-teams');
       const teamFiles = fs.readdirSync(teamDir).filter(file => file.endsWith('.yaml'));
       
       teamFiles.forEach(teamFile => {
@@ -240,7 +240,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies['structured-tasks']) {
           agent.config.dependencies['structured-tasks'].forEach(taskName => {
-            const taskPath = path.join(rootDir, 'bmad-core', 'structured-tasks', taskName);
+            const taskPath = path.join(rootDir, 'semad-core', 'structured-tasks', taskName);
             const alternativePath = path.join(rootDir, 'common', 'structured-tasks', taskName);
             
             let actualPath;
@@ -282,7 +282,7 @@ describe('Agent Connectivity and Dependency Validation', () => {
       Object.entries(allAgents).forEach(([fileName, agent]) => {
         if (agent.config.dependencies && agent.config.dependencies.checklists) {
           agent.config.dependencies.checklists.forEach(checklistName => {
-            const checklistPath = path.join(rootDir, 'bmad-core', 'structured-checklists', checklistName);
+            const checklistPath = path.join(rootDir, 'semad-core', 'structured-checklists', checklistName);
             const alternativePath = path.join(rootDir, 'common', 'structured-checklists', checklistName);
             
             let actualPath;

@@ -22,7 +22,7 @@ class InstructionHierarchyManager {
         scope: 'bmad-framework',
         overridable: true,
         instructions: [
-          'Reference bmad-core templates and workflows',
+          'Reference semad-core templates and workflows',
           'Maintain agent dependency integrity',
           'Follow expansion pack conventions'
         ]

@@ -101,6 +101,52 @@ StoryContract:
       - "UI-only cosmetic changes with no logic"
     exception_requires: "explicit rationale in story"
   
+  # DoR-Mini sufficiency fields (SM enforces via DoR gate)
+  objective: "{{OBJECTIVE_ONE_SENTENCE}}"
+  interfaces:
+    inbound:
+      {{#INTERFACES_INBOUND}}
+      - {{.}}
+      {{/INTERFACES_INBOUND}}
+    outbound:
+      {{#INTERFACES_OUTBOUND}}
+      - {{.}}
+      {{/INTERFACES_OUTBOUND}}
+  data_contracts:
+    {{#DATA_CONTRACTS}}
+    {{NAME}}:
+      {{#FIELDS}}
+      {{KEY}}: {{TYPE}}
+      {{/FIELDS}}
+    {{/DATA_CONTRACTS}}
+  state_changes:
+    tables:
+      {{#STATE_TABLES}}
+      - {{.}}
+      {{/STATE_TABLES}}
+    rules:
+      {{#STATE_RULES}}
+      - {{.}}
+      {{/STATE_RULES}}
+  constraints:
+    transport: "{{CONSTRAINT_TRANSPORT}}"
+    discovery: "{{CONSTRAINT_DISCOVERY}}"
+    security: "{{CONSTRAINT_SECURITY}}"
+    perf: "{{CONSTRAINT_PERF}}"
+  acceptance_tests:
+    {{#AT_CASES}}
+    - {{.}}
+    {{/AT_CASES}}
+  assumptions:
+    {{#ASSUMPTIONS}}
+    - {{.}}
+    {{/ASSUMPTIONS}}
+  done_signals:
+    {{#DONE_SIGNALS}}
+    - {{.}}
+    {{/DONE_SIGNALS}}
+  readiness_score_target: 90
+  
   # Structured work breakdown for deterministic AC→Task→Test traceability
   workBreakdown:
     coveragePolicy:
@@ -265,6 +311,17 @@ As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
    - Verification: {{VERIFICATION_METHOD}}
 {{/ACCEPTANCE_CRITERIA_DETAILED}}
 
+## Definition of Ready (DoR-Mini)
+- [ ] Objective defined (single sentence)
+- [ ] Interfaces listed (inbound/outbound)
+- [ ] Data contracts specified (schemas for payloads)
+- [ ] State changes identified (tables/keys, rules)
+- [ ] Constraints stated (perf/platforms/protocols/versions)
+- [ ] Acceptance tests listed (5–8 black-box checks)
+- [ ] Assumptions frozen (A-IDs with change budget)
+- [ ] Done signals specified (logs/telemetry/UI markers)
+Target: {{DOR_TARGET}}
+
 ## Tasks / Subtasks
 # This section is rendered from StoryContract.workBreakdown to ensure 1:1 human+machine alignment
 {{#WB_TASKS}}
@@ -285,31 +342,111 @@ As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
 - {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
 {{/PERFORMANCE_CRITERIA}}
 
-### Security Requirements
-{{#SECURITY_REQUIREMENTS}}
-- {{REQUIREMENT}}  # Authentication, authorization, data protection
-{{/SECURITY_REQUIREMENTS}}
+  ### Security Requirements
+  {{#SECURITY_REQUIREMENTS}}
+  - {{REQUIREMENT}}  # Authentication, authorization, data protection
+  {{/SECURITY_REQUIREMENTS}}
 
-## Implementation Plan
-### Files to Create
-{{#FILES_TO_CREATE}}
-- `{{PATH}}`: {{PURPOSE}}
-{{/FILES_TO_CREATE}}
+## Inputs
+{{#STORY_INPUTS}}
+- {{.}}
+{{/STORY_INPUTS}}
+
+## Outputs
+{{#STORY_OUTPUTS}}
+- {{.}}
+{{/STORY_OUTPUTS}}
+
+## Integration Touchpoints
+{{#INTEGRATION_TOUCHPOINTS}}
+- {{.}}  # service/protocol + exact endpoint/topic/path (e.g., REST GET /v1/users/:id; Kafka topic user.updates)
+{{/INTEGRATION_TOUCHPOINTS}}
+
+  ## Implementation Plan
+  ### Files to Create
+  {{#FILES_TO_CREATE}}
+  - `{{PATH}}`: {{PURPOSE}}
+  {{/FILES_TO_CREATE}}
 
 ### Files to Modify
 {{#FILES_TO_MODIFY_DETAILED}}
 - `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
 {{/FILES_TO_MODIFY_DETAILED}}
 
-### Test Requirements
-{{#TEST_REQUIREMENTS}}
-- {{TEST_TYPE}}: {{DESCRIPTION}}
-  - File: `{{TEST_FILE}}`
-  - Coverage: {{COVERAGE_TARGET}}%
-{{/TEST_REQUIREMENTS}}
+  ### Test Requirements
+  {{#TEST_REQUIREMENTS}}
+  - {{TEST_TYPE}}: {{DESCRIPTION}}
+    - File: `{{TEST_FILE}}`
+    - Coverage: {{COVERAGE_TARGET}}%
+  {{/TEST_REQUIREMENTS}}
 
-## Risk Assessment
-**Risk Level**: {{RISK_LEVEL}}  # Low, Medium, High, Critical
+## Flow Chart
+### Existing Artifacts
+- Files:
+  {{#FC_EXISTING_FILES}}
+  - {{.}}
+  {{/FC_EXISTING_FILES}}
+- Classes:
+  {{#FC_EXISTING_CLASSES}}
+  - {{.}}
+  {{/FC_EXISTING_CLASSES}}
+- Functions:
+  {{#FC_EXISTING_FUNCTIONS}}
+  - {{.}}
+  {{/FC_EXISTING_FUNCTIONS}}
+
+### New Work
+- Files:
+  {{#FC_NEW_FILES}}
+  - {{.}}
+  {{/FC_NEW_FILES}}
+- Components/Modules:
+  {{#FC_NEW_COMPONENTS}}
+  - {{.}}
+  {{/FC_NEW_COMPONENTS}}
+
+### Execution Steps
+{{#FC_STEPS}}
+1. {{.}}
+{{/FC_STEPS}}
+
+### Output Sinks
+{{#FC_OUTPUT_SINKS}}
+- {{.}}  # e.g., logs, telemetry, DB tables, external endpoints
+{{/FC_OUTPUT_SINKS}}
+
+### ASCII Flow (optional)
+```
+[{{FC_ENTRY}}] -> [{{FC_STEP1}}] -> [{{FC_STEP2}}] -> [{{FC_OUTPUT}}]
+```
+
+## Sequence Diagram (ASCII)
+```
+{{SEQ_ACTOR_1}} -> {{SEQ_ACTOR_2}}: {{SEQ_MSG_1}}
+{{SEQ_ACTOR_2}} -> {{SEQ_ACTOR_3}}: {{SEQ_MSG_2}}
+{{SEQ_ACTOR_3}} --> {{SEQ_ACTOR_1}}: {{SEQ_RESP_1}}
+```
+
+## Debug Logging Requirements
+- Naming: Use stable, namespaced event names (e.g., APP_FEATURE_ACTION)
+- Purpose: Verify implementation progress and behavior via structured logs/telemetry
+
+{{#DEBUG_LOG_EVENTS}}
+- Event: {{NAME}}
+  - Level: {{LEVEL}}  # debug|info|warn|error
+  - When: {{WHEN}}    # precise trigger condition
+  - Fields:
+    {{#FIELDS}}
+    - {{KEY}}: {{TYPE}}{{#REQUIRED}} (required){{/REQUIRED}}
+    {{/FIELDS}}
+  - Sample:
+    ```json
+    {{SAMPLE_JSON}}
+    ```
+{{/DEBUG_LOG_EVENTS}}
+
+  ## Risk Assessment
+  **Risk Level**: {{RISK_LEVEL}}  # Low, Medium, High, Critical
 
 ### Identified Risks
 {{#RISKS}}

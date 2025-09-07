@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 describe('Search Tools Generation Integration', () => {
   const testDir = path.join(__dirname, 'integration-test-outputs');
   const scriptPath = path.join(__dirname, '..', 'scripts', 'generate-search-tools.js');
-  const mappingsPath = path.join(__dirname, '..', 'bmad-core', 'data', 'tool-mappings.yaml');
+  const mappingsPath = path.join(__dirname, '..', 'semad-core', 'data', 'tool-mappings.yaml');
   
   beforeEach(() => {
     if (!fs.existsSync(testDir)) {

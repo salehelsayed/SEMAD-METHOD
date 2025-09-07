@@ -2,8 +2,8 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.js'],
   collectCoverageFrom: [
-    'bmad-core/agents/**/*.js',
-    'bmad-core/utils/**/*.js',
+    'semad-core/agents/**/*.js',
+    'semad-core/utils/**/*.js',
     'tools/**/*.js',
     '!tools/installer/**/*.js'
   ],

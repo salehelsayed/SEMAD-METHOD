@@ -1,6 +1,6 @@
 # Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -8,13 +8,13 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 
 2. **Resource Navigation**: This bundle contains all resources you need. Resources are marked with tags like:
 
-- `==================== START: .bmad-core/folder/filename.md ====================`
-- `==================== END: .bmad-core/folder/filename.md ====================`
+- `==================== START: .semad-core/folder/filename.md ====================`
+- `==================== END: .semad-core/folder/filename.md ====================`
 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- The format is always the full path with dot prefix (e.g., `.semad-core/personas/analyst.md`, `.semad-core/structured-tasks/create-story.yaml`)
 - If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
@@ -29,17 +29,17 @@ dependencies:
 
 These references map directly to bundle sections:
 
-- `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
+- `utils: template-format` → Look for `==================== START: .semad-core/utils/template-format.md ====================`
+- `tasks: create-story` → Look for `==================== START: .semad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
 
-==================== START: .bmad-core/agents/dev.md ====================
+==================== START: .semad-core/agents/dev.md ====================
 # dev
 
 CRITICAL: Read the full YAML, start activation to alter your state of being, follow startup section instructions, stay in this being until told to exit this mode:
@@ -47,8 +47,8 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 ```yaml
 activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
-  - STEP 2: 'Initialize tracking for this session by ensuring .ai directory exists: mkdir -p .ai/history'
-  - STEP 3: 'Log agent activation: node .bmad-core/utils/track-progress.js observation dev ''Dev agent activated for session'''
+  - STEP 2: 'Initialize tracking by logging activation (this creates .ai and history dirs):'
+  - STEP 3: Greet user with ONLY "Hi, I'm James, your Developer. Type *help to see available commands." then STOP and wait for user input
   - STEP 4: Do NOT scan stories on activation. If and only if a specific story file was provided in the activation command, validate that it exists and has required fields; otherwise remain idle.
   - STEP 5: If a story is assigned, load the StoryContract from the story's YAML front-matter and verify that all required fields are present (version, story_id, epic_id, apiEndpoints, filesToModify, acceptanceCriteriaLinks). If the contract is missing fields or malformed, halt and ask the user or Scrum Master to fix the story before proceeding.
   - STEP 6: Greet user with your name/role, mention `*help` command, and briefly summarize any relevant implementation context
@@ -60,7 +60,8 @@ activation-instructions:
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
-  - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .bmad-core/core-config.yaml devLoadAlwaysFiles list
+  - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
+  - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .semad-core/core-config.yaml devLoadAlwaysFiles list
   - CRITICAL: Do NOT load any other files during startup aside from the assigned story and devLoadAlwaysFiles items, unless user requested you do or the following contradicts
   - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
   - PROGRESS VALIDATION: Before marking any story as 'Ready for Review', ensure all tasks in .ai/dev_tasks.json are marked complete and all tests pass.
@@ -81,44 +82,53 @@ persona:
   identity: Expert who implements stories by reading requirements and executing tasks sequentially with comprehensive testing
   focus: Executing story tasks with precision, updating Dev Agent Record sections only, maintaining minimal context overhead
 core_principles:
-  - CRITICAL: Your PRIMARY source of truth is the 'StoryContract' YAML block in the story file. If there is a conflict between the prose (e.g. Dev Notes or Story description) and the contract, follow the contract.
-  - CRITICAL: Story has ALL info you will need aside from what you loaded during the startup commands. NEVER load PRD/architecture/other docs files unless explicitly directed in story notes or direct command from user to resolve an ambiguity. Working from the contract and its acceptance criteria reduces hallucinations.
-  - CRITICAL: ONLY update story file Dev Agent Record sections (checkboxes/Debug Log/Completion Notes/Change Log/Status). Status can ONLY be updated as part of story completion workflow to "Ready for Review".
-  - CRITICAL: FOLLOW THE develop-story workflow when the user tells you to implement the story
-  - CRITICAL: Tests must be derived directly from the StoryContract - never invent tests not specified by the contract
-  - CRITICAL: When StoryContract contains a dataModels section, you MUST use the generate-datamodel-tests task to create comprehensive unit tests. The task will generate tests that validate required fields, data types, format constraints, enum values, patterns, and edge cases for each model.
-  - CRITICAL: When QA sets story status to "Needs Fixes", use the *address-qa-feedback command to implement their recommendations. QA feedback is advisory - you make the final technical decisions.
-  - CRITICAL: ALWAYS perform dependency analysis before implementing any code changes. Use dependency-impact-checker to identify all files and symbols that would be affected by your changes. This is MANDATORY for every story implementation.
-  - CRITICAL: Before modifying any file, check what other files import/use it. Document all potential impacts in Debug Log. If changes would impact critical system files, pause and inform user.
+  - 'CRITICAL: Your PRIMARY source of truth is the ''StoryContract'' YAML block in the story file. If there is a conflict between the prose (e.g. Dev Notes or Story description) and the contract, follow the contract.'
+  - 'CRITICAL: Story has ALL info you will need aside from what you loaded during the startup commands. NEVER load PRD/architecture/other docs files unless explicitly directed in story notes or direct command from user to resolve an ambiguity. Working from the contract and its acceptance criteria reduces hallucinations.'
+  - 'CRITICAL: ONLY update story file Dev Agent Record sections (checkboxes/Debug Log/Completion Notes/Change Log/Status). Status can ONLY be updated as part of story completion workflow to ''Ready for Review''.'
+  - 'CRITICAL: FOLLOW THE develop-story workflow when the user tells you to implement the story'
+  - 'CRITICAL: Tests must be derived directly from the StoryContract - never invent tests not specified by the contract'
+  - 'CRITICAL: When StoryContract contains a dataModels section, you MUST use the generate-datamodel-tests task to create comprehensive unit tests. The task will generate tests that validate required fields, data types, format constraints, enum values, patterns, and edge cases for each model.'
+  - 'CRITICAL: When QA sets story status to ''Needs Fixes'', use the *address-qa-feedback command to implement their recommendations. QA feedback is advisory - you make the final technical decisions.'
+  - 'CRITICAL: ALWAYS perform dependency analysis before implementing any code changes. Use dependency-impact-checker to identify all files and symbols that would be affected by your changes. This is MANDATORY for every story implementation.'
+  - 'CRITICAL: Before modifying any file, check what other files import/use it. Document all potential impacts in Debug Log. If changes would impact critical system files, pause and inform user.'
+  - 'CRITICAL: When implementing code for a story, ALWAYS add traceability annotations as comments: `// FEAT: <featureId> | STORY: <storyId>`. For example: `// FEAT: FEAT-auth-session | STORY: ST-auth-001`. This is REQUIRED for coverage tracking.'
+  - 'CRITICAL: When writing tests, include acceptance criteria IDs in test names or descriptions. For example: `test(''User login [AC-auth-session-1]'', ...)`. This enables automatic test coverage validation.'
   - Numbered Options - Always use numbered lists when presenting choices to the user
   - 'INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. StoryContract ALWAYS overrides template guidance. Never implement features not specified in StoryContract - escalate scope questions to SM/user.'
   - 'STRUCTURED OUTPUT: Use structured-output-tmpl.json format for complex outputs and handoff documents. Include decisions, assumptions, and risks for all non-trivial implementations. Document instruction level for technical decisions.'
   - 'NO INVENTION RULE: Only implement what is explicitly specified in StoryContract. If implementation details are ambiguous, escalate to user rather than making assumptions. Document all decisions and rationale.'
   - When implementing a story OR executing any individual task that contains more than 5 distinct actions, use Dynamic Plan Adaptation protocol. For stories, this applies to the overall implementation workflow. For tasks, this applies to task execution steps. Break the work into smaller sub-tasks, record them in .ai/dev_tasks.json and execute them sequentially.
   - When executing tasks, use the task-runner utility to automatically apply dynamic plan adaptation. The runner will analyze the task and create sub-tasks if needed.
-  - 'PROGRESS TRACKING: After implementation steps, record observations using: node .bmad-core/utils/track-progress.js observation dev ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision dev ''[decision]'' ''[rationale]''. Execute dev-track-progress task after completing major tasks.'
+  - 'PROGRESS TRACKING: After implementation steps, record observations directly in tracking system. Record decisions with clear rationale. Execute dev-track-progress task after completing major tasks.'
   - 'CONTEXT VALIDATION: Check that story file exists and has required StoryContract fields before proceeding. If context is missing, explicitly request it from user rather than making assumptions or hallucinating requirements.'
-  - 'KNOWLEDGE PERSISTENCE: Store important implementation patterns, debugging solutions, and technical decisions using: node .bmad-core/utils/track-progress.js keyfact dev ''[pattern or solution description]''.'
+  - 'KNOWLEDGE PERSISTENCE: Store important implementation patterns, debugging solutions, and technical decisions in persistent tracking system.'
   - 'TRACKING GUIDELINES - After run-tests: Log observation about test results. After execute-task: Log observation about task completion. After check-dependencies: Log findings as keyfact. After implement-next-story: Log story start. After address-qa-feedback: Log decisions about fixes. After check-quality: Log quality patterns found. After auto-refactor: Log refactoring approach.'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - run-tests: 'Execute linting and tests (enable runner parallelism, e.g., --maxWorkers=50% or 4) → Log results: node .bmad-core/utils/track-progress.js observation dev ''Test execution completed: [results]'' → Execute: *execute-task dev-track-progress'
-  - execute-task: 'Execute a task with dynamic plan adaptation using the task runner → Log completion: node .bmad-core/utils/track-progress.js observation dev ''Task completed: [task_name]'' → Execute: *execute-task dev-track-progress'
-  - check-dependencies: 'Analyze code dependencies and potential impacts (bounded concurrency up to 4 workers) → Log findings: node .bmad-core/utils/track-progress.js keyfact dev ''Dependencies: [findings]'''
-  - explain: 'teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. → Log knowledge: node .bmad-core/utils/track-progress.js keyfact dev ''Explained: [topic]'''
-  - implement-next-story: 'Automatically find the most recent approved story from the stories directory, display story title for confirmation, then execute the *develop-story command → Log start: node .bmad-core/utils/track-progress.js observation dev ''Starting story: [story_id]'''
-  - develop-story: 'Execute the develop-story workflow for the currently assigned story with sequential task implementation and progress tracking → execute: node .bmad-core/utils/track-progress.js observation dev ''Story development workflow initiated'' → Follow the develop-story order-of-execution'
-  - address-qa-feedback: 'Parse QA findings into structured format using qa-findings-parser → Initialize qa-fix-tracker → Execute address-qa-feedback task with systematic tracking → Generate fix report → Log: node .bmad-core/utils/track-progress.js observation dev ''QA fixes completed: [summary]'''
+  - run-tests: 'Execute linting and tests directly (enable runner parallelism, e.g., --maxWorkers=50% or 4) → Record test results → Execute: *execute-task dev-track-progress'
+  - execute-task: 'Execute a task with dynamic plan adaptation directly → Record task completion → Execute: *execute-task dev-track-progress'
+  - check-dependencies: Analyze code dependencies and potential impacts directly (bounded concurrency up to 4 workers) → Record findings as keyfacts
+  - explain: teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. → Record knowledge as keyfact
+  - implement-next-story: Automatically find the most recent approved story from the stories directory, display story title for confirmation, then execute the *develop-story command → Record story start
+  - develop-story: Execute the develop-story workflow honoring StoryContract.story.sliceType (flag|probe|int-flow|adhoc). Guard changes behind feature flags; no state change for probe; implement exactly one INT × one flow for int-flow; add integrationVerification + rollbackPlan when touching INTs. MUST add FEAT/STORY annotations to code and AC references to tests → Record story development initiation → Follow the develop-story order-of-execution
+  - address-qa-feedback: Parse QA findings into structured format using qa-findings-parser → Initialize qa-fix-tracker → Execute address-qa-feedback task with systematic tracking. Prioritize integration gaps (integrationVerification, rollbackPlan, contract tests) for INT stories → Re-run validations/tests → Generate fix report → Record QA fixes completion
   - verify-qa-fixes: Load .ai/qa_fixes_checklist.json → Display completion status for each item → Show summary of completed vs pending fixes → Verify all critical issues addressed
-  - check-quality: 'Run code quality analysis using analyze-code-quality task → Log findings: node .bmad-core/utils/track-progress.js keyfact dev ''Quality: [findings]'''
-  - auto-refactor: 'Generate and optionally apply refactoring recommendations → Log approach: node .bmad-core/utils/track-progress.js decision dev ''Refactoring'' ''[approach taken]'''
-  - progress-status: 'Show current progress and context: node .bmad-core/utils/track-progress.js show dev'
-  - show-context: 'Display current context and recent observations: cat .ai/dev_context.json && tail -10 .ai/history/dev_log.jsonl'
+  - check-quality: Run code quality analysis using analyze-code-quality task directly → Record quality findings as keyfacts
+  - auto-refactor: Generate and optionally apply refactoring recommendations directly → Record refactoring approach and decisions
+  - progress-status: Show current progress and context from tracking system directly
+  - show-context: Display current context and recent observations from .ai/dev_context.json and recent history
   - search-docs: Search project documentation for implementation guidance using grep or other file search tools
-  - adhoc: 'Run a one-off development task without scanning or reading story files → First, load devLoadAlwaysFiles from core-config for baseline context → Execute: node .bmad-core/utils/adhoc-runner.js --desc ''[task description]'' [--paths <path1> <path2> ...] → Log: node .bmad-core/utils/track-progress.js observation dev ''Ad-hoc task completed'''
+  - adhoc: Run a one-off development task without scanning or reading story files → First, load devLoadAlwaysFiles from core-config for baseline context → Execute adhoc runner directly → Record ad-hoc task completion
+  - adhoc-debug: Perform thorough root-cause debug capture for an error → Execute debug runner directly → Creates evidence bundle in .ai/adhoc/debug/<timestamp> → Record debug capture as keyfact
+  - adhoc-debug (guided): If you prefer, run without flags and I will ask 4 simple questions (problem, where, when, any error ID). You can also attach logs with --log-file <path> or paste via --stdin-log.
   - exit: Say goodbye as the Developer, create session summary using createSessionSummary and log summary using logSessionSummary(agentName, operation, summaryData, details), and abandon inhabiting this persona
 develop-story:
-  order-of-execution: 'Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If critical impacts detected (>10 files affected), pause and inform user→For each task: Read task→Log: node .bmad-core/utils/track-progress.js observation dev ''Starting task: [task name]''→Check dependency impacts for specific files being modified→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Log: node .bmad-core/utils/track-progress.js observation dev ''Completed task: [task name]''→Execute: *execute-task dev-track-progress→Repeat until all tasks complete'
+  order-of-execution: 'Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Parse StoryContract.story.sliceType and traceability.integrationPointIds→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If critical impacts detected (>10 files affected), pause and inform user→Enforce slice policy (see below)→For each task: Read task→Record task start→Check dependency impacts for specific files being modified→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Record task completion→Execute: *execute-task dev-track-progress→Repeat until all tasks complete'
+  slice-policy:
+    - 'flag: Implement feature flag scaffolding + telemetry only. No behavior changes; defaultState must remain off.'
+    - 'probe: Implement contract tests/wiring for the declared INTs. No state changes or writes.'
+    - 'int-flow: Implement exactly one integrationPoint × one flow variant; guard with feature flag; include integrationVerification steps and rollbackPlan; verify performance budget (p95/p99) where applicable.'
+    - 'adhoc: Proceed without PRD/Epic linkage; if integrationPointIds exist, apply the same integration safety rules as int-flow.'
   story-file-updates-ONLY:
     - CRITICAL: ONLY UPDATE THE STORY FILE WITH UPDATES TO SECTIONS INDICATED BELOW. DO NOT MODIFY ANY OTHER SECTIONS.
     - CRITICAL: You are ONLY authorized to edit these specific sections of story files - Tasks / Subtasks Checkboxes, Dev Agent Record section and all its subsections, Agent Model Used, Debug Log References, Completion Notes List, File List, Change Log, Status
@@ -139,15 +149,15 @@ develop-story:
   progress-tracking:
     guidelines:
       - 'At story start: Create task list in .ai/dev_tasks.json'
-      - 'Before each task: Log start with: node .bmad-core/utils/track-progress.js observation dev ''Starting task: [task name]'''
-      - 'After task completion: Log completion with: node .bmad-core/utils/track-progress.js observation dev ''Completed task: [task name]'''
-      - 'For decisions: Log with: node .bmad-core/utils/track-progress.js decision dev ''[what]'' ''[why]'''
-      - 'For patterns: Log with: node .bmad-core/utils/track-progress.js keyfact dev ''[pattern description]'''
+      - 'Before each task: Record task start directly'
+      - 'After task completion: Record task completion directly'
+      - 'For decisions: Record decisions with clear rationale'
+      - 'For patterns: Record patterns as keyfacts'
       - 'Concurrency: For *check-dependencies and *address-qa-feedback, prefer bounded concurrency (3–4 workers) for independent units to improve throughput while maintaining safety'
     operations:
-      - 'View current progress: node .bmad-core/utils/track-progress.js show dev'
-      - 'Check task list: cat .ai/dev_tasks.json'
-      - 'View recent activity: tail -20 .ai/history/dev_log.jsonl'
+      - 'View current progress: Display progress from tracking system'
+      - 'Check task list: Display contents of .ai/dev_tasks.json'
+      - 'View recent activity: Display recent tracking history'
   blocking: 'HALT for: Unapproved deps needed, confirm with user | Ambiguous after story check | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
   ready-for-review: Code matches requirements + All validations pass + Follows standards + File List complete + AC Coverage PASSED
   completion: |
@@ -158,11 +168,14 @@ develop-story:
     If StoryContract includes a dataModels section, execute the generate-datamodel-tests task to create comprehensive unit tests that validate each schema's required fields, types, formats, and constraints →
     Log completion of datamodel tests →
     Use validation scripts from core-config to ensure the implemented code adheres to these specifications →
+    If story.sliceType is 'flag' or 'probe', verify no functional change escaped (smoke checks) and that flag default is off →
+    If touching integrationPointIds, run integrationVerification checks (IV1/IV2/IV3) and execute rollbackPlan (toggle flag off + verify) →
+    Verify performanceBudget where defined (p95/p99) →
     Mark tasks as complete when all tests pass →
     run execute-checklist for story-dod-checklist →
     Execute: *execute-task dev-track-progress to finalize tracking →
     VERIFY: Confirm all tasks completed successfully by checking .ai/dev_tasks.json →
-    Run AC Coverage Check: node tools/qa/ac-coverage-check.js <story-file|story-id> →
+    Run AC Coverage Check directly →
     VERIFY: AC coverage must be 100% and tests green →
     set story status: 'Ready for Review' →
     HALT
@@ -188,15 +201,16 @@ dependencies:
     dependency-analysis-storage: dependency-analysis-storage.js
     track-progress: track-progress.js
     adhoc-runner: adhoc-runner.js
+    adhoc-debug-runner: adhoc-debug-runner.js
     simple-task-tracker: simple-task-tracker.js
     qa-findings-parser: qa-findings-parser.js
     qa-fix-tracker: qa-fix-tracker.js
   checklists:
     - story-dod-checklist.yaml
 ```
-==================== END: .bmad-core/agents/dev.md ====================
+==================== END: .semad-core/agents/dev.md ====================
 
-==================== START: .bmad-core/templates/structured-output-tmpl.json ====================
+==================== START: .semad-core/templates/structured-output-tmpl.json ====================
 {
   "metadata": {
     "template_type": "structured-output",
@@ -573,9 +587,9 @@ dependencies:
     }
   }
 }
-==================== END: .bmad-core/templates/structured-output-tmpl.json ====================
+==================== END: .semad-core/templates/structured-output-tmpl.json ====================
 
-==================== START: .bmad-core/structured-checklists/story-dod-checklist.yaml ====================
+==================== START: .semad-core/structured-checklists/story-dod-checklist.yaml ====================
 # Story Definition of Done (DoD) Checklist
 
 ## 1. Instructions for Developer Agent
@@ -598,14 +612,6 @@ The goal is quality delivery, not just checking boxes.]]
 
 
 ## 2. Checklist Items
-
-[[LLM: Be specific - list each requirement and whether it's complete
-Code quality matters for maintainability. Check each item carefully
-Testing proves your code works. Be honest about test coverage
-Did you actually run and test your code? Be specific about what you tested
-Documentation helps the next developer. What should they know?
-Build issues block everyone. Ensure everything compiles and runs cleanly
-Good documentation prevents future confusion. What needs explaining?]]
 
 - [ ] All functional requirements specified in the story are implemented.
 - [ ] All acceptance criteria defined in the story are met.
@@ -635,7 +641,23 @@ Good documentation prevents future confusion. What needs explaining?]]
 - [ ] User-facing documentation updated, if changes impact users.
 - [ ] Technical documentation (e.g., READMEs, system diagrams) updated if significant architectural changes were made.
 
-## 3. Final Confirmation
+## 3. Brownfield Integration DoD
+
+[[LLM: Be specific - list each requirement and whether it's complete
+Code quality matters for maintainability. Check each item carefully
+Testing proves your code works. Be honest about test coverage
+Did you actually run and test your code? Be specific about what you tested
+Documentation helps the next developer. What should they know?
+Build issues block everyone. Ensure everything compiles and runs cleanly
+Good documentation prevents future confusion. What needs explaining?]]
+
+- [ ] If story defines `featureFlag`, new behavior is fully guarded and defaultState is OFF
+- [ ] If `sliceType` is `probe`, confirm no state-changing writes were introduced
+- [ ] If touching `integrationPointIds`, `integrationVerification` checks (IV1/IV2/IV3) executed with evidence
+- [ ] If touching `integrationPointIds`, `rollbackPlan` executed (flag toggle) and prior behavior verified
+- [ ] Performance budget (p95/p99) validated where defined
+
+## 4. Final Confirmation
 
 [[LLM: FINAL DOD SUMMARY
 
@@ -654,37 +676,21 @@ Be honest - it's better to flag issues now than have them discovered later.]]
 ## Validation Result
 
 Status: pending
-==================== END: .bmad-core/structured-checklists/story-dod-checklist.yaml ====================
+==================== END: .semad-core/structured-checklists/story-dod-checklist.yaml ====================
 
-==================== START: .bmad-core/task-runner.js ====================
+==================== START: .semad-core/task-runner.js ====================
 const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-// Import error classes
-const {
-  TaskError,
-  ValidationError,
-  TaskExecutionError,
-  MemoryStateError,
-  ActionExecutionError,
-  DependencyError,
-  ConfigurationError
-} = require('../bmad-core/errors/task-errors');
-
-// Import utilities
-const { MemoryTransaction } = require('../bmad-core/utils/memory-transaction');
-const { CleanupRegistry } = require('../bmad-core/utils/cleanup-registry');
-const { TaskRecovery } = require('../bmad-core/utils/task-recovery');
-
 // Dynamic module resolution helper
 function resolveModule(moduleName, fallbackPath) {
   const possiblePaths = [
-    path.join(__dirname, '..', 'bmad-core', moduleName),
-    path.join(__dirname, '..', '.bmad-core', moduleName),
+    path.join(__dirname, '..', 'semad-core', moduleName),
+    path.join(__dirname, '..', '.semad-core', moduleName),
     path.join(__dirname, '..', moduleName)
   ];
-  
+
   for (const modulePath of possiblePaths) {
     try {
       require.resolve(modulePath);
@@ -696,18 +702,34 @@ function resolveModule(moduleName, fallbackPath) {
   
   // Try as npm package
   try {
-    return require.resolve(`bmad-method/bmad-core/${moduleName}`);
+    return require.resolve(`semad-method/semad-core/${moduleName}`);
   } catch (e) {
     return fallbackPath;
   }
 }
 
-const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../bmad-core/tools/dynamic-planner'));
-const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../bmad-core/agents/index'));
+// Import error classes
+const {
+  TaskError,
+  ValidationError,
+  TaskExecutionError,
+  MemoryStateError,
+  ActionExecutionError,
+  DependencyError,
+  ConfigurationError
+} = require(resolveModule('errors/task-errors', '../semad-core/errors/task-errors'));
+
+// Import utilities
+const { MemoryTransaction } = require(resolveModule('utils/memory-transaction', '../semad-core/utils/memory-transaction'));
+const { CleanupRegistry } = require(resolveModule('utils/cleanup-registry', '../semad-core/utils/cleanup-registry'));
+const { TaskRecovery } = require(resolveModule('utils/task-recovery', '../semad-core/utils/task-recovery'));
+
+const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../semad-core/tools/dynamic-planner'));
+const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../semad-core/agents/index'));
 const StructuredTaskLoader = require('./lib/structured-task-loader');
-const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../bmad-core/utils/story-contract-validator'));
-const ModuleResolver = require(resolveModule('utils/module-resolver', '../bmad-core/utils/module-resolver'));
-const validationHooks = require(resolveModule('utils/validation-hooks', '../bmad-core/utils/validation-hooks'));
+const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../semad-core/utils/story-contract-validator'));
+const ModuleResolver = require(resolveModule('utils/module-resolver', '../semad-core/utils/module-resolver'));
+const validationHooks = require(resolveModule('utils/validation-hooks', '../semad-core/utils/validation-hooks'));
 
 class TaskRunner {
   constructor(rootDir) {
@@ -757,7 +779,10 @@ class TaskRunner {
     try {
       // Try multiple possible config locations
       const configPaths = [
-        path.join(this.rootDir, 'bmad-core', 'core-config.yaml'),
+        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
         path.join(this.rootDir, 'core-config.yaml')
       ];
       
@@ -927,8 +952,10 @@ class TaskRunner {
 
       // Validate elicit requirements before proceeding
       const elicitValidation = this.validateElicitRequirements(task, context);
-      const allowMissingByEnv = (process.env.BMAD_ALLOW_MISSING_USER_INPUT === '1' || process.env.BMAD_ALLOW_MISSING_USER_INPUT === 'true' || process.env.BMAD_NONINTERACTIVE === '1' || process.env.BMAD_NONINTERACTIVE === 'true');
-      if (!elicitValidation.valid && !(context.allowMissingUserInput || allowMissingByEnv)) {
+      // Agent policy: do not allow env-based bypass for elicit
+      const allowMissingByEnv = false;
+      const explicitOverride = (context.allowMissingUserInput === true && context.agentPolicy === 'override');
+      if (!elicitValidation.valid && !explicitOverride) {
         // Return early with information about missing inputs
         return {
           success: false,
@@ -938,8 +965,8 @@ class TaskRunner {
           requiresUserInput: true
         };
       }
-      if (!elicitValidation.valid && (context.allowMissingUserInput || allowMissingByEnv)) {
-        console.warn('\nℹ️  Proceeding in non-interactive mode: required user inputs will be skipped.');
+      if (!elicitValidation.valid && explicitOverride) {
+        console.warn('\nℹ️  Proceeding with explicit override: required user inputs will be skipped.');
       }
 
       // Get current working memory or initialize if it doesn't exist
@@ -947,7 +974,8 @@ class TaskRunner {
       if (!memory) {
         // Initialize memory using the centralized function
         try {
-          const { initializeWorkingMemory } = require('../bmad-core/agents/index');
+          const agentsIndexPath = resolveModule('agents/index', '../semad-core/agents/index');
+          const { initializeWorkingMemory } = require(agentsIndexPath);
           await initializeWorkingMemory(agentName);
           memory = await getWorkingMemory(agentName);
         } catch (initError) {
@@ -1577,7 +1605,7 @@ class TaskRunner {
    */
   async executeFileAction(action, inputs, outputs) {
     switch (action) {
-      case 'read':
+      case 'read': {
         if (!inputs.path) {
           throw new ActionExecutionError(
             'file:read requires a path input',
@@ -1587,7 +1615,12 @@ class TaskRunner {
           );
         }
         try {
-          const content = fs.readFileSync(inputs.path, 'utf8');
+          const base = path.resolve(this.rootDir);
+          const target = path.resolve(base, inputs.path);
+          if (!(target === base || target.startsWith(base + path.sep))) {
+            throw new Error('Path escapes project root');
+          }
+          const content = fs.readFileSync(target, 'utf8');
           if (outputs && outputs.content) {
             return { [outputs.content]: content };
           }
@@ -1599,7 +1632,7 @@ class TaskRunner {
             inputs,
             { path: inputs.path, error: error.message }
           );
-        }
+        } }
         
       default:
         throw new ActionExecutionError(
@@ -1676,56 +1709,42 @@ class TaskRunner {
    * Execute script-related actions
    */
   async executeScriptAction(action, inputs, outputs, context) {
-    const { exec } = require('child_process');
-    const util = require('util');
-    const execAsync = util.promisify(exec);
+    const { spawn } = require('child_process');
     
     switch (action) {
-      case 'execute':
+      case 'execute': {
         const scriptPath = path.join(this.rootDir, inputs.script);
         const args = inputs.args || [];
-        
+
         // Resolve template variables in args
-        const resolvedArgs = args.map(arg => 
+        const resolvedArgs = args.map(arg =>
           typeof arg === 'string' ? this.resolveTemplateValue(arg, context) : arg
         );
-        
-        const command = `node ${scriptPath} ${resolvedArgs.join(' ')}`;
-        
-        try {
-          const { stdout, stderr } = await execAsync(command, { cwd: this.rootDir });
-          
-          if (outputs) {
-            if (outputs.exitCode) {
-              context[outputs.exitCode] = 0;
-            }
-            if (outputs.stdout) {
-              context[outputs.stdout] = stdout;
-            }
-            if (outputs.stderr) {
-              context[outputs.stderr] = stderr;
-            }
+
+        // Execute via spawn to avoid shell interpolation
+        const child = spawn(process.execPath, [scriptPath, ...resolvedArgs], { cwd: this.rootDir });
+
+        let stdout = '';
+        let stderr = '';
+        child.stdout.on('data', d => { stdout += String(d); });
+        child.stderr.on('data', d => { stderr += String(d); });
+
+        const exitCode = await new Promise(resolve => child.on('close', code => resolve(code)));
+
+        if (outputs) {
+          if (outputs.exitCode) {
+            context[outputs.exitCode] = exitCode;
           }
-          
-          return { exitCode: 0, stdout, stderr };
-          
-        } catch (error) {
-          const exitCode = error.code || 1;
-          
-          if (outputs) {
-            if (outputs.exitCode) {
-              context[outputs.exitCode] = exitCode;
-            }
-            if (outputs.stdout) {
-              context[outputs.stdout] = error.stdout || '';
-            }
-            if (outputs.stderr) {
-              context[outputs.stderr] = error.stderr || error.message;
-            }
+          if (outputs.stdout) {
+            context[outputs.stdout] = stdout;
           }
-          
-          return { exitCode, stdout: error.stdout || '', stderr: error.stderr || error.message };
+          if (outputs.stderr) {
+            context[outputs.stderr] = stderr;
+          }
         }
+
+        return { exitCode, stdout, stderr };
+      }
         
       default:
         throw new ActionExecutionError(
@@ -1821,18 +1840,15 @@ class TaskRunner {
    * Safely evaluate expressions with context
    */
   evaluateExpression(expression, context) {
+    const { Script, createContext } = require('vm');
     // Replace template variables before evaluation
     const resolvedExpression = this.resolveTemplateValue(expression, context);
-    
-    // Use Function constructor for safer evaluation than eval
     try {
-      // Create a sandboxed context for evaluation
-      const contextKeys = Object.keys(context);
-      const contextValues = Object.values(context);
-      
-      // Build the function with proper parameter names
-      const func = new Function(...contextKeys, `return ${resolvedExpression}`);
-      return func(...contextValues);
+      // Create a minimal, frozen sandbox
+      const sandbox = Object.freeze({ ...context });
+      const vmContext = createContext(sandbox);
+      const script = new Script(`(function(){ return (${resolvedExpression}); })()`, { timeout: 50 });
+      return script.runInContext(vmContext, { timeout: 50 });
     } catch (error) {
       throw new ActionExecutionError(
         `Failed to evaluate expression: ${expression}\n${error.message}`,
@@ -1941,9 +1957,9 @@ class TaskRunner {
 }
 
 module.exports = TaskRunner;
-==================== END: .bmad-core/task-runner.js ====================
+==================== END: .semad-core/task-runner.js ====================
 
-==================== START: .bmad-core/scripts/validate-story-contract.js ====================
+==================== START: .semad-core/scripts/validate-story-contract.js ====================
 #!/usr/bin/env node
 
 const path = require('path');
@@ -2085,9 +2101,9 @@ function validateSingleStory(storyFilePath) {
 
 // Run the script
 main();
-==================== END: .bmad-core/scripts/validate-story-contract.js ====================
+==================== END: .semad-core/scripts/validate-story-contract.js ====================
 
-==================== START: .bmad-core/utils/datamodel-test-generator.js ====================
+==================== START: .semad-core/utils/datamodel-test-generator.js ====================
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -2807,13 +2823,30 @@ ${schemaRef.schemaSetup}
 }
 
 module.exports = DataModelTestGenerator;
-==================== END: .bmad-core/utils/datamodel-test-generator.js ====================
+==================== END: .semad-core/utils/datamodel-test-generator.js ====================
 
-==================== START: .bmad-core/utils/find-next-story.js ====================
+==================== START: .semad-core/utils/find-next-story.js ====================
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
+
+function extractStatus(content) {
+  try {
+    const headerMatch = content.match(/##\s*Status\s*\n+([^\n#]+)/i);
+    if (headerMatch && headerMatch[1]) {
+      const s = String(headerMatch[1]).trim();
+      if (s) return s;
+    }
+    const fm = content.match(/^---\n([\s\S]*?)\n---/);
+    if (fm) {
+      const y = yaml.load(fm[1]);
+      const v = (y && (y.status || y.Status)) ? String(y.status || y.Status).trim() : '';
+      if (v) return v;
+    }
+  } catch (_) { /* ignore */ }
+  return 'Unknown';
+}
 
 /**
  * Find the next approved story from the stories directory
@@ -2889,10 +2922,9 @@ function findNextApprovedStory(storiesDir) {
         
         const content = fs.readFileSync(fileInfo.path, 'utf8');
         
-        // Extract status from the story
-        // Regex: ##\s*Status\s*\n\s*(.+) matches "## Status" header followed by the status value on next line
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
-        if (statusMatch && statusMatch[1].trim().toLowerCase() === 'approved') {
+        // Extract status from the story (header or frontmatter)
+        const status = extractStatus(content);
+        if (status && status.toLowerCase() === 'approved') {
           // Extract StoryContract from YAML frontmatter
           // Regex: ^---\n([\s\S]*?)\n--- matches YAML frontmatter between --- delimiters
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
@@ -2966,7 +2998,7 @@ function getAllStoriesStatus(storiesDir) {
       const filePath = path.join(storiesDir, file);
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
+        const status = extractStatus(content);
         const titleMatch = content.match(/^#\s+(.+)/m);
         
         // Extract epic ID from filename (first number before the dot)
@@ -2978,7 +3010,7 @@ function getAllStoriesStatus(storiesDir) {
           file,
           path: filePath,
           title: titleMatch ? titleMatch[1] : file,
-          status: statusMatch ? statusMatch[1].trim() : 'Unknown',
+          status,
           epicId,
           storyId,
           fullStoryId: epicMatch ? `${epicId}.${storyId}` : file
@@ -3039,7 +3071,7 @@ function getStoriesForEpic(storiesDir, epicId) {
       const filePath = path.join(storiesDir, file);
       try {
         const content = fs.readFileSync(filePath, 'utf8');
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
+        const status = extractStatus(content);
         const titleMatch = content.match(/^#\s+(.+)/m);
         
         // Extract epic ID and story ID from filename
@@ -3050,7 +3082,7 @@ function getStoriesForEpic(storiesDir, epicId) {
           file,
           path: filePath,
           title: titleMatch ? titleMatch[1] : file,
-          status: statusMatch ? statusMatch[1].trim() : 'Unknown',
+          status,
           epicId: epicId.toString(),
           storyId: storyIdFromFile,
           fullStoryId: epicMatch ? `${epicId}.${storyIdFromFile}` : file
@@ -3106,7 +3138,7 @@ function findNextApprovedStoryInEpic(storiesDir, epicId) {
 
     // Find the first approved story in the epic
     const approvedStory = epicStories.find(story => 
-      story.status.toLowerCase() === 'approved'
+      (story.status || '').toLowerCase() === 'approved'
     );
 
     if (!approvedStory) {
@@ -3292,8 +3324,8 @@ async function findNextApprovedStoryAsync(storiesDir) {
         const content = await fsPromises.readFile(fileInfo.path, 'utf8');
         
         // Extract status from the story
-        const statusMatch = content.match(/##\s*Status\s*\n\s*(.+)/i);
-        if (statusMatch && statusMatch[1].trim().toLowerCase() === 'approved') {
+        const status = extractStatus(content);
+        if (status && status.toLowerCase() === 'approved') {
           // Extract StoryContract from YAML frontmatter
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
           let storyContract = null;
@@ -3347,9 +3379,9 @@ module.exports = {
   findNextApprovedStoryInEpic,
   getEpicStatus
 };
-==================== END: .bmad-core/utils/find-next-story.js ====================
+==================== END: .semad-core/utils/find-next-story.js ====================
 
-==================== START: .bmad-core/utils/dependency-impact-checker.js ====================
+==================== START: .semad-core/utils/dependency-impact-checker.js ====================
 const { queryImpactedSymbols, querySymbolsInFile, searchSymbols } = require('./dependency-analyzer');
 const { parseFile } = require('./dependency-parser');
 const fs = require('fs');
@@ -3682,9 +3714,9 @@ module.exports = {
   generateImpactReport,
   quickRiskAssessment
 };
-==================== END: .bmad-core/utils/dependency-impact-checker.js ====================
+==================== END: .semad-core/utils/dependency-impact-checker.js ====================
 
-==================== START: .bmad-core/utils/dependency-analyzer.js ====================
+==================== START: .semad-core/utils/dependency-analyzer.js ====================
 // Simplified dependency analyzer - Qdrant functionality removed
 const fs = require('fs');
 const path = require('path');
@@ -3899,9 +3931,9 @@ module.exports = {
   getDependencyStats,
   initializeDependencyStorage
 };
-==================== END: .bmad-core/utils/dependency-analyzer.js ====================
+==================== END: .semad-core/utils/dependency-analyzer.js ====================
 
-==================== START: .bmad-core/utils/dependency-scanner.js ====================
+==================== START: .semad-core/utils/dependency-scanner.js ====================
 const fs = require('fs');
 const path = require('path');
 const { glob } = require('glob');
@@ -4392,9 +4424,9 @@ module.exports = {
   processBatch, // Export for testing
   getMemoryUsage // Export for monitoring
 };
-==================== END: .bmad-core/utils/dependency-scanner.js ====================
+==================== END: .semad-core/utils/dependency-scanner.js ====================
 
-==================== START: .bmad-core/utils/dependency-analysis-storage.js ====================
+==================== START: .semad-core/utils/dependency-analysis-storage.js ====================
 /**
  * Dependency Analysis Storage Utilities
  * 
@@ -4694,9 +4726,9 @@ module.exports = {
   listDependencyAnalyses,
   archiveDependencyAnalyses
 };
-==================== END: .bmad-core/utils/dependency-analysis-storage.js ====================
+==================== END: .semad-core/utils/dependency-analysis-storage.js ====================
 
-==================== START: .bmad-core/utils/track-progress.js ====================
+==================== START: .semad-core/utils/track-progress.js ====================
 #!/usr/bin/env node
 
 /**
@@ -4740,8 +4772,19 @@ if (fs.existsSync(contextFile)) {
 const timestamp = new Date().toISOString();
 
 switch (operation) {
-  case 'observation':
-    const observation = args.join(' ');
+  case 'observation': {
+    const raw = args.join(' ');
+    let observation = raw;
+    let meta = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed) {
+        meta = parsed;
+        if (typeof parsed.message === 'string') {
+          observation = parsed.message;
+        }
+      }
+    } catch (_) { /* keep raw string */ }
     // Update context
     context.lastObservation = observation;
     context.lastUpdated = timestamp;
@@ -4751,16 +4794,24 @@ switch (operation) {
       timestamp,
       type: 'observation',
       agent,
-      content: observation
+      content: observation,
+      meta
     };
     fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
     
     console.log(`[${agent}] Observation recorded: ${observation}`);
-    break;
+    break; }
     
-  case 'decision':
-    const decision = args[0];
-    const rationale = args.slice(1).join(' ');
+  case 'decision': {
+    let decision = args[0];
+    let rationale = args.slice(1).join(' ');
+    try {
+      const parsed = JSON.parse(args.join(' '));
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.decision) decision = parsed.decision;
+        if (parsed.rationale) rationale = parsed.rationale;
+      }
+    } catch (_) { /* keep raw pieces */ }
     
     // Update context
     if (!context.decisions) context.decisions = [];
@@ -4778,10 +4829,17 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
     
     console.log(`[${agent}] Decision recorded: ${decision}`);
-    break;
+    break; }
     
-  case 'keyfact':
-    const fact = args.join(' ');
+  case 'keyfact': {
+    const raw = args.join(' ');
+    let fact = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.fact) {
+        fact = parsed.fact;
+      }
+    } catch (_) { /* keep raw string */ }
     
     // Append to log
     const factEntry = {
@@ -4793,7 +4851,7 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
     
     console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break;
+    break; }
     
   case 'show':
     console.log('Current context:', JSON.stringify(context, null, 2));
@@ -4809,9 +4867,9 @@ switch (operation) {
 if (operation !== 'show') {
   fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
 }
-==================== END: .bmad-core/utils/track-progress.js ====================
+==================== END: .semad-core/utils/track-progress.js ====================
 
-==================== START: .bmad-core/utils/adhoc-runner.js ====================
+==================== START: .semad-core/utils/adhoc-runner.js ====================
 #!/usr/bin/env node
 
 /**
@@ -4832,27 +4890,29 @@ function ensureDir(p) {
 }
 
 function logObservation(message) {
-  try {
-    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
-  } catch (_) {
-    try {
-      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'observation', 'dev', message], { stdio: 'inherit' });
-    } catch (e) {
-      console.warn('Could not record observation:', e.message);
-    }
+  const tries = [
+    ['.semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['.semad-core/utils/track-progress.js', 'observation', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'observation', 'dev', message]
+  ];
+  for (const t of tries) {
+    try { spawnSync(process.execPath, t, { stdio: 'inherit' }); return; } catch {}
   }
+  console.warn('Could not record observation');
 }
 
 function logKeyfact(message) {
-  try {
-    spawnSync(process.execPath, ['.bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
-  } catch (_) {
-    try {
-      spawnSync(process.execPath, ['bmad-core/utils/track-progress.js', 'keyfact', 'dev', message], { stdio: 'inherit' });
-    } catch (e) {
-      console.warn('Could not record keyfact:', e.message);
-    }
+  const tries = [
+    ['.semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['.semad-core/utils/track-progress.js', 'keyfact', 'dev', message],
+    ['semad-core/utils/track-progress.js', 'keyfact', 'dev', message]
+  ];
+  for (const t of tries) {
+    try { spawnSync(process.execPath, t, { stdio: 'inherit' }); return; } catch {}
   }
+  console.warn('Could not record keyfact');
 }
 
 function parseArgs(argv) {
@@ -4879,8 +4939,10 @@ function parseArgs(argv) {
 
 function loadCoreConfig() {
   const candidates = [
+    path.join(process.cwd(), 'semad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
     path.join(process.cwd(), 'bmad-core', 'core-config.yaml'),
-    path.join(process.cwd(), '.bmad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
     path.join(process.cwd(), 'core-config.yaml')
   ];
   for (const p of candidates) {
@@ -4967,9 +5029,355 @@ main().catch(err => {
   console.error('Ad-hoc runner error:', err);
   process.exit(1);
 });
-==================== END: .bmad-core/utils/adhoc-runner.js ====================
+==================== END: .semad-core/utils/adhoc-runner.js ====================
 
-==================== START: .bmad-core/utils/simple-task-tracker.js ====================
+==================== START: .semad-core/utils/adhoc-debug-runner.js ====================
+#!/usr/bin/env node
+/**
+ * Dev Agent Ad-hoc Debug Runner (*adhoc-debug)
+ *
+ * Purpose: Perform a thorough, root-cause oriented debug capture for a provided error description.
+ * - Creates an isolated evidence bundle under .ai/adhoc/debug/<timestamp>
+ * - Captures baseline context (git, env, runtime, configs)
+ * - Runs optional dependency impact analysis for provided paths
+ * - Optionally executes a reproduction command N times with profiling/diagnostic env
+ * - Produces summary.md and findings.json with links to evidence
+ */
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const yaml = require('js-yaml');
+const { spawnSync } = require('child_process');
+const { analyzeBatchImpact, generateImpactReport, quickRiskAssessment } = require('./dependency-impact-checker');
+
+function ensureDir(p) { if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true }); }
+
+function log(kind, message) {
+  const tries = [
+    ['.semad-core/utils/track-progress.js', kind, 'dev', message],
+    ['semad-core/utils/track-progress.js', kind, 'dev', message],
+    ['.semad-core/utils/track-progress.js', kind, 'dev', message],
+    ['semad-core/utils/track-progress.js', kind, 'dev', message],
+  ];
+  for (const t of tries) {
+    try { const r = spawnSync(process.execPath, t, { stdio: 'ignore' }); if ((r.status ?? 0) === 0) return; } catch {}
+  }
+}
+
+function parseArgs(argv) {
+  const out = {
+    error: '',
+    scope: '',
+    paths: [],
+    since: '',
+    repro: '',
+    runs: 1,
+    profile: [],
+    nettrace: false,
+    dbcheck: false,
+    audit: false,
+    bisect: false,
+    timeout: 0,
+    ci: false,
+    output: '',
+  };
+  const toks = argv.slice(2);
+  const next = () => toks.shift();
+  while (toks.length) {
+    const t = next();
+    if (!t) break;
+    switch (t) {
+      case '--error': case '--desc': case '--description': out.error = next() || out.error; break;
+      case '--scope': out.scope = next() || ''; break;
+      case '--where': out.where = next() || ''; break;
+      case '--when': out.when = next() || ''; break;
+      case '--tz': out.tz = next() || ''; break;
+      case '--id': case '--trace-id': case '--error-id': out.errorId = next() || ''; break;
+      case '--paths': { while (toks[0] && !toks[0].startsWith('--')) out.paths.push(next()); break; }
+      case '--since': out.since = next() || ''; break;
+      case '--repro': out.repro = next() || ''; break;
+      case '--runs': out.runs = Math.max(1, parseInt(next() || '1', 10) || 1); break;
+      case '--profile': out.profile = (next() || '').split(',').map(s => s.trim()).filter(Boolean); break;
+      case '--nettrace': out.nettrace = true; break;
+      case '--dbcheck': out.dbcheck = true; break;
+      case '--audit': out.audit = true; break;
+      case '--bisect': out.bisect = true; break;
+      case '--log-file': out.logFile = next() || ''; break;
+      case '--stdin-log': out.stdinLog = true; break;
+      case '--guided': out.guided = true; break;
+      case '--timeout': out.timeout = Math.max(0, parseInt(next() || '0', 10) || 0); break;
+      case '--ci': out.ci = true; break;
+      case '--output': out.output = next() || ''; break;
+      default:
+        if (!t.startsWith('--') && !out.error) out.error = t; // positional error description
+        break;
+    }
+  }
+  return out;
+}
+
+function loadCoreConfig() {
+  const candidates = [
+    path.join(process.cwd(), 'semad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
+    path.join(process.cwd(), 'bmad-core', 'core-config.yaml'),
+    path.join(process.cwd(), '.semad-core', 'core-config.yaml'),
+    path.join(process.cwd(), 'core-config.yaml')
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      try { return { path: p, config: yaml.load(fs.readFileSync(p, 'utf8')) || {} }; }
+      catch (e) { return { path: p, config: {}, error: e.message }; }
+    }
+  }
+  return { path: null, config: {} };
+}
+
+function safeJSON(data) {
+  return JSON.stringify(data, null, 2);
+}
+
+function redactEnv(env) {
+  const allow = ['NODE_ENV','BMAD_ENV','APP_ENV','CI','TZ'];
+  const out = {};
+  for (const k of allow) if (env[k] != null) out[k] = env[k];
+  out['__env_keys__'] = Object.keys(env).length; // count only
+  return out;
+}
+
+function run(cmd, opts = {}) {
+  const [bin, ...args] = Array.isArray(cmd) ? cmd : cmd.split(' ');
+  const res = spawnSync(bin, args, { encoding: 'utf8', ...opts });
+  return { code: res.status ?? res.signal ?? 0, stdout: res.stdout || '', stderr: res.stderr || '' };
+}
+
+function gitInfo() {
+  const info = {};
+  info.root = run('git rev-parse --show-toplevel').stdout.trim();
+  info.branch = run('git rev-parse --abbrev-ref HEAD').stdout.trim();
+  info.head = run('git rev-parse HEAD').stdout.trim();
+  info.dirty = run('git status --porcelain').stdout.trim().length > 0;
+  info.remotes = run('git remote -v').stdout.trim().split('\n').filter(Boolean).slice(0,6);
+  return info;
+}
+
+function gitDiffSince(ref) {
+  const out = run(`git diff --name-status ${ref}...HEAD`);
+  return out.stdout.trim().split('\n').filter(Boolean).slice(0,500);
+}
+
+async function main() {
+  const args = parseArgs(process.argv);
+  if (!args.error && !args.guided) {
+    console.log('Usage: adhoc-debug-runner.js --error "<error description>" [--where <screen/url>] [--when <timestamp>] [--id <traceId>] [--paths <p1> ...] [--repro "<cmd>"] [--runs 10] [--since <ref>] [--profile cpu,heap] [--nettrace] [--dbcheck] [--audit] [--ci] [--log-file <path>|--stdin-log] [--output <dir>] [--guided]');
+    process.exit(1);
+  }
+
+  if (args.guided) {
+    await promptGuided(args);
+  }
+
+  const startedAt = new Date();
+  const ts = startedAt.toISOString().replace(/[:.]/g, '-');
+  const baseOut = args.output || path.join('.ai','adhoc','debug', ts);
+  const out = {
+    root: baseOut,
+    logs: path.join(baseOut, 'logs'),
+    traces: path.join(baseOut, 'traces'),
+    profiles: path.join(baseOut, 'profiles'),
+    reports: path.join(baseOut, 'reports'),
+  };
+  ensureDir(out.root); ensureDir(out.logs); ensureDir(out.traces); ensureDir(out.profiles); ensureDir(out.reports);
+
+  log('observation', `adhoc-debug started: ${args.error}`);
+
+  // Baseline snapshot
+  const core = loadCoreConfig();
+  const baseline = {
+    startedAt: startedAt.toISOString(),
+    error: args.error,
+    scope: args.scope,
+    where: args.where || '',
+    when: args.when || '',
+    tz: args.tz || process.env.TZ || '',
+    errorId: args.errorId || '',
+    paths: args.paths,
+    since: args.since,
+    repro: args.repro,
+    runs: args.runs,
+    platform: { os: os.platform(), release: os.release(), cpus: os.cpus().length, memGB: Math.round(os.totalmem()/1e9), locale: Intl.DateTimeFormat().resolvedOptions().locale },
+    node: process.version,
+    nodeVersions: process.versions,
+    npm: run('npm -v').stdout.trim(),
+    git: gitInfo(),
+    env: redactEnv(process.env),
+    coreConfigPath: core.path,
+  };
+  fs.writeFileSync(path.join(out.root, 'baseline.json'), safeJSON(baseline));
+
+  if (args.since) {
+    const diff = gitDiffSince(args.since);
+    fs.writeFileSync(path.join(out.reports, 'git-diff-since.txt'), diff.join('\n'));
+  }
+
+  // Impact analysis (paths)
+  let impactSummary = 'skipped';
+  if (args.paths && args.paths.length) {
+    try {
+      const risk = await quickRiskAssessment(args.paths);
+      const impact = await analyzeBatchImpact(args.paths);
+      const md = generateImpactReport(impact, { includeDetails: true, maxDetailsPerFile: 10, format: 'markdown' });
+      fs.writeFileSync(path.join(out.reports, 'impact.md'), md);
+      impactSummary = `high=${risk.high.length}, medium=${risk.medium.length}, low=${risk.low.length}`;
+    } catch (e) {
+      impactSummary = `failed: ${e.message}`;
+    }
+  }
+
+  // Reproduction runs
+  let reproStats = null;
+  if (args.repro) {
+    const results = [];
+    for (let i = 0; i < args.runs; i++) {
+      const logFile = path.join(out.logs, `repro-${i+1}.log`);
+      const env = { ...process.env };
+      if (args.profile.includes('cpu') || args.profile.includes('heap')) {
+        const profFlags = [];
+        if (args.profile.includes('cpu')) profFlags.push('--cpu-prof');
+        if (args.profile.includes('heap')) profFlags.push('--heap-prof');
+        env.NODE_OPTIONS = [env.NODE_OPTIONS, ...profFlags].filter(Boolean).join(' ').trim();
+      }
+      if (args.nettrace) {
+        env.NODE_DEBUG = [env.NODE_DEBUG, 'http,net'].filter(Boolean).join(',');
+      }
+      const res = run(args.repro, { env, timeout: args.timeout > 0 ? args.timeout : undefined });
+      fs.writeFileSync(logFile, `# Run ${i+1}\n# code=${res.code}\n\n# stderr\n${res.stderr}\n\n# stdout\n${res.stdout}`);
+      results.push({ i: i+1, code: res.code, stderr: res.stderr.slice(0,2000), stdout: res.stdout.slice(0,2000) });
+    }
+    const failures = results.filter(r => r.code !== 0).length;
+    const flakiness = failures > 0 && failures < results.length;
+    reproStats = { total: results.length, failures, flakiness, passRate: (results.length - failures)/results.length };
+    fs.writeFileSync(path.join(out.reports, 'repro-summary.json'), safeJSON({ args: { runs: args.runs, profile: args.profile, nettrace: args.nettrace }, stats: reproStats }));
+  }
+
+  // Optional audits (best-effort, do not fail command)
+  let auditSummary = 'skipped';
+  if (args.audit) {
+    try {
+      const audit = run('npm audit --json', { timeout: 60_000 });
+      fs.writeFileSync(path.join(out.reports, 'npm-audit.json'), audit.stdout || audit.stderr || '');
+      auditSummary = audit.code === 0 ? 'no vulnerabilities (or audit disabled)' : 'vulnerabilities found/scan complete';
+    } catch (e) { auditSummary = `failed: ${e.message}`; }
+  }
+
+  // Basic DB drift scan (heuristic)
+  let dbSummary = 'skipped';
+  if (args.dbcheck) {
+    try {
+      const findings = [];
+      const candidates = ['prisma/schema.prisma','migrations','db/migrations','database/migrations','src/migrations'];
+      for (const c of candidates) {
+        const p = path.join(process.cwd(), c);
+        if (fs.existsSync(p)) findings.push({ path: c, type: fs.statSync(p).isDirectory() ? 'dir' : 'file' });
+      }
+      fs.writeFileSync(path.join(out.reports, 'db-check.json'), safeJSON({ findings }));
+      dbSummary = findings.length ? `artifacts:${findings.length}` : 'none-detected';
+    } catch (e) { dbSummary = `failed: ${e.message}`; }
+  }
+
+  // Findings and summary
+  const summaryMd = [];
+  summaryMd.push(`# Ad-hoc Debug Summary`);
+  summaryMd.push(`- Started: ${startedAt.toISOString()}`);
+  summaryMd.push(`- Error: ${args.error}`);
+  if (args.scope) summaryMd.push(`- Scope: ${args.scope}`);
+  if (args.paths?.length) summaryMd.push(`- Paths: ${args.paths.join(', ')}`);
+  if (args.since) summaryMd.push(`- Git diff since: ${args.since} → reports/git-diff-since.txt`);
+  summaryMd.push(`- Impact analysis: ${impactSummary} → reports/impact.md`);
+  if (reproStats) summaryMd.push(`- Repro: runs=${reproStats.total}, failures=${reproStats.failures}, flakiness=${reproStats.flakiness} → reports/repro-summary.json, logs/`);
+  if (args.profile.length) summaryMd.push(`- Profiling: ${args.profile.join(', ')} (NODE_OPTIONS applied)`);
+  if (args.nettrace) summaryMd.push(`- Nettrace: NODE_DEBUG=http,net applied`);
+  if (args.audit) summaryMd.push(`- Audit: ${auditSummary} → reports/npm-audit.json`);
+  if (args.dbcheck) summaryMd.push(`- DB check: ${dbSummary} → reports/db-check.json`);
+  summaryMd.push(`- Baseline: baseline.json`);
+  fs.writeFileSync(path.join(out.root, 'summary.md'), summaryMd.join('\n'));
+
+  const findings = {
+    error: args.error,
+    scope: args.scope,
+    impactSummary,
+    repro: reproStats || null,
+    audit: args.audit ? auditSummary : null,
+    db: args.dbcheck ? dbSummary : null,
+    artifacts: {
+      summary: path.relative(process.cwd(), path.join(out.root, 'summary.md')),
+      baseline: path.relative(process.cwd(), path.join(out.root, 'baseline.json')),
+      reports: path.relative(process.cwd(), out.reports),
+      logs: path.relative(process.cwd(), out.logs),
+      profiles: path.relative(process.cwd(), out.profiles),
+    }
+  };
+  fs.writeFileSync(path.join(out.root, 'findings.json'), safeJSON(findings));
+
+  const duration = Math.round((Date.now() - startedAt.getTime())/1000);
+  log('keyfact', `adhoc-debug complete: ${args.error} (${duration}s)`);
+  log('observation', `adhoc-debug artifacts: ${path.relative(process.cwd(), out.root)}`);
+
+function promptGuided(args) {
+  return new Promise((resolve) => {
+    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+    const ask = (q) => new Promise(res => rl.question(q, ans => res(ans.trim())));
+    (async () => {
+      if (!args.error) args.error = await ask('Problem (one sentence): ');
+      if (!args.where) args.where = await ask('Where (screen/URL/endpoint): ');
+      if (!args.when) args.when = await ask('When (timestamp/time range, include timezone): ');
+      if (!args.errorId) args.errorId = await ask('Error/Trace ID (if shown): ');
+      const steps = await ask('Steps to reproduce (3-5 bullets, optional): ');
+      args.userSteps = steps;
+      rl.close();
+      resolve();
+    })();
+  });
+}
+
+function saveUserLog(args, out) {
+  try {
+    let content = '';
+    if (args.logFile && fs.existsSync(args.logFile)) {
+      content = fs.readFileSync(args.logFile, 'utf8');
+    } else if (args.stdinLog && !process.stdin.isTTY) {
+      content = fs.readFileSync(0, 'utf8');
+    }
+    if (content) {
+      const dest = path.join(out.logs, 'user-provided.log');
+      fs.writeFileSync(dest, content);
+      // naive signatures
+      const lines = content.split(/\r?\n/);
+      const errs = lines.filter(l => /error|exception|fatal/i.test(l)).slice(0, 200);
+      const ids = Array.from(new Set(lines.map(l => (l.match(/(req[_-]?id|trace[_-]?id)[:=\s]+([\w-]+)/i) || [])[2]).filter(Boolean)));
+      fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ errors: errs.slice(0,100), traceIds: ids }));
+      return { saved: true, idsCount: ids.length, errorsCount: errs.length };
+    }
+  } catch (e) {
+    try { fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ error: e.message })); } catch {}
+  }
+  return { saved: false };
+}
+  console.log('Ad-hoc debug completed');
+  console.log('- Artifacts:', path.relative(process.cwd(), out.root));
+  console.log('- Summary: ', path.relative(process.cwd(), path.join(out.root, 'summary.md')));
+}
+
+main().catch(err => {
+  console.error('adhoc-debug error:', err);
+  process.exit(1);
+});
+  // Save user-provided logs or pasted logs (stdin)
+  const userLog = saveUserLog(args, out);
+==================== END: .semad-core/utils/adhoc-debug-runner.js ====================
+
+==================== START: .semad-core/utils/simple-task-tracker.js ====================
 /**
  * Simple Task Tracker
  * A lightweight in-memory task tracking system for agent workflows
@@ -5295,6 +5703,26 @@ class TaskTracker {
   }
 
   /**
+   * Save current tasks to .ai/dev_tasks.json (for external tooling)
+   * @param {string} filePath
+   * @returns {string} saved file path
+   */
+  saveDevTasks(filePath = '.ai/dev_tasks.json') {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const data = {
+      workflow: this.workflow,
+      tasks: this.workflow?.tasks || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    this.log('Dev tasks saved to: ' + filePath, 'info');
+    return filePath;
+  }
+
+  /**
    * Get elapsed time since workflow start
    * @returns {string} Formatted elapsed time
    */
@@ -5363,9 +5791,9 @@ class TaskTracker {
 
 // Export for use in agents
 module.exports = TaskTracker;
-==================== END: .bmad-core/utils/simple-task-tracker.js ====================
+==================== END: .semad-core/utils/simple-task-tracker.js ====================
 
-==================== START: .bmad-core/utils/qa-findings-parser.js ====================
+==================== START: .semad-core/utils/qa-findings-parser.js ====================
 /**
  * QA Findings Parser
  * Parses QA Results section from story files into structured JSON format
@@ -5609,9 +6037,9 @@ class QAFindingsParser {
 }
 
 module.exports = QAFindingsParser;
-==================== END: .bmad-core/utils/qa-findings-parser.js ====================
+==================== END: .semad-core/utils/qa-findings-parser.js ====================
 
-==================== START: .bmad-core/utils/qa-fix-tracker.js ====================
+==================== START: .semad-core/utils/qa-fix-tracker.js ====================
 const TaskTracker = require('./simple-task-tracker');
 const fs = require('fs');
 const path = require('path');
@@ -5905,4 +6333,4 @@ class QAFixTracker extends TaskTracker {
 }
 
 module.exports = QAFixTracker;
-==================== END: .bmad-core/utils/qa-fix-tracker.js ====================
+==================== END: .semad-core/utils/qa-fix-tracker.js ====================

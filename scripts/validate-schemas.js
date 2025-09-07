@@ -7,7 +7,7 @@ const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 
 // Use ModuleResolver for schema resolution
-const ModuleResolver = require('../bmad-core/utils/module-resolver');
+const ModuleResolver = require('../semad-core/utils/module-resolver');
 
 // Initialize AJV validator
 const ajv = new Ajv({ allErrors: true });
@@ -47,9 +47,9 @@ function loadSchema(schemaName, fallbackPath) {
 let taskSchema, structuredTaskSchema, checklistSchema;
 
 try {
-  taskSchema = loadSchema('taskSchema', 'bmad-core/schemas/task-schema.json');
-  structuredTaskSchema = loadSchema('structuredTaskSchema', 'bmad-core/schemas/structured-task-schema.json');
-  checklistSchema = loadSchema('checklistSchema', 'bmad-core/schemas/checklist-schema.json');
+  taskSchema = loadSchema('taskSchema', 'semad-core/schemas/task-schema.json');
+  structuredTaskSchema = loadSchema('structuredTaskSchema', 'semad-core/schemas/structured-task-schema.json');
+  checklistSchema = loadSchema('checklistSchema', 'semad-core/schemas/checklist-schema.json');
 } catch (error) {
   console.error('\n\u26a0️  Failed to load validation schemas');
   console.error('  Ensure all schema files exist and contain valid JSON');

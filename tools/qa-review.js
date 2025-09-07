@@ -12,19 +12,26 @@ const { program } = require('commander');
 class QAReviewRunner {
   constructor(rootDir = process.cwd()) {
     this.rootDir = rootDir;
-    this.configPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
+    this.configPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
   }
 
   /**
    * Load configuration from core-config.yaml
    */
   loadConfig() {
-    if (!fs.existsSync(this.configPath)) {
-      throw new Error(`Core configuration not found: ${this.configPath}`);
-    }
-
     const yaml = require('js-yaml');
-    const content = fs.readFileSync(this.configPath, 'utf8');
+    const candidates = [
+      path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, 'core-config.yaml')
+    ];
+    const p = candidates.find(f => fs.existsSync(f));
+    if (!p) {
+      throw new Error(`Core configuration not found. Searched: ${candidates.join(', ')}`);
+    }
+    const content = fs.readFileSync(p, 'utf8');
     return yaml.load(content);
   }
 
@@ -33,7 +40,7 @@ class QAReviewRunner {
    */
   findStoriesForReview() {
     try {
-      const { getAllStoriesStatus } = require('../bmad-core/utils/find-next-story');
+      const { getAllStoriesStatus } = require('../semad-core/utils/find-next-story');
       const config = this.loadConfig();
       
       const storyLocation = config.stories?.storyLocation || 'docs/stories';
@@ -61,7 +68,26 @@ class QAReviewRunner {
 
     const content = fs.readFileSync(storyPath, 'utf8');
     
-    // Check for required sections
+    // Check for YAML frontmatter with storyContract
+    if (content.startsWith('---') && content.includes('storyContract:')) {
+      // Parse YAML frontmatter
+      const yamlEnd = content.indexOf('---', 3);
+      if (yamlEnd > 0) {
+        const yamlContent = content.substring(3, yamlEnd);
+        try {
+          const yaml = require('js-yaml');
+          const frontmatter = yaml.load(yamlContent);
+          if (frontmatter && frontmatter.storyContract) {
+            // Valid contract format
+            return true;
+          }
+        } catch (e) {
+          console.warn(chalk.yellow(`⚠️  Failed to parse story contract: ${e.message}`));
+        }
+      }
+    }
+    
+    // Check for traditional markdown sections
     const requiredSections = ['Story ID', 'Status', 'Implementation Details'];
     const missingSections = requiredSections.filter(section => 
       !content.includes(`## ${section}`) && !content.includes(`# ${section}`)
@@ -79,63 +105,79 @@ class QAReviewRunner {
    */
   async runQAReview(storyPath, options = {}) {
     console.log(chalk.blue('🔍 Running QA Agent Review...\n'));
-    
+
     try {
-      let AgentRunner;
-      try {
-        AgentRunner = require('../bmad-core/utils/agent-runner');
-        // Verify memory deps exist; if not, use shim
-        const fs = require('fs');
-        const path = require('path');
-        const coreDir = fs.existsSync(path.join(this.rootDir, 'bmad-core')) ? 'bmad-core' : '.bmad-core';
-        const umm = path.join(this.rootDir, coreDir, 'utils', 'unified-memory-manager.js');
-        const mh = path.join(this.rootDir, coreDir, 'utils', 'memory-health.js');
-        if (!fs.existsSync(umm) || !fs.existsSync(mh)) {
-          AgentRunner = require('./orchestrator/agent-runner-shim');
-        }
-      } catch (e) {
-        AgentRunner = require('./orchestrator/agent-runner-shim');
+      // Prefer review-story.yaml; allow override via env; fallback to qa-dev-handoff.yaml
+      const requestedTask = process.env.QA_REVIEW_TASK || process.env.QA_REVIEW_STRUCTURED_TASK;
+      const tryNames = requestedTask ? [requestedTask] : ['review-story.yaml', 'qa-dev-handoff.yaml'];
+      const candidates = [];
+      for (const name of tryNames) {
+        candidates.push(
+          path.join(this.rootDir, 'semad-core', 'structured-tasks', name),
+          path.join(this.rootDir, '.semad-core', 'structured-tasks', name),
+          path.join(this.rootDir, 'semad-core', 'structured-tasks', name)
+        );
       }
-      const runner = new AgentRunner({
-        memoryEnabled: true,
-        healthMonitoringEnabled: true,
-        verbose: options.verbose || false
-      });
-
-      // Load QA agent configuration
-      const qaAgentPath = path.join(this.rootDir, 'bmad-core', 'agents', 'qa.md');
-      if (!fs.existsSync(qaAgentPath)) {
-        throw new Error(`QA agent not found: ${qaAgentPath}`);
+      const qaTaskPath = candidates.find(p => fs.existsSync(p));
+      if (!qaTaskPath) {
+        throw new Error('No QA structured task found (looked for review-story.yaml, qa-dev-handoff.yaml)');
       }
 
-      console.log(`📖 Story: ${path.relative(this.rootDir, storyPath)}`);
-      console.log(`🤖 Agent: qa`);
-      console.log(`📂 Working Directory: ${this.rootDir}\n`);
+      const taskName = path.basename(qaTaskPath);
+      console.log(chalk.blue(`🔧 Using structured task: ${taskName}`));
 
-      // Prepare context for the QA agent
+      // Build context with user input handler
+      const TaskRunner = require('./task-runner');
+      const { createUserInputHandler } = require('./lib/elicit-handler');
+
+      const allowMissingUserInput = !!options.writeOnly || process.env.BMAD_NONINTERACTIVE === '1' || process.env.BMAD_ALLOW_MISSING_USER_INPUT === '1';
+      const userInputHandler = allowMissingUserInput ?
+        createUserInputHandler({ mode: 'auto', nonInteractive: true }) :
+        createUserInputHandler({ mode: process.env.SEMAD_ELICIT_MODE || 'cli' });
+
       const context = {
-        storyPath: storyPath,
-        task: 'qa-review',
-        mode: options.mode || 'review',
+        storyPath,
         projectRoot: this.rootDir,
+        mode: options.mode || 'review',
         reviewType: options.reviewType || 'full',
-        writeOnly: options.writeOnly || false
+        userInputHandler,
+        allowMissingUserInput
       };
 
-      // Check for QA review structured task
-      const qaTaskPath = path.join(this.rootDir, 'bmad-core', 'structured-tasks', 'qa-dev-handoff.yaml');
-      
-      if (fs.existsSync(qaTaskPath)) {
-        console.log(chalk.blue('🔧 Using structured task: qa-dev-handoff.yaml'));
-        const result = await runner.runStructuredTask('qa', qaTaskPath, context);
-        return result;
-      } else {
-        // Fallback to direct agent execution
-        console.log(chalk.yellow('⚠️  QA structured task not found, using direct agent execution'));
-        const result = await runner.runAgent('qa', context);
-        return result;
+      // Execute task
+      const runner = new TaskRunner(this.rootDir);
+      const execResult = await runner.executeTask('qa', qaTaskPath, context);
+
+      // Summarize user responses (if any) into QA comments
+      let qaComments = '';
+      if (context.userResponses && typeof context.userResponses === 'object') {
+        const lines = [];
+        lines.push('Summary of interactive responses:');
+        for (const [stepId, responses] of Object.entries(context.userResponses)) {
+          lines.push(`- Step ${stepId}:`);
+          for (const [question, answer] of Object.entries(responses || {})) {
+            lines.push(`  • ${question} -> ${answer}`);
+          }
+        }
+        qaComments = lines.join('\n');
       }
 
+      // Infer final status: look for explicit final decision if provided
+      let finalStatus = 'QA Approved';
+      const decisionText = JSON.stringify(context.userResponses || {}).toLowerCase();
+      if (/claude\s*error|\[claude\s*error\]|error:/.test(decisionText)) {
+        finalStatus = 'QA Failed';
+      } else if (/no\b|reject|needs fix|needs\s+fixes|fail/.test(decisionText)) {
+        finalStatus = 'QA Failed';
+      } else if (/yes\b|approve|approved/.test(decisionText)) {
+        finalStatus = 'QA Approved';
+      }
+
+      return {
+        success: !!execResult && execResult.success !== false,
+        approved: finalStatus === 'QA Approved',
+        comments: qaComments
+      };
     } catch (error) {
       console.error(chalk.red('QA agent execution failed:'), error.message);
       throw error;
@@ -148,15 +190,46 @@ class QAReviewRunner {
   async updateStoryStatus(storyPath, status, qaComments = null) {
     try {
       let content = fs.readFileSync(storyPath, 'utf8');
-      const statusRegex = /(##\s*Status\s*\n\s*)(.+)/i;
+      // Match any markdown heading level for Status, with optional colon
+      const statusRegex = /(#{1,6}\s*Status\s*:?[\t ]*\n[\t ]*)(.+)/i;
       
       if (!statusRegex.test(content)) {
-        console.warn(chalk.yellow('⚠️  Could not find Status section in story file'));
-        return false;
+        // Try to update YAML frontmatter status if present
+        if (content.startsWith('---')) {
+          const yamlEnd = content.indexOf('---', 3);
+          if (yamlEnd > 0) {
+            const yaml = require('js-yaml');
+            const fmRaw = content.substring(3, yamlEnd);
+            try {
+              const fm = yaml.load(fmRaw) || {};
+              if (fm.storyContract) {
+                fm.storyContract.status = status;
+                const newFm = '---\n' + yaml.dump(fm) + '---';
+                content = newFm + content.substring(yamlEnd + 3);
+              } else if (fm.status) {
+                fm.status = status;
+                const newFm = '---\n' + yaml.dump(fm) + '---';
+                content = newFm + content.substring(yamlEnd + 3);
+              } else {
+                console.warn(chalk.yellow('⚠️  Could not find Status section in story file'));
+                return false;
+              }
+            } catch (e) {
+              console.warn(chalk.yellow('⚠️  Could not parse frontmatter to update status'));
+              return false;
+            }
+          } else {
+            console.warn(chalk.yellow('⚠️  Could not find Status section in story file'));
+            return false;
+          }
+        } else {
+          console.warn(chalk.yellow('⚠️  Could not find Status section in story file'));
+          return false;
+        }
+      } else {
+        // Update status in markdown section
+        content = content.replace(statusRegex, `$1${status}`);
       }
-
-      // Update status
-      content = content.replace(statusRegex, `$1${status}`);
 
       // Append QA findings into a consistent section
       if (qaComments && qaComments.trim()) {
@@ -251,16 +324,46 @@ class QAReviewRunner {
         
         // Extract story info from file
         const content = fs.readFileSync(absolutePath, 'utf8');
-        const storyIdMatch = content.match(/##?\s*Story ID\s*[:\n]\s*(\S+)/i);
-        const titleMatch = content.match(/##?\s*Title\s*[:\n]\s*(.+)/i);
-        const statusMatch = content.match(/##?\s*Status\s*[:\n]\s*(.+)/i);
+        let storyInfo = null;
         
-        selectedStory = {
-          storyId: storyIdMatch ? storyIdMatch[1].trim() : 'Unknown',
-          title: titleMatch ? titleMatch[1].trim() : 'Untitled',
-          status: statusMatch ? statusMatch[1].trim() : 'Unknown',
-          filePath: absolutePath
-        };
+        // Try to parse YAML frontmatter first
+        if (content.startsWith('---')) {
+          const yamlEnd = content.indexOf('---', 3);
+          if (yamlEnd > 0) {
+            const yamlContent = content.substring(3, yamlEnd);
+            try {
+              const yaml = require('js-yaml');
+              const frontmatter = yaml.load(yamlContent);
+              if (frontmatter && frontmatter.storyContract) {
+                const contract = frontmatter.storyContract;
+                storyInfo = {
+                  storyId: contract.story_id || 'Unknown',
+                  title: contract.story_title || 'Untitled',
+                  status: contract.status || 'Unknown',
+                  filePath: absolutePath
+                };
+              }
+            } catch (e) {
+              // Fall through to markdown parsing
+            }
+          }
+        }
+        
+        // Fall back to markdown parsing if YAML parsing failed
+        if (!storyInfo) {
+          const storyIdMatch = content.match(/##?\s*Story ID\s*[:\n]\s*(\S+)/i);
+          const titleMatch = content.match(/##?\s*Title\s*[:\n]\s*(.+)/i);
+          const statusMatch = content.match(/##?\s*Status\s*[:\n]\s*(.+)/i);
+          
+          storyInfo = {
+            storyId: storyIdMatch ? storyIdMatch[1].trim() : 'Unknown',
+            title: titleMatch ? titleMatch[1].trim() : 'Untitled',
+            status: statusMatch ? statusMatch[1].trim() : 'Unknown',
+            filePath: absolutePath
+          };
+        }
+        
+        selectedStory = storyInfo;
       } else {
         // Find and select story for review
         const reviewableStories = this.findStoriesForReview();

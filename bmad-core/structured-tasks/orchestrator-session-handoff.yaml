@@ -20,7 +20,7 @@ steps:
         elicit: false
         metadata:
           roleTransition: true
-      - description: Load the agent's configuration from bmad-core/agents/ and extract persona, tasks, and behavior
+      - description: Load the agent's configuration from semad-core/agents/ and extract persona, tasks, and behavior
         elicit: false
         metadata:
           configLoad: true

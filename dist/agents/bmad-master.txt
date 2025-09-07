@@ -1,6 +1,6 @@
 # Web Agent Bundle Instructions
 
-You are now operating as a specialized AI agent from the BMad-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
+You are now operating as a specialized AI agent from the SEMAD-Method framework. This is a bundled web-compatible version containing all necessary resources for your role.
 
 ## Important Instructions
 
@@ -8,13 +8,13 @@ You are now operating as a specialized AI agent from the BMad-Method framework. 
 
 2. **Resource Navigation**: This bundle contains all resources you need. Resources are marked with tags like:
 
-- `==================== START: .bmad-core/folder/filename.md ====================`
-- `==================== END: .bmad-core/folder/filename.md ====================`
+- `==================== START: .semad-core/folder/filename.md ====================`
+- `==================== END: .semad-core/folder/filename.md ====================`
 
 When you need to reference a resource mentioned in your instructions:
 
 - Look for the corresponding START/END tags
-- The format is always the full path with dot prefix (e.g., `.bmad-core/personas/analyst.md`, `.bmad-core/structured-tasks/create-story.yaml`)
+- The format is always the full path with dot prefix (e.g., `.semad-core/personas/analyst.md`, `.semad-core/structured-tasks/create-story.yaml`)
 - If a section is specified (e.g., `{root}/structured-tasks/create-story.yaml#section-name`), navigate to that section within the file
 
 **Understanding YAML References**: In the agent configuration, resources are referenced in the dependencies section. For example:
@@ -29,17 +29,17 @@ dependencies:
 
 These references map directly to bundle sections:
 
-- `utils: template-format` → Look for `==================== START: .bmad-core/utils/template-format.md ====================`
-- `tasks: create-story` → Look for `==================== START: .bmad-core/structured-tasks/create-story.yaml ====================`
+- `utils: template-format` → Look for `==================== START: .semad-core/utils/template-format.md ====================`
+- `tasks: create-story` → Look for `==================== START: .semad-core/structured-tasks/create-story.yaml ====================`
 
 3. **Execution Context**: You are operating in a web environment. All your capabilities and knowledge are contained within this bundle. Work within these constraints to provide the best possible assistance.
 
-4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the BMad-Method framework.
+4. **Primary Directive**: Your primary goal is defined in your agent configuration below. Focus on fulfilling your designated role according to the SEMAD-Method framework.
 
 ---
 
 
-==================== START: .bmad-core/agents/bmad-master.md ====================
+==================== START: .semad-core/agents/bmad-master.md ====================
 # bmad-master
 
 CRITICAL: Read the full YAML, start activation to alter your state of being, follow startup section instructions, stay in this being until told to exit this mode:
@@ -48,7 +48,7 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: Initialize task tracker for this session using const TaskTracker = require('./simple-task-tracker'); const tracker = new TaskTracker(); tracker.setAgent('bmad-master')
-  - STEP 3: Greet user with your name/role and mention `*help` command
+  - STEP 3: Greet user with ONLY "Greetings, I'm the BMad Master. Type *help to see available commands." then STOP and wait for user input
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
@@ -57,9 +57,10 @@ activation-instructions:
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
+  - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - CRITICAL: Do NOT scan filesystem or load any resources during startup, ONLY when commanded
   - CRITICAL: Do NOT run discovery tasks automatically
-  - CRITICAL: NEVER LOAD .bmad-core/data/bmad-kb.md UNLESS USER TYPES *kb
+  - CRITICAL: NEVER LOAD .semad-core/data/bmad-kb.md UNLESS USER TYPES *kb
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
 agent:
   name: BMad Master
@@ -78,19 +79,19 @@ persona:
     - Always presents numbered lists for choices
     - Process (*) commands immediately, All commands require * prefix when used (e.g., *help)
     - When a task contains more than 5 distinct actions or if a step seems ambiguous, use the Dynamic Plan Adaptation protocol: break the task into smaller sub-tasks and execute them sequentially
-    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use node .bmad-core/utils/track-progress.js for persistent tracking.
-    - 'PROGRESS TRACKING: After task operations, record observations using: node .bmad-core/utils/track-progress.js observation bmad-master ''[what was done]''. Record decisions using: node .bmad-core/utils/track-progress.js decision bmad-master ''[decision]'' ''[rationale]''.'
-    - 'KNOWLEDGE PERSISTENCE: Store task execution patterns and workflow insights using: node .bmad-core/utils/track-progress.js keyfact bmad-master ''[pattern or insight description]''.'
-    - 'TRACKING GUIDELINES - After kb: Log observation about knowledge access. After task execution: Log observation about task completion. After create-doc: Log decision about document creation. After execute-checklist: Log observation about quality check.'
+    - SIMPLIFIED TRACKING: Use tracker.log('message', 'type') for in-session tracking. Use direct tracking for persistence.
+    - 'PROGRESS TRACKING: After task operations, record observations directly. Record decisions with clear rationale.'
+    - 'KNOWLEDGE PERSISTENCE: Store task execution patterns and workflow insights in tracking system.'
+    - 'TRACKING GUIDELINES - After kb: Record observation about knowledge access. After task execution: Record observation about task completion. After create-doc: Record decision about document creation. After execute-checklist: Record observation about quality check.'
 commands:
   - help: Show these listed commands in a numbered list
-  - kb: 'Toggle KB mode off (default) or on, when on will load and reference the .bmad-core/data/bmad-kb.md and converse with the user answering his questions with this informational resource → tracker.log(''KB mode toggled'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-master ''Knowledge base accessed'' → tracker.completeCurrentTask(''KB accessed'')'
-  - task {task}: 'Execute task, if not found or none specified, ONLY list available dependencies/tasks listed below → tracker.log(''Executing task'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-master ''Task execution completed'' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-master ''Task execution patterns applied'' → tracker.completeCurrentTask(''task executed'')'
-  - create-doc {template}: 'execute task create-doc (no template = ONLY show available templates listed under dependencies/templates below) → tracker.log(''Creating document'', ''info'') → execute: node .bmad-core/utils/track-progress.js decision bmad-master ''Document creation decisions made'' ''Decision reasoning'' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-master ''Document creation patterns established'' → tracker.completeCurrentTask(''document created'')'
+  - kb: Toggle KB mode off (default) or on, when on will load and reference the .semad-core/data/bmad-kb.md and converse with the user answering his questions with this informational resource → tracker.log('KB mode toggled', 'info') → Record knowledge base access → tracker.completeCurrentTask('KB accessed')
+  - task {task}: Execute task, if not found or none specified, ONLY list available dependencies/tasks listed below → tracker.log('Executing task', 'info') → Record task execution completion → Record task execution patterns as keyfact → tracker.completeCurrentTask('task executed')
+  - create-doc {template}: execute task create-doc (no template = ONLY show available templates listed under dependencies/templates below) directly → tracker.log('Creating document', 'info') → Record document creation decisions → Record document creation patterns as keyfact → tracker.completeCurrentTask('document created')
   - doc-out: Output full document to current destination file
-  - document-project: 'execute the task document-project.md → tracker.log(''Documenting project'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-master ''Project documentation completed'' → tracker.completeCurrentTask(''project documented'')'
-  - execute-checklist {checklist}: 'Run task execute-checklist (no checklist = ONLY show available checklists listed under dependencies/checklist below) → tracker.log(''Executing checklist'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-master ''Checklist execution completed'' → execute: node .bmad-core/utils/track-progress.js keyfact bmad-master ''Checklist execution patterns validated'' → tracker.completeCurrentTask(''checklist executed'')'
-  - shard-doc {document} {destination}: 'run the task shard-doc against the optionally provided document to the specified destination → tracker.log(''Sharding document'', ''info'') → execute: node .bmad-core/utils/track-progress.js observation bmad-master ''Document sharding completed'' → tracker.completeCurrentTask(''document sharded'')'
+  - document-project: execute the task document-project.md directly → tracker.log('Documenting project', 'info') → Record project documentation completion → tracker.completeCurrentTask('project documented')
+  - execute-checklist {checklist}: Run task execute-checklist (no checklist = ONLY show available checklists listed under dependencies/checklist below) directly → tracker.log('Executing checklist', 'info') → Record checklist execution completion → Record checklist execution patterns as keyfact → tracker.completeCurrentTask('checklist executed')
+  - shard-doc {document} {destination}: run the task shard-doc against the optionally provided document to the specified destination directly → tracker.log('Sharding document', 'info') → Record document sharding completion → tracker.completeCurrentTask('document sharded')
   - progress: Show current task progress using tracker.getProgressReport()
   - yolo: Toggle Yolo Mode
   - exit: Exit (confirm)
@@ -109,7 +110,6 @@ dependencies:
     - generate-ai-frontend-prompt.yaml
     - index-docs.yaml
     - shard-doc.yaml
-    - update-working-memory.yaml
   templates:
     - architecture-tmpl.yaml
     - brownfield-architecture-tmpl.yaml
@@ -145,9 +145,9 @@ dependencies:
     - track-progress.js
     - simple-task-tracker.js
 ```
-==================== END: .bmad-core/agents/bmad-master.md ====================
+==================== END: .semad-core/agents/bmad-master.md ====================
 
-==================== START: .bmad-core/templates/architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/architecture-tmpl.yaml ====================
 template:
   id: architecture-template-v2
   name: Architecture Document
@@ -277,7 +277,7 @@ sections:
     instruction: |
       This is the DEFINITIVE technology selection section. Work with the user to make specific choices:
       
-      1. Review PRD technical assumptions and any preferences from .bmad-core/data/technical-preferences.yaml or an attached technical-preferences
+      1. Review PRD technical assumptions and any preferences from .semad-core/data/technical-preferences.yaml or an attached technical-preferences
       2. For each category, present 2-3 viable options with pros/cons
       3. Make a clear recommendation based on project needs
       4. Get explicit user approval for each selection
@@ -801,9 +801,9 @@ sections:
           - Key UI requirements from PRD
           - Any frontend-specific decisions made here
           - Request for detailed frontend architecture
-==================== END: .bmad-core/templates/architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/brownfield-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================
 template:
   id: brownfield-architecture-template-v2
   name: Brownfield Enhancement Architecture
@@ -1280,9 +1280,9 @@ sections:
           - Key technical decisions based on real project constraints
           - Existing system compatibility requirements with specific verification steps
           - Clear sequencing of implementation to minimize risk to existing functionality
-==================== END: .bmad-core/templates/brownfield-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/brownfield-prd-tmpl.yaml ====================
+==================== START: .semad-core/templates/brownfield-prd-tmpl.yaml ====================
 template:
   id: brownfield-prd-template-v2
   name: Brownfield Enhancement PRD
@@ -1422,7 +1422,7 @@ sections:
         instruction: Each Requirement will be a bullet markdown with identifier starting with NFR. Include constraints from existing system
         examples:
           - "NFR1: Enhancement must maintain existing performance characteristics and not exceed current memory usage by more than 20%."
-      - id: compatibility
+  - id: compatibility
         title: Compatibility Requirements
         instruction: Critical for brownfield - what must remain compatible
         type: numbered-list
@@ -1437,6 +1437,14 @@ sections:
             template: "CR3: {{ui_ux_consistency}}"
           - id: cr4
             template: "CR4: {{integration_compatibility}}"
+          - id: cr5
+            template: "CR5: Latency budget (p95/p99) {{latency_budget}}"
+          - id: cr6
+            template: "CR6: Error budget / availability {{error_budget}}"
+          - id: cr7
+            template: "CR7: Throughput/capacity expectations {{throughput_budget}}"
+          - id: cr8
+            template: "CR8: Backward-compatible contract/schema requirement {{schema_compatibility}}"
 
   - id: ui-enhancement-goals
     title: User Interface Enhancement Goals
@@ -1479,6 +1487,13 @@ sections:
           **API Integration Strategy**: {{api_integration}}
           **Frontend Integration Strategy**: {{frontend_integration}}
           **Testing Integration Strategy**: {{testing_integration}}
+      - id: integration-surfaces
+        title: Integration Surfaces
+        instruction: Map all components and interfaces involved with owners and code references; classify delta and budgets.
+        template: |
+          | Component | Interface/Port | Owner | Delta(existing|extend|new) | ContractRef | SourceRef | CompatibilityBudget | Risk |
+          |---|---|---|---|---|---|---|---|
+          | {{component}} | {{interface}} | {{owner}} | {{delta}} | {{contract_ref}} | {{source_ref}} | {{compat_budget}} | {{risk}} |
       - id: code-organization
         title: Code Organization and Standards
         instruction: Based on existing project analysis, define how new code will fit existing patterns
@@ -1495,6 +1510,15 @@ sections:
           **Deployment Strategy**: {{deployment_strategy}}
           **Monitoring and Logging**: {{monitoring_logging}}
           **Configuration Management**: {{config_management}}
+      - id: rollout-toggle-plan
+        title: Rollout and Feature Toggle Plan
+        instruction: Define safe rollout and rollback with observability before enabling write paths.
+        template: |
+          **Feature Flag**: {{flag_name}} (default off)
+          **Canary Strategy**: {{canary_strategy}} (e.g., 10% → 50% → 100%)
+          **Kill Switch**: {{kill_switch_mechanism}}
+          **Observability Hooks**: {{metrics_dashboards_alerts}}
+          **Rollback Plan**: {{rollback_plan}}
       - id: risk-assessment
         title: Risk Assessment and Mitigation
         instruction: |
@@ -1563,9 +1587,9 @@ sections:
               - template: "IV1: {{existing_functionality_verification}}"
               - template: "IV2: {{integration_point_verification}}"
               - template: "IV3: {{performance_impact_verification}}"
-==================== END: .bmad-core/templates/brownfield-prd-tmpl.yaml ====================
+==================== END: .semad-core/templates/brownfield-prd-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/competitor-analysis-tmpl.yaml ====================
+==================== START: .semad-core/templates/competitor-analysis-tmpl.yaml ====================
 template:
   id: competitor-analysis-template-v2
   name: Competitive Analysis Report
@@ -1859,9 +1883,9 @@ sections:
           - Weekly: {{weekly_items}}
           - Monthly: {{monthly_items}}
           - Quarterly: {{quarterly_analysis}}
-==================== END: .bmad-core/templates/competitor-analysis-tmpl.yaml ====================
+==================== END: .semad-core/templates/competitor-analysis-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/front-end-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/front-end-architecture-tmpl.yaml ====================
 template:
   id: frontend-architecture-template-v2
   name: Frontend Architecture Document
@@ -2071,9 +2095,9 @@ sections:
           - Key import patterns
           - File naming conventions
           - Project-specific patterns and utilities
-==================== END: .bmad-core/templates/front-end-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/front-end-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/front-end-spec-tmpl.yaml ====================
+==================== START: .semad-core/templates/front-end-spec-tmpl.yaml ====================
 template:
   id: frontend-spec-template-v2
   name: UI/UX Specification
@@ -2423,9 +2447,9 @@ sections:
   - id: checklist-results
     title: Checklist Results
     instruction: If a UI/UX checklist exists, run it against this document and report results here.
-==================== END: .bmad-core/templates/front-end-spec-tmpl.yaml ====================
+==================== END: .semad-core/templates/front-end-spec-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/fullstack-architecture-tmpl.yaml ====================
+==================== START: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 template:
   id: fullstack-architecture-template-v2
   name: Fullstack Architecture Document
@@ -3234,9 +3258,9 @@ sections:
   - id: checklist-results
     title: Checklist Results Report
     instruction: Before running the checklist, offer to output the full architecture document. Once user confirms, execute the architect-checklist and populate results here.
-==================== END: .bmad-core/templates/fullstack-architecture-tmpl.yaml ====================
+==================== END: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/market-research-tmpl.yaml ====================
+==================== START: .semad-core/templates/market-research-tmpl.yaml ====================
 template:
   id: market-research-template-v2
   name: Market Research Report
@@ -3489,9 +3513,9 @@ sections:
       - id: additional-analysis
         title: C. Additional Analysis
         instruction: Any supplementary analysis not included in main body
-==================== END: .bmad-core/templates/market-research-tmpl.yaml ====================
+==================== END: .semad-core/templates/market-research-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/prd-tmpl.yaml ====================
+==================== START: .semad-core/templates/prd-tmpl.yaml ====================
 template:
   id: prd-template-v2
   name: Product Requirements Document
@@ -3525,6 +3549,32 @@ sections:
         columns: [Date, Version, Description, Author]
         instruction: Track document versions and changes
 
+  - id: feature-contract
+    title: Feature Contract
+    instruction: |
+      Define high-level features with unique IDs and acceptance criteria for traceability.
+      Use FEAT-<slug> format for feature IDs and AC-<feat>-<n> for acceptance criteria.
+    elicit: true
+    sections:
+      - id: features
+        title: Features
+        type: structured-list
+        instruction: Each feature must have id, title, description, acceptanceCriteria, priority, and risk
+        examples:
+          - id: FEAT-auth-session
+            title: User Authentication
+            description: Secure user authentication and session management
+            acceptanceCriteria:
+              - id: AC-auth-session-1
+                description: Users can log in with email/password
+              - id: AC-auth-session-2
+                description: Session expires after 24 hours of inactivity
+            priority: high
+            risk: medium
+            traceability:
+              epics: []
+              stories: []
+  
   - id: requirements
     title: Requirements
     instruction: Draft the list of functional and non functional requirements under the two child sections
@@ -3534,9 +3584,9 @@ sections:
         title: Functional
         type: numbered-list
         prefix: FR
-        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with FR
+        instruction: Each Requirement will be a bullet markdown and an identifier sequence starting with FR. Link to relevant FEAT-* IDs where applicable.
         examples:
-          - "FR6: The Todo List uses AI to detect and warn against potentially duplicate todo items that are worded differently."
+          - "FR6: The Todo List uses AI to detect and warn against potentially duplicate todo items that are worded differently. [FEAT-todo-ai]"
       - id: non-functional
         title: Non Functional
         type: numbered-list
@@ -3593,7 +3643,7 @@ sections:
     instruction: |
       Gather technical decisions that will guide the Architect. Steps:
       
-      1. Check if .bmad-core/data/technical-preferences.yaml or an attached technical-preferences file exists - use it to pre-populate choices
+      1. Check if .semad-core/data/technical-preferences.yaml or an attached technical-preferences file exists - use it to pre-populate choices
       2. Ask user about: languages, frameworks, starter templates, libraries, APIs, deployment targets
       3. For unknowns, offer guidance based on project goals and MVP scope
       4. Document ALL technical choices with rationale (why this choice fits the project)
@@ -3694,9 +3744,9 @@ sections:
       - id: architect-prompt
         title: Architect Prompt
         instruction: This section will contain the prompt for the Architect, keep it short and to the point to initiate create architecture mode using this document as input.
-==================== END: .bmad-core/templates/prd-tmpl.yaml ====================
+==================== END: .semad-core/templates/prd-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/project-brief-tmpl.yaml ====================
+==================== START: .semad-core/templates/project-brief-tmpl.yaml ====================
 template:
   id: project-brief-template-v2
   name: Project Brief
@@ -3918,9 +3968,9 @@ sections:
         title: PM Handoff
         content: |
           This Project Brief provides the full context for {{project_name}}. Please start in 'PRD Generation Mode', review the brief thoroughly to work with the user to create the PRD section by section as the template indicates, asking for any necessary clarification or suggesting improvements.
-==================== END: .bmad-core/templates/project-brief-tmpl.yaml ====================
+==================== END: .semad-core/templates/project-brief-tmpl.yaml ====================
 
-==================== START: .bmad-core/templates/story-tmpl.yaml ====================
+==================== START: .semad-core/templates/story-tmpl.yaml ====================
 ---
 # DETERMINISTIC STORY TEMPLATE v1.0
 # This template ensures predictable, traceable story generation
@@ -4023,6 +4073,52 @@ StoryContract:
     exceptions_allowed:
       - "UI-only cosmetic changes with no logic"
     exception_requires: "explicit rationale in story"
+  
+  # DoR-Mini sufficiency fields (SM enforces via DoR gate)
+  objective: "{{OBJECTIVE_ONE_SENTENCE}}"
+  interfaces:
+    inbound:
+      {{#INTERFACES_INBOUND}}
+      - {{.}}
+      {{/INTERFACES_INBOUND}}
+    outbound:
+      {{#INTERFACES_OUTBOUND}}
+      - {{.}}
+      {{/INTERFACES_OUTBOUND}}
+  data_contracts:
+    {{#DATA_CONTRACTS}}
+    {{NAME}}:
+      {{#FIELDS}}
+      {{KEY}}: {{TYPE}}
+      {{/FIELDS}}
+    {{/DATA_CONTRACTS}}
+  state_changes:
+    tables:
+      {{#STATE_TABLES}}
+      - {{.}}
+      {{/STATE_TABLES}}
+    rules:
+      {{#STATE_RULES}}
+      - {{.}}
+      {{/STATE_RULES}}
+  constraints:
+    transport: "{{CONSTRAINT_TRANSPORT}}"
+    discovery: "{{CONSTRAINT_DISCOVERY}}"
+    security: "{{CONSTRAINT_SECURITY}}"
+    perf: "{{CONSTRAINT_PERF}}"
+  acceptance_tests:
+    {{#AT_CASES}}
+    - {{.}}
+    {{/AT_CASES}}
+  assumptions:
+    {{#ASSUMPTIONS}}
+    - {{.}}
+    {{/ASSUMPTIONS}}
+  done_signals:
+    {{#DONE_SIGNALS}}
+    - {{.}}
+    {{/DONE_SIGNALS}}
+  readiness_score_target: 90
   
   # Structured work breakdown for deterministic AC→Task→Test traceability
   workBreakdown:
@@ -4188,6 +4284,17 @@ As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
    - Verification: {{VERIFICATION_METHOD}}
 {{/ACCEPTANCE_CRITERIA_DETAILED}}
 
+## Definition of Ready (DoR-Mini)
+- [ ] Objective defined (single sentence)
+- [ ] Interfaces listed (inbound/outbound)
+- [ ] Data contracts specified (schemas for payloads)
+- [ ] State changes identified (tables/keys, rules)
+- [ ] Constraints stated (perf/platforms/protocols/versions)
+- [ ] Acceptance tests listed (5–8 black-box checks)
+- [ ] Assumptions frozen (A-IDs with change budget)
+- [ ] Done signals specified (logs/telemetry/UI markers)
+Target: {{DOR_TARGET}}
+
 ## Tasks / Subtasks
 # This section is rendered from StoryContract.workBreakdown to ensure 1:1 human+machine alignment
 {{#WB_TASKS}}
@@ -4208,31 +4315,111 @@ As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
 - {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
 {{/PERFORMANCE_CRITERIA}}
 
-### Security Requirements
-{{#SECURITY_REQUIREMENTS}}
-- {{REQUIREMENT}}  # Authentication, authorization, data protection
-{{/SECURITY_REQUIREMENTS}}
+  ### Security Requirements
+  {{#SECURITY_REQUIREMENTS}}
+  - {{REQUIREMENT}}  # Authentication, authorization, data protection
+  {{/SECURITY_REQUIREMENTS}}
 
-## Implementation Plan
-### Files to Create
-{{#FILES_TO_CREATE}}
-- `{{PATH}}`: {{PURPOSE}}
-{{/FILES_TO_CREATE}}
+## Inputs
+{{#STORY_INPUTS}}
+- {{.}}
+{{/STORY_INPUTS}}
+
+## Outputs
+{{#STORY_OUTPUTS}}
+- {{.}}
+{{/STORY_OUTPUTS}}
+
+## Integration Touchpoints
+{{#INTEGRATION_TOUCHPOINTS}}
+- {{.}}  # service/protocol + exact endpoint/topic/path (e.g., REST GET /v1/users/:id; Kafka topic user.updates)
+{{/INTEGRATION_TOUCHPOINTS}}
+
+  ## Implementation Plan
+  ### Files to Create
+  {{#FILES_TO_CREATE}}
+  - `{{PATH}}`: {{PURPOSE}}
+  {{/FILES_TO_CREATE}}
 
 ### Files to Modify
 {{#FILES_TO_MODIFY_DETAILED}}
 - `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
 {{/FILES_TO_MODIFY_DETAILED}}
 
-### Test Requirements
-{{#TEST_REQUIREMENTS}}
-- {{TEST_TYPE}}: {{DESCRIPTION}}
-  - File: `{{TEST_FILE}}`
-  - Coverage: {{COVERAGE_TARGET}}%
-{{/TEST_REQUIREMENTS}}
+  ### Test Requirements
+  {{#TEST_REQUIREMENTS}}
+  - {{TEST_TYPE}}: {{DESCRIPTION}}
+    - File: `{{TEST_FILE}}`
+    - Coverage: {{COVERAGE_TARGET}}%
+  {{/TEST_REQUIREMENTS}}
 
-## Risk Assessment
-**Risk Level**: {{RISK_LEVEL}}  # Low, Medium, High, Critical
+## Flow Chart
+### Existing Artifacts
+- Files:
+  {{#FC_EXISTING_FILES}}
+  - {{.}}
+  {{/FC_EXISTING_FILES}}
+- Classes:
+  {{#FC_EXISTING_CLASSES}}
+  - {{.}}
+  {{/FC_EXISTING_CLASSES}}
+- Functions:
+  {{#FC_EXISTING_FUNCTIONS}}
+  - {{.}}
+  {{/FC_EXISTING_FUNCTIONS}}
+
+### New Work
+- Files:
+  {{#FC_NEW_FILES}}
+  - {{.}}
+  {{/FC_NEW_FILES}}
+- Components/Modules:
+  {{#FC_NEW_COMPONENTS}}
+  - {{.}}
+  {{/FC_NEW_COMPONENTS}}
+
+### Execution Steps
+{{#FC_STEPS}}
+1. {{.}}
+{{/FC_STEPS}}
+
+### Output Sinks
+{{#FC_OUTPUT_SINKS}}
+- {{.}}  # e.g., logs, telemetry, DB tables, external endpoints
+{{/FC_OUTPUT_SINKS}}
+
+### ASCII Flow (optional)
+```
+[{{FC_ENTRY}}] -> [{{FC_STEP1}}] -> [{{FC_STEP2}}] -> [{{FC_OUTPUT}}]
+```
+
+## Sequence Diagram (ASCII)
+```
+{{SEQ_ACTOR_1}} -> {{SEQ_ACTOR_2}}: {{SEQ_MSG_1}}
+{{SEQ_ACTOR_2}} -> {{SEQ_ACTOR_3}}: {{SEQ_MSG_2}}
+{{SEQ_ACTOR_3}} --> {{SEQ_ACTOR_1}}: {{SEQ_RESP_1}}
+```
+
+## Debug Logging Requirements
+- Naming: Use stable, namespaced event names (e.g., APP_FEATURE_ACTION)
+- Purpose: Verify implementation progress and behavior via structured logs/telemetry
+
+{{#DEBUG_LOG_EVENTS}}
+- Event: {{NAME}}
+  - Level: {{LEVEL}}  # debug|info|warn|error
+  - When: {{WHEN}}    # precise trigger condition
+  - Fields:
+    {{#FIELDS}}
+    - {{KEY}}: {{TYPE}}{{#REQUIRED}} (required){{/REQUIRED}}
+    {{/FIELDS}}
+  - Sample:
+    ```json
+    {{SAMPLE_JSON}}
+    ```
+{{/DEBUG_LOG_EVENTS}}
+
+  ## Risk Assessment
+  **Risk Level**: {{RISK_LEVEL}}  # Low, Medium, High, Critical
 
 ### Identified Risks
 {{#RISKS}}
@@ -4265,9 +4452,9 @@ As a {{PERSONA}}, I want {{FUNCTIONALITY}} so that {{BUSINESS_VALUE}}.
 
 ---
 # END OF DETERMINISTIC STORY TEMPLATE
-==================== END: .bmad-core/templates/story-tmpl.yaml ====================
+==================== END: .semad-core/templates/story-tmpl.yaml ====================
 
-==================== START: .bmad-core/data/bmad-kb.md ====================
+==================== START: .semad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
 
 ## Overview
@@ -5071,9 +5258,9 @@ Use the **expansion-creator** pack to build your own:
 - **Documentation**: Check `docs/` folder for project-specific context
 - **Community**: Discord and GitHub resources available for support
 - **Contributing**: See `CONTRIBUTING.md` for full guidelines
-==================== END: .bmad-core/data/bmad-kb.md ====================
+==================== END: .semad-core/data/bmad-kb.md ====================
 
-==================== START: .bmad-core/data/brainstorming-techniques.md ====================
+==================== START: .semad-core/data/brainstorming-techniques.md ====================
 # Brainstorming Techniques Data
 
 ## Creative Expansion
@@ -5110,9 +5297,9 @@ Use the **expansion-creator** pack to build your own:
 18. **Resource Constraints**: "What if you had only $10 and 1 hour?"
 19. **Metaphor Mapping**: Use extended metaphors to explore solutions
 20. **Question Storming**: Generate questions instead of answers first
-==================== END: .bmad-core/data/brainstorming-techniques.md ====================
+==================== END: .semad-core/data/brainstorming-techniques.md ====================
 
-==================== START: .bmad-core/data/elicitation-methods.md ====================
+==================== START: .semad-core/data/elicitation-methods.md ====================
 # Elicitation Methods Data
 
 ## Core Reflective Methods
@@ -5247,15 +5434,15 @@ Use the **expansion-creator** pack to build your own:
 - Acknowledge choice to finalize current work
 - Accept output as-is or move to next step
 - Prepare to continue without additional elicitation
-==================== END: .bmad-core/data/elicitation-methods.md ====================
+==================== END: .semad-core/data/elicitation-methods.md ====================
 
-==================== START: .bmad-core/data/technical-preferences.md ====================
+==================== START: .semad-core/data/technical-preferences.md ====================
 # User-Defined Preferred Patterns and Preferences
 
 None Listed
-==================== END: .bmad-core/data/technical-preferences.md ====================
+==================== END: .semad-core/data/technical-preferences.md ====================
 
-==================== START: .bmad-core/utils/track-progress.js ====================
+==================== START: .semad-core/utils/track-progress.js ====================
 #!/usr/bin/env node
 
 /**
@@ -5299,8 +5486,19 @@ if (fs.existsSync(contextFile)) {
 const timestamp = new Date().toISOString();
 
 switch (operation) {
-  case 'observation':
-    const observation = args.join(' ');
+  case 'observation': {
+    const raw = args.join(' ');
+    let observation = raw;
+    let meta = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed) {
+        meta = parsed;
+        if (typeof parsed.message === 'string') {
+          observation = parsed.message;
+        }
+      }
+    } catch (_) { /* keep raw string */ }
     // Update context
     context.lastObservation = observation;
     context.lastUpdated = timestamp;
@@ -5310,16 +5508,24 @@ switch (operation) {
       timestamp,
       type: 'observation',
       agent,
-      content: observation
+      content: observation,
+      meta
     };
     fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
     
     console.log(`[${agent}] Observation recorded: ${observation}`);
-    break;
+    break; }
     
-  case 'decision':
-    const decision = args[0];
-    const rationale = args.slice(1).join(' ');
+  case 'decision': {
+    let decision = args[0];
+    let rationale = args.slice(1).join(' ');
+    try {
+      const parsed = JSON.parse(args.join(' '));
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.decision) decision = parsed.decision;
+        if (parsed.rationale) rationale = parsed.rationale;
+      }
+    } catch (_) { /* keep raw pieces */ }
     
     // Update context
     if (!context.decisions) context.decisions = [];
@@ -5337,10 +5543,17 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
     
     console.log(`[${agent}] Decision recorded: ${decision}`);
-    break;
+    break; }
     
-  case 'keyfact':
-    const fact = args.join(' ');
+  case 'keyfact': {
+    const raw = args.join(' ');
+    let fact = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.fact) {
+        fact = parsed.fact;
+      }
+    } catch (_) { /* keep raw string */ }
     
     // Append to log
     const factEntry = {
@@ -5352,7 +5565,7 @@ switch (operation) {
     fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
     
     console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break;
+    break; }
     
   case 'show':
     console.log('Current context:', JSON.stringify(context, null, 2));
@@ -5368,9 +5581,9 @@ switch (operation) {
 if (operation !== 'show') {
   fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
 }
-==================== END: .bmad-core/utils/track-progress.js ====================
+==================== END: .semad-core/utils/track-progress.js ====================
 
-==================== START: .bmad-core/utils/simple-task-tracker.js ====================
+==================== START: .semad-core/utils/simple-task-tracker.js ====================
 /**
  * Simple Task Tracker
  * A lightweight in-memory task tracking system for agent workflows
@@ -5696,6 +5909,26 @@ class TaskTracker {
   }
 
   /**
+   * Save current tasks to .ai/dev_tasks.json (for external tooling)
+   * @param {string} filePath
+   * @returns {string} saved file path
+   */
+  saveDevTasks(filePath = '.ai/dev_tasks.json') {
+    const fs = require('fs');
+    const path = require('path');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const data = {
+      workflow: this.workflow,
+      tasks: this.workflow?.tasks || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    this.log('Dev tasks saved to: ' + filePath, 'info');
+    return filePath;
+  }
+
+  /**
    * Get elapsed time since workflow start
    * @returns {string} Formatted elapsed time
    */
@@ -5764,4 +5997,4 @@ class TaskTracker {
 
 // Export for use in agents
 module.exports = TaskTracker;
-==================== END: .bmad-core/utils/simple-task-tracker.js ====================
+==================== END: .semad-core/utils/simple-task-tracker.js ====================

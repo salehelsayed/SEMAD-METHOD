@@ -8,7 +8,7 @@ This document provides a comprehensive API reference for SEMAD-METHOD's programm
 
 ### SimpleTaskTracker
 
-**Location**: `bmad-core/utils/simple-task-tracker.js`
+**Location**: `semad-core/utils/simple-task-tracker.js`
 
 **Purpose**: Lightweight in-memory task tracking for agent workflows
 
@@ -73,7 +73,7 @@ await tracker.persist();
 
 ### ProgressLogger
 
-**Location**: `bmad-core/utils/track-progress.js`
+**Location**: `semad-core/utils/track-progress.js`
 
 **Purpose**: Persistent observation and decision logging
 

@@ -8,8 +8,8 @@
 const path = require('path');
 const fs = require('fs').promises;
 const yaml = require('js-yaml');
-const WorkflowExecutor = require('../../bmad-core/utils/workflow-executor');
-const AgentPermissionsValidator = require('../../bmad-core/utils/agent-permissions');
+const WorkflowExecutor = require('../../semad-core/utils/workflow-executor');
+const AgentPermissionsValidator = require('../../semad-core/utils/agent-permissions');
 const { expect } = require('chai');
 const sinon = require('sinon');
 

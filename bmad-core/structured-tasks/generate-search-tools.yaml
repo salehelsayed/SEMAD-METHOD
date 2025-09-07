@@ -9,7 +9,7 @@ inputs:
   mappingsPath:
     type: string
     description: Path to tool mappings file
-    default: bmad-core/data/tool-mappings.yaml
+    default: semad-core/data/tool-mappings.yaml
 outputs:
   searchToolsFile:
     type: string

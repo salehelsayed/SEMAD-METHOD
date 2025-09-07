@@ -51,7 +51,7 @@ This is a test story for validation.
     };
     
     // Load the task
-    const taskData = await taskRunner.taskLoader.loadTask('bmad-core/structured-tasks/validate-story-contract.yaml');
+    const taskData = await taskRunner.taskLoader.loadTask('semad-core/structured-tasks/validate-story-contract.yaml');
     const task = taskData.data;
     
     // Execute each step manually

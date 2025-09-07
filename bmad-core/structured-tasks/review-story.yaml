@@ -33,6 +33,30 @@ steps:
         elicit: false
       - description: If executing tests during review, prefer bounded concurrency using the project's test runner (e.g., jest --maxWorkers=50%)
         elicit: false
+  - id: step2a
+    name: Brownfield Integration Review
+    description: Verify integration safety for stories that touch integration points and compliance with slice type.
+    actions:
+      - description: Parse StoryContract in the story file to read `traceability.integrationPointIds` and `story.sliceType`
+        elicit: false
+      - description: If integrationPointIds present, verify story contains `integrationVerification` section (IV1/IV2/IV3) and `rollbackPlan` section with steps and verification
+        elicit: true
+      - description: If either required section is missing (integrationVerification or rollbackPlan), TREAT AS BLOCKING — do not approve this review; later in Final Status set Status to "Needs Fixes" and list missing section(s) under QA Results
+        elicit: false
+      - description: If story.sliceType is `flag` or `probe`, verify `featureFlag.defaultState` is `off` in story and/or config
+        elicit: true
+      - description: If story.sliceType is `probe`, scan implementation for suspicious write operations (e.g., DB mutations, external POST/PUT/DELETE). Flag for developer confirmation if found
+        elicit: true
+      - description: If story.sliceType is `int-flow`, confirm the story scope is one INT × one flow variant and guarded by the feature flag. Flag broad changes for SM/Dev follow-up
+        elicit: true
+      - description: If performanceBudget present (p95/p99), verify tests/benchmarks or telemetry hooks exist to validate it
+        elicit: true
+  - id: step2b
+    name: Enforce Blocking Conditions
+    description: If Brownfield integration safety mandatory sections are missing for INT stories, this review MUST NOT be approved.
+    actions:
+      - description: If integrationPointIds present AND (integrationVerification missing OR rollbackPlan missing), mark this as a CRITICAL issue and proceed to set Final Status to "Needs Fixes" in step 6
+        elicit: false
   - id: step3
     name: Code Quality Analysis
     description: Perform automated code quality analysis on implemented files
@@ -90,7 +114,9 @@ steps:
       - description: Update ONLY the QA Results section with the review findings, including quality metrics
         elicit: false
       - description: Determine if implementation is approved based on review findings and quality thresholds
-        elicit: false
+        elicit: true
+      - description: 'Final decision: Approve implementation? (yes/no)'
+        elicit: true
       - description: Update Status section to "Done" if approved with no issues found and quality standards met
         elicit: false
       - description: Update Status section to "Needs Fixes" if any recommendations, issues, or quality violations found

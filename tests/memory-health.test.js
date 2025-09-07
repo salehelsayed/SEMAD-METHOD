@@ -23,9 +23,9 @@ const {
   clearHealthStatus,
   SEVERITY,
   CHECK_TYPES
-} = require('../bmad-core/utils/memory-health');
+} = require('../semad-core/utils/memory-health');
 
-const AgentRunner = require('../bmad-core/utils/agent-runner');
+const AgentRunner = require('../semad-core/utils/agent-runner');
 
 // Test utilities
 let testTempDir;

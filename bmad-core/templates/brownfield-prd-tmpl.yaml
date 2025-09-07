@@ -137,7 +137,7 @@ sections:
         instruction: Each Requirement will be a bullet markdown with identifier starting with NFR. Include constraints from existing system
         examples:
           - "NFR1: Enhancement must maintain existing performance characteristics and not exceed current memory usage by more than 20%."
-      - id: compatibility
+  - id: compatibility
         title: Compatibility Requirements
         instruction: Critical for brownfield - what must remain compatible
         type: numbered-list
@@ -152,6 +152,14 @@ sections:
             template: "CR3: {{ui_ux_consistency}}"
           - id: cr4
             template: "CR4: {{integration_compatibility}}"
+          - id: cr5
+            template: "CR5: Latency budget (p95/p99) {{latency_budget}}"
+          - id: cr6
+            template: "CR6: Error budget / availability {{error_budget}}"
+          - id: cr7
+            template: "CR7: Throughput/capacity expectations {{throughput_budget}}"
+          - id: cr8
+            template: "CR8: Backward-compatible contract/schema requirement {{schema_compatibility}}"
 
   - id: ui-enhancement-goals
     title: User Interface Enhancement Goals
@@ -194,6 +202,13 @@ sections:
           **API Integration Strategy**: {{api_integration}}
           **Frontend Integration Strategy**: {{frontend_integration}}
           **Testing Integration Strategy**: {{testing_integration}}
+      - id: integration-surfaces
+        title: Integration Surfaces
+        instruction: Map all components and interfaces involved with owners and code references; classify delta and budgets.
+        template: |
+          | Component | Interface/Port | Owner | Delta(existing|extend|new) | ContractRef | SourceRef | CompatibilityBudget | Risk |
+          |---|---|---|---|---|---|---|---|
+          | {{component}} | {{interface}} | {{owner}} | {{delta}} | {{contract_ref}} | {{source_ref}} | {{compat_budget}} | {{risk}} |
       - id: code-organization
         title: Code Organization and Standards
         instruction: Based on existing project analysis, define how new code will fit existing patterns
@@ -210,6 +225,15 @@ sections:
           **Deployment Strategy**: {{deployment_strategy}}
           **Monitoring and Logging**: {{monitoring_logging}}
           **Configuration Management**: {{config_management}}
+      - id: rollout-toggle-plan
+        title: Rollout and Feature Toggle Plan
+        instruction: Define safe rollout and rollback with observability before enabling write paths.
+        template: |
+          **Feature Flag**: {{flag_name}} (default off)
+          **Canary Strategy**: {{canary_strategy}} (e.g., 10% → 50% → 100%)
+          **Kill Switch**: {{kill_switch_mechanism}}
+          **Observability Hooks**: {{metrics_dashboards_alerts}}
+          **Rollback Plan**: {{rollback_plan}}
       - id: risk-assessment
         title: Risk Assessment and Mitigation
         instruction: |

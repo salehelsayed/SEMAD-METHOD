@@ -4,8 +4,8 @@ const { execSync } = require('child_process');
 
 describe('Core Config Validation', () => {
   const rootDir = path.join(__dirname, '..');
-  const coreConfigPath = path.join(rootDir, 'bmad-core', 'core-config.yaml');
-  const tempConfigPath = path.join(rootDir, 'bmad-core', 'core-config.yaml.backup');
+  const coreConfigPath = path.join(rootDir, 'semad-core', 'core-config.yaml');
+  const tempConfigPath = path.join(rootDir, 'semad-core', 'core-config.yaml.backup');
 
   describe('Missing core-config.yaml error handling', () => {
     beforeEach(() => {
@@ -41,7 +41,7 @@ describe('Core Config Validation', () => {
       // Ensure the file is missing
       expect(fs.existsSync(coreConfigPath)).toBe(false);
 
-      const ModuleResolver = require('../bmad-core/utils/module-resolver');
+      const ModuleResolver = require('../semad-core/utils/module-resolver');
       
       // The resolver should handle missing config gracefully
       const result = ModuleResolver.resolveSchemaPath('someSchema', rootDir);
@@ -77,7 +77,7 @@ describe('Core Config Validation', () => {
   });
 
   describe('Correct core-config.yaml path usage', () => {
-    test('should load core-config.yaml from bmad-core directory', () => {
+    test('should load core-config.yaml from semad-core directory', () => {
       // Verify the file exists at the correct location
       expect(fs.existsSync(coreConfigPath)).toBe(true);
 
@@ -89,9 +89,9 @@ describe('Core Config Validation', () => {
       expect(runner.coreConfig).toBeDefined();
     });
 
-    test('should not reference .bmad-core directory', () => {
-      // Check that no code references the incorrect .bmad-core path
-      const incorrectPath = path.join(rootDir, '.bmad-core', 'core-config.yaml');
+    test('should not reference .semad-core directory', () => {
+      // Check that no code references the incorrect .semad-core path
+      const incorrectPath = path.join(rootDir, '.semad-core', 'core-config.yaml');
       expect(fs.existsSync(incorrectPath)).toBe(false);
     });
   });

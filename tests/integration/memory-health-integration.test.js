@@ -11,13 +11,13 @@ const os = require('os');
 
 // Import components
 const WorkflowOrchestrator = require('../../tools/workflow-orchestrator');
-const AgentRunner = require('../../bmad-core/utils/agent-runner');
+const AgentRunner = require('../../semad-core/utils/agent-runner');
 const {
   performHealthCheck,
   getAggregatedHealthStatus,
   clearHealthStatus,
   SEVERITY
-} = require('../../bmad-core/utils/memory-health');
+} = require('../../semad-core/utils/memory-health');
 
 // Test utilities
 let testTempDir;
@@ -32,7 +32,7 @@ describe('Memory Health Integration Tests', () => {
     originalCwd = process.cwd();
     
     // Set up test project structure
-    const bmadCoreDir = path.join(testTempDir, 'bmad-core');
+    const bmadCoreDir = path.join(testTempDir, 'semad-core');
     const utilsDir = path.join(bmadCoreDir, 'utils');
     const workflowsDir = path.join(bmadCoreDir, 'workflows');
     const aiDir = path.join(testTempDir, '.ai');
