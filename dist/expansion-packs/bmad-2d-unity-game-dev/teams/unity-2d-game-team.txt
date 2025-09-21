@@ -3896,15 +3896,17 @@ This knowledge base provides the foundation for effective game development using
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const WorkingMemoryStore = require('./working-memory-store');
 
 class SharedContextManager {
   constructor(baseDirectory = '.ai') {
     this.baseDirectory = path.resolve(baseDirectory);
     this.contextFilePath = path.join(this.baseDirectory, 'shared-context.json');
-    this.userInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
+    this.legacyUserInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
     this.contextCache = null;
     this.contextCacheTimestamp = null;
     this.CACHE_TTL = 30000; // 30 seconds
+    this.memoryStore = new WorkingMemoryStore(path.join(this.baseDirectory, 'working-memory'));
   }
 
   /**
@@ -3932,17 +3934,19 @@ class SharedContextManager {
     try {
       // Ensure base directory exists
       await fs.mkdir(this.baseDirectory, { recursive: true });
-      
+
       // Initialize context file if it doesn't exist
       if (!(await this.fileExists(this.contextFilePath))) {
         await this.resetContext();
       }
-      
-      // Initialize user interactions file if it doesn't exist
-      if (!(await this.fileExists(this.userInteractionsPath))) {
-        await this.resetUserInteractions();
+
+      await this.memoryStore.initialize();
+
+      // Migrate legacy interaction store if present
+      if (await this.fileExists(this.legacyUserInteractionsPath)) {
+        await this.migrateLegacyInteractions();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Failed to initialize SharedContextManager:', error);
@@ -4001,7 +4005,8 @@ class SharedContextManager {
    * Reset user interactions log
    */
   async resetUserInteractions() {
-    const initialInteractions = {
+    await this.memoryStore.resetAll();
+    return {
       sessionId: this.generateSessionId(),
       createdAt: new Date().toISOString(),
       interactions: [],
@@ -4011,11 +4016,34 @@ class SharedContextManager {
         topicsSummary: []
       }
     };
-    
-    await this.retryWithBackoff(() => 
-      fs.writeFile(this.userInteractionsPath, JSON.stringify(initialInteractions, null, 2))
-    );
-    return initialInteractions;
+  }
+
+  /**
+   * Migrate interactions from legacy single-file storage to chunked store
+   */
+  async migrateLegacyInteractions() {
+    try {
+      const raw = await fs.readFile(this.legacyUserInteractionsPath, 'utf8');
+      const legacy = JSON.parse(raw);
+      const interactions = Array.isArray(legacy?.interactions) ? legacy.interactions : [];
+
+      const ordered = interactions
+        .slice()
+        .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
+      for (const interaction of ordered) {
+        if (!interaction.id) {
+          interaction.id = `${interaction.agentName || 'agent'}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`;
+        }
+        const agentName = interaction.agentName || 'unknown';
+        await this.memoryStore.appendInteraction(agentName, interaction);
+      }
+
+      await fs.rm(this.legacyUserInteractionsPath, { force: true });
+      console.log('Migrated legacy user interactions into chunked working-memory store.');
+    } catch (error) {
+      console.error('Failed to migrate legacy interactions:', error);
+    }
   }
 
   /**
@@ -4110,28 +4138,7 @@ class SharedContextManager {
         importance: options.importance || 'medium'
       };
 
-      // Load current interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Add new interaction
-      interactions.interactions.push(interaction);
-      
-      // Update summary statistics
-      interactions.summary.totalInteractions++;
-      if (!interactions.summary.agentBreakdown[agentName]) {
-        interactions.summary.agentBreakdown[agentName] = 0;
-      }
-      interactions.summary.agentBreakdown[agentName]++;
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      // Update shared context with this interaction
+      await this.memoryStore.appendInteraction(agentName, interaction);
       await this.updateContextWithUserInput(agentName, interaction);
       
       return interaction;
@@ -4288,30 +4295,25 @@ class SharedContextManager {
    */
   async confirmUserResponse(interactionId, agentName, confirmationText) {
     try {
-      // Load interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Find the interaction
-      const interaction = interactions.interactions.find(i => i.id === interactionId);
-      if (!interaction) {
-        throw new Error(`Interaction ${interactionId} not found`);
+      const updated = await this.memoryStore.updateInteraction(agentName, interactionId, interaction => {
+        const confirmationAttempts = (interaction.userResponse.confirmationAttempts || 0) + 1;
+        return {
+          ...interaction,
+          userResponse: {
+            ...interaction.userResponse,
+            confirmed: true,
+            confirmationAttempts,
+            confirmationText,
+            confirmedAt: new Date().toISOString()
+          }
+        };
+      });
+
+      if (!updated) {
+        throw new Error(`Interaction ${interactionId} not found for agent ${agentName}`);
       }
-      
-      // Update confirmation status
-      interaction.userResponse.confirmed = true;
-      interaction.userResponse.confirmationAttempts++;
-      interaction.userResponse.confirmationText = confirmationText;
-      interaction.userResponse.confirmedAt = new Date().toISOString();
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      return interaction;
+
+      return updated;
     } catch (error) {
       console.error('Failed to confirm user response:', error);
       return null;
@@ -4357,38 +4359,28 @@ class SharedContextManager {
    */
   async getRelevantInteractions(agentName, options = {}) {
     try {
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      let relevantInteractions = interactions.interactions;
-      
-      // Filter by agent if specified
-      if (options.agentSpecific !== false) {
-        relevantInteractions = relevantInteractions.filter(i => i.agentName === agentName);
+      const includeAllAgents = options.agentSpecific === false || agentName === 'all';
+      const rawAgents = includeAllAgents
+        ? await this.memoryStore.listAgentDirectories()
+        : [agentName];
+      const targetAgents = rawAgents.filter(name => Boolean(name) && name !== 'all');
+
+      if (targetAgents.length === 0) {
+        return [];
       }
-      
-      // Filter by context if specified
-      if (options.storyId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.storyId === options.storyId);
-      }
-      
-      if (options.epicId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.epicId === options.epicId);
-      }
-      
-      // Sort by timestamp (most recent first)
-      relevantInteractions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
-      // Limit results if specified
-      if (options.limit) {
-        relevantInteractions = relevantInteractions.slice(0, options.limit);
-      }
-      
-      return relevantInteractions;
+
+      const filters = {
+        storyId: options.storyId,
+        epicId: options.epicId,
+        phase: options.phase
+      };
+
+      const interactions = await this.memoryStore.getInteractions(targetAgents, {
+        limit: options.limit,
+        filters
+      });
+
+      return interactions;
     } catch (error) {
       console.error('Failed to get relevant interactions:', error);
       return [];
@@ -4500,28 +4492,9 @@ class SharedContextManager {
    */
   async cleanup(olderThanDays = 7) {
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-      
-      // Clean up interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      const filteredInteractions = interactions.interactions.filter(i => 
-        new Date(i.timestamp) > cutoffDate
-      );
-      
-      interactions.interactions = filteredInteractions;
-      interactions.summary.totalInteractions = filteredInteractions.length;
-      
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      console.log(`Cleaned up ${interactions.interactions.length - filteredInteractions.length} old interactions`);
-      
+      const olderThanMs = olderThanDays * 24 * 60 * 60 * 1000;
+      await this.memoryStore.cleanup({ olderThanMs });
+      console.log('Cleaned up old interactions from working-memory store');
       return true;
     } catch (error) {
       console.error('Failed to cleanup old interactions:', error);
@@ -6927,21 +6900,38 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
+
     - agent: sm
       action: create_story
       creates: story.md
-      requires: sharded_docs_or_brownfield_docs
+      requires: sharded_docs
       repeats: for_each_epic_or_enhancement
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_story_created
       notes: |
-        Story creation cycle:
-        - For sharded PRD: @sm → *create (uses create-next-story)
-        - For brownfield docs: @sm → use create-brownfield-story task
-        - Creates story from available documentation
+        Story creation cycle (ECM-aware, DoR-gated):
+        - SM Agent (New Chat): @sm → *create (uses create-next-story)
+        - Uses EpicContract + ECM to drive thin slices (flag → probe → 1 INT × 1 flow)
+        - Creates story from sharded docs/epics
         - Story starts in "Draft" status
-        - May require additional context gathering for brownfield
+        - DoR-mini gate and StoryContract validation enforced
 
     - agent: analyst/pm
       action: review_draft_story
@@ -7196,6 +7186,23 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -7416,6 +7423,23 @@ workflow:
         Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
+
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
 
     - agent: sm
       action: create_story
@@ -7733,6 +7757,33 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      context_includes:
+        - .ai/handoff-context.json
+        - prd_shards
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Runs tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Uses docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+        - PO fills ECM rows and traceability; assigns epicId conventions (EP-<slug>)
+
+    - agent: pm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use structured task pm-validate-epic.yaml for each epic (or run npm run validate:epic -- --file <epic.md>)
+        - Ensure 100% REQ/INT coverage in ECM (tools/ecm-validate.js)
+
     - agent: sm
       orchestrated: true
       handoff_from: orchestrator
@@ -7876,6 +7927,8 @@ workflow:
         J --> ORCH
         I -->|No| ORCH
         ORCH --> K[po: shard documents]
+        K --> K2[po: create epics from PRD]
+        K2 --> K3[pm: validate epics]
         K --> ORCH
         
         %% Development Phase - Hub and Spoke Pattern
@@ -8041,6 +8094,22 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use pm-validate-epic.yaml or npm run validate:epic -- --file <epic.md>
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -8140,6 +8209,8 @@ workflow:
         G --> H{PO finds issues?}
         H -->|Yes| I[Return to relevant agent for fixes]
         H -->|No| J[po: shard documents]
+        J --> J2[po: create epics from PRD]
+        J2 --> J3[pm: validate epics]
         I --> G
         
         J --> K[sm: create story]
@@ -8293,6 +8364,22 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use pm-validate-epic.yaml or npm run validate:epic -- --file <epic.md>
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -8397,6 +8484,8 @@ workflow:
         H --> I{PO finds issues?}
         I -->|Yes| J[Return to relevant agent for fixes]
         I -->|No| K[po: shard documents]
+        K --> K2[po: create epics from PRD]
+        K2 --> K3[pm: validate epics]
         J --> H
         
         K --> L[sm: create story]

@@ -4,7 +4,6 @@ const yaml = require('js-yaml');
 const { execSync } = require('child_process');
 
 // Import system modules
-const { storeMemorySnippet, retrieveMemory } = require('../semad-core/utils/qdrant');
 const { updateWorkingMemory, getWorkingMemory } = require('../semad-core/agents/index');
 const { planAdaptation } = require('../semad-core/tools/dynamic-planner');
 const StoryContractValidator = require('../semad-core/utils/story-contract-validator');
@@ -132,8 +131,8 @@ describe('Comprehensive Backend Validation - SEMAD-METHOD', () => {
     });
   });
 
-  describe('TC014: Generate and Ingest Search Tools into Qdrant', () => {
-    test('search tools are generated from PRD and ingested into Qdrant', async () => {
+  describe('TC014: Generate search tools with local ingestion plan', () => {
+    test('search tools are generated from PRD with local ingestion plan', async () => {
       const prdPath = path.join(rootDir, 'PRD.md');
       const searchToolsOutput = path.join(testOutputDir, 'test-search-tools.yaml');
       
@@ -154,13 +153,10 @@ describe('Comprehensive Backend Validation - SEMAD-METHOD', () => {
         expect(Array.isArray(searchTools.searchTools)).toBe(true);
         expect(searchTools.searchTools.length).toBeGreaterThan(0);
 
-        // Test Qdrant ingestion (if available)
-        if (searchTools.searchTools.length > 0) {
-          const testSnippet = searchTools.searchTools[0];
-          const storeResult = await storeMemorySnippet('test-search-ingestion', testSnippet);
-          // Qdrant may not be available in test environment, so we don't require success
-          console.log('Qdrant store result:', storeResult ? 'success' : 'skipped (no Qdrant)');
-        }
+        expect(searchTools.local_ingestion_plan).toBeDefined();
+        expect(searchTools.local_ingestion_plan.output_directory).toBe('.ai/doc-ingestion');
+        expect(Array.isArray(searchTools.local_ingestion_plan.tasks)).toBe(true);
+        expect(searchTools.local_ingestion_plan.tasks.map(t => t.task)).toContain('ingest-documentation');
       } catch (error) {
         console.warn('Search tools generation test failed:', error.message);
         // Don't fail test if external dependencies are missing
@@ -742,7 +738,7 @@ description: "This is malformed
       console.log('  ✓ YAML Parsing and Validation');
       console.log('  ✓ Working Memory Management');
       console.log('  ✓ Dynamic Task Planning');
-      console.log('  ✓ Search Tools and Qdrant Integration');
+      console.log('  ✓ Search Tools and Local Documentation Cache');
       console.log('  ✓ Story Contract Validation');
       console.log('  ✓ Concurrency and Race Conditions');
       console.log('  ✓ Error Handling and Fallbacks');

@@ -1,0 +1,65 @@
+name: FRONTEND DESIGN & IMPLEMENTATION [[FRONTEND ONLY]]
+items:
+  - description: Framework & Core Libraries align with main architecture document
+    checked: false
+  - description: Component Architecture (e.g., Atomic Design) is clearly described
+    checked: false
+  - description: State Management Strategy is appropriate for application complexity
+    checked: false
+  - description: Data Flow patterns are consistent and clear
+    checked: false
+  - description: Styling Approach is defined and tooling specified
+    checked: false
+  - description: Directory structure is clearly documented with ASCII diagram
+    checked: false
+  - description: Component organization follows stated patterns
+    checked: false
+  - description: File naming conventions are explicit
+    checked: false
+  - description: Structure supports chosen framework's best practices
+    checked: false
+  - description: Clear guidance on where new components should be placed
+    checked: false
+  - description: Component template/specification format is defined
+    checked: false
+  - description: Component props, state, and events are well-documented
+    checked: false
+  - description: Shared/foundational components are identified
+    checked: false
+  - description: Component reusability patterns are established
+    checked: false
+  - description: Accessibility requirements are built into component design
+    checked: false
+  - description: API interaction layer is clearly defined
+    checked: false
+  - description: HTTP client setup and configuration documented
+    checked: false
+  - description: Error handling for API calls is comprehensive
+    checked: false
+  - description: Service definitions follow consistent patterns
+    checked: false
+  - description: Authentication integration with backend is clear
+    checked: false
+  - description: Routing strategy and library are specified
+    checked: false
+  - description: Route definitions table is comprehensive
+    checked: false
+  - description: Route protection mechanisms are defined
+    checked: false
+  - description: Deep linking considerations addressed
+    checked: false
+  - description: Navigation patterns are consistent
+    checked: false
+  - description: Image optimization strategies defined
+    checked: false
+  - description: Code splitting approach documented
+    checked: false
+  - description: Lazy loading patterns established
+    checked: false
+  - description: Re-render optimization techniques specified
+    checked: false
+  - description: Performance monitoring approach defined
+    checked: false
+notes: This entire section should be skipped for backend-only projects. Only evaluate if the project includes a user interface. When evaluating, ensure alignment between the main architecture document and the frontend-specific architecture document.
+metadata:
+  originalName: 4. FRONTEND DESIGN & IMPLEMENTATION [[FRONTEND ONLY]]

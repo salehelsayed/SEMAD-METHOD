@@ -773,6 +773,26 @@ class TaskRunner {
             );
           }
         }
+        // Execute namespaced actions declared in legacy field (e.g., action: "file:read")
+        else if (action.action && typeof action.action === 'string' && /^(file|yaml|script|logic|workflow):/.test(action.action)) {
+          try {
+            const tmpStep = { action: action.action };
+            if (action.inputs) tmpStep.inputs = action.inputs;
+            if (action.outputs) tmpStep.outputs = action.outputs;
+            const result = await this.executeNamespacedAction(tmpStep, context);
+            if (result && typeof result === 'object' && !Array.isArray(result)) {
+              Object.assign(context, result);
+            }
+          } catch (error) {
+            console.error(`Namespaced action failed: ${action.action}`, error.message);
+            throw new ActionExecutionError(
+              `Namespaced action failed: ${error.message}`,
+              action.action,
+              { inputs: action.inputs, outputs: action.outputs },
+              { error: error.message, stack: error.stack }
+            );
+          }
+        }
         // Execute command-based actions (old format)
         else if (action.action && typeof action.action === 'string') {
           // Replace template variables in the action

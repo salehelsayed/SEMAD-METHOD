@@ -10,7 +10,7 @@
  *  - Extracts candidates from:
  *      - StoryContract.filesToModify[].path
  *      - Body section "### Files to Modify" bullet list
- *      - Body tasks under Implementation Plan (simple bullet parsing)
+ *      - Body tasks under Implementation Checklist (simple checkbox parsing)
  *  - Determines scope by the top-level directory of file paths (first segment)
  *  - Assigns tasks to a scope if they reference a path; otherwise to a fallback scope "misc"
  *  - Writes per-scope story files following story naming conventions (append -<scope>)
@@ -67,10 +67,14 @@ function extractTasksFromBody(body) {
   let inImpl = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (/^##\s+Implementation\s+Plan/i.test(line)) { inImpl = true; continue; }
-    if (inImpl && /^##\s+/.test(line)) { break; }
-    if (inImpl && /^\s*-\s+/.test(line)) {
-      out.push(line.replace(/^\s*-\s+/, '').trim());
+    if (/^##\s+Implementation\s+Checklist/i.test(line)) { inImpl = true; continue; }
+    if (inImpl && /^##\s+/.test(line) && !/^##\s+Implementation\s+Checklist/i.test(line)) { break; }
+    if (!inImpl) continue;
+    if (/^###\s+/.test(line)) { continue; }
+    if (/^\s*-\s+/.test(line)) {
+      let task = line.replace(/^\s*-\s+/, '').trim();
+      task = task.replace(/^\[\s?\]\s*/,'');
+      out.push(task);
     }
   }
   return out;

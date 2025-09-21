@@ -80,7 +80,6 @@
     "dev:tests:preflight": "npm run preflight:tests",
     "init:memory": "node semad-core/scripts/init-memory.js",
     "generate:search-tools": "node scripts/generate-search-tools.js",
-    "ingest:search-results": "node scripts/ingest-to-qdrant.js",
     "validate:search-tools": "node scripts/validate-search-tools.js",
     "version:patch": "node tools/version-bump.js patch",
     "version:minor": "node tools/version-bump.js minor",
@@ -153,7 +152,6 @@
   },
   "dependencies": {
     "@kayvan/markdown-tree-parser": "^1.5.0",
-    "@qdrant/js-client-rest": "^1.15.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "bmad-method": "^4.30.3",

@@ -82,13 +82,6 @@ memory:
     includeAgentRole: true
     includeTimestamp: true
     customTags: []
-  qdrant:
-    enabled: true
-    host: "localhost"
-    port: 6333
-    collection: "bmad_agent_memory"
-    vectorSize: 384
-    healthCheckInterval: 30000
   delays:
     memoryLockTimeout: 5000
     batchTaskDelay: 500

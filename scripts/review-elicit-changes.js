@@ -12,8 +12,6 @@ const FALSE_POSITIVE_ACTIONS = [
   /^execute.*task.*update-working-memory/i,
   /^execute.*task.*retrieve-context/i,
   /^apply.*dynamic.*plan/i,
-  /^store.*in.*qdrant/i,
-  /^archive.*to.*qdrant/i,
   /^run.*validation.*script/i,
   /^execute.*script/i,
   /^verify.*file.*exists/i,

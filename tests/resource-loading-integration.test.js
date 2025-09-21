@@ -206,7 +206,6 @@ describe('Resource Loading Integration Tests', () => {
       // Verify tags
       expect(task.tags).toContain('memory');
       expect(task.tags).toContain('context-retrieval');
-      expect(task.tags).toContain('qdrant');
       
       // Verify required inputs
       expect(task.requiredInputs).toEqual(
@@ -226,8 +225,8 @@ describe('Resource Loading Integration Tests', () => {
       );
       
       // Verify execution steps
-      expect(task.executionSteps).toContain('Connect to Qdrant vector database');
-      expect(task.executionSteps).toContain('Generate embedding for the query');
+      expect(task.executionSteps).toContain('Retrieve related context from long-term memory');
+      expect(task.executionSteps).toContain('Provide recommendations for context usage');
       
       // Verify example usage
       expect(task.exampleUsage).toContain('retrieveMemory');

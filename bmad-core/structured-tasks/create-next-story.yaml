@@ -3,11 +3,10 @@ name: Create Next Story Task
 purpose: To identify the next logical story based on project progress and epic definitions, and then to prepare a comprehensive, self-contained, and actionable story file using the `Story Template`. This task ensures the story is enriched with all necessary technical context, requirements, and acceptance criteria, making it ready for efficient implementation by a Developer Agent with minimal need for additional research or finding its own context.
 requirements:
   - SHARDED DOCUMENTS REQUIRED: This task requires both PRD and Architecture documents to be sharded
-  - PRD must be split into epic files in docs/prd/ directory  
+  - PRD must be split into epic files in docs/prd/ directory
   - Architecture must be split into component files in docs/architecture/ directory
   - Will not work with monolithic documents - sharding provides better context management
 steps:
-  # Memory loading removed - no longer using memory functions
   - id: step0-simplified
     name: Initialize Context
     description: Initialize context for story creation
@@ -67,7 +66,7 @@ steps:
         elicit: false
       - description: If ECM present, select the next planned row (Status=planned, or without Story ID). Map REQ IDs and INT IDs from that row
         elicit: true
-      - description: Determine slice type for this epic in order: (a) Story 0: feature flag + telemetry only (if not yet created), (b) Story 1: probe/contract tests for INTs (read‑only; no state change) if not yet created, (c) Next ECM row: 1 INT × 1 flow variant per story
+      - description: 'Determine slice type for this epic in order: (a) Story 0: feature flag + telemetry only (if not yet created), (b) Story 1: probe/contract tests for INTs (read‑only; no state change) if not yet created, (c) Next ECM row: 1 INT × 1 flow variant per story'
         elicit: true
       - description: If no EpicContract/ECM found, proceed with legacy selection using sharded PRD files
         elicit: false
@@ -166,11 +165,11 @@ steps:
     name: Read Sharded Architecture Documents
     description: ''
     actions:
-      - description: 'Navigate to docs/architecture/ directory and read index.md first to understand the file structure and naming convention'
+      - description: Navigate to docs/architecture/ directory and read index.md first to understand the file structure and naming convention
         elicit: false
         metadata:
           originalIndent: 0
-      - description: 'The index.md should list all architecture files - use this as your guide to find the correct files'
+      - description: The index.md should list all architecture files - use this as your guide to find the correct files
         elicit: false
         metadata:
           originalIndent: 0
@@ -187,26 +186,26 @@ steps:
       Read architecture files based on story type. Files may use either naming convention:
       - Direct names: tech-stack.md, data-models.md, etc.
       - Numbered names: 03-technology-stack.md, 05-data-models.md, etc.
-      
+
       **For ALL Stories, read these topics (find by content, not exact filename):**
       - Technology stack / Tech stack (e.g., tech-stack.md OR 03-technology-stack.md)
       - Project structure / unified structure 
       - Coding standards
       - Testing strategy (e.g., testing-strategy.md OR 12-testing-strategy.md)
-      
+
       **For Backend/API Stories, additionally read:**
       - Data models (e.g., data-models.md OR 05-data-models.md)
       - Database schema
       - Backend architecture / Component architecture (e.g., 04-component-architecture.md)
       - API specifications (e.g., rest-api-spec.md OR 06-api-specifications.md)
       - External APIs
-      
+
       **For Frontend/UI Stories, additionally read:**
       - Frontend architecture / Component architecture (e.g., 04-component-architecture.md)
       - Components / UI components
       - Core workflows (e.g., core-workflows.md OR 07-core-workflows.md)
       - Data models (e.g., data-models.md OR 05-data-models.md)
-      
+
       **For Full-Stack Stories:** Read both Backend and Frontend sections above
     actions:
       - description: First check docs/architecture/index.md to understand the file structure and naming convention used
@@ -214,7 +213,7 @@ steps:
         metadata:
           originalIndent: 0
       - description: Based on the index, identify which files contain the required information for this story type
-        elicit: false  
+        elicit: false
         metadata:
           originalIndent: 0
       - description: Read the identified files, focusing on sections relevant to the current story
@@ -258,6 +257,19 @@ steps:
     metadata:
       level: 4
       originalNumber: '3.3'
+  - id: step8b-codebase-inventory
+    name: Scan Codebase for Existing Capabilities
+    description: Generate an inventory of existing utilities, services, components, hooks, tools, and tests to prevent re-implementation.
+    action: script:execute
+    inputs:
+      script: tools/sm/codebase-inventory.js
+      args: []
+    outputs:
+      exitCode: invExitCode
+      stdout: invMarkdown
+    metadata:
+      level: 4
+      originalNumber: '3.4'
   - id: parse-story
     name: Parse Story Requirements into StoryContract
     description: From the sharded PRD and architecture docs, extract endpoints, data models, file paths and acceptance criteria and construct a StoryContract YAML block.
@@ -340,6 +352,18 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
+      - description: 'Add a new subsection: "Existing Capabilities & Reuse". Summarize relevant items from `.ai/reports/sm/codebase-inventory.md` that can be reused for this story (utilities, services/APIs, components, hooks, tools, tests).'
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: Under Flow Chart → "Existing Artifacts", list paths of the most relevant existing files/classes/functions discovered by the inventory that align with this slice.
+        elicit: false
+        metadata:
+          originalIndent: 0
+      - description: If inventory suggests a matching utility/service already exists, update the workBreakdown to modify/extend it instead of creating a duplicate file.
+        elicit: true
+        metadata:
+          originalIndent: 2
       - description: 'Include ALL relevant technical details from Steps 2-3, organized by category:'
         elicit: false
         metadata:
@@ -378,6 +402,26 @@ steps:
           originalIndent: 2
       - description: 'If information for a category is not found in the architecture docs, explicitly state: "No specific guidance found in architecture docs"'
         elicit: false
+        metadata:
+          originalIndent: 2
+      - description: Populate the **Implementation Checklist** section with short category headers (e.g., Migration, DAO Updates, Tests, Telemetry) so related work stays grouped but each bullet remains atomic.
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: 'For every checklist entry, write a single action per checkbox in the format: Verb + concrete target + explicit success signal (example: "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it").'
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Convert any narrative hints from PRD or architecture into explicit checklist items rather than leaving the developer to infer the steps.
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Whenever extended plans exist (e.g., docs/stories/story-friend-reliability-8a-implementation-plan.md), add a Companion References bullet like "See <file>:<section>" while keeping the concise checklist in the main story.
+        elicit: true
+        metadata:
+          originalIndent: 2
+      - description: Use markdown checkboxes `[ ]` consistently across Implementation Checklist and Tasks/Subtasks so downstream agents can track completion programmatically.
+        elicit: true
         metadata:
           originalIndent: 2
       - description: '**`Tasks / Subtasks` section:**'
@@ -490,7 +534,6 @@ steps:
         elicit: false
         metadata:
           originalIndent: 2
-      # Memory saving removed - no longer using memory functions
   - id: dor-gate
     name: DoR Sufficiency Gate (SM)
     description: Enforce DoR-Mini with readiness scoring and stop rule. Locks story on pass.
@@ -508,9 +551,9 @@ steps:
         elicit: false
         action: workflow:conditional-halt
         inputs:
-          condition: {{dorExitCode !== 0}}
-          errorMessage: DoR gate not passed. See report: {{dorStdout}}
-inputs: {}
+          condition:
+            '[object Object]': null
+          errorMessage: 'DoR gate not passed. See report: {{dorStdout}}'
 outputs: {}
 metadata:
   originalSections:

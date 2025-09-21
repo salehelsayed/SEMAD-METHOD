@@ -41,8 +41,8 @@ steps:
         elicit: false
         action: workflow:conditional-halt
         inputs:
-          condition: {{genExit !== 0}}
-          errorMessage: Test generation failed. See details: {{genStdout}}
+          condition: "{{genExit !== 0}}"
+          errorMessage: "Test generation failed. See details: {{genStdout}}"
 
   - id: run-tests-red
     name: Run Tests (Expect Red)
@@ -75,4 +75,3 @@ notes: |
   - Use DevX3 to run this task 3 times for time-bounded agents to converge on green.
   - Tests are scoped to files referenced by acceptanceTestMatrix.
   - Pair with QA later for full validation.
-

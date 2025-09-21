@@ -113,6 +113,38 @@ integrationPoints:
     sourceRef: "email-service/src/publishers/reset.ts#sendResetEvent"
     version: "v2"
 
+storyBlueprints:
+  - storyId: ST-XXX-001
+    title: "Flag scaffolding for reset flow"
+    sliceType: flag # flag | probe | int-flow | chore
+    summary: "Ship feature flag + telemetry only"
+    reqIds: ["REQ-001"]
+    flowIds: ["FLOW-A"]
+    integrationPointIds: []
+    implementationChecklistSeed:
+      - group: "Feature Flag"
+        items:
+          - "Introduce feature flag auth.reset.enabled defaulting off in config and verify rollout toggle logs change"
+      - group: "Telemetry"
+        items:
+          - "Emit telemetry event auth.reset.flag_evaluation with flag state and confirm ingestion dashboard increments"
+    companionDocs:
+      - path: docs/stories/story-xxx-plan.md
+        section: Implementation Checklist
+  - storyId: ST-XXX-002
+    title: "Probe contract tests for reset API"
+    sliceType: probe
+    summary: "Add read-only contract tests"
+    reqIds: ["REQ-001", "REQ-002"]
+    flowIds: ["FLOW-A"]
+    integrationPointIds: ["INT-1"]
+    implementationChecklistSeed:
+      - group: "Contract Tests"
+        items:
+          - "Author contract test hitting POST /v1/auth/reset happy path against mock email service and assert 202 status"
+          - "Add rate limit test sending 6 requests/hour confirming 429 with throttle metric increment"
+    companionDocs: []
+
 acceptanceScenarios:
   - id: E2E-1
     name: "Successful reset request"
@@ -199,6 +231,8 @@ validation:
     requireReqIds: true
     requireFlowIds: true
     requireIntegrationPointIds: true
+    requireImplementationChecklistSeed: true
+    enforceCompanionDocReferences: true
   storyDoD:
     - "Acceptance criteria pass with tests"
     - "Contract tests passing for all integrationPointIds"
@@ -238,6 +272,12 @@ Mirror the YAML section in human-readable form for reviewers.
 
 ## End‑to‑End Flows (FLOW-*)
 Narrative of flows; reference components and actors.
+
+## Story Blueprints
+- For each planned story, enumerate sliceType (flag → telemetry only, probe → contract tests, int-flow → single INT × flow).
+- List reqIds, flowIds, integrationPointIds to guarantee traceability.
+- Provide an implementationChecklistSeed grouped by headers (Migration, DAO Updates, Tests, Telemetry, etc.) with single-action checkboxes that include success signals.
+- Reference any supporting design docs with `See <file>:<section>` so SM can surface them when generating stories.
 
 ## Integration Points
 Summarize APIs/events and owners.

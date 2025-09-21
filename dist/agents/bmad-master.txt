@@ -135,7 +135,7 @@ dependencies:
     - greenfield-service.md
     - greenfield-ui.md
   structured-checklists:
-    - architect-checklist.yaml
+    - architect-checklist/index.yaml
     - change-checklist.yaml
     - pm-checklist.yaml
     - po-master-checklist.yaml
@@ -2504,7 +2504,6 @@ sections:
         type: table
         columns: [Date, Version, Description, Author]
         instruction: Track document versions and changes
-
   - id: high-level-architecture
     title: High Level Architecture
     instruction: This section contains multiple subsections that establish the foundation. Present all subsections together, then elicit feedback on the complete section.
@@ -2584,7 +2583,6 @@ sections:
           - "**Component-Based UI:** Reusable React components with TypeScript - _Rationale:_ Maintainability and type safety across large codebases"
           - "**Repository Pattern:** Abstract data access logic - _Rationale:_ Enables testing and future database migration flexibility"
           - "**API Gateway Pattern:** Single entry point for all API calls - _Rationale:_ Centralized auth, rate limiting, and monitoring"
-
   - id: tech-stack
     title: Tech Stack
     instruction: |
@@ -2631,7 +2629,6 @@ sections:
           - ["Monitoring", "{{monitoring}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["Logging", "{{logging}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["CSS Framework", "{{css_framework}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
-
   - id: data-models
     title: Data Models
     instruction: |
@@ -2666,7 +2663,6 @@ sections:
             title: Relationships
             type: bullet-list
             template: "- {{relationship}}"
-
   - id: api-spec
     title: API Specification
     instruction: |
@@ -2709,7 +2705,6 @@ sections:
         type: code
         language: typescript
         template: "{{trpc_routers}}"
-
   - id: components
     title: Components
     instruction: |
@@ -2749,7 +2744,6 @@ sections:
           - Component diagram for detailed internal structure
           - Sequence diagrams for complex interactions
           Choose the most appropriate for clarity
-
   - id: external-apis
     title: External APIs
     condition: Project requires external API integrations
@@ -2779,7 +2773,6 @@ sections:
           - `{{method}} {{endpoint_path}}` - {{endpoint_purpose}}
           
           **Integration Notes:** {{integration_considerations}}
-
   - id: core-workflows
     title: Core Workflows
     type: mermaid
@@ -2796,7 +2789,6 @@ sections:
       
       Focus on workflows that clarify architecture decisions or complex interactions.
     elicit: true
-
   - id: database-schema
     title: Database Schema
     instruction: |
@@ -2810,7 +2802,6 @@ sections:
       
       Present schema in format appropriate to database type (SQL DDL, JSON schema, etc.)
     elicit: true
-
   - id: frontend-architecture
     title: Frontend Architecture
     instruction: Define frontend-specific architecture details. After each subsection, note if user wants to refine before continuing.
@@ -2871,7 +2862,6 @@ sections:
             type: code
             language: typescript
             template: "{{service_example}}"
-
   - id: backend-architecture
     title: Backend Architecture
     instruction: Define backend-specific architecture details. Consider serverless vs traditional server approaches.
@@ -2935,7 +2925,6 @@ sections:
             type: code
             language: typescript
             template: "{{auth_middleware}}"
-
   - id: unified-project-structure
     title: Unified Project Structure
     instruction: Create a monorepo structure that accommodates both frontend and backend. Adapt based on chosen tools and frameworks.
@@ -2997,7 +2986,6 @@ sections:
       ├── package.json                # Root package.json
       ├── {{monorepo_config}}         # Monorepo configuration
       └── README.md
-
   - id: development-workflow
     title: Development Workflow
     instruction: Define the development setup and workflow for the fullstack application.
@@ -3048,7 +3036,6 @@ sections:
               
               # Shared
               {{shared_env_vars}}
-
   - id: deployment-architecture
     title: Deployment Architecture
     instruction: Define deployment strategy based on platform choice.
@@ -3080,7 +3067,6 @@ sections:
           - ["Development", "{{dev_fe_url}}", "{{dev_be_url}}", "Local development"]
           - ["Staging", "{{staging_fe_url}}", "{{staging_be_url}}", "Pre-production testing"]
           - ["Production", "{{prod_fe_url}}", "{{prod_be_url}}", "Live environment"]
-
   - id: security-performance
     title: Security and Performance
     instruction: Define security and performance considerations for the fullstack application.
@@ -3115,7 +3101,6 @@ sections:
           - Response Time Target: {{response_target}}
           - Database Optimization: {{db_optimization}}
           - Caching Strategy: {{be_cache_strategy}}
-
   - id: testing-strategy
     title: Testing Strategy
     instruction: Define comprehensive testing approach for fullstack application.
@@ -3167,7 +3152,6 @@ sections:
             type: code
             language: typescript
             template: "{{e2e_test_example}}"
-
   - id: coding-standards
     title: Coding Standards
     instruction: Define MINIMAL but CRITICAL standards for AI agents. Focus only on project-specific rules that prevent common mistakes. These will be used by dev agents.
@@ -3192,7 +3176,6 @@ sections:
           - ["Hooks", "camelCase with 'use'", "-", "`useAuth.ts`"]
           - ["API Routes", "-", "kebab-case", "`/api/user-profile`"]
           - ["Database Tables", "-", "snake_case", "`user_profiles`"]
-
   - id: error-handling
     title: Error Handling Strategy
     instruction: Define unified error handling across frontend and backend.
@@ -3227,7 +3210,6 @@ sections:
         type: code
         language: typescript
         template: "{{backend_error_handler}}"
-
   - id: monitoring
     title: Monitoring and Observability
     instruction: Define monitoring strategy for fullstack application.
@@ -3254,10 +3236,6 @@ sections:
           - Error rate
           - Response time
           - Database query performance
-
-  - id: checklist-results
-    title: Checklist Results Report
-    instruction: Before running the checklist, offer to output the full architecture document. Once user confirms, execute the architect-checklist and populate results here.
 ==================== END: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 
 ==================== START: .semad-core/templates/market-research-tmpl.yaml ====================
@@ -4315,10 +4293,34 @@ Target: {{DOR_TARGET}}
 - {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
 {{/PERFORMANCE_CRITERIA}}
 
-  ### Security Requirements
-  {{#SECURITY_REQUIREMENTS}}
+### Security Requirements
+{{#SECURITY_REQUIREMENTS}}
   - {{REQUIREMENT}}  # Authentication, authorization, data protection
-  {{/SECURITY_REQUIREMENTS}}
+{{/SECURITY_REQUIREMENTS}}
+
+## Existing Capabilities & Reuse
+- Reference: .ai/reports/sm/codebase-inventory.md
+- Summary: {{REUSE_SUMMARY}}
+- Relevant Utilities:
+  {{#REUSE_UTILS}}
+  - {{.}}
+  {{/REUSE_UTILS}}
+- Relevant Services/APIs:
+  {{#REUSE_SERVICES}}
+  - {{.}}
+  {{/REUSE_SERVICES}}
+- Relevant Components/Hooks:
+  {{#REUSE_COMPONENTS}}
+  - {{.}}
+  {{/REUSE_COMPONENTS}}
+- Scripts/Tools:
+  {{#REUSE_TOOLS}}
+  - {{.}}
+  {{/REUSE_TOOLS}}
+- Tests to Build On:
+  {{#REUSE_TESTS}}
+  - {{.}}
+  {{/REUSE_TESTS}}
 
 ## Inputs
 {{#STORY_INPUTS}}
@@ -4335,23 +4337,52 @@ Target: {{DOR_TARGET}}
 - {{.}}  # service/protocol + exact endpoint/topic/path (e.g., REST GET /v1/users/:id; Kafka topic user.updates)
 {{/INTEGRATION_TOUCHPOINTS}}
 
-  ## Implementation Plan
-  ### Files to Create
-  {{#FILES_TO_CREATE}}
-  - `{{PATH}}`: {{PURPOSE}}
-  {{/FILES_TO_CREATE}}
+## Implementation Checklist
+{{#IMPLEMENTATION_GROUPS}}
+### {{GROUP_TITLE}}  # Keep groups tight (e.g., Migration, DAO Updates, Tests, Telemetry)
+{{#ITEMS}}
+- [ ] {{DESCRIPTION}}  # Format: Verb + concrete target + success signal (e.g., "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it")
+{{/ITEMS}}
+{{/IMPLEMENTATION_GROUPS}}
+{{^IMPLEMENTATION_GROUPS}}
+### Migration
+- [ ] Replace this placeholder with action-target-success items grouped by category
+{{/IMPLEMENTATION_GROUPS}}
+
+### Companion References
+{{#IMPLEMENTATION_REFERENCES}}
+- See {{PATH}}:{{SECTION}}  # Keep checklist in story and point to extended plan
+{{/IMPLEMENTATION_REFERENCES}}
+{{^IMPLEMENTATION_REFERENCES}}
+- See docs/stories/<companion>.md:<section-name>
+{{/IMPLEMENTATION_REFERENCES}}
+
+## Implementation Plan (Detailed)
+### Files to Create
+{{#FILES_TO_CREATE}}
+- `{{PATH}}`: {{PURPOSE}}
+{{/FILES_TO_CREATE}}
+{{^FILES_TO_CREATE}}
+- N/A
+{{/FILES_TO_CREATE}}
 
 ### Files to Modify
 {{#FILES_TO_MODIFY_DETAILED}}
 - `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
 {{/FILES_TO_MODIFY_DETAILED}}
+{{^FILES_TO_MODIFY_DETAILED}}
+- N/A
+{{/FILES_TO_MODIFY_DETAILED}}
 
-  ### Test Requirements
-  {{#TEST_REQUIREMENTS}}
-  - {{TEST_TYPE}}: {{DESCRIPTION}}
-    - File: `{{TEST_FILE}}`
-    - Coverage: {{COVERAGE_TARGET}}%
-  {{/TEST_REQUIREMENTS}}
+### Test Requirements
+{{#TEST_REQUIREMENTS}}
+- {{TEST_TYPE}}: {{DESCRIPTION}}
+  - File: `{{TEST_FILE}}`
+  - Coverage: {{COVERAGE_TARGET}}%
+{{/TEST_REQUIREMENTS}}
+{{^TEST_REQUIREMENTS}}
+- Document required tests with success signals (unit, integration, contract)
+{{/TEST_REQUIREMENTS}}
 
 ## Flow Chart
 ### Existing Artifacts
@@ -4456,7 +4487,6 @@ Target: {{DOR_TARGET}}
 
 ==================== START: .semad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
-
 ## Overview
 
 BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework that combines AI agents with Agile development methodologies. The v4 system introduces a modular architecture with improved dependency management, bundle optimization, and support for both web and IDE environments.
@@ -4476,7 +4506,6 @@ BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework 
 - **Team Collaboration**: Multiple roles working together
 - **Quality Assurance**: Structured testing and validation
 - **Documentation**: Professional PRDs, architecture docs, user stories
-
 ## How BMad Works
 
 ### The Core Method
@@ -4522,7 +4551,6 @@ BMad transforms you into a "Vibe CEO" - directing a team of specialized AI agent
 - **Incremental Progress**: Small stories = manageable complexity
 - **Human Oversight**: You validate each step = quality control
 - **Document-Driven**: Specs guide everything = consistency
-
 ## Getting Started
 
 ### Quick Start Options
@@ -4632,7 +4660,6 @@ npx bmad-method install
 4. **MUST switch to SM agent** for story creation
 5. **MUST switch to Dev agent** for implementation
 6. Keep planning and coding in separate chat sessions
-
 ## Core Configuration (core-config.yaml)
 
 **New in V4**: The `bmad-core/core-config.yaml` file is a critical innovation that enables BMad to work seamlessly with any project structure, providing maximum flexibility and backwards compatibility.
@@ -4695,7 +4722,6 @@ architectureVersion: v4
 architectureSharded: true
 architectureShardedLocation: docs/architecture
 ```
-
 ## Core Philosophy
 
 ### Vibe CEO'ing
@@ -4724,7 +4750,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 3. **Status Tracking**: Maintain story statuses (Draft → Approved → InProgress → Done)
 4. **Iterative Development**: Complete one story before starting the next
 5. **Documentation First**: Always start with solid PRD and architecture
-
 ## Agent System
 
 ### Core Development Team
@@ -4783,7 +4808,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 /help - Show available commands
 /switch agent-name - Change active agent (if orchestrator available)
 ```
-
 ## Team Configurations
 
 ### Pre-Built Teams
@@ -4805,7 +4829,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 - **Includes**: PM, Architect, Developer, QA (no UX Expert)
 - **Use Case**: Backend services, APIs, system development
 - **Bundle**: `team-no-ui.txt`
-
 ## Core Architecture
 
 ### System Overview
@@ -4883,7 +4906,6 @@ The `web-builder.js` tool creates web-ready bundles by:
 4. Outputting ready-to-upload bundles for web AI interfaces
 
 This architecture enables seamless operation across environments while maintaining the rich, interconnected agent ecosystem that makes BMad powerful.
-
 ## Complete Development Workflow
 
 ### Planning Phase (Web UI Recommended - Especially Gemini!)
@@ -5077,7 +5099,6 @@ Each status change requires user verification and approval before proceeding.
 4. **Incremental Approach**: Plan for gradual rollout and testing
 
 **For detailed guide**: See `docs/working-in-the-brownfield.md`
-
 ## Document Creation Best Practices
 
 ### Required File Naming for Framework Integration
@@ -5108,7 +5129,7 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 
 ```markdown
 ## Goals and Background Context
-## Requirements  
+## Requirements
 ## User Interface Design Goals
 ## Success Metrics
 ```
@@ -5121,7 +5142,6 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 - `docs/prd/success-metrics.md`
 
 Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sharding.
-
 ## Usage Patterns and Best Practices
 
 ### Environment-Specific Usage
@@ -5153,7 +5173,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - Choose appropriate team size for project needs
 - Leverage technical preferences for consistency
 - Regular context management and cache clearing
-
 ## Success Tips
 
 - **Use Gemini for big picture planning** - The team-fullstack bundle provides collaborative expertise
@@ -5161,7 +5180,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - **Follow the SM → Dev cycle religiously** - This ensures systematic progress
 - **Keep conversations focused** - One agent, one task per conversation
 - **Review everything** - Always review and approve before marking complete
-
 ## Contributing to BMad-Method
 
 ### Quick Contribution Guidelines
@@ -5189,7 +5207,6 @@ For full details, see `CONTRIBUTING.md`. Key points:
 - **Natural Language First**: Everything in markdown, no code in core
 - **Core vs Expansion Packs**: Core for universal needs, packs for specialized domains
 - **Design Philosophy**: "Dev agents code, planning agents plan"
-
 ## Expansion Packs
 
 ### What Are Expansion Packs?
@@ -5250,7 +5267,6 @@ Use the **expansion-creator** pack to build your own:
 4. **Test & Share**: Validate with real use cases, share with community
 
 **Key Principle**: Expansion packs democratize expertise by making specialized knowledge accessible through AI agents.
-
 ## Getting Help
 
 - **Commands**: Use `*/*help` in any environment to see available commands

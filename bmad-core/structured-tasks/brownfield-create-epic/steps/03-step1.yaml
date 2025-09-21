@@ -1,0 +1,42 @@
+id: step1
+name: Project Analysis (Required)
+description: |-
+  Before creating the epic, gather essential information about the existing project:
+  **Existing Project Context:**
+  **Enhancement Scope:**
+actions:
+  - description: '[ ] Project purpose and current functionality understood'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Existing technology stack identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Current architecture patterns noted'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration points with existing system identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Enhancement clearly defined and scoped'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Impact on existing functionality assessed'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Required integration points identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Success criteria established'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '1'

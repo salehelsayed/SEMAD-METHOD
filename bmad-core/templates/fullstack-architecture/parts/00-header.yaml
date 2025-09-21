@@ -1,0 +1,14 @@
+template:
+  id: fullstack-architecture-template-v2
+  name: Fullstack Architecture Document
+  version: 2.0
+  output:
+    format: markdown
+    filename: docs/architecture.md
+    title: "{{project_name}} Fullstack Architecture Document"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+sections:

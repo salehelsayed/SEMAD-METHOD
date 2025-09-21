@@ -7,37 +7,29 @@ This guide explains the dependency analysis and impact checking system implement
 The dependency analysis system consists of four main components:
 
 1. **Dependency Scanner**: Analyzes repository code and extracts symbols (functions, classes, variables, etc.)
-2. **Qdrant Integration**: Stores dependency relationships in a vector database for fast querying
+2. **Dependency Index**: Stores dependency relationships in a local JSONL database for fast querying
 3. **Impact Checker**: Provides functions to query what code might be affected by changes
 4. **Agent Integration**: Structured tasks for Dev and QA agents to use dependency analysis
 
 ## Prerequisites
 
-### Qdrant Setup
+### Dependency Index Directory
 
-The system requires Qdrant vector database to be running:
-
-```bash
-# Using Docker
-docker run -p 6333:6333 qdrant/qdrant
-
-# Or using Docker Compose (if you have a docker-compose.yaml)
-docker-compose up qdrant
-```
+The analysis utilities persist results under `.ai/dependency-index/`. The CLI and structured tasks will create the directory automatically if it does not exist.
 
 ### Required Dependencies
 
 Ensure your project has the required npm packages:
 
 ```bash
-npm install @qdrant/js-client-rest glob chokidar
+npm install glob chokidar
 ```
 
 ## Initial Setup
 
 ### 1. Scan Repository Dependencies
 
-Before using the dependency analysis features, you need to populate the Qdrant database with your repository's dependency information:
+Before using the dependency analysis features, populate the local dependency index with your repository's dependency information:
 
 ```bash
 # Scan the entire repository
@@ -218,32 +210,33 @@ const config = {
 };
 ```
 
-### Qdrant Configuration
+### Dependency Index Structure
 
-The system uses these Qdrant settings:
+The analyzer writes JSONL records to `.ai/dependency-index/`. Each entry contains:
 
-- **Collection Name**: `bmad_code_dependencies`
-- **Vector Size**: 384 dimensions
-- **Distance Metric**: Cosine similarity
-- **Embedding Method**: Hash-based (with OpenAI fallback if API key available)
+- **symbolName**: Fully qualified symbol identifier
+- **filePath**: Relative path to the source file
+- **symbolType**: Function, class, constant, etc.
+- **references**: Other symbols referenced within the file
+- **metadata**: Language, framework hints, and timestamps
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Qdrant collection initialization failed"**
-   - Ensure Qdrant is running on localhost:6333
-   - Check Docker container status
-   - Verify network connectivity
+1. **"Dependency index not found"**
+   - Run the dependency scanner first
+   - Verify the `.ai/dependency-index/` directory exists
+   - Ensure the process has write permissions
 
 2. **"No symbols found in database"**
-   - Run the dependency scanner first
    - Check that your code files are in supported formats
-   - Verify file patterns in configuration
+   - Verify include/exclude patterns in the configuration
+   - Confirm the repository contains source files matching the patterns
 
 3. **"High memory usage during scanning"**
    - Exclude large directories (node_modules, dist)
-   - Reduce maxFileSize setting
+   - Reduce `maxFileSize` setting
    - Process files in smaller batches
 
 ### Performance Optimization
@@ -324,18 +317,18 @@ analyzeBatchImpact(files).then(result => {
 
 ## Migration and Maintenance
 
-### Database Maintenance
+### Dependency Index Maintenance
 
 - **Regular rescans**: Run full repository scans periodically to ensure accuracy
 - **Clean stale data**: Remove dependencies for deleted or moved files
-- **Monitor performance**: Watch Qdrant resource usage and optimize as needed
+- **Monitor performance**: Keep an eye on `.ai/dependency-index/` size and prune stale entries if needed
 
 ### System Updates
 
 When updating the dependency analysis system:
 
 1. Test with a subset of your codebase first
-2. Backup existing Qdrant data if needed
+2. Backup the `.ai/dependency-index/` directory if needed
 3. Update agent configurations gradually
 4. Monitor impact on development workflow
 5. Gather feedback from team members

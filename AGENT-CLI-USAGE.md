@@ -88,7 +88,7 @@ node tools/agent.js "/pm *update-prd-from-implementation"
 node tools/agent.js "/pm *document-missing-requirements"
 
 # Validate an epic
-node tools/agent.js "/pm *validate-epic docs/prd/epics/epic-1.md"
+node tools/agent.js "/pm *validate-epic docs/epics/epic-1.md"
 
 # Validate feature coverage (target 100%)
 node tools/agent.js "/pm *validate-feature-coverage --threshold 100 --report .ai/reports/feature-coverage.json"

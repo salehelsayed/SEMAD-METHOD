@@ -23,7 +23,7 @@ SEMAD-METHOD/
 - **Node.js v20+**: Runtime environment
 - **YAML/JSON**: Structured data formats
 - **JSON Schema**: Validation framework
-- **Qdrant**: Vector database for memory
+- **Dependency Index**: Local JSONL database for memory metrics
 - **js-yaml**: YAML parsing
 - **ajv**: JSON Schema validation
 

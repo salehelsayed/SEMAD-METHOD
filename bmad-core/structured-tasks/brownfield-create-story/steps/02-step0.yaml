@@ -1,0 +1,12 @@
+id: step0
+name: Initialize Memory and Context
+description: Set up working memory and retrieve relevant context
+actions:
+  - description: Initialize working memory for brownfield story creation
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Retrieve any previous brownfield story patterns and integration approaches
+    elicit: false
+    metadata:
+      originalIndent: 0

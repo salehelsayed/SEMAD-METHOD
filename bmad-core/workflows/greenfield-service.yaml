@@ -73,6 +73,22 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use pm-validate-epic.yaml or npm run validate:epic -- --file <epic.md>
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -172,6 +188,8 @@ workflow:
         G --> H{PO finds issues?}
         H -->|Yes| I[Return to relevant agent for fixes]
         H -->|No| J[po: shard documents]
+        J --> J2[po: create epics from PRD]
+        J2 --> J3[pm: validate epics]
         I --> G
         
         J --> K[sm: create story]

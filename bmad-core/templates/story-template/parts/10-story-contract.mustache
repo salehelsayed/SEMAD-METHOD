@@ -1,0 +1,283 @@
+StoryContract:
+  version: "{{STORY_VERSION}}"  # Semantic version (required)
+  schemaVersion: "1.0"          # Contract schema version (required by validator)
+  story_id: "{{STORY_ID}}"      # Unique story identifier (required)
+  epic_id: "{{EPIC_ID}}"        # Parent epic identifier (required)
+  
+  # Pre-conditions that must exist before story execution
+  preConditions:
+    {{#PRECONDITIONS}}
+    - "{{.}}"  # Condition that must be met before starting
+    {{/PRECONDITIONS}}
+  
+  # Post-conditions that must be true after story completion
+  postConditions:
+    {{#POSTCONDITIONS}}
+    - "{{.}}"  # Condition that must be verified after completion
+    {{/POSTCONDITIONS}}
+  
+  # API endpoints affected by this story
+  apiEndpoints:
+    {{#API_ENDPOINTS}}
+    - "{{.}}"  # Endpoint path or identifier
+    {{/API_ENDPOINTS}}
+  
+  # Files that will be modified by this story
+  filesToModify:
+    {{#FILES_TO_MODIFY}}
+    - path: "{{PATH}}"     # File path relative to project root
+      reason: "{{REASON}}" # Why this file needs modification
+    {{/FILES_TO_MODIFY}}
+  
+  # Acceptance criteria with explicit traceability
+  acceptanceCriteriaLinks:
+    {{#ACCEPTANCE_CRITERIA}}
+    - "{{ID}}: {{DESCRIPTION}}"  # AC identifier and description
+    {{/ACCEPTANCE_CRITERIA}}
+
+  # Acceptance Test Matrix: executable tests tied to ACs (keep concise and meaningful)
+  acceptanceTestMatrix:
+    policy:
+      test_runner: "{{TEST_RUNNER}}"           # e.g., jest, vitest
+      max_tests_per_ac: {{MAX_TESTS_PER_AC}}   # e.g., 3
+      must_cover:
+        - "1 happy path per AC"
+        - "1 key failure path per AC"
+      skip_criteria:
+        - "pure presentation change with no logic"
+        - "redundant test already covered in broader integration"
+      rationale_required: true
+    globals:
+      base_url: "{{BASE_URL}}"                 # e.g., http://localhost:3000
+      auth:
+        required: {{AUTH_REQUIRED}}            # true/false
+        roles: {{AUTH_ROLES}}                  # e.g., ["user"]
+    items:
+      # Example item (duplicate/remove as needed)
+      - ac_id: "{{AC_ID}}"
+        title: "{{TEST_TITLE}}"
+        type: "{{TEST_TYPE}}"                  # api | api-negative | auth | model | unit | integration
+        endpoint_ref: { method: "{{METHOD}}", path: "{{PATH}}" }
+        preconditions:
+          - "{{PRECONDITION}}"
+        request:
+          headers: {{REQUEST_HEADERS}}
+          body: {{REQUEST_BODY}}
+        assertions:
+          - status: {{HTTP_STATUS}}
+          - json_schema_ref: "{{SCHEMA_REF}}"
+        test_files:
+          - path: "{{TEST_FILE_PATH}}"
+            framework: "{{TEST_RUNNER}}"
+        must_have: true
+        rationale: "{{WHY_THIS_TEST_EXISTS}}"
+
+  # Development and QA policies to minimize Dev↔QA loops via test-first
+  developmentPolicy:
+    tdd: true
+    test_source: "acceptanceTestMatrix"
+    required_sequence:
+      - write_tests_from_matrix
+      - run_tests_expect_fail
+      - implement_until_green
+    max_tests_per_ac: {{MAX_TESTS_PER_AC}}
+    skip_criteria:
+      - "pure presentation change with no logic"
+      - "redundant behavior already covered by an existing integration test"
+    rationale_required: true
+
+  qaValidationPolicy:
+    enforce_tdd: true
+    checks:
+      - "Every acceptanceTestMatrix item has its listed test_files added/updated in the PR"
+      - "Tests authored before main implementation (separate commits or clearly staged)"
+      - "Each test has a rationale tied to its AC"
+    exceptions_allowed:
+      - "UI-only cosmetic changes with no logic"
+    exception_requires: "explicit rationale in story"
+  
+  # DoR-Mini sufficiency fields (SM enforces via DoR gate)
+  objective: "{{OBJECTIVE_ONE_SENTENCE}}"
+  interfaces:
+    inbound:
+      {{#INTERFACES_INBOUND}}
+      - {{.}}
+      {{/INTERFACES_INBOUND}}
+    outbound:
+      {{#INTERFACES_OUTBOUND}}
+      - {{.}}
+      {{/INTERFACES_OUTBOUND}}
+  data_contracts:
+    {{#DATA_CONTRACTS}}
+    {{NAME}}:
+      {{#FIELDS}}
+      {{KEY}}: {{TYPE}}
+      {{/FIELDS}}
+    {{/DATA_CONTRACTS}}
+  state_changes:
+    tables:
+      {{#STATE_TABLES}}
+      - {{.}}
+      {{/STATE_TABLES}}
+    rules:
+      {{#STATE_RULES}}
+      - {{.}}
+      {{/STATE_RULES}}
+  constraints:
+    transport: "{{CONSTRAINT_TRANSPORT}}"
+    discovery: "{{CONSTRAINT_DISCOVERY}}"
+    security: "{{CONSTRAINT_SECURITY}}"
+    perf: "{{CONSTRAINT_PERF}}"
+  acceptance_tests:
+    {{#AT_CASES}}
+    - {{.}}
+    {{/AT_CASES}}
+  assumptions:
+    {{#ASSUMPTIONS}}
+    - {{.}}
+    {{/ASSUMPTIONS}}
+  done_signals:
+    {{#DONE_SIGNALS}}
+    - {{.}}
+    {{/DONE_SIGNALS}}
+  readiness_score_target: 90
+  
+  # Structured work breakdown for deterministic AC→Task→Test traceability
+  workBreakdown:
+    coveragePolicy:
+      requireTaskForEveryAC: {{REQUIRE_TASK_FOR_EVERY_AC}}   # true/false
+      requireTestForEveryAC: {{REQUIRE_TEST_FOR_EVERY_AC}}   # true/false
+      minTestsPerAC: {{MIN_TESTS_PER_AC}}                    # e.g., 1
+      forbidOrphanTasks: {{FORBID_ORPHAN_TASKS}}             # true/false
+      allowedPaths:
+        {{#ALLOWED_PATHS}}
+        - "{{.}}"
+        {{/ALLOWED_PATHS}}
+      forbiddenPaths:
+        {{#FORBIDDEN_PATHS}}
+        - "{{.}}"
+        {{/FORBIDDEN_PATHS}}
+    tasks:
+      {{#WB_TASKS}}
+      - id: "{{ID}}"                                  # ^T-[\w\.\-]+$
+        title: "{{TITLE}}"
+        type: "{{TYPE}}"                              # backend|frontend|api|model|infra|test|doc|chore
+        risk: "{{RISK}}"                              # low|med|high
+        owner: "{{OWNER}}"
+        reviewers:
+          {{#REVIEWERS}}
+          - "{{.}}"
+          {{/REVIEWERS}}
+        acRefs:
+          {{#AC_REFS}}
+          - "{{.}}"                                   # ^AC-[\w\-]+
+          {{/AC_REFS}}
+        dependsOn:
+          {{#DEPENDS_ON}}
+          - "{{.}}"                                   # references other task IDs
+          {{/DEPENDS_ON}}
+        changes:
+          files:
+            {{#CHANGES_FILES}}
+            - path: "{{PATH}}"
+              action: "{{ACTION}}"                    # create|modify|move|delete
+              reason: "{{REASON}}"
+            {{/CHANGES_FILES}}
+        tests:
+          mustAdd:
+            {{#TESTS_MUST_ADD}}
+            - id: "{{ID}}"                            # ^[A-Z]+-[\w\-]+$
+              path: "{{PATH}}"
+              framework: "{{FRAMEWORK}}"
+              type: "{{TEST_TYPE}}"
+              covers:
+                {{#COVERS}}
+                - "{{.}}"                             # AC IDs
+                {{/COVERS}}
+            {{/TESTS_MUST_ADD}}
+        commands:
+          precheck:
+            {{#COMMANDS_PRECHECK}}
+            - "{{.}}"
+            {{/COMMANDS_PRECHECK}}
+          build:
+            {{#COMMANDS_BUILD}}
+            - "{{.}}"
+            {{/COMMANDS_BUILD}}
+          test:
+            {{#COMMANDS_TEST}}
+            - "{{.}}"
+            {{/COMMANDS_TEST}}
+          run:
+            {{#COMMANDS_RUN}}
+            - "{{.}}"
+            {{/COMMANDS_RUN}}
+        evidence:
+          artifacts:
+            {{#EVIDENCE_ARTIFACTS}}
+            - "{{.}}"
+            {{/EVIDENCE_ARTIFACTS}}
+          logs:
+            {{#EVIDENCE_LOGS}}
+            - "{{.}}"
+            {{/EVIDENCE_LOGS}}
+        subtasks:
+          {{#SUBTASKS}}
+          - id: "{{ID}}"
+            description: "{{DESCRIPTION}}"
+            outcome: "{{OUTCOME}}"
+          {{/SUBTASKS}}
+        acceptance:
+          {{#ACCEPTANCE}}
+          - id: "{{ID}}"
+            check: "{{CHECK}}"
+            acRefs:
+              {{#AC_REFS}}
+              - "{{.}}"
+              {{/AC_REFS}}
+          {{/ACCEPTANCE}}
+        notes: "{{NOTES}}"
+  
+  # Impact radius for dependency-aware work
+  impactRadius:
+    components:
+      {{#IMPACT_COMPONENTS}}
+      - "{{.}}"  # modules or top-level folders likely affected
+      {{/IMPACT_COMPONENTS}}
+    symbols:
+      {{#IMPACT_SYMBOLS}}
+      - "{{.}}"  # classes, functions, constants to audit for references
+      {{/IMPACT_SYMBOLS}}
+    breakageBudget:
+      allowedInterfaceChanges: {{ALLOWED_INTERFACE_CHANGES}}  # true or false
+      migrationNotes: "{{MIGRATION_NOTES}}"                   # brief guidance if interfaces change
+      maxFilesAffected: {{MAX_FILES_AFFECTED}}                 # fail fast if blast radius is too big
+
+  # Cleanup requirements to avoid dead code drift
+  cleanupRequired:
+    removeUnused: {{REMOVE_UNUSED}}  # true or false
+    deprecations:
+      {{#DEPRECATIONS}}
+      - symbol: "{{SYMBOL}}"
+        path: "{{PATH}}"
+        replacement: "{{REPLACEMENT}}"
+      {{/DEPRECATIONS}}
+    notes:
+      {{#CLEANUP_NOTES}}
+      - "{{.}}"
+      {{/CLEANUP_NOTES}}
+
+  # Quality gates to reduce hallucination and enforce precision
+  qualityGates:
+    typeErrors: {{TYPE_ERRORS}}              # usually 0
+    zeroUnused: {{ZERO_UNUSED}}              # true to enforce zero unused exports/files
+    coverageDeltaMax: {{COVERAGE_DELTA_MAX}} # max allowed coverage drop (e.g., 0.5)
+    runImpactScan: {{RUN_IMPACT_SCAN}}       # true to require pre-change scan
+
+  # Linked artifacts for full traceability
+  linkedArtifacts:
+    {{#LINKED_ARTIFACTS}}
+    - type: "{{TYPE}}"      # brief, prd, architecture, test-plan
+      path: "{{PATH}}"      # Path to artifact
+      version: "{{VERSION}}" # Artifact version
+    {{/LINKED_ARTIFACTS}}

@@ -1,0 +1,20 @@
+id: dor-gate
+name: DoR Sufficiency Gate (SM)
+description: Enforce DoR-Mini with readiness scoring and stop rule. Locks story on pass.
+actions:
+  - description: Execute DoR linter to compute readiness and lock story if ≥90; auto-spawn spike if <90 after 2 passes
+    elicit: false
+    action: script:execute
+    inputs:
+      script: tools/sm/dor-gate.js
+      args: []
+    outputs:
+      exitCode: dorExitCode
+      stdout: dorStdout
+  - description: Halt if DoR gate fails (<90). If first failure (70–89), perform one revision then re-run manually; if still <90, spike is created.
+    elicit: false
+    action: workflow:conditional-halt
+    inputs:
+      condition:
+        '[object Object]': null
+      errorMessage: 'DoR gate not passed. See report: {{dorStdout}}'

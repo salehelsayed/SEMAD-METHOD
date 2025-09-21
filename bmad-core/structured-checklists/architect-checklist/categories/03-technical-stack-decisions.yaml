@@ -1,0 +1,47 @@
+name: TECHNICAL STACK & DECISIONS
+items:
+  - description: Selected technologies meet all requirements
+    checked: false
+  - description: Technology versions are specifically defined (not ranges)
+    checked: false
+  - description: Technology choices are justified with clear rationale
+    checked: false
+  - description: Alternatives considered are documented with pros/cons
+    checked: false
+  - description: Selected stack components work well together
+    checked: false
+  - description: UI framework and libraries are specifically selected
+    checked: false
+  - description: State management approach is defined
+    checked: false
+  - description: Component structure and organization is specified
+    checked: false
+  - description: Responsive/adaptive design approach is outlined
+    checked: false
+  - description: Build and bundling strategy is determined
+    checked: false
+  - description: API design and standards are defined
+    checked: false
+  - description: Service organization and boundaries are clear
+    checked: false
+  - description: Authentication and authorization approach is specified
+    checked: false
+  - description: Error handling strategy is outlined
+    checked: false
+  - description: Backend scaling approach is defined
+    checked: false
+  - description: Data models are fully defined
+    checked: false
+  - description: Database technologies are selected with justification
+    checked: false
+  - description: Data access patterns are documented
+    checked: false
+  - description: Data migration/seeding approach is specified
+    checked: false
+  - description: Data backup and recovery strategies are outlined
+    checked: false
+notes: |-
+  Technology choices have long-term implications. For each technology decision, consider: Is this the simplest solution that could work? Are we over-engineering? Will this scale? What are the maintenance implications? Are there security vulnerabilities in the chosen versions? Verify that specific versions are defined, not ranges.
+  Skip this entire section if this is a backend-only or service-only project. Only evaluate if the project includes a user interface.
+metadata:
+  originalName: 3. TECHNICAL STACK & DECISIONS

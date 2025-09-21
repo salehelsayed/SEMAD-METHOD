@@ -1,0 +1,19 @@
+id: step6
+name: Read Sharded Architecture Documents
+description: ''
+actions:
+  - description: Navigate to docs/architecture/ directory and read index.md first to understand the file structure and naming convention
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: The index.md should list all architecture files - use this as your guide to find the correct files
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Note: Architecture files may use numbered prefixes (01-, 02-, etc.) or descriptive names - check index.md to determine which'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 4
+  originalNumber: '3.1'

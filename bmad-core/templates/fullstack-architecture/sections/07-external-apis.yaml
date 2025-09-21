@@ -1,0 +1,29 @@
+  - id: external-apis
+    title: External APIs
+    condition: Project requires external API integrations
+    instruction: |
+      For each external service integration:
+      
+      1. Identify APIs needed based on PRD requirements and component design
+      2. If documentation URLs are unknown, ask user for specifics
+      3. Document authentication methods and security considerations
+      4. List specific endpoints that will be used
+      5. Note any rate limits or usage constraints
+      
+      If no external APIs are needed, state this explicitly and skip to next section.
+    elicit: true
+    repeatable: true
+    sections:
+      - id: api
+        title: "{{api_name}} API"
+        template: |
+          - **Purpose:** {{api_purpose}}
+          - **Documentation:** {{api_docs_url}}
+          - **Base URL(s):** {{api_base_url}}
+          - **Authentication:** {{auth_method}}
+          - **Rate Limits:** {{rate_limits}}
+          
+          **Key Endpoints Used:**
+          - `{{method}} {{endpoint_path}}` - {{endpoint_purpose}}
+          
+          **Integration Notes:** {{integration_considerations}}

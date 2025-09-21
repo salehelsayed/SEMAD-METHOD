@@ -1,0 +1,20 @@
+id: step1a
+name: Integration Survey and Contracts
+description: |
+  Identify and document all integration surfaces before drafting the epic details.
+  For each integration point, capture owner team, contract location, and a concrete SourceRef in the current codebase.
+  Classify the delta for each integration as existing, extend, or new.
+actions:
+  - description: Enumerate integrationPoints (INT-*) with ownerTeam and contract links
+    elicit: true
+  - description: For each INT, add SourceRef to current code (file#symbol, route path, or module export)
+    elicit: true
+  - description: Classify delta for each INT as existing | extend | new (SourceRef mandatory when delta ≠ new)
+    elicit: true
+  - description: Create minimal contract snapshot per INT (request/response, error codes, idempotency, version)
+    elicit: true
+  - description: Prepare Epic Coverage Matrix (ECM) rows for all REQ-* and INT-* (use docs/templates/ecm-template.md)
+    elicit: true
+metadata:
+  level: 3
+  originalNumber: 1a

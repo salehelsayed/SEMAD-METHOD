@@ -1,0 +1,22 @@
+type: concat
+parts:
+  - 00-title.md
+  - sections/01-overview.md
+  - sections/02-how-bmad-works.md
+  - sections/03-getting-started.md
+  - sections/04-core-configuration-core-config-yaml.md
+  - sections/05-core-philosophy.md
+  - sections/06-agent-system.md
+  - sections/07-team-configurations.md
+  - sections/08-core-architecture.md
+  - sections/09-complete-development-workflow.md
+  - sections/10-document-creation-best-practices.md
+  - sections/11-goals-and-background-context.md
+  - sections/12-requirements.md
+  - sections/13-user-interface-design-goals.md
+  - sections/14-success-metrics.md
+  - sections/15-usage-patterns-and-best-practices.md
+  - sections/16-success-tips.md
+  - sections/17-contributing-to-bmad-method.md
+  - sections/18-expansion-packs.md
+  - sections/19-getting-help.md

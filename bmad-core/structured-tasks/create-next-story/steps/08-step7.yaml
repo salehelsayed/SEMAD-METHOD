@@ -1,0 +1,43 @@
+id: step7
+name: Read Architecture Documents Based on Story Type
+description: |-
+  Read architecture files based on story type. Files may use either naming convention:
+  - Direct names: tech-stack.md, data-models.md, etc.
+  - Numbered names: 03-technology-stack.md, 05-data-models.md, etc.
+
+  **For ALL Stories, read these topics (find by content, not exact filename):**
+  - Technology stack / Tech stack (e.g., tech-stack.md OR 03-technology-stack.md)
+  - Project structure / unified structure 
+  - Coding standards
+  - Testing strategy (e.g., testing-strategy.md OR 12-testing-strategy.md)
+
+  **For Backend/API Stories, additionally read:**
+  - Data models (e.g., data-models.md OR 05-data-models.md)
+  - Database schema
+  - Backend architecture / Component architecture (e.g., 04-component-architecture.md)
+  - API specifications (e.g., rest-api-spec.md OR 06-api-specifications.md)
+  - External APIs
+
+  **For Frontend/UI Stories, additionally read:**
+  - Frontend architecture / Component architecture (e.g., 04-component-architecture.md)
+  - Components / UI components
+  - Core workflows (e.g., core-workflows.md OR 07-core-workflows.md)
+  - Data models (e.g., data-models.md OR 05-data-models.md)
+
+  **For Full-Stack Stories:** Read both Backend and Frontend sections above
+actions:
+  - description: First check docs/architecture/index.md to understand the file structure and naming convention used
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Based on the index, identify which files contain the required information for this story type
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Read the identified files, focusing on sections relevant to the current story
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 4
+  originalNumber: '3.2'

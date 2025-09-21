@@ -1,0 +1,16 @@
+  - id: core-workflows
+    title: Core Workflows
+    type: mermaid
+    mermaid_type: sequence
+    instruction: |
+      Illustrate key system workflows using sequence diagrams:
+      
+      1. Identify critical user journeys from PRD
+      2. Show component interactions including external APIs
+      3. Include both frontend and backend flows
+      4. Include error handling paths
+      5. Document async operations
+      6. Create both high-level and detailed diagrams as needed
+      
+      Focus on workflows that clarify architecture decisions or complex interactions.
+    elicit: true

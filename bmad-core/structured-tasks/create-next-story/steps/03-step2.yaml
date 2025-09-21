@@ -1,0 +1,17 @@
+id: step2
+name: Identify Next Story for Preparation (ECM‑Aware)
+description: Prefer EpicContract + ECM when available to drive thin, incremental slices. Fallback to sharded PRD flow when ECM is not present.
+actions:
+  - description: Check for EpicContract files under docs/epics/ for the active epic; if present, parse frontmatter and ECM table
+    elicit: false
+  - description: If ECM present, select the next planned row (Status=planned, or without Story ID). Map REQ IDs and INT IDs from that row
+    elicit: true
+  - description: 'Determine slice type for this epic in order: (a) Story 0: feature flag + telemetry only (if not yet created), (b) Story 1: probe/contract tests for INTs (read‑only; no state change) if not yet created, (c) Next ECM row: 1 INT × 1 flow variant per story'
+    elicit: true
+  - description: If no EpicContract/ECM found, proceed with legacy selection using sharded PRD files
+    elicit: false
+  - description: Announce chosen slice (flag/probe/ECM row) and story id context (epic, sequence) before drafting
+    elicit: true
+metadata:
+  level: 3
+  originalNumber: '1'

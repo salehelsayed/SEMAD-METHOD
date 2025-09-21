@@ -1,0 +1,38 @@
+id: step1
+name: Quick Project Assessment
+description: |-
+  Gather minimal but essential context about the existing project:
+  **Current System Context:**
+  **Change Scope:**
+actions:
+  - description: '[ ] Relevant existing functionality identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Technology stack for this area noted'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration point(s) clearly understood'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Existing patterns for similar work identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Specific change clearly defined'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Impact boundaries identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Success criteria established'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '1'

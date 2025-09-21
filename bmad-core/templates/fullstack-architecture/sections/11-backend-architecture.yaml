@@ -1,0 +1,63 @@
+  - id: backend-architecture
+    title: Backend Architecture
+    instruction: Define backend-specific architecture details. Consider serverless vs traditional server approaches.
+    elicit: true
+    sections:
+      - id: service-architecture
+        title: Service Architecture
+        instruction: Based on platform choice, define service organization.
+        sections:
+          - id: serverless-architecture
+            condition: Serverless architecture chosen
+            sections:
+              - id: function-organization
+                title: Function Organization
+                type: code
+                language: text
+                template: "{{function_structure}}"
+              - id: function-template
+                title: Function Template
+                type: code
+                language: typescript
+                template: "{{function_template}}"
+          - id: traditional-server
+            condition: Traditional server architecture chosen
+            sections:
+              - id: controller-organization
+                title: Controller/Route Organization
+                type: code
+                language: text
+                template: "{{controller_structure}}"
+              - id: controller-template
+                title: Controller Template
+                type: code
+                language: typescript
+                template: "{{controller_template}}"
+      - id: database-architecture
+        title: Database Architecture
+        instruction: Define database schema and access patterns.
+        sections:
+          - id: schema-design
+            title: Schema Design
+            type: code
+            language: sql
+            template: "{{database_schema}}"
+          - id: data-access-layer
+            title: Data Access Layer
+            type: code
+            language: typescript
+            template: "{{repository_pattern}}"
+      - id: auth-architecture
+        title: Authentication and Authorization
+        instruction: Define auth implementation details.
+        sections:
+          - id: auth-flow
+            title: Auth Flow
+            type: mermaid
+            mermaid_type: sequence
+            template: "{{auth_flow_diagram}}"
+          - id: auth-middleware
+            title: Middleware/Guards
+            type: code
+            language: typescript
+            template: "{{auth_middleware}}"

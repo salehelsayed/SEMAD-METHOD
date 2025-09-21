@@ -1,0 +1,45 @@
+name: SECURITY & COMPLIANCE
+items:
+  - description: Authentication mechanism is clearly defined
+    checked: false
+  - description: Authorization model is specified
+    checked: false
+  - description: Role-based access control is outlined if required
+    checked: false
+  - description: Session management approach is defined
+    checked: false
+  - description: Credential management is addressed
+    checked: false
+  - description: Data encryption approach (at rest and in transit) is specified
+    checked: false
+  - description: Sensitive data handling procedures are defined
+    checked: false
+  - description: Data retention and purging policies are outlined
+    checked: false
+  - description: Backup encryption is addressed if required
+    checked: false
+  - description: Data access audit trails are specified if required
+    checked: false
+  - description: API security controls are defined
+    checked: false
+  - description: Rate limiting and throttling approaches are specified
+    checked: false
+  - description: Input validation strategy is outlined
+    checked: false
+  - description: CSRF/XSS prevention measures are addressed
+    checked: false
+  - description: Secure communication protocols are specified
+    checked: false
+  - description: Network security design is outlined
+    checked: false
+  - description: Firewall and security group configurations are specified
+    checked: false
+  - description: Service isolation approach is defined
+    checked: false
+  - description: Least privilege principle is applied
+    checked: false
+  - description: Security monitoring strategy is outlined
+    checked: false
+notes: 'Security is not optional. Review this section with a hacker''s mindset - how could someone exploit this system? Also consider compliance: Are there industry-specific regulations that apply? GDPR? HIPAA? PCI? Ensure the architecture addresses these proactively. Look for specific security controls, not just general statements.'
+metadata:
+  originalName: 6. SECURITY & COMPLIANCE

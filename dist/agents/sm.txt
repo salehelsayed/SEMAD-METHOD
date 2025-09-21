@@ -487,10 +487,34 @@ Target: {{DOR_TARGET}}
 - {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
 {{/PERFORMANCE_CRITERIA}}
 
-  ### Security Requirements
-  {{#SECURITY_REQUIREMENTS}}
+### Security Requirements
+{{#SECURITY_REQUIREMENTS}}
   - {{REQUIREMENT}}  # Authentication, authorization, data protection
-  {{/SECURITY_REQUIREMENTS}}
+{{/SECURITY_REQUIREMENTS}}
+
+## Existing Capabilities & Reuse
+- Reference: .ai/reports/sm/codebase-inventory.md
+- Summary: {{REUSE_SUMMARY}}
+- Relevant Utilities:
+  {{#REUSE_UTILS}}
+  - {{.}}
+  {{/REUSE_UTILS}}
+- Relevant Services/APIs:
+  {{#REUSE_SERVICES}}
+  - {{.}}
+  {{/REUSE_SERVICES}}
+- Relevant Components/Hooks:
+  {{#REUSE_COMPONENTS}}
+  - {{.}}
+  {{/REUSE_COMPONENTS}}
+- Scripts/Tools:
+  {{#REUSE_TOOLS}}
+  - {{.}}
+  {{/REUSE_TOOLS}}
+- Tests to Build On:
+  {{#REUSE_TESTS}}
+  - {{.}}
+  {{/REUSE_TESTS}}
 
 ## Inputs
 {{#STORY_INPUTS}}
@@ -507,23 +531,52 @@ Target: {{DOR_TARGET}}
 - {{.}}  # service/protocol + exact endpoint/topic/path (e.g., REST GET /v1/users/:id; Kafka topic user.updates)
 {{/INTEGRATION_TOUCHPOINTS}}
 
-  ## Implementation Plan
-  ### Files to Create
-  {{#FILES_TO_CREATE}}
-  - `{{PATH}}`: {{PURPOSE}}
-  {{/FILES_TO_CREATE}}
+## Implementation Checklist
+{{#IMPLEMENTATION_GROUPS}}
+### {{GROUP_TITLE}}  # Keep groups tight (e.g., Migration, DAO Updates, Tests, Telemetry)
+{{#ITEMS}}
+- [ ] {{DESCRIPTION}}  # Format: Verb + concrete target + success signal (e.g., "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it")
+{{/ITEMS}}
+{{/IMPLEMENTATION_GROUPS}}
+{{^IMPLEMENTATION_GROUPS}}
+### Migration
+- [ ] Replace this placeholder with action-target-success items grouped by category
+{{/IMPLEMENTATION_GROUPS}}
+
+### Companion References
+{{#IMPLEMENTATION_REFERENCES}}
+- See {{PATH}}:{{SECTION}}  # Keep checklist in story and point to extended plan
+{{/IMPLEMENTATION_REFERENCES}}
+{{^IMPLEMENTATION_REFERENCES}}
+- See docs/stories/<companion>.md:<section-name>
+{{/IMPLEMENTATION_REFERENCES}}
+
+## Implementation Plan (Detailed)
+### Files to Create
+{{#FILES_TO_CREATE}}
+- `{{PATH}}`: {{PURPOSE}}
+{{/FILES_TO_CREATE}}
+{{^FILES_TO_CREATE}}
+- N/A
+{{/FILES_TO_CREATE}}
 
 ### Files to Modify
 {{#FILES_TO_MODIFY_DETAILED}}
 - `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
 {{/FILES_TO_MODIFY_DETAILED}}
+{{^FILES_TO_MODIFY_DETAILED}}
+- N/A
+{{/FILES_TO_MODIFY_DETAILED}}
 
-  ### Test Requirements
-  {{#TEST_REQUIREMENTS}}
-  - {{TEST_TYPE}}: {{DESCRIPTION}}
-    - File: `{{TEST_FILE}}`
-    - Coverage: {{COVERAGE_TARGET}}%
-  {{/TEST_REQUIREMENTS}}
+### Test Requirements
+{{#TEST_REQUIREMENTS}}
+- {{TEST_TYPE}}: {{DESCRIPTION}}
+  - File: `{{TEST_FILE}}`
+  - Coverage: {{COVERAGE_TARGET}}%
+{{/TEST_REQUIREMENTS}}
+{{^TEST_REQUIREMENTS}}
+- Document required tests with success signals (unit, integration, contract)
+{{/TEST_REQUIREMENTS}}
 
 ## Flow Chart
 ### Existing Artifacts

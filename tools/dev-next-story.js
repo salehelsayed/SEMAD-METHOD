@@ -273,11 +273,13 @@ class DevNextStoryRunner {
         // Update story status to Implemented
         await this.updateStoryStatus(nextStory.filePath, 'Implemented');
         
-        console.log(chalk.blue('\n📋 Next Steps:'));
-        console.log('   1. Review the implemented changes');
-        console.log('   2. Run tests to ensure quality');
-        console.log('   3. Use QA agent for validation');
-        console.log(`   4. Run: npm run qa:review "${path.relative(this.rootDir, nextStory.filePath)}"`);
+        if (!options.quiet) {
+          console.log(chalk.blue('\n📋 Next Steps:'));
+          console.log('   1. Review the implemented changes');
+          console.log('   2. Run tests to ensure quality');
+          console.log('   3. Use QA agent for validation');
+          console.log(`   4. Run: npm run qa:review "${path.relative(this.rootDir, nextStory.filePath)}"`);
+        }
         
         return 0;
       } else {
@@ -309,6 +311,7 @@ program
   .option('-m, --mode <mode>', 'Implementation mode (implementation, review, test)', 'implementation')
   .option('--guard <mode>', 'Guard mode: contract | always | never', 'contract')
   .option('--story <path>', 'Explicit story file path to implement (bypass finder)')
+  .option('--quiet', 'Reduce output; suppress tips/next-steps')
   .parse(process.argv);
 
 async function main() {
@@ -320,7 +323,8 @@ async function main() {
       auto: options.auto,
       verbose: options.verbose,
       mode: options.mode,
-      storyOverride: options.story
+      storyOverride: options.story,
+      quiet: options.quiet
     });
     process.exit(exitCode);
   } catch (error) {

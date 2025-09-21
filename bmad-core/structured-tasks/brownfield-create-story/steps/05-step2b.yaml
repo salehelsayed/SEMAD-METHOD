@@ -1,0 +1,37 @@
+id: step2b
+name: StoryContract and Template Compliance
+description: |-
+  Embed a StoryContract and ensure the story follows the canonical Story Template used by SM create-next-story.
+  - Use docs/templates/story-contract-template.yaml as schema guidance for the StoryContract block at the top of the file.
+  - Follow bmad-core/templates/story-tmpl.yaml sectioning (Dev Agent Record, QA Findings, traceability blocks, etc.).
+actions:
+  - description: Ask for or detect the created story file path
+    elicit: true
+  - description: Embed a StoryContract YAML block at the top of the story file between --- markers
+    elicit: false
+  - description: Ensure sections match canonical story template (Status, Dev Agent Record, QA Findings, Traceability)
+    elicit: false
+  - description: Validate StoryContract structure using scripts/validate-story-contract.js
+    elicit: false
+    function: execute
+    parameters:
+      command: node scripts/validate-story-contract.js -- {{storyFilePath}}
+  - description: Execute DoR mini-gate to enforce readiness
+    elicit: false
+    action: script:execute
+    inputs:
+      script: tools/sm/dor-gate.js
+      args: []
+    outputs:
+      exitCode: dorExitCode
+      stdout: dorStdout
+  - description: Halt if DoR gate fails (<90). If first failure (70–89), perform one revision then re-run manually; if still <90, spike is created.
+    elicit: false
+    action: workflow:conditional-halt
+    inputs:
+      condition:
+        '[object Object]': null
+      errorMessage: 'DoR gate not passed. See report: {{dorStdout}}'
+metadata:
+  level: 3
+  originalNumber: 2b

@@ -1,0 +1,34 @@
+  - id: security-performance
+    title: Security and Performance
+    instruction: Define security and performance considerations for the fullstack application.
+    elicit: true
+    sections:
+      - id: security-requirements
+        title: Security Requirements
+        template: |
+          **Frontend Security:**
+          - CSP Headers: {{csp_policy}}
+          - XSS Prevention: {{xss_strategy}}
+          - Secure Storage: {{storage_strategy}}
+          
+          **Backend Security:**
+          - Input Validation: {{validation_approach}}
+          - Rate Limiting: {{rate_limit_config}}
+          - CORS Policy: {{cors_config}}
+          
+          **Authentication Security:**
+          - Token Storage: {{token_strategy}}
+          - Session Management: {{session_approach}}
+          - Password Policy: {{password_requirements}}
+      - id: performance-optimization
+        title: Performance Optimization
+        template: |
+          **Frontend Performance:**
+          - Bundle Size Target: {{bundle_size}}
+          - Loading Strategy: {{loading_approach}}
+          - Caching Strategy: {{fe_cache_strategy}}
+          
+          **Backend Performance:**
+          - Response Time Target: {{response_target}}
+          - Database Optimization: {{db_optimization}}
+          - Caching Strategy: {{be_cache_strategy}}

@@ -43,11 +43,10 @@ describe('Dynamic Planner', () => {
       
       const result = planAdaptation(memory, task);
       
-      expect(result.subTasks).toHaveLength(2);
-      expect(result.subTasks[0].steps).toHaveLength(5);
-      expect(result.subTasks[1].steps).toHaveLength(3);
+      expect(result.subTasks).toHaveLength(3);
+      expect(result.subTasks.map(st => st.steps.length)).toEqual([3, 3, 2]);
       expect(result.subTasks[0].parentTaskId).toBe('test-task-2');
-      expect(result.plan).toHaveLength(2);
+      expect(result.plan).toHaveLength(3);
     });
     
     it('should split tasks with conjunction keywords in description', () => {

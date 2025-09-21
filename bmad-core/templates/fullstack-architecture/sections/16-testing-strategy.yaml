@@ -1,0 +1,51 @@
+  - id: testing-strategy
+    title: Testing Strategy
+    instruction: Define comprehensive testing approach for fullstack application.
+    elicit: true
+    sections:
+      - id: testing-pyramid
+        title: Testing Pyramid
+        type: code
+        language: text
+        template: |
+                  E2E Tests
+                 /        \
+            Integration Tests
+               /            \
+          Frontend Unit  Backend Unit
+      - id: test-organization
+        title: Test Organization
+        sections:
+          - id: frontend-tests
+            title: Frontend Tests
+            type: code
+            language: text
+            template: "{{frontend_test_structure}}"
+          - id: backend-tests
+            title: Backend Tests
+            type: code
+            language: text
+            template: "{{backend_test_structure}}"
+          - id: e2e-tests
+            title: E2E Tests
+            type: code
+            language: text
+            template: "{{e2e_test_structure}}"
+      - id: test-examples
+        title: Test Examples
+        sections:
+          - id: frontend-test
+            title: Frontend Component Test
+            type: code
+            language: typescript
+            template: "{{frontend_test_example}}"
+          - id: backend-test
+            title: Backend API Test
+            type: code
+            language: typescript
+            template: "{{backend_test_example}}"
+          - id: e2e-test
+            title: E2E Test
+            type: code
+            language: typescript
+            template: "{{e2e_test_example}}"

@@ -1,0 +1,31 @@
+  - id: deployment-architecture
+    title: Deployment Architecture
+    instruction: Define deployment strategy based on platform choice.
+    elicit: true
+    sections:
+      - id: deployment-strategy
+        title: Deployment Strategy
+        template: |
+          **Frontend Deployment:**
+          - **Platform:** {{frontend_deploy_platform}}
+          - **Build Command:** {{frontend_build_command}}
+          - **Output Directory:** {{frontend_output_dir}}
+          - **CDN/Edge:** {{cdn_strategy}}
+          
+          **Backend Deployment:**
+          - **Platform:** {{backend_deploy_platform}}
+          - **Build Command:** {{backend_build_command}}
+          - **Deployment Method:** {{deployment_method}}
+      - id: cicd-pipeline
+        title: CI/CD Pipeline
+        type: code
+        language: yaml
+        template: "{{cicd_pipeline_config}}"
+      - id: environments
+        title: Environments
+        type: table
+        columns: [Environment, Frontend URL, Backend URL, Purpose]
+        rows:
+          - ["Development", "{{dev_fe_url}}", "{{dev_be_url}}", "Local development"]
+          - ["Staging", "{{staging_fe_url}}", "{{staging_be_url}}", "Pre-production testing"]
+          - ["Production", "{{prod_fe_url}}", "{{prod_be_url}}", "Live environment"]

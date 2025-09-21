@@ -91,9 +91,6 @@ This file is generated from implementation evidence. Do not edit within BEGIN/EN
 - [module] DeterministicGenerator: unused
   - id: scripts/generation/deterministic-generator.js#DeterministicGenerator
   - Evidence: scripts/generation/deterministic-generator.js
-- [module] scripts/ingest-to-qdrant.js: active
-  - id: scripts/ingest-to-qdrant.js
-  - Evidence: scripts/ingest-to-qdrant.js
 - [module] scripts/preflight/brand-compat-check.js: unused
   - id: scripts/preflight/brand-compat-check.js
   - Evidence: scripts/preflight/brand-compat-check.js

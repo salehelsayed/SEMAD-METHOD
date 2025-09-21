@@ -1,0 +1,50 @@
+  - id: development-workflow
+    title: Development Workflow
+    instruction: Define the development setup and workflow for the fullstack application.
+    elicit: true
+    sections:
+      - id: local-setup
+        title: Local Development Setup
+        sections:
+          - id: prerequisites
+            title: Prerequisites
+            type: code
+            language: bash
+            template: "{{prerequisites_commands}}"
+          - id: initial-setup
+            title: Initial Setup
+            type: code
+            language: bash
+            template: "{{setup_commands}}"
+          - id: dev-commands
+            title: Development Commands
+            type: code
+            language: bash
+            template: |
+              # Start all services
+              {{start_all_command}}
+              
+              # Start frontend only
+              {{start_frontend_command}}
+              
+              # Start backend only
+              {{start_backend_command}}
+              
+              # Run tests
+              {{test_commands}}
+      - id: environment-config
+        title: Environment Configuration
+        sections:
+          - id: env-vars
+            title: Required Environment Variables
+            type: code
+            language: bash
+            template: |
+              # Frontend (.env.local)
+              {{frontend_env_vars}}
+              
+              # Backend (.env)
+              {{backend_env_vars}}
+              
+              # Shared
+              {{shared_env_vars}}

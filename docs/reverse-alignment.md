@@ -86,7 +86,7 @@ The orchestrator `run` command prints a quick summary from these files so agents
   - `docs/architecture/source-tree.md`
 - Rewritten `docs/prd/PRD.md`
 - Sharded PRD/Architecture when enabled in `bmad-core/core-config.yaml`
-- Per-epic summaries under `docs/prd/epics/epic-*.md`
+- Per-epic summaries under `docs/prd/epic-summaries/epic-*.md` (summaries only; EpicContracts live in `docs/epics/`)
 - Recreated `docs/stories/*.md` (marked Implemented, referencing real files)
 - Coverage and alignment reports in `.ai/reports/`
 - Canonical manifest at `.ai/documentation-manifest.json`

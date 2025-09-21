@@ -1,20 +1,20 @@
 id: ingest-documentation
-name: Ingest Documentation to Qdrant
-purpose: Fetch technical documentation from search results and ingest into Qdrant for agent access
+name: Ingest Documentation Locally
+purpose: Fetch technical documentation from search results and persist curated summaries for offline agent access
 inputs:
   searchToolsPath:
     type: string
     description: Path to the tech-search-tools.yaml file
     default: tech-search-tools.yaml
-  collectionName:
+  outputDirectory:
     type: string
-    description: Qdrant collection name for documentation
-    default: project_documentation
+    description: Directory where normalized documentation chunks will be stored
+    default: .ai/doc-ingestion
 outputs:
   ingestionReport:
     type: string
-    description: Report of ingested documentation
-    default: documentation-ingestion-report.yaml
+    description: Report describing which documents were captured, stored under the output directory
+    default: documentation-ingestion-report.md
 steps:
   - id: parse-search-tools
     name: Parse Search Tools Configuration
@@ -39,25 +39,28 @@ steps:
         elicit: true
   
   - id: process-content
-    name: Process Documentation for Qdrant
-    description: Convert documentation into vector embeddings
+    name: Normalize Documentation Content
+    description: Convert documentation into compact, chunked text bundles for local indexing
     actions:
-      - description: Process documentation content for vector storage (chunk and process documents with bounded concurrency)
+      - description: Process documentation content for local storage (chunk and process documents with bounded concurrency)
         action: |
-          echo "Processing documentation for Qdrant..."
+          echo "Processing documentation for local knowledge pack..."
           echo "This would:"
           echo "1. Split documentation into semantic chunks"
-          echo "2. Generate embeddings using OpenAI or local model"
-          echo "3. Extract metadata (source, date, technology, version)"
-          echo "4. Prepare for Qdrant ingestion"
+          echo "2. Capture source metadata (url, title, technology, lastUpdated)"
+          echo "3. Produce normalized markdown/plaintext snippets"
+          echo "4. Stage JSONL/Markdown files for local storage"
         elicit: true
-  
-  - id: ingest-to-qdrant
-    name: Ingest to Qdrant
-    description: Store processed documentation in Qdrant
+
+  - id: persist-locally
+    name: Persist Documentation Locally
+    description: Store processed documentation chunks in the configured directory
     actions:
-      - description: Use ingest-to-qdrant.js to store documentation
-        action: node {root}/scripts/ingest-to-qdrant.js --collection {{inputs.collectionName}} --data processed-docs.json
+      - description: Move normalized chunks into the output directory and merge with any existing knowledge pack
+        action: |
+          mkdir -p "{{inputs.outputDirectory}}"
+          echo "Writing normalized documentation to {{inputs.outputDirectory}}/docs.jsonl (or split Markdown files)"
+          echo "Combine new chunks with existing entries, deduplicating by source + heading"
         elicit: true
   
   - id: generate-report
@@ -68,10 +71,11 @@ steps:
         action: |
           echo "Generating ingestion report..."
           echo "Report would include:"
-          echo "- Number of documents ingested"
+          echo "- Number of documents captured"
           echo "- Technologies covered"
           echo "- Sources used"
-          echo "- Collection statistics"
+          echo "- Destination directory and file list"
+          echo "Writing report to {{inputs.outputDirectory}}/{{outputs.ingestionReport}}"
         elicit: true
         
 metadata:
@@ -82,7 +86,6 @@ metadata:
     - tech-search-tools.yaml
   tags:
     - documentation
-    - qdrant
     - ingestion
   performance:
     concurrency: Prefer bounded concurrency for fetch and processing steps to reduce total ingestion time without exhausting system/network resources

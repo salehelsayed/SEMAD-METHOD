@@ -50,7 +50,6 @@ EXCLUDE_PATTERNS=(
     "*.bundle.js"
     "package-lock.json"
     "*.log"
-    "qdrant_storage"
     ".ai"
     "CHANGELOG.md"
     "*.test.js"

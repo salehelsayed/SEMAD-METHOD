@@ -235,12 +235,15 @@ function main() {
   if (agent === 'dev' && command === 'run-tests') {
     // Route to QA test runner
     const runner = path.join(projectRoot, 'tools', 'qa', 'run-test-quality.js');
+    const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
     if (fs.existsSync(runner)) {
-      const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
+      const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     } else {
-      // Fallback to npm test
-      const child = spawn('npm', ['test', ...rest], { stdio: 'inherit', cwd: projectRoot });
+      // Fallback to npm test (non-interactive)
+      const args = ['test', '--silent'];
+      if (rest && rest.length) args.push(...rest);
+      const child = spawn('npm', args, { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     }
     return;
@@ -256,8 +259,7 @@ function main() {
   }
 
   if (agent === 'qa' && command === 'analyze-code-quality') {
-    // Use task runner for structured task; prefer `.semad-core` but fall back if needed
-    const taskRunner = path.join(projectRoot, 'tools', 'task-runner.js');
+    // Execute structured task via TaskRunner (non-interactive by default)
     const candidates = [
       path.join(projectRoot, '.semad-core', 'structured-tasks', 'analyze-code-quality.yaml'),
       path.join(projectRoot, 'semad-core', 'structured-tasks', 'analyze-code-quality.yaml'),
@@ -265,30 +267,52 @@ function main() {
       path.join(projectRoot, '.semad-core', 'structured-tasks', 'analyze-code-quality.yaml')
     ];
     const taskPath = candidates.find(p => require('fs').existsSync(p)) || candidates[0];
-    const child = spawn(process.execPath, [taskRunner, taskPath, ...rest], { stdio: 'inherit', cwd: projectRoot });
-    child.on('exit', code => process.exit(code));
+    // Accept optional story path via positional, --story <path>, or @<path>
+    let storyPath = null;
+    for (let i = 0; i < rest.length; i++) {
+      const tok = rest[i];
+      if (!tok) continue;
+      if (tok === '--story' && rest[i + 1]) { storyPath = rest[i + 1]; break; }
+      if (tok.startsWith('@') && tok.length > 1) { storyPath = tok.slice(1); break; }
+      if (!tok.startsWith('-') && !storyPath) { storyPath = tok; break; }
+    }
+    const run = async () => {
+      try {
+        const TaskRunner = require('./task-runner');
+        const runner = new TaskRunner(projectRoot);
+        const context = { allowMissingUserInput: true, storyPath, argv: rest };
+        const result = await runner.executeTask('qa', taskPath, context);
+        const ok = result && result.success !== false;
+        console.log(`analyze-code-quality: ${ok ? 'success' : 'failed'}`);
+        return ok ? 0 : 1;
+      } catch (e) {
+        console.error('analyze-code-quality failed:', e.message);
+        return 1;
+      }
+    };
+    run().then(code => process.exit(code));
     return;
   }
 
   if (agent === 'qa' && command === 'generate-coverage-report') {
     const runner = path.join(projectRoot, 'tools', 'qa', 'test-quality-gate.js');
+    const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
     if (fs.existsSync(runner)) {
-      const child = spawn(process.execPath, [runner, '--coverage', ...rest], { stdio: 'inherit', cwd: projectRoot });
+      const child = spawn(process.execPath, [runner, '--coverage', ...rest], { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     } else {
-      // Fallback to npm coverage
-      const child = spawn('npm', ['run', 'coverage', ...rest], { stdio: 'inherit', cwd: projectRoot });
+      // Fallback to npm coverage (non-interactive)
+      const child = spawn('npm', ['run', 'coverage', ...rest], { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     }
     return;
   }
 
   if (agent === 'qa' && command === 'validate-docs-code-alignment') {
-    // Use task runner with validation task
-    const taskRunner = path.join(projectRoot, 'tools', 'task-runner.js');
+    // Delegate to orchestrator CLI validation to avoid interactive prompts
+    const orchestratorCLI = path.join(projectRoot, 'tools', 'workflow-orchestrator.js');
     console.log('Validating documentation and code alignment...');
-    // This would need a specific task or script to be created
-    const child = spawn(process.execPath, [taskRunner, '--validate-alignment', ...rest], { stdio: 'inherit', cwd: projectRoot });
+    const child = spawn(process.execPath, [orchestratorCLI, 'qa-validate-alignment', ...rest], { stdio: 'inherit', cwd: projectRoot });
     child.on('exit', code => process.exit(code));
     return;
   }
@@ -310,27 +334,40 @@ function main() {
   if (agent === 'qa' && command === 'validate-feature-coverage') {
     // Run the feature coverage tool
     const runner = path.join(projectRoot, 'tools', 'feature-coverage.js');
+    const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
     if (fs.existsSync(runner)) {
-      const child = spawn(process.execPath, [runner, '--min-test-coverage', '80', '--report', '.ai/reports/feature-coverage.json', '--markdown', '.ai/reports/feature-coverage.md', ...rest], { stdio: 'inherit', cwd: projectRoot });
+      const child = spawn(process.execPath, [runner, '--min-test-coverage', '80', '--report', '.ai/reports/feature-coverage.json', '--markdown', '.ai/reports/feature-coverage.md', ...rest], { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     } else {
       console.error('Feature coverage tool not found. Running basic test coverage instead.');
-      const child = spawn('npm', ['run', 'test:coverage', ...rest], { stdio: 'inherit', cwd: projectRoot });
+      const child = spawn('npm', ['run', 'test:coverage', ...rest], { stdio: 'inherit', cwd: projectRoot, env });
       child.on('exit', code => process.exit(code));
     }
     return;
   }
 
   if (agent === 'qa' && command === 'analyze-dependencies') {
-    // Run dependency analysis task
-    const taskRunner = path.join(projectRoot, 'tools', 'task-runner.js');
+    // Run dependency analysis structured task via TaskRunner
     const candidates = [
       path.join(projectRoot, '.semad-core', 'structured-tasks', 'analyze-dependency-impacts-qa.yaml'),
       path.join(projectRoot, 'semad-core', 'structured-tasks', 'analyze-dependency-impacts-qa.yaml')
     ];
     const taskPath = candidates.find(p => require('fs').existsSync(p)) || candidates[0];
-    const child = spawn(process.execPath, [taskRunner, taskPath, ...rest], { stdio: 'inherit', cwd: projectRoot });
-    child.on('exit', code => process.exit(code));
+    const run = async () => {
+      try {
+        const TaskRunner = require('./task-runner');
+        const runner = new TaskRunner(projectRoot);
+        const context = { allowMissingUserInput: true, argv: rest };
+        const result = await runner.executeTask('qa', taskPath, context);
+        const ok = result && result.success !== false;
+        console.log(`analyze-dependencies: ${ok ? 'success' : 'failed'}`);
+        return ok ? 0 : 1;
+      } catch (e) {
+        console.error('analyze-dependencies failed:', e.message);
+        return 1;
+      }
+    };
+    run().then(code => process.exit(code));
     return;
   }
 
@@ -411,6 +448,47 @@ function main() {
     console.log(`Executing PM command: ${command}`);
     const taskRunner = path.join(projectRoot, 'tools', 'task-runner.js');
     const child = spawn(process.execPath, [taskRunner, `--pm-${command}`, ...rest], { stdio: 'inherit', cwd: projectRoot });
+    child.on('exit', code => process.exit(code));
+    return;
+  }
+
+  if (agent === 'pm' && (command === 'brownfield-create-epic' || command === 'brownfield-create-story')) {
+    // Run brownfield creation structured tasks via TaskRunner
+    const candidates = [
+      path.join(projectRoot, '.semad-core', 'structured-tasks', command === 'brownfield-create-epic' ? 'brownfield-create-epic.yaml' : 'brownfield-create-story.yaml'),
+      path.join(projectRoot, 'semad-core', 'structured-tasks', command === 'brownfield-create-epic' ? 'brownfield-create-epic.yaml' : 'brownfield-create-story.yaml'),
+      path.join(projectRoot, 'bmad-core', 'structured-tasks', command === 'brownfield-create-epic' ? 'brownfield-create-epic.yaml' : 'brownfield-create-story.yaml'),
+      path.join(projectRoot, '.bmad-core', 'structured-tasks', command === 'brownfield-create-epic' ? 'brownfield-create-epic.yaml' : 'brownfield-create-story.yaml')
+    ];
+    const taskPath = candidates.find(p => require('fs').existsSync(p)) || candidates[candidates.length - 1];
+
+    const run = async () => {
+      try {
+        const TaskRunner = require('./task-runner');
+        const runner = new TaskRunner(projectRoot);
+        // Allow missing user input for non-interactive usage; forward args through context
+        const context = { allowMissingUserInput: true, argv: rest };
+        const result = await runner.executeTask('pm', taskPath, context);
+        const ok = result && result.success !== false;
+        console.log(`${command}: ${ok ? 'success' : 'failed'}`);
+        return ok ? 0 : 1;
+      } catch (e) {
+        console.error(`${command} failed:`, e.message);
+        return 1;
+      }
+    };
+    run().then(code => process.exit(code));
+    return;
+  }
+
+  // ============== PO AGENT COMMANDS ==============
+  if (agent === 'po' && (command === 'create-epics' || command === 'create-epics-from-prd')) {
+    const runner = path.join(projectRoot, 'tools', 'po', 'create-epics-from-prd.js');
+    if (!require('fs').existsSync(runner)) {
+      console.error('Epic creation tool not found at:', runner);
+      process.exit(1);
+    }
+    const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
     child.on('exit', code => process.exit(code));
     return;
   }
@@ -539,6 +617,35 @@ function main() {
   // ============== ORCHESTRATOR AGENT COMMANDS ==============
   if ((agent === 'orchestrator' || agent === 'bmad-orchestrator')) {
     const orchestratorCLI = path.join(projectRoot, 'tools', 'workflow-orchestrator.js');
+
+    // Special-case: dev-qa-iterative-session → stream in-session Dev↔QA handoffs like greenfield flow
+    if (command === 'dev-qa-iterative-session') {
+      const path = require('path');
+      // Parse args: accept positional, --story/-s, or @<pathOrId>; and --max/-m
+      let storyArg = null;
+      let maxIterations = null;
+      for (let i = 0; i < rest.length; i++) {
+        const tok = rest[i];
+        if (!tok) continue;
+        if ((tok === '--story' || tok === '-s') && rest[i + 1]) { storyArg = rest[i + 1]; i++; continue; }
+        if ((tok === '--max' || tok === '-m') && rest[i + 1]) { maxIterations = rest[i + 1]; i++; continue; }
+        if (tok.startsWith('@') && tok.length > 1 && !storyArg) { storyArg = tok.slice(1); continue; }
+        if (!tok.startsWith('-') && !storyArg) { storyArg = tok; continue; }
+      }
+      if (!storyArg) {
+        console.error('Missing required option: --story <pathOrId>');
+        process.exit(1);
+      }
+
+      // Stream the built-in orchestrator iterative flow to match greenfield UX
+      const args = ['dev-qa-iterative', '--directory', projectRoot, '--story', storyArg];
+      if (maxIterations) args.push('--max', String(maxIterations));
+      const env = { ...process.env, BMAD_NONINTERACTIVE: '1', BMAD_ALLOW_MISSING_USER_INPUT: '1' };
+      const child = spawn(process.execPath, [orchestratorCLI, ...args], { stdio: 'inherit', cwd: projectRoot, env });
+      child.on('exit', code => process.exit(code));
+      return;
+    }
+
     const passthrough = (subcmd) => {
       const child = spawn(process.execPath, [orchestratorCLI, subcmd, ...rest], { stdio: 'inherit', cwd: projectRoot });
       child.on('exit', code => process.exit(code));
@@ -550,6 +657,13 @@ function main() {
     if (command === 'create-documentation-manifest') return passthrough('create-documentation-manifest');
     if (command === 'architect-rewrite') return passthrough('architect-rewrite');
     if (command === 'pm-update-prd') return passthrough('pm-update-prd');
+    // New and generic passthroughs for orchestrator helpers/workflows
+    if (command === 'create-epics-from-prd') return passthrough('create-epics-from-prd');
+    if (command === 'validate-epics') return passthrough('validate-epics');
+    if (command === 'brownfield-bootstrap') return passthrough('brownfield-bootstrap');
+    if (command === 'brownfield-story-gen') return passthrough('brownfield-story-gen');
+    // Fallback: attempt to run any orchestrator subcommand directly
+    return passthrough(command);
   }
 
   console.error(`Unsupported routing: agent='${agent}', command='${command}'. Try '/${agent} *help' for available commands.`);

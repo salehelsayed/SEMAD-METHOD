@@ -344,6 +344,7 @@ persona:
     - 'INSTRUCTION HIERARCHY: Follow instruction priority order: system > gate rules > StoryContract > PRD/Architecture > templates. When creating PRDs, focus on requirements that directly support implementation. Never specify requirements not derivable from user needs and market research.'
     - 'STRUCTURED OUTPUT: Use structured-output-tmpl.json format for PRDs and strategic documents. Include decisions, assumptions, and risks sections. Document instruction level for product decisions and market assumptions.'
     - 'NO INVENTION RULE: Base all PRD requirements on user research, market analysis, or explicit stakeholder requests. If requirements are unclear, conduct additional research rather than making assumptions.'
+    - 'EPIC STORY BLUEPRINTS: When creating epics, populate `storyBlueprints` with one entry per planned story, including sliceType, traceability (reqIds/flowIds/intIds), and an implementationChecklistSeed grouped by headers with single-action tasks that end in a success signal so the SM can lift them directly into story Implementation Checklists. Reference any extended plans via companionDocs (See <file>:<section>).'
 commands:
   - help: Show numbered list of the following commands to allow selection
   - create-prd: run task create-doc.yaml with template prd-tmpl.yaml directly → tracker.log('Creating PRD', 'info') → Record PRD creation decision → Record PRD pattern application as keyfact → tracker.completeCurrentTask('PRD created')
@@ -540,7 +541,7 @@ dependencies:
     - fullstack-architecture-tmpl.yaml
     - brownfield-architecture-tmpl.yaml
   structured-checklists:
-    - architect-checklist.yaml
+    - architect-checklist/index.yaml
   data:
     - technical-preferences.md
   utils:
@@ -602,12 +603,14 @@ persona:
     - 'PROGRESS TRACKING: After backlog operations, record observations directly. Record decisions with clear rationale.'
     - 'KNOWLEDGE PERSISTENCE: Store successful story patterns and quality validation methods in tracking system.'
     - 'TRACKING GUIDELINES - After execute-checklist-po: Record observation about quality validation. After shard-doc: Record observation about document processing. After create-epic: Record observation about epic creation.'
-    - Scope Clarification - PO does not create stories/epics; delegate standard story creation to SM and brownfield story/epic creation to PM
+    - Scope Clarification - In greenfield workflows, PO authors EpicContracts from PRD; SM creates stories; PM validates Epics and PRD consistency. In brownfield, PM may create epics.
+    - 'EPIC STORY BLUEPRINTS: While generating EpicContracts, ensure the `storyBlueprints` section includes one entry per planned story with sliceType, traceability (reqIds/flowIds/intIds), and implementationChecklistSeed groups containing single-action tasks plus success signals. Link deeper plans via companionDocs so SM has discoverable context.'
 commands:
   - help: Show numbered list of the following commands to allow selection
   - execute-checklist-po: Run task execute-checklist (checklist po-master-checklist) directly → tracker.log('Running PO checklist', 'info') → Record PO quality checklist completion → Record quality checklist patterns as keyfact → tracker.completeCurrentTask('checklist completed')
   - shard-doc {document} {destination}: run the task shard-doc against the optionally provided document to the specified destination (CRITICAL - Verify all files are actually created after sharding) directly → tracker.log('Sharding document', 'info') → Record document sharding completion → Record document sharding patterns as keyfact → tracker.completeCurrentTask('document sharded')
   - correct-course: execute the correct-course task directly → tracker.log('Correcting course', 'info') → Record process corrections decision → tracker.completeCurrentTask('course corrected')
+  - create-epics-from-prd: Generate EpicContracts from PRD using tools/po/create-epics-from-prd.js → tracker.log('Creating epics from PRD', 'info') → tracker.completeCurrentTask('epics created')
   - doc-out: Output full document to current destination file
   - validate-story-draft {story}: run the task validate-next-story against the provided story file directly → tracker.log('Validating story', 'info') → Record story validation completion → tracker.completeCurrentTask('story validated')
   - validate-epic {epic}: validate epic contract directly → tracker.log('Validating epic', 'info') → Record epic validation report generation → tracker.completeCurrentTask('epic validated')
@@ -1165,7 +1168,6 @@ sections:
 
 ==================== START: .semad-core/data/bmad-kb.md ====================
 # BMad Knowledge Base
-
 ## Overview
 
 BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework that combines AI agents with Agile development methodologies. The v4 system introduces a modular architecture with improved dependency management, bundle optimization, and support for both web and IDE environments.
@@ -1185,7 +1187,6 @@ BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework 
 - **Team Collaboration**: Multiple roles working together
 - **Quality Assurance**: Structured testing and validation
 - **Documentation**: Professional PRDs, architecture docs, user stories
-
 ## How BMad Works
 
 ### The Core Method
@@ -1231,7 +1232,6 @@ BMad transforms you into a "Vibe CEO" - directing a team of specialized AI agent
 - **Incremental Progress**: Small stories = manageable complexity
 - **Human Oversight**: You validate each step = quality control
 - **Document-Driven**: Specs guide everything = consistency
-
 ## Getting Started
 
 ### Quick Start Options
@@ -1341,7 +1341,6 @@ npx bmad-method install
 4. **MUST switch to SM agent** for story creation
 5. **MUST switch to Dev agent** for implementation
 6. Keep planning and coding in separate chat sessions
-
 ## Core Configuration (core-config.yaml)
 
 **New in V4**: The `bmad-core/core-config.yaml` file is a critical innovation that enables BMad to work seamlessly with any project structure, providing maximum flexibility and backwards compatibility.
@@ -1404,7 +1403,6 @@ architectureVersion: v4
 architectureSharded: true
 architectureShardedLocation: docs/architecture
 ```
-
 ## Core Philosophy
 
 ### Vibe CEO'ing
@@ -1433,7 +1431,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 3. **Status Tracking**: Maintain story statuses (Draft → Approved → InProgress → Done)
 4. **Iterative Development**: Complete one story before starting the next
 5. **Documentation First**: Always start with solid PRD and architecture
-
 ## Agent System
 
 ### Core Development Team
@@ -1492,7 +1489,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 /help - Show available commands
 /switch agent-name - Change active agent (if orchestrator available)
 ```
-
 ## Team Configurations
 
 ### Pre-Built Teams
@@ -1514,7 +1510,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 - **Includes**: PM, Architect, Developer, QA (no UX Expert)
 - **Use Case**: Backend services, APIs, system development
 - **Bundle**: `team-no-ui.txt`
-
 ## Core Architecture
 
 ### System Overview
@@ -1592,7 +1587,6 @@ The `web-builder.js` tool creates web-ready bundles by:
 4. Outputting ready-to-upload bundles for web AI interfaces
 
 This architecture enables seamless operation across environments while maintaining the rich, interconnected agent ecosystem that makes BMad powerful.
-
 ## Complete Development Workflow
 
 ### Planning Phase (Web UI Recommended - Especially Gemini!)
@@ -1786,7 +1780,6 @@ Each status change requires user verification and approval before proceeding.
 4. **Incremental Approach**: Plan for gradual rollout and testing
 
 **For detailed guide**: See `docs/working-in-the-brownfield.md`
-
 ## Document Creation Best Practices
 
 ### Required File Naming for Framework Integration
@@ -1817,7 +1810,7 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 
 ```markdown
 ## Goals and Background Context
-## Requirements  
+## Requirements
 ## User Interface Design Goals
 ## Success Metrics
 ```
@@ -1830,7 +1823,6 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 - `docs/prd/success-metrics.md`
 
 Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sharding.
-
 ## Usage Patterns and Best Practices
 
 ### Environment-Specific Usage
@@ -1862,7 +1854,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - Choose appropriate team size for project needs
 - Leverage technical preferences for consistency
 - Regular context management and cache clearing
-
 ## Success Tips
 
 - **Use Gemini for big picture planning** - The team-fullstack bundle provides collaborative expertise
@@ -1870,7 +1861,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - **Follow the SM → Dev cycle religiously** - This ensures systematic progress
 - **Keep conversations focused** - One agent, one task per conversation
 - **Review everything** - Always review and approve before marking complete
-
 ## Contributing to BMad-Method
 
 ### Quick Contribution Guidelines
@@ -1898,7 +1888,6 @@ For full details, see `CONTRIBUTING.md`. Key points:
 - **Natural Language First**: Everything in markdown, no code in core
 - **Core vs Expansion Packs**: Core for universal needs, packs for specialized domains
 - **Design Philosophy**: "Dev agents code, planning agents plan"
-
 ## Expansion Packs
 
 ### What Are Expansion Packs?
@@ -1959,7 +1948,6 @@ Use the **expansion-creator** pack to build your own:
 4. **Test & Share**: Validate with real use cases, share with community
 
 **Key Principle**: Expansion packs democratize expertise by making specialized knowledge accessible through AI agents.
-
 ## Getting Help
 
 - **Commands**: Use `*/*help` in any environment to see available commands
@@ -2291,15 +2279,17 @@ parallel:
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const WorkingMemoryStore = require('./working-memory-store');
 
 class SharedContextManager {
   constructor(baseDirectory = '.ai') {
     this.baseDirectory = path.resolve(baseDirectory);
     this.contextFilePath = path.join(this.baseDirectory, 'shared-context.json');
-    this.userInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
+    this.legacyUserInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
     this.contextCache = null;
     this.contextCacheTimestamp = null;
     this.CACHE_TTL = 30000; // 30 seconds
+    this.memoryStore = new WorkingMemoryStore(path.join(this.baseDirectory, 'working-memory'));
   }
 
   /**
@@ -2327,17 +2317,19 @@ class SharedContextManager {
     try {
       // Ensure base directory exists
       await fs.mkdir(this.baseDirectory, { recursive: true });
-      
+
       // Initialize context file if it doesn't exist
       if (!(await this.fileExists(this.contextFilePath))) {
         await this.resetContext();
       }
-      
-      // Initialize user interactions file if it doesn't exist
-      if (!(await this.fileExists(this.userInteractionsPath))) {
-        await this.resetUserInteractions();
+
+      await this.memoryStore.initialize();
+
+      // Migrate legacy interaction store if present
+      if (await this.fileExists(this.legacyUserInteractionsPath)) {
+        await this.migrateLegacyInteractions();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Failed to initialize SharedContextManager:', error);
@@ -2396,7 +2388,8 @@ class SharedContextManager {
    * Reset user interactions log
    */
   async resetUserInteractions() {
-    const initialInteractions = {
+    await this.memoryStore.resetAll();
+    return {
       sessionId: this.generateSessionId(),
       createdAt: new Date().toISOString(),
       interactions: [],
@@ -2406,11 +2399,34 @@ class SharedContextManager {
         topicsSummary: []
       }
     };
-    
-    await this.retryWithBackoff(() => 
-      fs.writeFile(this.userInteractionsPath, JSON.stringify(initialInteractions, null, 2))
-    );
-    return initialInteractions;
+  }
+
+  /**
+   * Migrate interactions from legacy single-file storage to chunked store
+   */
+  async migrateLegacyInteractions() {
+    try {
+      const raw = await fs.readFile(this.legacyUserInteractionsPath, 'utf8');
+      const legacy = JSON.parse(raw);
+      const interactions = Array.isArray(legacy?.interactions) ? legacy.interactions : [];
+
+      const ordered = interactions
+        .slice()
+        .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
+      for (const interaction of ordered) {
+        if (!interaction.id) {
+          interaction.id = `${interaction.agentName || 'agent'}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`;
+        }
+        const agentName = interaction.agentName || 'unknown';
+        await this.memoryStore.appendInteraction(agentName, interaction);
+      }
+
+      await fs.rm(this.legacyUserInteractionsPath, { force: true });
+      console.log('Migrated legacy user interactions into chunked working-memory store.');
+    } catch (error) {
+      console.error('Failed to migrate legacy interactions:', error);
+    }
   }
 
   /**
@@ -2505,28 +2521,7 @@ class SharedContextManager {
         importance: options.importance || 'medium'
       };
 
-      // Load current interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Add new interaction
-      interactions.interactions.push(interaction);
-      
-      // Update summary statistics
-      interactions.summary.totalInteractions++;
-      if (!interactions.summary.agentBreakdown[agentName]) {
-        interactions.summary.agentBreakdown[agentName] = 0;
-      }
-      interactions.summary.agentBreakdown[agentName]++;
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      // Update shared context with this interaction
+      await this.memoryStore.appendInteraction(agentName, interaction);
       await this.updateContextWithUserInput(agentName, interaction);
       
       return interaction;
@@ -2683,30 +2678,25 @@ class SharedContextManager {
    */
   async confirmUserResponse(interactionId, agentName, confirmationText) {
     try {
-      // Load interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Find the interaction
-      const interaction = interactions.interactions.find(i => i.id === interactionId);
-      if (!interaction) {
-        throw new Error(`Interaction ${interactionId} not found`);
+      const updated = await this.memoryStore.updateInteraction(agentName, interactionId, interaction => {
+        const confirmationAttempts = (interaction.userResponse.confirmationAttempts || 0) + 1;
+        return {
+          ...interaction,
+          userResponse: {
+            ...interaction.userResponse,
+            confirmed: true,
+            confirmationAttempts,
+            confirmationText,
+            confirmedAt: new Date().toISOString()
+          }
+        };
+      });
+
+      if (!updated) {
+        throw new Error(`Interaction ${interactionId} not found for agent ${agentName}`);
       }
-      
-      // Update confirmation status
-      interaction.userResponse.confirmed = true;
-      interaction.userResponse.confirmationAttempts++;
-      interaction.userResponse.confirmationText = confirmationText;
-      interaction.userResponse.confirmedAt = new Date().toISOString();
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      return interaction;
+
+      return updated;
     } catch (error) {
       console.error('Failed to confirm user response:', error);
       return null;
@@ -2752,38 +2742,28 @@ class SharedContextManager {
    */
   async getRelevantInteractions(agentName, options = {}) {
     try {
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      let relevantInteractions = interactions.interactions;
-      
-      // Filter by agent if specified
-      if (options.agentSpecific !== false) {
-        relevantInteractions = relevantInteractions.filter(i => i.agentName === agentName);
+      const includeAllAgents = options.agentSpecific === false || agentName === 'all';
+      const rawAgents = includeAllAgents
+        ? await this.memoryStore.listAgentDirectories()
+        : [agentName];
+      const targetAgents = rawAgents.filter(name => Boolean(name) && name !== 'all');
+
+      if (targetAgents.length === 0) {
+        return [];
       }
-      
-      // Filter by context if specified
-      if (options.storyId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.storyId === options.storyId);
-      }
-      
-      if (options.epicId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.epicId === options.epicId);
-      }
-      
-      // Sort by timestamp (most recent first)
-      relevantInteractions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
-      // Limit results if specified
-      if (options.limit) {
-        relevantInteractions = relevantInteractions.slice(0, options.limit);
-      }
-      
-      return relevantInteractions;
+
+      const filters = {
+        storyId: options.storyId,
+        epicId: options.epicId,
+        phase: options.phase
+      };
+
+      const interactions = await this.memoryStore.getInteractions(targetAgents, {
+        limit: options.limit,
+        filters
+      });
+
+      return interactions;
     } catch (error) {
       console.error('Failed to get relevant interactions:', error);
       return [];
@@ -2895,28 +2875,9 @@ class SharedContextManager {
    */
   async cleanup(olderThanDays = 7) {
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-      
-      // Clean up interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      const filteredInteractions = interactions.interactions.filter(i => 
-        new Date(i.timestamp) > cutoffDate
-      );
-      
-      interactions.interactions = filteredInteractions;
-      interactions.summary.totalInteractions = filteredInteractions.length;
-      
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      console.log(`Cleaned up ${interactions.interactions.length - filteredInteractions.length} old interactions`);
-      
+      const olderThanMs = olderThanDays * 24 * 60 * 60 * 1000;
+      await this.memoryStore.cleanup({ olderThanMs });
+      console.log('Cleaned up old interactions from working-memory store');
       return true;
     } catch (error) {
       console.error('Failed to cleanup old interactions:', error);
@@ -6277,7 +6238,6 @@ sections:
         type: table
         columns: [Date, Version, Description, Author]
         instruction: Track document versions and changes
-
   - id: high-level-architecture
     title: High Level Architecture
     instruction: This section contains multiple subsections that establish the foundation. Present all subsections together, then elicit feedback on the complete section.
@@ -6357,7 +6317,6 @@ sections:
           - "**Component-Based UI:** Reusable React components with TypeScript - _Rationale:_ Maintainability and type safety across large codebases"
           - "**Repository Pattern:** Abstract data access logic - _Rationale:_ Enables testing and future database migration flexibility"
           - "**API Gateway Pattern:** Single entry point for all API calls - _Rationale:_ Centralized auth, rate limiting, and monitoring"
-
   - id: tech-stack
     title: Tech Stack
     instruction: |
@@ -6404,7 +6363,6 @@ sections:
           - ["Monitoring", "{{monitoring}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["Logging", "{{logging}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["CSS Framework", "{{css_framework}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
-
   - id: data-models
     title: Data Models
     instruction: |
@@ -6439,7 +6397,6 @@ sections:
             title: Relationships
             type: bullet-list
             template: "- {{relationship}}"
-
   - id: api-spec
     title: API Specification
     instruction: |
@@ -6482,7 +6439,6 @@ sections:
         type: code
         language: typescript
         template: "{{trpc_routers}}"
-
   - id: components
     title: Components
     instruction: |
@@ -6522,7 +6478,6 @@ sections:
           - Component diagram for detailed internal structure
           - Sequence diagrams for complex interactions
           Choose the most appropriate for clarity
-
   - id: external-apis
     title: External APIs
     condition: Project requires external API integrations
@@ -6552,7 +6507,6 @@ sections:
           - `{{method}} {{endpoint_path}}` - {{endpoint_purpose}}
           
           **Integration Notes:** {{integration_considerations}}
-
   - id: core-workflows
     title: Core Workflows
     type: mermaid
@@ -6569,7 +6523,6 @@ sections:
       
       Focus on workflows that clarify architecture decisions or complex interactions.
     elicit: true
-
   - id: database-schema
     title: Database Schema
     instruction: |
@@ -6583,7 +6536,6 @@ sections:
       
       Present schema in format appropriate to database type (SQL DDL, JSON schema, etc.)
     elicit: true
-
   - id: frontend-architecture
     title: Frontend Architecture
     instruction: Define frontend-specific architecture details. After each subsection, note if user wants to refine before continuing.
@@ -6644,7 +6596,6 @@ sections:
             type: code
             language: typescript
             template: "{{service_example}}"
-
   - id: backend-architecture
     title: Backend Architecture
     instruction: Define backend-specific architecture details. Consider serverless vs traditional server approaches.
@@ -6708,7 +6659,6 @@ sections:
             type: code
             language: typescript
             template: "{{auth_middleware}}"
-
   - id: unified-project-structure
     title: Unified Project Structure
     instruction: Create a monorepo structure that accommodates both frontend and backend. Adapt based on chosen tools and frameworks.
@@ -6770,7 +6720,6 @@ sections:
       ├── package.json                # Root package.json
       ├── {{monorepo_config}}         # Monorepo configuration
       └── README.md
-
   - id: development-workflow
     title: Development Workflow
     instruction: Define the development setup and workflow for the fullstack application.
@@ -6821,7 +6770,6 @@ sections:
               
               # Shared
               {{shared_env_vars}}
-
   - id: deployment-architecture
     title: Deployment Architecture
     instruction: Define deployment strategy based on platform choice.
@@ -6853,7 +6801,6 @@ sections:
           - ["Development", "{{dev_fe_url}}", "{{dev_be_url}}", "Local development"]
           - ["Staging", "{{staging_fe_url}}", "{{staging_be_url}}", "Pre-production testing"]
           - ["Production", "{{prod_fe_url}}", "{{prod_be_url}}", "Live environment"]
-
   - id: security-performance
     title: Security and Performance
     instruction: Define security and performance considerations for the fullstack application.
@@ -6888,7 +6835,6 @@ sections:
           - Response Time Target: {{response_target}}
           - Database Optimization: {{db_optimization}}
           - Caching Strategy: {{be_cache_strategy}}
-
   - id: testing-strategy
     title: Testing Strategy
     instruction: Define comprehensive testing approach for fullstack application.
@@ -6940,7 +6886,6 @@ sections:
             type: code
             language: typescript
             template: "{{e2e_test_example}}"
-
   - id: coding-standards
     title: Coding Standards
     instruction: Define MINIMAL but CRITICAL standards for AI agents. Focus only on project-specific rules that prevent common mistakes. These will be used by dev agents.
@@ -6965,7 +6910,6 @@ sections:
           - ["Hooks", "camelCase with 'use'", "-", "`useAuth.ts`"]
           - ["API Routes", "-", "kebab-case", "`/api/user-profile`"]
           - ["Database Tables", "-", "snake_case", "`user_profiles`"]
-
   - id: error-handling
     title: Error Handling Strategy
     instruction: Define unified error handling across frontend and backend.
@@ -7000,7 +6944,6 @@ sections:
         type: code
         language: typescript
         template: "{{backend_error_handler}}"
-
   - id: monitoring
     title: Monitoring and Observability
     instruction: Define monitoring strategy for fullstack application.
@@ -7027,10 +6970,6 @@ sections:
           - Error rate
           - Response time
           - Database query performance
-
-  - id: checklist-results
-    title: Checklist Results Report
-    instruction: Before running the checklist, offer to output the full architecture document. Once user confirms, execute the architect-checklist and populate results here.
 ==================== END: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 
 ==================== START: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================
@@ -7857,10 +7796,34 @@ Target: {{DOR_TARGET}}
 - {{METRIC}}: {{TARGET_VALUE}}  # response_time, throughput, etc.
 {{/PERFORMANCE_CRITERIA}}
 
-  ### Security Requirements
-  {{#SECURITY_REQUIREMENTS}}
+### Security Requirements
+{{#SECURITY_REQUIREMENTS}}
   - {{REQUIREMENT}}  # Authentication, authorization, data protection
-  {{/SECURITY_REQUIREMENTS}}
+{{/SECURITY_REQUIREMENTS}}
+
+## Existing Capabilities & Reuse
+- Reference: .ai/reports/sm/codebase-inventory.md
+- Summary: {{REUSE_SUMMARY}}
+- Relevant Utilities:
+  {{#REUSE_UTILS}}
+  - {{.}}
+  {{/REUSE_UTILS}}
+- Relevant Services/APIs:
+  {{#REUSE_SERVICES}}
+  - {{.}}
+  {{/REUSE_SERVICES}}
+- Relevant Components/Hooks:
+  {{#REUSE_COMPONENTS}}
+  - {{.}}
+  {{/REUSE_COMPONENTS}}
+- Scripts/Tools:
+  {{#REUSE_TOOLS}}
+  - {{.}}
+  {{/REUSE_TOOLS}}
+- Tests to Build On:
+  {{#REUSE_TESTS}}
+  - {{.}}
+  {{/REUSE_TESTS}}
 
 ## Inputs
 {{#STORY_INPUTS}}
@@ -7877,23 +7840,52 @@ Target: {{DOR_TARGET}}
 - {{.}}  # service/protocol + exact endpoint/topic/path (e.g., REST GET /v1/users/:id; Kafka topic user.updates)
 {{/INTEGRATION_TOUCHPOINTS}}
 
-  ## Implementation Plan
-  ### Files to Create
-  {{#FILES_TO_CREATE}}
-  - `{{PATH}}`: {{PURPOSE}}
-  {{/FILES_TO_CREATE}}
+## Implementation Checklist
+{{#IMPLEMENTATION_GROUPS}}
+### {{GROUP_TITLE}}  # Keep groups tight (e.g., Migration, DAO Updates, Tests, Telemetry)
+{{#ITEMS}}
+- [ ] {{DESCRIPTION}}  # Format: Verb + concrete target + success signal (e.g., "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it")
+{{/ITEMS}}
+{{/IMPLEMENTATION_GROUPS}}
+{{^IMPLEMENTATION_GROUPS}}
+### Migration
+- [ ] Replace this placeholder with action-target-success items grouped by category
+{{/IMPLEMENTATION_GROUPS}}
+
+### Companion References
+{{#IMPLEMENTATION_REFERENCES}}
+- See {{PATH}}:{{SECTION}}  # Keep checklist in story and point to extended plan
+{{/IMPLEMENTATION_REFERENCES}}
+{{^IMPLEMENTATION_REFERENCES}}
+- See docs/stories/<companion>.md:<section-name>
+{{/IMPLEMENTATION_REFERENCES}}
+
+## Implementation Plan (Detailed)
+### Files to Create
+{{#FILES_TO_CREATE}}
+- `{{PATH}}`: {{PURPOSE}}
+{{/FILES_TO_CREATE}}
+{{^FILES_TO_CREATE}}
+- N/A
+{{/FILES_TO_CREATE}}
 
 ### Files to Modify
 {{#FILES_TO_MODIFY_DETAILED}}
 - `{{PATH}}`: {{MODIFICATION_TYPE}} - {{REASON}}
 {{/FILES_TO_MODIFY_DETAILED}}
+{{^FILES_TO_MODIFY_DETAILED}}
+- N/A
+{{/FILES_TO_MODIFY_DETAILED}}
 
-  ### Test Requirements
-  {{#TEST_REQUIREMENTS}}
-  - {{TEST_TYPE}}: {{DESCRIPTION}}
-    - File: `{{TEST_FILE}}`
-    - Coverage: {{COVERAGE_TARGET}}%
-  {{/TEST_REQUIREMENTS}}
+### Test Requirements
+{{#TEST_REQUIREMENTS}}
+- {{TEST_TYPE}}: {{DESCRIPTION}}
+  - File: `{{TEST_FILE}}`
+  - Coverage: {{COVERAGE_TARGET}}%
+{{/TEST_REQUIREMENTS}}
+{{^TEST_REQUIREMENTS}}
+- Document required tests with success signals (unit, integration, contract)
+{{/TEST_REQUIREMENTS}}
 
 ## Flow Chart
 ### Existing Artifacts
@@ -8116,21 +8108,38 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
+
     - agent: sm
       action: create_story
       creates: story.md
-      requires: sharded_docs_or_brownfield_docs
+      requires: sharded_docs
       repeats: for_each_epic_or_enhancement
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_story_created
       notes: |
-        Story creation cycle:
-        - For sharded PRD: @sm → *create (uses create-next-story)
-        - For brownfield docs: @sm → use create-brownfield-story task
-        - Creates story from available documentation
+        Story creation cycle (ECM-aware, DoR-gated):
+        - SM Agent (New Chat): @sm → *create (uses create-next-story)
+        - Uses EpicContract + ECM to drive thin slices (flag → probe → 1 INT × 1 flow)
+        - Creates story from sharded docs/epics
         - Story starts in "Draft" status
-        - May require additional context gathering for brownfield
+        - DoR-mini gate and StoryContract validation enforced
 
     - agent: analyst/pm
       action: review_draft_story
@@ -8385,6 +8394,23 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -8605,6 +8631,23 @@ workflow:
         Automatically shard documents for IDE development when prdSharded=true in core-config.yaml:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
+
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
 
     - agent: sm
       action: create_story
@@ -8922,6 +8965,33 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      context_includes:
+        - .ai/handoff-context.json
+        - prd_shards
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Runs tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Uses docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+        - PO fills ECM rows and traceability; assigns epicId conventions (EP-<slug>)
+
+    - agent: pm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use structured task pm-validate-epic.yaml for each epic (or run npm run validate:epic -- --file <epic.md>)
+        - Ensure 100% REQ/INT coverage in ECM (tools/ecm-validate.js)
+
     - agent: sm
       orchestrated: true
       handoff_from: orchestrator
@@ -9065,6 +9135,8 @@ workflow:
         J --> ORCH
         I -->|No| ORCH
         ORCH --> K[po: shard documents]
+        K --> K2[po: create epics from PRD]
+        K2 --> K3[pm: validate epics]
         K --> ORCH
         
         %% Development Phase - Hub and Spoke Pattern
@@ -9230,6 +9302,22 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use pm-validate-epic.yaml or npm run validate:epic -- --file <epic.md>
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -9329,6 +9417,8 @@ workflow:
         G --> H{PO finds issues?}
         H -->|Yes| I[Return to relevant agent for fixes]
         H -->|No| J[po: shard documents]
+        J --> J2[po: create epics from PRD]
+        J2 --> J3[pm: validate epics]
         I --> G
         
         J --> K[sm: create story]
@@ -9482,6 +9572,22 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use pm-validate-epic.yaml or npm run validate:epic -- --file <epic.md>
+
     - agent: sm
       action: create_story
       creates: story.md
@@ -9586,6 +9692,8 @@ workflow:
         H --> I{PO finds issues?}
         I -->|Yes| J[Return to relevant agent for fixes]
         I -->|No| K[po: shard documents]
+        K --> K2[po: create epics from PRD]
+        K2 --> K3[pm: validate epics]
         J --> H
         
         K --> L[sm: create story]

@@ -1,0 +1,19 @@
+id: step3a
+name: Epic Contract Validation
+description: Validate ECM coverage and EpicContract structure before handoff
+actions:
+  - description: Ask for or detect the generated EpicContract file path
+    elicit: true
+  - description: Run ECM validator and fix any coverage gaps (all REQ-* and INT-* referenced in ≥1 ECM row)
+    elicit: false
+    function: execute
+    parameters:
+      command: node tools/ecm-validate.js {{epicPath}}
+  - description: Validate EpicContract front matter against required fields
+    elicit: false
+    function: execute
+    parameters:
+      command: npm run validate:epic -- {{epicPath}}
+metadata:
+  level: 3
+  originalNumber: 3a

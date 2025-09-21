@@ -13,7 +13,7 @@
 ### Phase 2: Memory System (Completed)
 - ✅ Working memory implementation
 - ✅ Memory transaction handling
-- ✅ Qdrant integration for long-term memory (Story 14)
+- ✅ File-based working memory for long-term context (Story 14)
 - ✅ Context retrieval optimization
 - ✅ Consistent use of short-term and long-term memory across agents (Story 15)
 - ✅ Unified memory utilization and hygiene (Story 16)

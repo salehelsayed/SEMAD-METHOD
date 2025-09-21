@@ -12,6 +12,8 @@ function resolveModule(moduleName, fallbackPath) {
   const possiblePaths = [
     path.join(__dirname, '..', '..', 'semad-core', moduleName),
     path.join(__dirname, '..', '..', '.semad-core', moduleName),
+    path.join(__dirname, '..', '..', 'bmad-core', moduleName),
+    path.join(__dirname, '..', '..', '.bmad-core', moduleName),
     path.join(__dirname, '..', '..', moduleName)
   ];
   
@@ -40,9 +42,11 @@ const SimpleTaskTracker = require(resolveModule('utils/simple-task-tracker', '..
 const QAFindingsParser = require(resolveModule('utils/qa-findings-parser', '../../semad-core/utils/qa-findings-parser'));
 const QAFixTracker = require(resolveModule('utils/qa-fix-tracker', '../../semad-core/utils/qa-fix-tracker'));
 const { verifyQAFixes } = require(resolveModule('utils/verify-qa-fixes', '../../semad-core/utils/verify-qa-fixes'));
+const { createUserInputHandler } = require('./elicit-handler');
 // Unified memory removed - use simple-task-tracker and track-progress instead
 const fs = require('fs');
 const { execSync, execFileSync } = require('child_process');
+const WorkflowOrchestrator = require(path.join(__dirname, '..', 'workflow-orchestrator'));
 
 // Create a singleton instance of the tracker
 let trackerInstance = null;
@@ -217,11 +221,47 @@ const FUNCTION_REGISTRY = {
         const re = /(##\s*Status\s*\n\s*)(.+)/i;
         if (re.test(content)) {
           content = content.replace(re, `$1${status}`);
-          fs.writeFileSync(filePath, content, 'utf8');
-          return true;
+        } else {
+          // Insert a Status section after the title or at top if missing
+          if (/^#\s+/.test(content)) {
+            content = content.replace(/^(#\s+.*\n)/, `$1\n## Status\n${status}\n\n`);
+          } else {
+            content = `## Status\n${status}\n\n` + content;
+          }
         }
-        return false;
+        fs.writeFileSync(filePath, content, 'utf8');
+        return true;
       } catch (_) { return false; }
+    }
+
+    function getStoryStatus(filePath) {
+      try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        const match = content.match(/##\s*Status\s*:?.*?\n([\s\S]*?)(?:\n#{1,6}\s|$)/i);
+        if (!match) return null;
+        const lines = match[1].split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        return lines.length ? lines[0] : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function isApprovedStatus(status) {
+      if (!status) return false;
+      const normalized = status.trim().toLowerCase();
+      return ['done', 'qa approved', 'approved', 'ready for done'].some(flag => normalized.includes(flag));
+    }
+
+    function requiresFixes(status) {
+      return status ? /needs\s+fix(es)?/i.test(status) : false;
+    }
+
+    function hasFixTracking() {
+      try {
+        return fs.existsSync(path.join(projectRoot, '.ai', 'qa_fixes_checklist.json'));
+      } catch (_) {
+        return false;
+      }
     }
 
     const storyPath = resolveStoryPath(storyArg);
@@ -238,29 +278,72 @@ const FUNCTION_REGISTRY = {
         const tr = new TaskRunner(projectRoot);
         const res = await tr.executeTask('dev', fixTask, { storyPath, allowMissingUserInput: true });
         return { success: !!res?.success };
-      } catch (e) { return { success: false, error: e.message }; }
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    }
+
+    async function runQAReview() {
+      const candidateTasks = [
+        path.join('structured-tasks', 'review-story.yaml'),
+        path.join('structured-tasks', 'qa-dev-handoff.yaml')
+      ];
+      let reviewTaskPath = null;
+      for (const rel of candidateTasks) {
+        const resolved = resolveCore(rel);
+        if (fs.existsSync(resolved)) {
+          reviewTaskPath = resolved;
+          break;
+        }
+      }
+      if (!reviewTaskPath) {
+        return { success: false, reason: 'no_task' };
+      }
+      try {
+        const TaskRunner = require(path.join(__dirname, '..', 'task-runner'));
+        const runner = new TaskRunner(projectRoot);
+        const userInputHandler = createUserInputHandler({ mode: 'auto', nonInteractive: true });
+        const context = {
+          storyPath,
+          projectRoot,
+          mode: 'review',
+          reviewType: 'full',
+          userInputHandler
+        };
+        const result = await runner.executeTask('qa', reviewTaskPath, context);
+        const status = getStoryStatus(storyPath);
+        return {
+          success: !!result && result.success !== false,
+          status,
+          approved: isApprovedStatus(status),
+          needsFixes: requiresFixes(status)
+        };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
     }
 
     function runQAGateStrict() {
       const qaGateLocal = path.join(projectRoot, 'tools', 'orchestrator', 'gates', 'qa-gate.js');
       const qaGateCore = resolveCore(path.join('tools', 'orchestrator', 'gates', 'qa-gate.js'));
       try {
+        const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
         if (fs.existsSync(qaGateLocal)) {
-          execFileSync(process.execPath, [qaGateLocal, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot });
+          execFileSync(process.execPath, [qaGateLocal, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot, env });
           return true;
         }
         if (fs.existsSync(qaGateCore)) {
-          execFileSync(process.execPath, [qaGateCore, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot });
+          execFileSync(process.execPath, [qaGateCore, path.basename(storyPath)], { stdio: 'inherit', cwd: projectRoot, env });
           return true;
         }
         // Fallback to npm scripts
         const pkg = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
         if (pkg.scripts && pkg.scripts['gate:qa']) {
-          execSync('npm run -s gate:qa', { stdio: 'inherit', cwd: projectRoot });
+          execSync('npm run -s gate:qa', { stdio: 'inherit', cwd: projectRoot, env });
           return true;
         }
         if (pkg.scripts && pkg.scripts['test']) {
-          execSync('npm test --silent', { stdio: 'inherit', cwd: projectRoot });
+          execSync('npm test --silent', { stdio: 'inherit', cwd: projectRoot, env });
           return true;
         }
         return false;
@@ -274,23 +357,152 @@ const FUNCTION_REGISTRY = {
       } catch (_) { return false; }
     }
 
-    const maxIters = Number(maxIterations) || 5;
-    for (let iter = 1; iter <= maxIters; iter++) {
-      // Dev phase (structured fixes if available)
-      await runDevFixes();
+    const orchestrator = new WorkflowOrchestrator(projectRoot);
+    orchestrator.nonInteractive = true;
+    orchestrator.suppressDevLoadWarnings = true;
 
-      // Verify
-      const verified = verifyFixesStrict();
-
-      // QA phase
-      const qaPassed = runQAGateStrict();
-
-      if (qaPassed && verified) {
-        setStoryStatus(storyPath, 'Done');
-        return { success: true, iterations: iter, story: path.relative(projectRoot, storyPath) };
-      }
+    try {
+      await orchestrator.initialize();
+    } catch (error) {
+      console.warn('⚠️  Failed to initialize orchestrator context:', error.message);
     }
-    return { success: false, iterations: maxIters, story: path.relative(projectRoot, storyPath) };
+
+    orchestrator.logger.configure({ verbosity: true, verbosityLevel: 'detailed' });
+
+    const logger = orchestrator.logger;
+    const storyRelative = path.relative(projectRoot, storyPath);
+    const storyDescriptor = {
+      id: path.basename(storyPath).replace(/\.md$/i, '').toUpperCase(),
+      name: path.basename(storyPath, path.extname(storyPath)),
+      file: storyPath
+    };
+
+    const transcript = [];
+    const record = (message) => {
+      transcript.push(message);
+      console.log(message);
+    };
+
+    logger.phaseStart('Dev↔QA Iterative Session', `Story: ${storyDescriptor.name}`);
+    logger.summary('Story Context', [
+      `Path: ${storyRelative}`,
+      `Max Iterations: ${maxIterations || 5}`
+    ]);
+
+    record(`🔁 Starting Dev↔QA iterative session for ${storyRelative}`);
+
+    const maxIters = Number(maxIterations) || 5;
+    let qaTaskAvailable = true;
+    let lastQAOutcome = null;
+
+    const logHandoff = (handoff) => {
+      if (!handoff) return;
+      record(`\n🤝 Handoff ${handoff.sourceAgent} → ${handoff.targetAgent}`);
+      if (handoff.recommendations && handoff.recommendations.length) {
+        handoff.recommendations.forEach((rec, index) => {
+          record(`  ${index + 1}. ${rec}`);
+        });
+      }
+      if (handoff.error) {
+        record(`  ⚠️  Handoff warning: ${handoff.error}`);
+      }
+    };
+
+    for (let iter = 1; iter <= maxIters; iter++) {
+      logger.iteration(iter, 'Starting iteration');
+      record(`\nIteration ${iter}: Preparing Dev updates`);
+
+      const handoffToDev = await orchestrator.consolidateContextForHandoff(
+        iter === 1 ? 'orchestrator' : 'qa',
+        'dev',
+        'dev-qa-iterative',
+        { storyPath: storyRelative, iteration: iter }
+      );
+      logHandoff(handoffToDev);
+      logger.agentAction('dev', iter === 1 ? 'Implementing story' : 'Applying QA feedback', {
+        story: storyRelative,
+        iteration: iter
+      });
+
+      const devResult = await runDevFixes();
+      if (!devResult.success && devResult.reason !== 'no_task') {
+        setStoryStatus(storyPath, 'Needs Fixes');
+        logger.warn(`Dev fixes task failed: ${devResult.error || 'Dev fixes task failed'}`);
+        record(`  ⚠️  Dev fixes task failed: ${devResult.error || 'Dev fixes task failed'}`);
+        logger.phaseComplete('Dev↔QA Iterative Session');
+        return {
+          success: false,
+          iterations: iter,
+          story: storyRelative,
+          error: devResult.error || 'Dev fixes task failed',
+          transcript
+        };
+      }
+      record(`  ✅ Dev structured task complete (address-qa-feedback)`);
+
+      const handoffToQA = await orchestrator.consolidateContextForHandoff(
+        'dev',
+        'qa',
+        'dev-qa-iterative',
+        { storyPath: storyRelative, iteration: iter }
+      );
+      logHandoff(handoffToQA);
+      logger.agentAction('qa', 'Reviewing implementation', { iteration: iter, story: storyRelative });
+      record(`  🔍 QA review in progress`);
+
+      let qaOutcome = { success: false, approved: false, needsFixes: false, status: getStoryStatus(storyPath) };
+
+      if (qaTaskAvailable) {
+        qaOutcome = await runQAReview();
+        if (qaOutcome.reason === 'no_task') {
+          qaTaskAvailable = false;
+          record('  ℹ️  No structured QA review task found; falling back to QA gate only');
+        } else if (qaOutcome.success === false && qaOutcome.error) {
+          console.warn(`QA review task failed: ${qaOutcome.error}`);
+          record(`  ⚠️  QA review task failed: ${qaOutcome.error}`);
+        }
+      }
+
+      const verified = verifyFixesStrict() || !hasFixTracking();
+      const qaPassed = runQAGateStrict();
+      record(`  🧪 QA gate ${qaPassed ? 'passed' : 'failed'} | Fix verification ${verified ? 'passed' : 'incomplete'}`);
+
+      if (!qaTaskAvailable) {
+        if (qaPassed && verified) {
+          setStoryStatus(storyPath, 'Done');
+          logger.agentAction('qa', 'QA gate passed (no structured review task)', { iteration: iter });
+          record('  ✅ QA gate passed; story marked Done');
+          logger.phaseComplete('Dev↔QA Iterative Session');
+          return { success: true, iterations: iter, story: storyRelative, transcript };
+        }
+
+        setStoryStatus(storyPath, 'Needs Fixes');
+        lastQAOutcome = qaOutcome;
+        record('  🔁 Additional work required before approval');
+        continue;
+      }
+
+      if (qaOutcome.success && qaOutcome.approved && qaPassed && verified) {
+        setStoryStatus(storyPath, 'Done');
+        logger.agentAction('qa', 'QA approved implementation', { iteration: iter });
+        record('  ✅ QA approved implementation; story marked Done');
+        logger.phaseComplete('Dev↔QA Iterative Session');
+        return { success: true, iterations: iter, story: storyRelative, transcript };
+      }
+
+      setStoryStatus(storyPath, 'Needs Fixes');
+      lastQAOutcome = qaOutcome;
+      const statusNote = qaOutcome.status ? ` (status: ${qaOutcome.status})` : '';
+      logger.warn(`QA review indicates additional work required${statusNote}`);
+      record(`  🔁 QA indicates more work${statusNote}`);
+      verifyFixesStrict();
+    }
+
+    logger.warn(`Maximum iterations reached (${maxIters}) for ${storyRelative}`);
+    record(`⚠️  Maximum iterations reached (${maxIters}) without QA approval`);
+    logger.phaseComplete('Dev↔QA Iterative Session');
+
+    return { success: false, iterations: maxIters, story: storyRelative, transcript, qaOutcome: lastQAOutcome };
   }
 };
 

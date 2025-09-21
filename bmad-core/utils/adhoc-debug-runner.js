@@ -31,6 +31,46 @@ function log(kind, message) {
   }
 }
 
+async function promptGuided(args) {
+  return new Promise((resolve) => {
+    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+    const ask = (q) => new Promise(res => rl.question(q, ans => res(ans.trim())));
+    (async () => {
+      if (!args.error) args.error = await ask('Problem (one sentence): ');
+      if (!args.where) args.where = await ask('Where (screen/URL/endpoint): ');
+      if (!args.when) args.when = await ask('When (timestamp/time range, include timezone): ');
+      if (!args.errorId) args.errorId = await ask('Error/Trace ID (if shown): ');
+      const steps = await ask('Steps to reproduce (3-5 bullets, optional): ');
+      args.userSteps = steps;
+      rl.close();
+      resolve();
+    })();
+  });
+}
+
+function saveUserLog(args, out) {
+  try {
+    let content = '';
+    if (args.logFile && fs.existsSync(args.logFile)) {
+      content = fs.readFileSync(args.logFile, 'utf8');
+    } else if (args.stdinLog && !process.stdin.isTTY) {
+      content = fs.readFileSync(0, 'utf8');
+    }
+    if (content) {
+      const dest = path.join(out.logs, 'user-provided.log');
+      fs.writeFileSync(dest, content);
+      const lines = content.split(/\r?\n/);
+      const errs = lines.filter(l => /error|exception|fatal/i.test(l)).slice(0, 200);
+      const ids = Array.from(new Set(lines.map(l => (l.match(/(req[_-]?id|trace[_-]?id)[:=\s]+([\w-]+)/i) || [])[2]).filter(Boolean)));
+      fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ errors: errs.slice(0,100), traceIds: ids }));
+      return { saved: true, idsCount: ids.length, errorsCount: errs.length };
+    }
+  } catch (e) {
+    try { fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ error: e.message })); } catch {}
+  }
+  return { saved: false };
+}
+
 function parseArgs(argv) {
   const out = {
     error: '',
@@ -252,6 +292,8 @@ async function main() {
     } catch (e) { dbSummary = `failed: ${e.message}`; }
   }
 
+  const userLog = saveUserLog(args, out);
+
   // Findings and summary
   const summaryMd = [];
   summaryMd.push(`# Ad-hoc Debug Summary`);
@@ -266,6 +308,11 @@ async function main() {
   if (args.nettrace) summaryMd.push(`- Nettrace: NODE_DEBUG=http,net applied`);
   if (args.audit) summaryMd.push(`- Audit: ${auditSummary} → reports/npm-audit.json`);
   if (args.dbcheck) summaryMd.push(`- DB check: ${dbSummary} → reports/db-check.json`);
+  if (userLog.saved) {
+    summaryMd.push(`- User log: saved (${userLog.errorsCount} errors, ${userLog.idsCount} trace IDs) → logs/user-provided.log`);
+  } else if (args.logFile || args.stdinLog) {
+    summaryMd.push(`- User log: no content detected (check --log-file / --stdin-log input)`);
+  }
   summaryMd.push(`- Baseline: baseline.json`);
   fs.writeFileSync(path.join(out.root, 'summary.md'), summaryMd.join('\n'));
 
@@ -289,47 +336,6 @@ async function main() {
   const duration = Math.round((Date.now() - startedAt.getTime())/1000);
   log('keyfact', `adhoc-debug complete: ${args.error} (${duration}s)`);
   log('observation', `adhoc-debug artifacts: ${path.relative(process.cwd(), out.root)}`);
-
-function promptGuided(args) {
-  return new Promise((resolve) => {
-    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-    const ask = (q) => new Promise(res => rl.question(q, ans => res(ans.trim())));
-    (async () => {
-      if (!args.error) args.error = await ask('Problem (one sentence): ');
-      if (!args.where) args.where = await ask('Where (screen/URL/endpoint): ');
-      if (!args.when) args.when = await ask('When (timestamp/time range, include timezone): ');
-      if (!args.errorId) args.errorId = await ask('Error/Trace ID (if shown): ');
-      const steps = await ask('Steps to reproduce (3-5 bullets, optional): ');
-      args.userSteps = steps;
-      rl.close();
-      resolve();
-    })();
-  });
-}
-
-function saveUserLog(args, out) {
-  try {
-    let content = '';
-    if (args.logFile && fs.existsSync(args.logFile)) {
-      content = fs.readFileSync(args.logFile, 'utf8');
-    } else if (args.stdinLog && !process.stdin.isTTY) {
-      content = fs.readFileSync(0, 'utf8');
-    }
-    if (content) {
-      const dest = path.join(out.logs, 'user-provided.log');
-      fs.writeFileSync(dest, content);
-      // naive signatures
-      const lines = content.split(/\r?\n/);
-      const errs = lines.filter(l => /error|exception|fatal/i.test(l)).slice(0, 200);
-      const ids = Array.from(new Set(lines.map(l => (l.match(/(req[_-]?id|trace[_-]?id)[:=\s]+([\w-]+)/i) || [])[2]).filter(Boolean)));
-      fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ errors: errs.slice(0,100), traceIds: ids }));
-      return { saved: true, idsCount: ids.length, errorsCount: errs.length };
-    }
-  } catch (e) {
-    try { fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ error: e.message })); } catch {}
-  }
-  return { saved: false };
-}
   console.log('Ad-hoc debug completed');
   console.log('- Artifacts:', path.relative(process.cwd(), out.root));
   console.log('- Summary: ', path.relative(process.cwd(), path.join(out.root, 'summary.md')));
@@ -339,5 +345,3 @@ main().catch(err => {
   console.error('adhoc-debug error:', err);
   process.exit(1);
 });
-  // Save user-provided logs or pasted logs (stdin)
-  const userLog = saveUserLog(args, out);

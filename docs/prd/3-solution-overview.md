@@ -6,7 +6,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 ### Core Structural Enhancements
 1. **Structured Task System**: YAML/JSON schemas replace markdown for deterministic execution
 2. **Working Memory Protocol**: Persistent scratchpad and vector-based long-term memory with health monitoring
-3. **Dependency Analysis**: Qdrant-based tracking of code dependencies for impact assessment
+3. **Dependency Analysis**: File-based tracking of code dependencies for impact assessment
 4. **Automated Validation**: Schema-based validation at every handoff point with mandatory story validation
 
 ### Workflow and Process Improvements

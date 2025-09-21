@@ -1,6 +1,10 @@
 {
   "dev": {
     "aliases": [
+      { "phrase": "execute devx3", "command": "*devx3" },
+      { "phrase": "execute *devx3", "command": "*devx3" },
+      { "phrase": "run devx3", "command": "*devx3" },
+      { "phrase": "devx3", "command": "*devx3" },
       { "phrase": "implement next story", "command": "*implement-next-story" },
       { "phrase": "next story", "command": "*implement-next-story" },
       { "phrase": "address qa feedback", "command": "*address-qa-feedback" },

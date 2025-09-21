@@ -1,0 +1,35 @@
+id: create-next-story
+name: Create Next Story Task
+purpose: To identify the next logical story based on project progress and epic definitions, and then to prepare a comprehensive, self-contained, and actionable story file using the `Story Template`. This task ensures the story is enriched with all necessary technical context, requirements, and acceptance criteria, making it ready for efficient implementation by a Developer Agent with minimal need for additional research or finding its own context.
+requirements:
+  - SHARDED DOCUMENTS REQUIRED: This task requires both PRD and Architecture documents to be sharded
+  - PRD must be split into epic files in docs/prd/ directory
+  - Architecture must be split into component files in docs/architecture/ directory
+  - Will not work with monolithic documents - sharding provides better context management
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+  preservedContent:
+    - type: section-header
+      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+      level: 2
+  executionMode: SEQUENTIAL
+steps:
+  - file: steps/01-step0-simplified.yaml
+  - file: steps/02-step1.yaml
+  - file: steps/03-step2.yaml
+  - file: steps/04-step3.yaml
+  - file: steps/05-step4.yaml
+  - file: steps/06-step5.yaml
+  - file: steps/07-step6.yaml
+  - file: steps/08-step7.yaml
+  - file: steps/09-step8.yaml
+  - file: steps/10-step8b-codebase-inventory.yaml
+  - file: steps/11-parse-story.yaml
+  - file: steps/12-step9.yaml
+  - file: steps/13-step10.yaml
+  - file: steps/14-step11.yaml
+  - file: steps/15-dor-gate.yaml

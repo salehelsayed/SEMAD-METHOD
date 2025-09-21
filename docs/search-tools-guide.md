@@ -7,7 +7,7 @@ This guide provides comprehensive documentation for the BMad search tools featur
 - **Structured Task Definition**: `bmad-core/structured-tasks/generate-search-tools.yaml`
 - **Tool Mappings Configuration**: `bmad-core/data/tool-mappings.yaml`
 - **Generation Script**: `scripts/generate-search-tools.js`
-- **Ingestion Script**: `scripts/ingest-to-qdrant.js`
+- **Local Ingestion Task**: `semad-core/structured-tasks/ingest-documentation.yaml`
 - **Validation Script**: `scripts/validate-search-tools.js`
 
 ## Overview
@@ -136,29 +136,17 @@ cat search-tools.yaml
 
 ## What Happens with Search Results After Generation
 
-### Current State
+### Recommended Workflow
 
-1. **Query Generation**: The system generates optimized search queries based on your PRD
-2. **Manual Execution**: Developers manually run searches using the generated queries
-3. **Future Automation**: Planned features include automated search execution and result caching
+1. **Query Generation**: The system analyzes your PRD and emits `tech-search-tools.yaml`
+2. **Documentation Capture**: Run the `ingest-documentation` structured task (or its CLI equivalent) to fetch docs and normalize them into `.ai/doc-ingestion/`
+3. **Local Search**: Use the `query-technical-docs` task to search the local documentation cache during development
 
-### Planned Workflow
+### Usage Tips
 
-```mermaid
-graph LR
-    A[PRD] --> B[Generate search-tools.yaml]
-    B --> C[Manual Search Execution]
-    C --> D[Review Results]
-    D --> E[Apply to Development]
-```
-
-### Interim Usage
-
-Until automated ingestion is available:
-
-1. **Review Generated Queries**: Examine search-tools.yaml to understand what external resources are relevant
-2. **Priority Searches**: Manually execute high-priority searches for critical features
-3. **Document Findings**: Store important findings in project documentation for agent access
+1. **Review Generated Queries**: Examine `tech-search-tools.yaml` to prioritize the sources you want captured first
+2. **Capture Frequently Needed Docs**: Run `ingest-documentation` whenever the PRD or architecture evolves so the cache stays current
+3. **Leverage Local Cache**: During development, call `query-technical-docs` to surface relevant snippets without leaving your editor
 
 ## Supported Search Providers
 

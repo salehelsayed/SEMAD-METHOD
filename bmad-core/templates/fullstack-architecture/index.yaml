@@ -1,0 +1,22 @@
+type: concat
+parts:
+  - parts/00-header.yaml
+  - sections/01-introduction.yaml
+  - sections/02-high-level-architecture.yaml
+  - sections/03-tech-stack.yaml
+  - sections/04-data-models.yaml
+  - sections/05-api-spec.yaml
+  - sections/06-components.yaml
+  - sections/07-external-apis.yaml
+  - sections/08-core-workflows.yaml
+  - sections/09-database-schema.yaml
+  - sections/10-frontend-architecture.yaml
+  - sections/11-backend-architecture.yaml
+  - sections/12-unified-project-structure.yaml
+  - sections/13-development-workflow.yaml
+  - sections/14-deployment-architecture.yaml
+  - sections/15-security-performance.yaml
+  - sections/16-testing-strategy.yaml
+  - sections/17-coding-standards.yaml
+  - sections/18-error-handling.yaml
+  - sections/19-monitoring.yaml

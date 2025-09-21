@@ -2,7 +2,7 @@
 /**
  * Validate an EpicContract Markdown file (with YAML front matter) against required fields
  * Usage:
- *   node scripts/validate-epic-contract.js --file docs/prd/epics/epic-5.md
+ *   node scripts/validate-epic-contract.js --file docs/epics/epic-5.md
  */
 const fs = require('fs');
 const path = require('path');
@@ -91,6 +91,85 @@ function validateEpic(epicData) {
   if (!Array.isArray(ints) || ints.length === 0) issues.push('integrationPoints missing or empty');
   else if (ints.some((i) => !i || !i.id)) issues.push('each integrationPoint must include id');
 
+  // Story blueprints producing atomic story seeds
+  const blueprints = req(epicData, ['storyBlueprints']);
+  if (!Array.isArray(blueprints) || blueprints.length === 0) {
+    issues.push('storyBlueprints missing or empty (need atomic story seeds for SM)');
+  } else {
+    const seenStoryIds = new Set();
+    const allowedSliceTypes = new Set(['flag', 'probe', 'int-flow', 'chore', 'maintenance', 'refactor']);
+    blueprints.forEach((bp, idx) => {
+      const label = `storyBlueprints[${idx}]`;
+      if (!bp || typeof bp !== 'object') {
+        issues.push(`${label} must be an object`);
+        return;
+      }
+      const sid = bp.storyId;
+      if (!sid) issues.push(`${label} missing storyId`);
+      else if (seenStoryIds.has(sid)) issues.push(`${label} duplicate storyId ${sid}`);
+      else seenStoryIds.add(sid);
+
+      if (!bp.title) warnings.push(`${label} missing title`);
+
+      if (!bp.sliceType) warnings.push(`${label} missing sliceType`);
+      else if (!allowedSliceTypes.has(String(bp.sliceType))) {
+        warnings.push(`${label} sliceType '${bp.sliceType}' should be one of ${Array.from(allowedSliceTypes).join(', ')}`);
+      }
+
+      const reqIds = bp.reqIds;
+      if (!Array.isArray(reqIds) || reqIds.length === 0) issues.push(`${label} reqIds missing or empty`);
+      const flowIds = bp.flowIds;
+      if (!Array.isArray(flowIds) || flowIds.length === 0) warnings.push(`${label} flowIds missing or empty`);
+      const intIds = bp.integrationPointIds;
+      if (intIds !== undefined && !Array.isArray(intIds)) issues.push(`${label} integrationPointIds should be an array`);
+
+      const checklistSeed = bp.implementationChecklistSeed;
+      if (!Array.isArray(checklistSeed) || checklistSeed.length === 0) {
+        issues.push(`${label} implementationChecklistSeed missing or empty`);
+      } else {
+        checklistSeed.forEach((group, gIdx) => {
+          const gLabel = `${label}.implementationChecklistSeed[${gIdx}]`;
+          if (!group || typeof group !== 'object') {
+            issues.push(`${gLabel} must be an object with group/items`);
+            return;
+          }
+          const groupName = group.group || group.groupTitle;
+          if (!groupName) warnings.push(`${gLabel} missing group name`);
+          const items = group.items;
+          if (!Array.isArray(items) || items.length === 0) {
+            issues.push(`${gLabel} items missing or empty`);
+          } else {
+            items.forEach((item, itemIdx) => {
+              if (typeof item !== 'string' || !item.trim()) {
+                issues.push(`${gLabel}.items[${itemIdx}] must be a non-empty string`);
+              } else if (item.trim().length < 15) {
+                warnings.push(`${gLabel}.items[${itemIdx}] looks too short to be actionable`);
+              } else if (!/(verify|confirm|ensure|validate|assert)/i.test(item)) {
+                warnings.push(`${gLabel}.items[${itemIdx}] should end with an explicit success signal (verify/confirm/etc.)`);
+              }
+            });
+          }
+        });
+      }
+
+      if (bp.companionDocs !== undefined) {
+        if (!Array.isArray(bp.companionDocs)) {
+          issues.push(`${label}.companionDocs must be an array`);
+        } else {
+          bp.companionDocs.forEach((docRef, dIdx) => {
+            const dLabel = `${label}.companionDocs[${dIdx}]`;
+            if (!docRef || typeof docRef !== 'object') {
+              issues.push(`${dLabel} must be an object with path/section`);
+              return;
+            }
+            if (!docRef.path) warnings.push(`${dLabel} missing path`);
+            if (!docRef.section) warnings.push(`${dLabel} missing section`);
+          });
+        }
+      }
+    });
+  }
+
   // Acceptance scenarios
   const e2e = req(epicData, ['acceptanceScenarios']);
   if (!Array.isArray(e2e) || e2e.length === 0) issues.push('acceptanceScenarios missing or empty');
@@ -104,7 +183,16 @@ function validateEpic(epicData) {
   else {
     if (!Array.isArray(validation.epicDoR) || validation.epicDoR.length === 0)
       warnings.push('validation.epicDoR not specified');
-    if (!validation.storyRules) warnings.push('validation.storyRules missing');
+    if (!validation.storyRules) {
+      warnings.push('validation.storyRules missing');
+    } else {
+      if (!validation.storyRules.requireImplementationChecklistSeed) {
+        warnings.push('validation.storyRules.requireImplementationChecklistSeed should be true to enforce atomic checklists');
+      }
+      if (!validation.storyRules.enforceCompanionDocReferences) {
+        warnings.push('validation.storyRules.enforceCompanionDocReferences should be true to keep companion docs discoverable');
+      }
+    }
     if (!Array.isArray(validation.storyDoD) || validation.storyDoD.length === 0)
       warnings.push('validation.storyDoD not specified');
     if (!Array.isArray(validation.epicDoneCriteria) || validation.epicDoneCriteria.length === 0)
@@ -159,6 +247,7 @@ function writeReports(epicPath, results, epicData) {
   }
   md.push('## Next Actions');
   md.push('- PO: Fill missing fields in EpicContract (use template at `docs/templates/epic-contract-template.md`).');
+  md.push('- PM/PO: Ensure storyBlueprints include sliceType, traceability, and implementation checklist seeds with success signals.');
   md.push('- SM: Ensure StoryContracts reference `epicId`, `reqIds`, `flowIds`, and `integrationPointIds`.');
   md.push('- Orchestrator: Run `npm run reverse:align` to refresh docs-code alignment.');
   md.push('- QA: Re-run this validator and review reverse-alignment reports.');
@@ -205,4 +294,3 @@ function main() {
 }
 
 main();
-

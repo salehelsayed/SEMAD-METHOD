@@ -41,6 +41,46 @@ describe('WorkflowOrchestrator', () => {
     if (!fs.existsSync(testRootDir)) {
       fs.mkdirSync(testRootDir, { recursive: true });
     }
+
+    const coreDir = path.join(testRootDir, 'bmad-core');
+    const docsDir = path.join(testRootDir, 'docs');
+    const prdDir = path.join(docsDir, 'prd');
+    const archDir = path.join(docsDir, 'architecture');
+    const storiesDir = path.join(coreDir, 'stories');
+
+    [coreDir, docsDir, prdDir, archDir, storiesDir].forEach(dir => {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+
+    const coreConfig = `devStoryLocation: bmad-core/stories
+prd:
+  prdFile: docs/prd.md
+  prdShardedLocation: docs/prd
+architecture:
+  architectureFile: docs/architecture.md
+  architectureShardedLocation: docs/architecture
+devDebugLog: .ai/dev-debug.log
+devLoadAlwaysFiles: []
+`;
+    fs.writeFileSync(path.join(coreDir, 'core-config.yaml'), coreConfig);
+
+    // Ensure optional files referenced by config exist
+    const prdFile = path.join(docsDir, 'prd.md');
+    if (!fs.existsSync(prdFile)) {
+      fs.writeFileSync(prdFile, '# Test PRD');
+    }
+    const archFile = path.join(docsDir, 'architecture.md');
+    if (!fs.existsSync(archFile)) {
+      fs.writeFileSync(archFile, '# Test Architecture');
+    }
+
+    const aiDir = path.join(testRootDir, '.ai');
+    if (!fs.existsSync(aiDir)) {
+      fs.mkdirSync(aiDir, { recursive: true });
+    }
+
     orchestrator = new WorkflowOrchestrator(testRootDir);
   });
 

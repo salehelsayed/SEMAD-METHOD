@@ -30,14 +30,11 @@ describe('Dev Agent Contract Validation on Activation', () => {
       const validStoryContent = `---
 StoryContract:
   version: "1.0"
+  schemaVersion: "1.0"
   story_id: "4.1"
   epic_id: "4"
   apiEndpoints:
-    - method: POST
-      path: /api/users
-      description: Create a new user
-      requestBody: { "name": "string", "email": "string" }
-      successResponse: { "id": "string", "name": "string", "email": "string" }
+    - "POST /api/users"
   filesToModify:
     - path: src/controllers/userController.js
       reason: Add createUser endpoint
@@ -139,6 +136,7 @@ As an admin, I want to update user information.
       const malformedStoryContent = `---
 StoryContract:
   version: "1.0"
+  schemaVersion: "1.0"
   story_id: "4.3"
   # Missing: epic_id, apiEndpoints, filesToModify, acceptanceCriteriaLinks
 ---
@@ -188,6 +186,7 @@ As an admin, I want to delete users.
       const invalidMethodContent = `---
 StoryContract:
   version: "1.0"
+  schemaVersion: "1.0"
   story_id: "4.4"
   epic_id: "4"
   apiEndpoints:
@@ -198,7 +197,7 @@ StoryContract:
       successResponse: {}
   filesToModify:
     - path: src/test.js
-      reason: Test file
+      # Missing reason field
   acceptanceCriteriaLinks: ["AC-1"]
 ---
 
@@ -231,8 +230,8 @@ StoryContract:
       try {
         devAgentActivation(storyPath);
       } catch (error) {
-        expect(error.message).toContain('Invalid value at /apiEndpoints/0/method');
-        expect(error.message).toContain('Allowed values: GET, POST, PUT, DELETE, PATCH');
+        expect(error.message).toContain('Invalid type at /apiEndpoints/0');
+        expect(error.message).toContain('expected string');
       }
     });
 
@@ -240,15 +239,13 @@ StoryContract:
       const missingPropsContent = `---
 StoryContract:
   version: "1.0"
+  schemaVersion: "1.0"
   story_id: "4.5"
   epic_id: "4"
   apiEndpoints:
-    - method: POST
-      path: /api/users
-      # Missing: description, requestBody, successResponse
+    - "POST /api/users"
   filesToModify:
     - path: src/test.js
-      reason: Test file
   acceptanceCriteriaLinks: ["AC-1"]
 ---
 
@@ -275,15 +272,14 @@ StoryContract:
         return { success: true, contract: contract };
       }
 
-      expect(() => devAgentActivation(storyPath))
-        .toThrow(/StoryContract validation failed/);
-      
+      expect.assertions(2);
+      const contractCheck = validator.extractContractFromStory(storyPath);
       try {
         devAgentActivation(storyPath);
+        throw new Error('Expected validation to fail');
       } catch (error) {
-        // AJV reports missing fields one at a time
-        expect(error.message).toContain('Missing required field:');
-        expect(error.message).toContain('at /apiEndpoints/0');
+        expect(error.message).toContain('Missing required field');
+        expect(error.message).toContain('at /filesToModify/0');
       }
     });
 
@@ -418,14 +414,11 @@ Please contact the Scrum Master to fix the story before proceeding.`;
       const fixedContent = `---
 StoryContract:
   version: "1.0"
+  schemaVersion: "1.0"
   story_id: "5.1"
   epic_id: "5"
   apiEndpoints:
-    - method: GET
-      path: /api/status
-      description: Get system status
-      requestBody: {}
-      successResponse: { "status": "string", "timestamp": "string" }
+    - "GET /api/status"
   filesToModify:
     - path: src/controllers/statusController.js
       reason: Add status endpoint

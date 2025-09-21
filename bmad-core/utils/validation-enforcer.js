@@ -188,26 +188,6 @@ async function checkMemorySystemHealth() {
             };
         }
         
-        // Check Qdrant connection (quick timeout)
-        try {
-            const healthResult = await executeBmadCommand(
-                'memory-health.js',
-                ['check'],
-                { timeout: 5000, silent: true }
-            );
-            
-            if (healthResult.exitCode !== 0) {
-                return {
-                    healthy: false,
-                    reason: 'Qdrant connection unhealthy'
-                };
-            }
-        } catch (error) {
-            // Qdrant might not be required for all operations
-            // Log but don't fail
-            console.warn('Qdrant health check failed:', error.message);
-        }
-        
         return {
             healthy: true,
             timestamp: new Date().toISOString()

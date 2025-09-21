@@ -96,7 +96,7 @@ dependencies:
     - fullstack-architecture-tmpl.yaml
     - brownfield-architecture-tmpl.yaml
   structured-checklists:
-    - architect-checklist.yaml
+    - architect-checklist/index.yaml
   data:
     - technical-preferences.md
   utils:

@@ -1,0 +1,68 @@
+id: step4
+name: Validation Checklist
+description: |-
+  Before finalizing the story, confirm:
+  **Scope Validation:**
+  **Clarity Check:**
+  The story creation is successful when:
+  1. Enhancement is clearly defined and appropriately scoped for single session
+  2. Integration approach is straightforward and low-risk
+  3. Existing system patterns are identified and will be followed
+  4. Rollback plan is simple and feasible
+  5. Acceptance criteria include existing functionality verification
+actions:
+  - description: '[ ] Story can be completed in one development session'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration approach is straightforward'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Follows existing patterns exactly'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] No design or architecture work required'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Story requirements are unambiguous'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration points are clearly specified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Success criteria are testable'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Rollback approach is simple'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: This task is for VERY SMALL brownfield changes only
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If complexity grows during analysis, escalate to brownfield-create-epic
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Always prioritize existing system integrity
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: When in doubt about integration complexity, use brownfield-create-epic instead
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Stories should take no more than 4 hours of focused development work
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '4'

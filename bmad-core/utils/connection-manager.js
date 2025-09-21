@@ -1,129 +1,134 @@
 /**
- * Centralized Connection Manager
- * 
- * Manages all external connections (databases, services) in a centralized way.
- * Ensures proper connection pooling, error handling, and cleanup.
+ * Centralized Connection Manager (generic)
+ *
+ * Provides a lightweight registry for external connections so agents
+ * can reuse handles and perform basic health checks without relying on
+ * vendor-specific implementations.
  */
 
-const { QdrantClient } = require('@qdrant/js-client-rest');
-const { Agent } = require('undici');
-const { MEMORY_CONFIG } = require('./memory-config');
 const EventEmitter = require('events');
 
 class ConnectionManager extends EventEmitter {
   constructor() {
     super();
     this.connections = new Map();
-    this.connectionPools = new Map();
     this.healthStatus = new Map();
     this.reconnectTimers = new Map();
     this.isShuttingDown = false;
 
-    // Handle process termination
     process.on('SIGINT', () => this.shutdown());
     process.on('SIGTERM', () => this.shutdown());
     process.on('beforeExit', () => this.shutdown());
   }
 
   /**
-   * Get or create a Qdrant connection
-   * @param {string} name - Connection name (default: 'default')
-   * @param {Object} config - Connection configuration
-   * @returns {QdrantClient} Qdrant client instance
+   * Register a connection handle.
+   *
+   * @param {string} key Unique identifier for the connection
+   * @param {*} client The underlying connection/client instance
+   * @param {Object} options Optional metadata ({ type, config, healthCheck, reconnect, close })
+   * @returns {*} The registered client instance
    */
-  getQdrantConnection(name = 'default', config = {}) {
-    const key = `qdrant_${name}`;
-    
-    if (!this.connections.has(key) || !this.healthStatus.get(key)) {
-      const agent = new Agent({ 
-        keepAliveTimeout: 0,  // Disable keep-alive
-        keepAliveMaxTimeout: 0,
-        connections: config.maxConnections || 10
-      });
+  registerConnection(key, client, options = {}) {
+    const entry = {
+      type: options.type || 'generic',
+      client,
+      config: options.config || {},
+      healthCheck: typeof options.healthCheck === 'function' ? options.healthCheck : null,
+      reconnect: typeof options.reconnect === 'function' ? options.reconnect : null,
+      close: typeof options.close === 'function' ? options.close : null,
+      created: Date.now(),
+      lastUsed: Date.now()
+    };
 
-      const client = new QdrantClient({ 
-        host: config.host || MEMORY_CONFIG.QDRANT_HOST, 
-        port: config.port || MEMORY_CONFIG.QDRANT_PORT,
-        timeout: config.timeout || 5000,
-        agent
-      });
-
-      this.connections.set(key, {
-        type: 'qdrant',
-        client,
-        agent,
-        config,
-        created: Date.now(),
-        lastUsed: Date.now()
-      });
-
-      this.healthStatus.set(key, true);
-      this.emit('connection:created', { key, type: 'qdrant' });
-    }
-
-    const connection = this.connections.get(key);
-    connection.lastUsed = Date.now();
-    return connection.client;
+    this.connections.set(key, entry);
+    this.healthStatus.set(key, true);
+    this.emit('connection:created', { key, type: entry.type });
+    return client;
   }
 
   /**
-   * Check health of a specific connection
-   * @param {string} key - Connection key
-   * @returns {boolean} True if healthy
+   * Retrieve a connection by key.
+   * @param {string} key
+   * @returns {*} The client instance or null if not found/healthy
+   */
+  async getConnection(key) {
+    const entry = this.connections.get(key);
+    if (!entry) {
+      return null;
+    }
+
+    entry.lastUsed = Date.now();
+
+    // Trigger background health check if stale
+    const lastHealthCheck = entry.lastHealthCheck || 0;
+    if (Date.now() - lastHealthCheck > 30000) {
+      entry.lastHealthCheck = Date.now();
+      await this.checkConnectionHealth(key);
+    }
+
+    return this.healthStatus.get(key) ? entry.client : null;
+  }
+
+  /**
+   * Perform a health check for a registered connection.
+   * @param {string} key
+   * @returns {boolean} True when healthy.
    */
   async checkConnectionHealth(key) {
-    const connection = this.connections.get(key);
-    if (!connection) return false;
+    const entry = this.connections.get(key);
+    if (!entry) {
+      return false;
+    }
 
     try {
-      if (connection.type === 'qdrant') {
-        await connection.client.getCollections();
+      if (entry.healthCheck) {
+        await entry.healthCheck(entry.client, entry.config);
       }
-      // Add other connection type health checks here
 
       this.healthStatus.set(key, true);
-      this.emit('connection:healthy', { key, type: connection.type });
+      this.emit('connection:healthy', { key, type: entry.type });
       return true;
     } catch (error) {
       this.healthStatus.set(key, false);
-      this.emit('connection:unhealthy', { key, type: connection.type, error: error.message });
-      
-      // Schedule reconnection attempt
+      this.emit('connection:unhealthy', { key, type: entry.type, error: error.message });
       this.scheduleReconnect(key);
       return false;
     }
   }
 
   /**
-   * Schedule a reconnection attempt
-   * @param {string} key - Connection key
-   * @param {number} delay - Delay in ms (default: 5000)
+   * Attempt to reconnect a connection using the supplied reconnect handler.
+   * @param {string} key
+   * @param {number} delay Delay before attempting in milliseconds (default 5000)
    */
   scheduleReconnect(key, delay = 5000) {
     if (this.reconnectTimers.has(key) || this.isShuttingDown) {
       return;
     }
 
+    const entry = this.connections.get(key);
+    if (!entry || !entry.reconnect) {
+      return;
+    }
+
     const timer = setTimeout(async () => {
       this.reconnectTimers.delete(key);
-      
-      const connection = this.connections.get(key);
-      if (!connection) return;
-
-      console.log(`Attempting to reconnect ${key}...`);
-      
-      // Close old connection
-      await this.closeConnection(key, false);
-      
-      // Recreate connection
-      if (connection.type === 'qdrant') {
-        this.getQdrantConnection(key.replace('qdrant_', ''), connection.config);
+      if (this.isShuttingDown) {
+        return;
       }
-      
-      // Check health
-      const healthy = await this.checkConnectionHealth(key);
-      if (!healthy) {
-        // Exponential backoff
+
+      try {
+        const newClient = await entry.reconnect(entry.client, entry.config);
+        if (newClient) {
+          entry.client = newClient;
+          entry.lastUsed = Date.now();
+          this.healthStatus.set(key, true);
+          this.emit('connection:reconnected', { key, type: entry.type });
+        }
+      } catch (error) {
+        this.healthStatus.set(key, false);
+        this.emit('connection:reconnect-failed', { key, type: entry.type, error: error.message });
         this.scheduleReconnect(key, Math.min(delay * 2, 60000));
       }
     }, delay);
@@ -132,42 +137,26 @@ class ConnectionManager extends EventEmitter {
   }
 
   /**
-   * Get connection pool statistics
-   * @returns {Object} Pool statistics
-   */
-  getPoolStats() {
-    const stats = {};
-    
-    for (const [key, connection] of this.connections.entries()) {
-      stats[key] = {
-        type: connection.type,
-        created: connection.created,
-        lastUsed: connection.lastUsed,
-        healthy: this.healthStatus.get(key) || false,
-        age: Date.now() - connection.created,
-        idle: Date.now() - connection.lastUsed
-      };
-    }
-    
-    return stats;
-  }
-
-  /**
-   * Close a specific connection
-   * @param {string} key - Connection key
-   * @param {boolean} removeFromPool - Whether to remove from pool
+   * Close and optionally remove a connection.
+   * @param {string} key
+   * @param {boolean} removeFromPool
    */
   async closeConnection(key, removeFromPool = true) {
-    const connection = this.connections.get(key);
-    if (!connection) return;
+    const entry = this.connections.get(key);
+    if (!entry) {
+      return;
+    }
 
     try {
-      if (connection.type === 'qdrant' && connection.agent) {
-        await connection.agent.destroy();
+      if (entry.close) {
+        await entry.close(entry.client, entry.config);
+      } else if (entry.client) {
+        await entry.client.close?.();
+        await entry.client.destroy?.();
+        await entry.client.end?.();
       }
-      // Add other connection type cleanup here
 
-      this.emit('connection:closed', { key, type: connection.type });
+      this.emit('connection:closed', { key, type: entry.type });
     } catch (error) {
       console.error(`Error closing connection ${key}:`, error.message);
     }
@@ -175,8 +164,6 @@ class ConnectionManager extends EventEmitter {
     if (removeFromPool) {
       this.connections.delete(key);
       this.healthStatus.delete(key);
-      
-      // Clear any pending reconnect timers
       if (this.reconnectTimers.has(key)) {
         clearTimeout(this.reconnectTimers.get(key));
         this.reconnectTimers.delete(key);
@@ -185,126 +172,119 @@ class ConnectionManager extends EventEmitter {
   }
 
   /**
-   * Close idle connections
-   * @param {number} maxIdleTime - Maximum idle time in ms (default: 5 minutes)
+   * Close idle connections.
+   * @param {number} maxIdleTime Maximum idle time in milliseconds
    */
   async closeIdleConnections(maxIdleTime = 300000) {
     const now = Date.now();
-    const connectionsToClose = [];
+    const targets = [];
 
-    for (const [key, connection] of this.connections.entries()) {
-      if (now - connection.lastUsed > maxIdleTime) {
-        connectionsToClose.push(key);
+    for (const [key, entry] of this.connections.entries()) {
+      if (now - entry.lastUsed > maxIdleTime) {
+        targets.push(key);
       }
     }
 
-    for (const key of connectionsToClose) {
-      console.log(`Closing idle connection: ${key}`);
+    for (const key of targets) {
       await this.closeConnection(key);
     }
 
-    return connectionsToClose.length;
+    return targets.length;
   }
 
   /**
-   * Perform health check on all connections
-   * @returns {Object} Health check results
+   * Run health checks on all registered connections.
    */
   async healthCheckAll() {
     const results = {};
-    
     for (const key of this.connections.keys()) {
       results[key] = await this.checkConnectionHealth(key);
     }
-    
     return results;
   }
 
   /**
-   * Shutdown all connections gracefully
+   * Shutdown all connections gracefully.
    */
   async shutdown() {
-    if (this.isShuttingDown) return;
-    
-    console.log('Connection manager shutting down...');
+    if (this.isShuttingDown) {
+      return;
+    }
+
     this.isShuttingDown = true;
 
-    // Clear all reconnect timers
     for (const timer of this.reconnectTimers.values()) {
       clearTimeout(timer);
     }
     this.reconnectTimers.clear();
 
-    // Close all connections
     const closePromises = [];
     for (const key of this.connections.keys()) {
       closePromises.push(this.closeConnection(key));
     }
 
     await Promise.all(closePromises);
-    
-    console.log('All connections closed');
     this.emit('shutdown');
   }
 
   /**
-   * Get connection by key with automatic health check
-   * @param {string} key - Connection key
-   * @returns {Object|null} Connection object or null
+   * Convenience helper: get stats for all connections.
    */
-  async getConnection(key) {
-    const connection = this.connections.get(key);
-    if (!connection) return null;
-
-    // Check health if not checked recently
-    const lastHealthCheck = connection.lastHealthCheck || 0;
-    if (Date.now() - lastHealthCheck > 30000) {
-      connection.lastHealthCheck = Date.now();
-      await this.checkConnectionHealth(key);
+  getPoolStats() {
+    const stats = {};
+    for (const [key, entry] of this.connections.entries()) {
+      stats[key] = {
+        type: entry.type,
+        created: entry.created,
+        lastUsed: entry.lastUsed,
+        healthy: this.healthStatus.get(key) || false,
+        age: Date.now() - entry.created,
+        idle: Date.now() - entry.lastUsed
+      };
     }
-
-    return this.healthStatus.get(key) ? connection : null;
+    return stats;
   }
 
   /**
-   * Register connection middleware
-   * @param {Function} middleware - Middleware function
+   * Middleware registration helper.
    */
   use(middleware) {
     this.on('connection:created', middleware);
     this.on('connection:closed', middleware);
     this.on('connection:healthy', middleware);
     this.on('connection:unhealthy', middleware);
+    this.on('connection:reconnected', middleware);
+    this.on('connection:reconnect-failed', middleware);
+  }
+
+  /**
+   * Legacy API shim for removed Qdrant integration.
+   */
+  getQdrantConnection() {
+    throw new Error('Qdrant integration has been retired. Update tasks to use local documentation search.');
   }
 }
 
-// Create singleton instance
 const connectionManager = new ConnectionManager();
 
-// Store interval IDs to clear them later
 let idleCleanupInterval = null;
 let healthCheckInterval = null;
-
-// Only start intervals if not in a subprocess that needs quick exit
 const isSubprocess = process.argv.some(arg => arg.includes('AndExit'));
 
 if (!isSubprocess) {
-  // Schedule periodic idle connection cleanup
   idleCleanupInterval = setInterval(() => {
     if (!connectionManager.isShuttingDown) {
       connectionManager.closeIdleConnections().catch(console.error);
     }
-  }, 60000); // Run every minute
+  }, 60000);
 
-  // Schedule periodic health checks
   healthCheckInterval = setInterval(() => {
     if (!connectionManager.isShuttingDown) {
       connectionManager.healthCheckAll().catch(console.error);
     }
-  }, 30000); // Run every 30 seconds
+  }, 30000);
 }
 
-// Add method to clear intervals
 connectionManager.clearIntervals = () => {
   if (idleCleanupInterval) {
     clearInterval(idleCleanupInterval);
@@ -316,9 +296,8 @@ connectionManager.clearIntervals = () => {
   }
 };
 
-// Override shutdown to clear intervals
 const originalShutdown = connectionManager.shutdown.bind(connectionManager);
-connectionManager.shutdown = async function() {
+connectionManager.shutdown = async function shutdownWrapper() {
   this.clearIntervals();
   return originalShutdown();
 };

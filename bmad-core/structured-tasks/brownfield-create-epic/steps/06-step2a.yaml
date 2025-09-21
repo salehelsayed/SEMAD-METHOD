@@ -1,0 +1,20 @@
+id: step2a
+name: Incremental Slicing Rules
+description: |
+  Define an incremental, reversible slicing plan to minimize integration risk.
+  Seed with a feature flag slice, then prove wiring via read-only/contract tests,
+  then enable one integration and one flow at a time.
+actions:
+  - description: 'Story 0: Feature flag scaffolding + kill switch + telemetry (no behavior change)'
+    elicit: false
+  - description: 'Story 1: Contract tests/probe path for INTs (read-only; no state change)'
+    elicit: false
+  - description: 'Story 2+: One story per INT per flow variant (success, negative, resiliency)'
+    elicit: false
+  - description: Every story includes Integration Verification steps for existing functionality
+    elicit: false
+  - description: Every story includes a rollback plan and performance budget check
+    elicit: false
+metadata:
+  level: 3
+  originalNumber: 2a

@@ -30,7 +30,7 @@ function runScenario(planner, label) {
   };
 
   const memory = { taskId: 'demo', plan: [], subTasks: [] };
-  const tokenCount = 3000; // exceed default 2000 threshold
+  const tokenCount = 3000; // large context example that exceeds the 2,000-token threshold
   const before = Date.now();
   const adapted = planner.planAdaptation(memory, task, { tokenCount });
   const after = Date.now();
@@ -64,4 +64,3 @@ function main() {
 }
 
 main();
-

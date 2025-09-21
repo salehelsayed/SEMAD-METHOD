@@ -1,0 +1,45 @@
+name: RESILIENCE & OPERATIONAL READINESS
+items:
+  - description: Error handling strategy is comprehensive
+    checked: false
+  - description: Retry policies are defined where appropriate
+    checked: false
+  - description: Circuit breakers or fallbacks are specified for critical services
+    checked: false
+  - description: Graceful degradation approaches are defined
+    checked: false
+  - description: System can recover from partial failures
+    checked: false
+  - description: Logging strategy is defined
+    checked: false
+  - description: Monitoring approach is specified
+    checked: false
+  - description: Key metrics for system health are identified
+    checked: false
+  - description: Alerting thresholds and strategies are outlined
+    checked: false
+  - description: Debugging and troubleshooting capabilities are built in
+    checked: false
+  - description: Performance bottlenecks are identified and addressed
+    checked: false
+  - description: Caching strategy is defined where appropriate
+    checked: false
+  - description: Load balancing approach is specified
+    checked: false
+  - description: Horizontal and vertical scaling strategies are outlined
+    checked: false
+  - description: Resource sizing recommendations are provided
+    checked: false
+  - description: Deployment strategy is defined
+    checked: false
+  - description: CI/CD pipeline approach is outlined
+    checked: false
+  - description: Environment strategy (dev, staging, prod) is specified
+    checked: false
+  - description: Infrastructure as Code approach is defined
+    checked: false
+  - description: Rollback and recovery procedures are outlined
+    checked: false
+notes: 'Production systems fail in unexpected ways. As you review this section, think about Murphy''s Law - what could go wrong? Consider real-world scenarios: What happens during peak load? How does the system behave when a critical service is down? Can the operations team diagnose issues at 3 AM? Look for specific resilience patterns, not just mentions of "error handling".'
+metadata:
+  originalName: 5. RESILIENCE & OPERATIONAL READINESS

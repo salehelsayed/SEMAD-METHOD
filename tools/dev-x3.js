@@ -30,11 +30,13 @@ function resolveStoryPath(root, input) {
 }
 
 function runNode(cmd, args, cwd) {
-  return spawnSync(process.execPath, [cmd, ...args], { stdio: 'inherit', cwd });
+  const env = { ...process.env, CI: process.env.CI || '1' };
+  return spawnSync(process.execPath, [cmd, ...args], { stdio: 'inherit', cwd, env });
 }
 
 function runShell(cmd, args, cwd) {
-  return spawnSync(cmd, args, { stdio: 'inherit', cwd });
+  const env = { ...process.env, CI: process.env.CI || '1' };
+  return spawnSync(cmd, args, { stdio: 'inherit', cwd, env });
 }
 
 async function main() {

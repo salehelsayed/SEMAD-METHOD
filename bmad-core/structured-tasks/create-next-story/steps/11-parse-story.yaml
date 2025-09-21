@@ -1,0 +1,31 @@
+id: parse-story
+name: Parse Story Requirements into StoryContract
+description: From the sharded PRD and architecture docs, extract endpoints, data models, file paths and acceptance criteria and construct a StoryContract YAML block.
+actions:
+  - description: If using ECM, set traceability.reqIds and traceability.integrationPointIds from the selected ECM row; set acceptanceCriteriaCovered from epic acceptanceScenarios that reference those reqIds/flowIds
+    elicit: false
+  - description: Extract all API endpoints from architecture documents with their method, path, description, request body, and success response
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Identify all files that need to be created or modified based on the story requirements
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Link acceptance criteria from the epic to this story
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Build StoryContract YAML block with version, story_id, epic_id, apiEndpoints, filesToModify, and acceptanceCriteriaLinks
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: CRITICAL - Do NOT summarise or invent data. Extract requirements verbatim from PRD and Architecture documents
+    elicit: false
+    metadata:
+      originalIndent: 0
+output: storyContract
+schema: storyContractSchema
+metadata:
+  level: 3
+  originalNumber: '4'

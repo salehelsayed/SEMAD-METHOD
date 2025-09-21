@@ -169,7 +169,7 @@ function hasComplexDependencies(steps) {
  * Analyzes a task and creates sub-tasks if needed based on complexity
  * @param {Object} memory - Current working memory
  * @param {Object} task - Task object with steps array
- * @param {Object} context - Optional context with token count
+ * @param {Object} context - Optional context metadata (e.g., estimated token counts)
  * @returns {Object} Updated memory object
  */
 function planAdaptation(memory, task, context = {}) {
@@ -186,7 +186,7 @@ function planAdaptation(memory, task, context = {}) {
     conjunction: task.description && conjunctionPattern.test(task.description),
     multipleDomains: hasMultipleDomains(task),
     complexDependencies: hasComplexDependencies(task.steps),
-    contextSize: context.tokenCount && rules && rules.thresholds && rules.thresholds.maxContextTokens && 
+    contextSize: context.tokenCount && rules && rules.thresholds && rules.thresholds.maxContextTokens &&
                  context.tokenCount > rules.thresholds.maxContextTokens
   };
   

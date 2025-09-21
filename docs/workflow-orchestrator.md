@@ -62,13 +62,13 @@ bmad-orchestrator reverse-align
 bmad-orchestrator reverse-quality-gate --threshold 0.9
 
 # Validate an EpicContract file (PO/PM shortcut)
-bmad-orchestrator validate-epic docs/prd/epics/epic-5.md
+ bmad-orchestrator validate-epic docs/epics/epic-5.md
 
 # Validate ECM coverage (PM/PO shortcut)
-node tools/ecm-validate.js docs/prd/epics/epic-5.md
+node tools/ecm-validate.js docs/epics/epic-5.md
 ```
 
-- `po-shard-docs`: Splits `docs/prd/PRD.md` and `docs/architecture/architecture.md` by H2 sections when sharding is enabled in `semad-core/core-config.yaml` (legacy `bmad-core/core-config.yaml` still supported), and writes per-epic summaries under `docs/prd/epics/epic-*.md`.
+- `po-shard-docs`: Splits `docs/prd/PRD.md` and `docs/architecture/architecture.md` by H2 sections when sharding is enabled in `semad-core/core-config.yaml` (legacy `bmad-core/core-config.yaml` still supported), and writes per-epic summaries under `docs/prd/epic-summaries/epic-*.md`. Use `tools/po/create-epics-from-prd.js` to scaffold EpicContracts under `docs/epics/`.
 - `reverse-align`: Runs cleanup → analyze → rewrite → shard → recreate stories → validate → report → manifest.
 - `reverse-quality-gate`: Emits `.ai/reports/reverse-align-gate.json` and fails if coverage is below the threshold.
 - `validate-epic <path>`: Runs the EpicContract validator and emits a PO report in `.ai/adhoc/*` and a JSON artifact in `.ai/reports/*`.

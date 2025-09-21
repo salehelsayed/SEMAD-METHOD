@@ -167,6 +167,33 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      context_includes:
+        - .ai/handoff-context.json
+        - prd_shards
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Runs tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Uses docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+        - PO fills ECM rows and traceability; assigns epicId conventions (EP-<slug>)
+
+    - agent: pm
+      orchestrated: true
+      handoff_from: orchestrator
+      handoff_to: orchestrator
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use structured task pm-validate-epic.yaml for each epic (or run npm run validate:epic -- --file <epic.md>)
+        - Ensure 100% REQ/INT coverage in ECM (tools/ecm-validate.js)
+
     - agent: sm
       orchestrated: true
       handoff_from: orchestrator
@@ -310,6 +337,8 @@ workflow:
         J --> ORCH
         I -->|No| ORCH
         ORCH --> K[po: shard documents]
+        K --> K2[po: create epics from PRD]
+        K2 --> K3[pm: validate epics]
         K --> ORCH
         
         %% Development Phase - Hub and Spoke Pattern

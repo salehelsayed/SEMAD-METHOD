@@ -34,9 +34,13 @@ The system uses rules defined in `bmad-core/structured-tasks/dynamic-plan-rules.
 
 1. **Step Count**: Tasks with more than 5 steps (configurable) are automatically split
 2. **Conjunctions**: Tasks containing configurable keywords (default: "and", "then", "additionally", "furthermore", "also") are split at natural boundaries
-3. **Context Size**: Tasks with context exceeding token threshold (default: 2000) are divided
+3. **Context Size**: Tasks with context exceeding the token threshold (default: 2000) are divided to avoid overflow
 4. **Domain Separation**: Tasks involving multiple domains (frontend, backend, database, infrastructure, testing) are separated
 5. **Complex Dependencies**: Tasks where >30% of steps have dependency indicators are split
+6. **Artefact Volume**: Tasks touching many files or API endpoints trigger scope-based splitting
+7. **Data Model Complexity**: Large schemas or multiple models are decomposed before implementation
+8. **External Setup**: Installation or configuration work is isolated from feature delivery
+9. **Concurrency Patterns**: Loops or async flows get their own sub-task planning
 
 ### Working Memory Integration
 
@@ -193,9 +197,10 @@ const { processTaskRecursively } = require('./bmad-core/tools/dynamic-planner');
 const processedTask = processTaskRecursively(task, maxDepth = 3);
 ```
 
-### Context-Aware Splitting
+### Context Awareness
 
-The planner can split based on context size when provided:
+`planAdaptation` accepts metadata such as estimated token counts and will split
+when the context exceeds the configured threshold:
 
 ```javascript
 const result = planAdaptation(memory, task, { tokenCount: 2500 });

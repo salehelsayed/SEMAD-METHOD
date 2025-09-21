@@ -1,0 +1,37 @@
+id: step3
+name: Risk and Compatibility Check
+description: |-
+  **Minimal Risk Assessment:**
+  **Compatibility Verification:**
+actions:
+  - description: '**Primary Risk:** {{main risk to existing system}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Mitigation:** {{simple mitigation approach}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Rollback:** {{how to undo if needed}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] No breaking changes to existing APIs'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Database changes (if any) are additive only'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] UI changes follow existing design patterns'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Performance impact is negligible'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '3'

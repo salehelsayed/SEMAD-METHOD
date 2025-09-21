@@ -7,15 +7,17 @@
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const WorkingMemoryStore = require('./working-memory-store');
 
 class SharedContextManager {
   constructor(baseDirectory = '.ai') {
     this.baseDirectory = path.resolve(baseDirectory);
     this.contextFilePath = path.join(this.baseDirectory, 'shared-context.json');
-    this.userInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
+    this.legacyUserInteractionsPath = path.join(this.baseDirectory, 'user-interactions.json');
     this.contextCache = null;
     this.contextCacheTimestamp = null;
     this.CACHE_TTL = 30000; // 30 seconds
+    this.memoryStore = new WorkingMemoryStore(path.join(this.baseDirectory, 'working-memory'));
   }
 
   /**
@@ -43,17 +45,19 @@ class SharedContextManager {
     try {
       // Ensure base directory exists
       await fs.mkdir(this.baseDirectory, { recursive: true });
-      
+
       // Initialize context file if it doesn't exist
       if (!(await this.fileExists(this.contextFilePath))) {
         await this.resetContext();
       }
-      
-      // Initialize user interactions file if it doesn't exist
-      if (!(await this.fileExists(this.userInteractionsPath))) {
-        await this.resetUserInteractions();
+
+      await this.memoryStore.initialize();
+
+      // Migrate legacy interaction store if present
+      if (await this.fileExists(this.legacyUserInteractionsPath)) {
+        await this.migrateLegacyInteractions();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Failed to initialize SharedContextManager:', error);
@@ -112,7 +116,8 @@ class SharedContextManager {
    * Reset user interactions log
    */
   async resetUserInteractions() {
-    const initialInteractions = {
+    await this.memoryStore.resetAll();
+    return {
       sessionId: this.generateSessionId(),
       createdAt: new Date().toISOString(),
       interactions: [],
@@ -122,11 +127,34 @@ class SharedContextManager {
         topicsSummary: []
       }
     };
-    
-    await this.retryWithBackoff(() => 
-      fs.writeFile(this.userInteractionsPath, JSON.stringify(initialInteractions, null, 2))
-    );
-    return initialInteractions;
+  }
+
+  /**
+   * Migrate interactions from legacy single-file storage to chunked store
+   */
+  async migrateLegacyInteractions() {
+    try {
+      const raw = await fs.readFile(this.legacyUserInteractionsPath, 'utf8');
+      const legacy = JSON.parse(raw);
+      const interactions = Array.isArray(legacy?.interactions) ? legacy.interactions : [];
+
+      const ordered = interactions
+        .slice()
+        .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
+      for (const interaction of ordered) {
+        if (!interaction.id) {
+          interaction.id = `${interaction.agentName || 'agent'}_${Date.now()}_${crypto.randomBytes(2).toString('hex')}`;
+        }
+        const agentName = interaction.agentName || 'unknown';
+        await this.memoryStore.appendInteraction(agentName, interaction);
+      }
+
+      await fs.rm(this.legacyUserInteractionsPath, { force: true });
+      console.log('Migrated legacy user interactions into chunked working-memory store.');
+    } catch (error) {
+      console.error('Failed to migrate legacy interactions:', error);
+    }
   }
 
   /**
@@ -221,28 +249,7 @@ class SharedContextManager {
         importance: options.importance || 'medium'
       };
 
-      // Load current interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Add new interaction
-      interactions.interactions.push(interaction);
-      
-      // Update summary statistics
-      interactions.summary.totalInteractions++;
-      if (!interactions.summary.agentBreakdown[agentName]) {
-        interactions.summary.agentBreakdown[agentName] = 0;
-      }
-      interactions.summary.agentBreakdown[agentName]++;
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      // Update shared context with this interaction
+      await this.memoryStore.appendInteraction(agentName, interaction);
       await this.updateContextWithUserInput(agentName, interaction);
       
       return interaction;
@@ -399,30 +406,25 @@ class SharedContextManager {
    */
   async confirmUserResponse(interactionId, agentName, confirmationText) {
     try {
-      // Load interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      // Find the interaction
-      const interaction = interactions.interactions.find(i => i.id === interactionId);
-      if (!interaction) {
-        throw new Error(`Interaction ${interactionId} not found`);
+      const updated = await this.memoryStore.updateInteraction(agentName, interactionId, interaction => {
+        const confirmationAttempts = (interaction.userResponse.confirmationAttempts || 0) + 1;
+        return {
+          ...interaction,
+          userResponse: {
+            ...interaction.userResponse,
+            confirmed: true,
+            confirmationAttempts,
+            confirmationText,
+            confirmedAt: new Date().toISOString()
+          }
+        };
+      });
+
+      if (!updated) {
+        throw new Error(`Interaction ${interactionId} not found for agent ${agentName}`);
       }
-      
-      // Update confirmation status
-      interaction.userResponse.confirmed = true;
-      interaction.userResponse.confirmationAttempts++;
-      interaction.userResponse.confirmationText = confirmationText;
-      interaction.userResponse.confirmedAt = new Date().toISOString();
-      
-      // Save updated interactions
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      return interaction;
+
+      return updated;
     } catch (error) {
       console.error('Failed to confirm user response:', error);
       return null;
@@ -468,38 +470,28 @@ class SharedContextManager {
    */
   async getRelevantInteractions(agentName, options = {}) {
     try {
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      let relevantInteractions = interactions.interactions;
-      
-      // Filter by agent if specified
-      if (options.agentSpecific !== false) {
-        relevantInteractions = relevantInteractions.filter(i => i.agentName === agentName);
+      const includeAllAgents = options.agentSpecific === false || agentName === 'all';
+      const rawAgents = includeAllAgents
+        ? await this.memoryStore.listAgentDirectories()
+        : [agentName];
+      const targetAgents = rawAgents.filter(name => Boolean(name) && name !== 'all');
+
+      if (targetAgents.length === 0) {
+        return [];
       }
-      
-      // Filter by context if specified
-      if (options.storyId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.storyId === options.storyId);
-      }
-      
-      if (options.epicId) {
-        relevantInteractions = relevantInteractions.filter(i => 
-          i.context.epicId === options.epicId);
-      }
-      
-      // Sort by timestamp (most recent first)
-      relevantInteractions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
-      // Limit results if specified
-      if (options.limit) {
-        relevantInteractions = relevantInteractions.slice(0, options.limit);
-      }
-      
-      return relevantInteractions;
+
+      const filters = {
+        storyId: options.storyId,
+        epicId: options.epicId,
+        phase: options.phase
+      };
+
+      const interactions = await this.memoryStore.getInteractions(targetAgents, {
+        limit: options.limit,
+        filters
+      });
+
+      return interactions;
     } catch (error) {
       console.error('Failed to get relevant interactions:', error);
       return [];
@@ -611,28 +603,9 @@ class SharedContextManager {
    */
   async cleanup(olderThanDays = 7) {
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-      
-      // Clean up interactions
-      const interactionsData = await this.retryWithBackoff(() => 
-        fs.readFile(this.userInteractionsPath, 'utf8')
-      );
-      const interactions = JSON.parse(interactionsData);
-      
-      const filteredInteractions = interactions.interactions.filter(i => 
-        new Date(i.timestamp) > cutoffDate
-      );
-      
-      interactions.interactions = filteredInteractions;
-      interactions.summary.totalInteractions = filteredInteractions.length;
-      
-      await this.retryWithBackoff(() => 
-        fs.writeFile(this.userInteractionsPath, JSON.stringify(interactions, null, 2))
-      );
-      
-      console.log(`Cleaned up ${interactions.interactions.length - filteredInteractions.length} old interactions`);
-      
+      const olderThanMs = olderThanDays * 24 * 60 * 60 * 1000;
+      await this.memoryStore.cleanup({ olderThanMs });
+      console.log('Cleaned up old interactions from working-memory store');
       return true;
     } catch (error) {
       console.error('Failed to cleanup old interactions:', error);

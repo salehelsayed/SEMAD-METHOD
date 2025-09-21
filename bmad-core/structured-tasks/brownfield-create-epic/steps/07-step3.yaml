@@ -1,0 +1,59 @@
+id: step3
+name: Validation Checklist
+description: |-
+  Before finalizing the epic, ensure:
+  **Scope Validation:**
+  **Risk Assessment:**
+  **Completeness Check:**
+actions:
+  - description: '[ ] Epic is decomposed into right-sized stories (3–5 points each); no hard cap on count'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] No architectural documentation is required'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Enhancement follows existing patterns'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration complexity is manageable'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Risk to existing system is low'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Rollback plan is feasible'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Testing approach covers existing functionality'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Team has sufficient knowledge of integration points'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Epic goal is clear and achievable'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Stories are properly scoped'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Success criteria are measurable'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Dependencies are identified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '3'

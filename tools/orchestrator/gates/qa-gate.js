@@ -97,49 +97,33 @@ class QAGate {
       }
     }
 
-    if (testFile) {
-      // Run the specific test file
-      try {
-        const { stdout } = await execAsync(`npm test ${testFile}`, {
-          cwd: projectRoot,
-          timeout: 120000 // 2 minutes
-        });
-        
-        return this.parseTestOutput(stdout);
-      } catch (error) {
-        // Test execution failed
-        return {
-          passed: 0,
-          failed: 1,
-          skipped: 0,
-          tests: [],
-          error: error.message
-        };
-      }
-    } else {
-      // No specific test file found, create mock passing results
-      console.log(`⚠️  No specific test file found for ${storyId}, creating mock results`);
-      
-      const mockResults = {
-        storyId,
-        timestamp: new Date().toISOString(),
-        passed: 5,
-        failed: 0,
-        skipped: 0,
-        tests: [
-          { name: 'Story Contract Validation', status: 'passed' },
-          { name: 'Acceptance Criteria Verification', status: 'passed' },
-          { name: 'Integration Test', status: 'passed' },
-          { name: 'Regression Test', status: 'passed' },
-          { name: 'Performance Check', status: 'passed' }
-        ]
-      };
+    if (!testFile) {
+      throw new Error(
+        `No acceptance tests found for ${storyId}. ` +
+        `Add targeted tests under tests/, tests/acceptance/, or tests/integration/ ` +
+        `or provide cached results at .ai/test-logs/${storyId}-tests.json.`
+      );
+    }
 
-      // Save mock results
-      await fs.mkdir(testLogsDir, { recursive: true });
-      await fs.writeFile(testResultsPath, JSON.stringify(mockResults, null, 2));
+    // Run the specific test file
+    try {
+      const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
+      const { stdout } = await execAsync(`npm test --silent ${testFile}`, {
+        cwd: projectRoot,
+        timeout: 120000, // 2 minutes
+        env
+      });
       
-      return mockResults;
+      return this.parseTestOutput(stdout);
+    } catch (error) {
+      // Test execution failed
+      return {
+        passed: 0,
+        failed: 1,
+        skipped: 0,
+        tests: [],
+        error: error.message
+      };
     }
   }
 

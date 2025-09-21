@@ -720,8 +720,8 @@ const { parseFile, analyzeCrossFileDependencies, isFileSupported } = require('./
 const { storeSymbolDependency, removeFileSymbols, getDependencyStats } = require('./dependency-analyzer');\nconst { logger } = require('./logger');
 
 /**
- * Repository scanner that analyzes the codebase and populates Qdrant
- * with dependency information for impact analysis
+ * Repository scanner that analyzes the codebase and updates the
+ * local dependency index for impact analysis.
  */
 
 /**
@@ -810,7 +810,7 @@ async function scanFile(filePath, config = {}) {
       return { success: true, symbolCount: 0 };
     }
     
-    // Store each symbol in Qdrant
+    // Store each symbol in the dependency index
     const storedIds = [];
     for (const symbol of symbols) {
       try {

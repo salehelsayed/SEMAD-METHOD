@@ -71,7 +71,7 @@ thresholds:
   maxSteps: 3
   # Maximum tokens of retrieved context (PRD/architecture or scratchpad) before splitting.
   # Typical models like GPT‑3.5 support around 4,000 tokens and GPT‑4 up to 32,000
-  # tokens【329989590427775†L103-L108】.  Limiting context to half of a base model’s
+  # tokens.  Limiting context to half of a base model’s
   # capacity (2,000 tokens) prevents overflow and keeps the agent focused.
   maxContextTokens: 2000
   # Maximum perceived complexity rating (user‑defined) before splitting

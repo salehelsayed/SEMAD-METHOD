@@ -1,0 +1,19 @@
+id: step9
+name: Verify Project Structure Alignment
+description: ''
+actions:
+  - description: Cross-reference story requirements with Project Structure Guide from `docs/architecture/unified-project-structure.md`
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Ensure file paths, component locations, or module names align with defined structures
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Document any structural conflicts in "Project Structure Notes" section within the story draft
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '4'

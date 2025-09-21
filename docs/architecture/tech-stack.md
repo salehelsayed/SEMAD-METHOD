@@ -37,6 +37,6 @@
 - **Installation**: NPX-based installer for project setup
 
 ## Memory Management
-- **Vector Database**: Qdrant for agent memory storage
+- **Working Memory**: Chunked JSONL files stored under `.ai/working-memory/`
 - **Memory Hygiene**: Automated cleanup and summarization
 - **Context Management**: Structured memory with tagging system

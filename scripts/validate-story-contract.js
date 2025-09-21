@@ -262,8 +262,6 @@ function validateStoryFile(filePath, schema) {
       '## Story',
       '## Acceptance Criteria',
       '## Technical Requirements',
-      '## Implementation Plan',
-      '## Test Requirements',
       '## Risk Assessment',
       '## Definition of Done',
       '## Traceability'
@@ -272,6 +270,20 @@ function validateStoryFile(filePath, schema) {
     if (missing.length) {
       console.log('  ✗ Missing required sections:');
       missing.forEach(h => console.log(`    - ${h}`));
+      ok = false;
+    }
+
+    const hasNewImpl = content.includes('## Implementation Checklist') && content.includes('## Implementation Plan (Detailed)');
+    const hasLegacyImpl = content.includes('## Implementation Plan');
+    if (!hasNewImpl && !hasLegacyImpl) {
+      console.log('  ✗ Missing implementation planning section (expected "## Implementation Checklist" with "## Implementation Plan (Detailed)" or legacy "## Implementation Plan")');
+      ok = false;
+    } else if (!hasNewImpl && hasLegacyImpl) {
+      console.log('  ⚠ Legacy Implementation Plan format detected – consider upgrading to Implementation Checklist.');
+    }
+
+    if (!content.includes('### Test Requirements')) {
+      console.log('  ✗ Missing subsection: ### Test Requirements');
       ok = false;
     }
 

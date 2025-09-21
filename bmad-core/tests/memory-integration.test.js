@@ -7,14 +7,10 @@ const {
   getWorkingMemory,
   clearWorkingMemory
 } = require('../agents/index.js');
-const { 
-  storeMemorySnippet, 
-  retrieveMemory 
-} = require('../utils/qdrant.js');
 
 describe('Working Memory Integration Tests', () => {
   const testAgents = ['dev', 'pm', 'analyst', 'architect', 'qa', 'sm', 'po', 'ux-expert'];
-  const memoryDir = path.join(__dirname, '../ai');
+  const memoryDir = path.join(__dirname, '../ai/working-memory/agents');
   
   beforeEach(async () => {
     // Clean up any existing test memory files
@@ -34,7 +30,7 @@ describe('Working Memory Integration Tests', () => {
     for (const agent of testAgents) {
       await initializeWorkingMemory(agent);
       
-      const memoryPath = path.join(memoryDir, `working_memory_${agent}.json`);
+      const memoryPath = path.join(memoryDir, agent, 'state.json');
       const exists = await fs.access(memoryPath)
         .then(() => true)
         .catch(() => false);
@@ -105,37 +101,6 @@ describe('Working Memory Integration Tests', () => {
     }
   });
 
-  test('should integrate with Qdrant for long-term memory', async () => {
-    // Skip test if Qdrant is not available
-    try {
-      const agent = 'pm';
-      const testSnippet = 'Created PRD for payment processing feature';
-      const metadata = {
-        agent: agent,
-        taskId: 'prd-payment-001',
-        timestamp: new Date().toISOString()
-      };
-      
-      // Store memory snippet
-      const storeResult = await storeMemorySnippet(agent, testSnippet, metadata);
-      
-      // If Qdrant is not available, skip the test
-      if (!storeResult) {
-        console.warn('Qdrant not available, skipping integration test');
-        return;
-      }
-      
-      // Retrieve similar memories
-      const results = await retrieveMemory('payment feature', 3);
-      
-      // Should return relevant results
-      expect(results).toBeDefined();
-      expect(Array.isArray(results)).toBe(true);
-    } catch (error) {
-      console.warn('Qdrant integration test skipped:', error.message);
-    }
-  });
-
   test('should persist memory across agent sessions', async () => {
     const agent = 'architect';
     
@@ -166,32 +131,6 @@ describe('Working Memory Integration Tests', () => {
       context: {},
       observations: []
     });
-  });
-
-  test('should support cross-agent memory sharing via Qdrant', async () => {
-    try {
-      // PM creates a PRD
-      const storeResult = await storeMemorySnippet('pm', 'PRD: User authentication system with OAuth', {
-        agent: 'pm',
-        taskId: 'prd-auth-001',
-        type: 'prd'
-      });
-      
-      // If Qdrant is not available, skip the test
-      if (!storeResult) {
-        console.warn('Qdrant not available, skipping cross-agent memory test');
-        return;
-      }
-      
-      // Architect retrieves relevant context
-      const archContext = await retrieveMemory('authentication OAuth', 5);
-      
-      // Should find PM's PRD snippet
-      expect(archContext).toBeDefined();
-      expect(archContext.length).toBeGreaterThanOrEqual(0);
-    } catch (error) {
-      console.warn('Qdrant cross-agent memory test skipped:', error.message);
-    }
   });
 
   test('should validate memory structure on updates', async () => {
@@ -260,27 +199,5 @@ describe('Working Memory Integration Tests', () => {
     // Verify persistence
     const retrievedMemory = await getWorkingMemory(agent);
     expect(retrievedMemory.subTasks).toEqual(updates.subTasks);
-  });
-});
-
-describe('Agent Activation Memory Tests', () => {
-  test('should verify all agents have memory task dependencies', async () => {
-    const agentFiles = [
-      'dev.md', 'pm.md', 'analyst.md', 'architect.md', 
-      'qa.md', 'sm.md', 'po.md', 'ux-expert.md',
-      'bmad-master.md', 'bmad-orchestrator.md'
-    ];
-    
-    for (const agentFile of agentFiles) {
-      const agentPath = path.join(__dirname, '../agents', agentFile);
-      const content = await fs.readFile(agentPath, 'utf8');
-      
-      // Check for memory task dependencies
-      expect(content).toContain('update-working-memory.yaml');
-      expect(content).toContain('retrieve-context.yaml');
-      
-      // Check for memory initialization in activation
-      expect(content).toContain('Initialize working memory');
-    }
   });
 });

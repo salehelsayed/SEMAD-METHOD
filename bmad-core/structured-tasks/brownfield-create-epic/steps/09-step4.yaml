@@ -1,0 +1,19 @@
+id: step4
+name: Coverage Validation
+description: Validate that all acceptance criteria are covered by stories
+actions:
+  - description: Run feature coverage validation to ensure all acceptance criteria are covered
+    elicit: false
+    function: execute
+    parameters:
+      command: node tools/feature-coverage.js --epics docs/epics --stories docs/stories --threshold {{args.coverage_threshold || 100}} --report .ai/reports/feature-coverage-epic.json
+    metadata:
+      originalIndent: 0
+  - description: If coverage gaps exist and auto-split is enabled, create additional stories
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: Continue splitting stories until coverage threshold is met or max-stories reached
+    elicit: true
+    metadata:
+      originalIndent: 0

@@ -1,0 +1,12 @@
+id: step0
+name: Initialize Memory Context
+description: Set up working memory and retrieve project context
+actions:
+  - description: Initialize working memory for epic creation
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Retrieve relevant project context from memory
+    elicit: false
+    metadata:
+      originalIndent: 0

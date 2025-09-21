@@ -1,5 +1,4 @@
 # BMad Knowledge Base
-
 ## Overview
 
 BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework that combines AI agents with Agile development methodologies. The v4 system introduces a modular architecture with improved dependency management, bundle optimization, and support for both web and IDE environments.
@@ -19,7 +18,6 @@ BMad-Method (Breakthrough Method of Agile AI-driven Development) is a framework 
 - **Team Collaboration**: Multiple roles working together
 - **Quality Assurance**: Structured testing and validation
 - **Documentation**: Professional PRDs, architecture docs, user stories
-
 ## How BMad Works
 
 ### The Core Method
@@ -65,7 +63,6 @@ BMad transforms you into a "Vibe CEO" - directing a team of specialized AI agent
 - **Incremental Progress**: Small stories = manageable complexity
 - **Human Oversight**: You validate each step = quality control
 - **Document-Driven**: Specs guide everything = consistency
-
 ## Getting Started
 
 ### Quick Start Options
@@ -175,7 +172,6 @@ npx bmad-method install
 4. **MUST switch to SM agent** for story creation
 5. **MUST switch to Dev agent** for implementation
 6. Keep planning and coding in separate chat sessions
-
 ## Core Configuration (core-config.yaml)
 
 **New in V4**: The `bmad-core/core-config.yaml` file is a critical innovation that enables BMad to work seamlessly with any project structure, providing maximum flexibility and backwards compatibility.
@@ -238,7 +234,6 @@ architectureVersion: v4
 architectureSharded: true
 architectureShardedLocation: docs/architecture
 ```
-
 ## Core Philosophy
 
 ### Vibe CEO'ing
@@ -267,7 +262,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 3. **Status Tracking**: Maintain story statuses (Draft → Approved → InProgress → Done)
 4. **Iterative Development**: Complete one story before starting the next
 5. **Documentation First**: Always start with solid PRD and architecture
-
 ## Agent System
 
 ### Core Development Team
@@ -326,7 +320,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 /help - Show available commands
 /switch agent-name - Change active agent (if orchestrator available)
 ```
-
 ## Team Configurations
 
 ### Pre-Built Teams
@@ -348,7 +341,6 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 - **Includes**: PM, Architect, Developer, QA (no UX Expert)
 - **Use Case**: Backend services, APIs, system development
 - **Bundle**: `team-no-ui.txt`
-
 ## Core Architecture
 
 ### System Overview
@@ -426,7 +418,6 @@ The `web-builder.js` tool creates web-ready bundles by:
 4. Outputting ready-to-upload bundles for web AI interfaces
 
 This architecture enables seamless operation across environments while maintaining the rich, interconnected agent ecosystem that makes BMad powerful.
-
 ## Complete Development Workflow
 
 ### Planning Phase (Web UI Recommended - Especially Gemini!)
@@ -620,7 +611,6 @@ Each status change requires user verification and approval before proceeding.
 4. **Incremental Approach**: Plan for gradual rollout and testing
 
 **For detailed guide**: See `docs/working-in-the-brownfield.md`
-
 ## Document Creation Best Practices
 
 ### Required File Naming for Framework Integration
@@ -651,7 +641,7 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 
 ```markdown
 ## Goals and Background Context
-## Requirements  
+## Requirements
 ## User Interface Design Goals
 ## Success Metrics
 ```
@@ -664,7 +654,6 @@ Templates with Level 2 headings (`##`) can be automatically sharded:
 - `docs/prd/success-metrics.md`
 
 Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sharding.
-
 ## Usage Patterns and Best Practices
 
 ### Environment-Specific Usage
@@ -696,7 +685,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - Choose appropriate team size for project needs
 - Leverage technical preferences for consistency
 - Regular context management and cache clearing
-
 ## Success Tips
 
 - **Use Gemini for big picture planning** - The team-fullstack bundle provides collaborative expertise
@@ -704,7 +692,6 @@ Use the `shard-doc` task or `@kayvan/markdown-tree-parser` tool for automatic sh
 - **Follow the SM → Dev cycle religiously** - This ensures systematic progress
 - **Keep conversations focused** - One agent, one task per conversation
 - **Review everything** - Always review and approve before marking complete
-
 ## Contributing to BMad-Method
 
 ### Quick Contribution Guidelines
@@ -732,7 +719,6 @@ For full details, see `CONTRIBUTING.md`. Key points:
 - **Natural Language First**: Everything in markdown, no code in core
 - **Core vs Expansion Packs**: Core for universal needs, packs for specialized domains
 - **Design Philosophy**: "Dev agents code, planning agents plan"
-
 ## Expansion Packs
 
 ### What Are Expansion Packs?
@@ -793,7 +779,6 @@ Use the **expansion-creator** pack to build your own:
 4. **Test & Share**: Validate with real use cases, share with community
 
 **Key Principle**: Expansion packs democratize expertise by making specialized knowledge accessible through AI agents.
-
 ## Getting Help
 
 - **Commands**: Use `*/*help` in any environment to see available commands

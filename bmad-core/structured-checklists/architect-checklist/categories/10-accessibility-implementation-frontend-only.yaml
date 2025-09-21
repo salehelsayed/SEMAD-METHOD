@@ -1,0 +1,69 @@
+name: ACCESSIBILITY IMPLEMENTATION [[FRONTEND ONLY]]
+items:
+  - description: Semantic HTML usage is emphasized
+    checked: false
+  - description: ARIA implementation guidelines provided
+    checked: false
+  - description: Keyboard navigation requirements defined
+    checked: false
+  - description: Focus management approach specified
+    checked: false
+  - description: Screen reader compatibility addressed
+    checked: false
+  - description: Accessibility testing tools identified
+    checked: false
+  - description: Testing process integrated into workflow
+    checked: false
+  - description: Compliance targets (WCAG level) specified
+    checked: false
+  - description: Manual testing procedures defined
+    checked: false
+  - description: Automated testing approach outlined
+    checked: false
+notes: |-
+  Skip this section for backend-only projects. Accessibility is a core requirement for any user interface.
+  FINAL VALIDATION REPORT GENERATION
+
+  Now that you've completed the checklist, generate a comprehensive validation report that includes:
+
+  1. Executive Summary
+
+     - Overall architecture readiness (High/Medium/Low)
+     - Critical risks identified
+     - Key strengths of the architecture
+     - Project type (Full-stack/Frontend/Backend) and sections evaluated
+
+  2. Section Analysis
+
+     - Pass rate for each major section (percentage of items passed)
+     - Most concerning failures or gaps
+     - Sections requiring immediate attention
+     - Note any sections skipped due to project type
+
+  3. Risk Assessment
+
+     - Top 5 risks by severity
+     - Mitigation recommendations for each
+     - Timeline impact of addressing issues
+
+  4. Recommendations
+
+     - Must-fix items before development
+     - Should-fix items for better quality
+     - Nice-to-have improvements
+
+  5. AI Implementation Readiness
+
+     - Specific concerns for AI agent implementation
+     - Areas needing additional clarification
+     - Complexity hotspots to address
+
+  6. Frontend-Specific Assessment (if applicable)
+     - Frontend architecture completeness
+     - Alignment between main and frontend architecture docs
+     - UI/UX specification coverage
+     - Component design clarity
+
+  After presenting the report, ask the user if they would like detailed analysis of any specific section, especially those with warnings or failures.
+metadata:
+  originalName: 10. ACCESSIBILITY IMPLEMENTATION [[FRONTEND ONLY]]

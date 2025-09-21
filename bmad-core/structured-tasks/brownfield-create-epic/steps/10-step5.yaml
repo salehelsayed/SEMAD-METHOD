@@ -1,0 +1,59 @@
+id: step5
+name: Handoff to Story Manager
+description: |-
+  Once the epic is validated and coverage confirmed, provide this handoff to the Story Manager:
+  ---
+  **Story Manager Handoff:**
+  "Please develop detailed user stories for this brownfield epic. Key considerations:
+  The epic should maintain system integrity while delivering {{epic goal}}."
+  ---
+
+  Update working memory with epic details for future reference
+  The epic creation is successful when:
+  1. Enhancement scope is clearly defined and appropriately sized
+  2. Integration approach respects existing system architecture
+  3. Risk to existing functionality is minimized
+  4. Stories are logically sequenced for safe implementation
+  5. Compatibility requirements are clearly specified
+  6. Rollback plan is feasible and documented
+actions:
+  - description: This is an enhancement to an existing system running {{technology stack}}
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Integration points: {{list key integration points}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Existing patterns to follow: {{relevant existing patterns}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Critical compatibility requirements: {{key requirements}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Each story must include verification that existing functionality remains intact
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: This task is suitable for brownfield enhancements of any size when decomposed into right-sized stories
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If decomposition reveals complex cross-cutting concerns, consider complementing with the full brownfield PRD process (optional)
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Always prioritize existing system integrity over new functionality
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: When in doubt about scope or complexity, escalate to full brownfield planning
+    elicit: false
+    metadata:
+      originalIndent: 0
+notes: '- Critical compatibility requirements: {{key requirements}}'
+metadata:
+  level: 3
+  originalNumber: '5'

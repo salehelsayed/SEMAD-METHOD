@@ -126,7 +126,7 @@ dependencies:
     - fullstack-architecture-tmpl.yaml
     - brownfield-architecture-tmpl.yaml
   structured-checklists:
-    - architect-checklist.yaml
+    - architect-checklist/index.yaml
   data:
     - technical-preferences.md
   utils:
@@ -1058,7 +1058,6 @@ sections:
         type: table
         columns: [Date, Version, Description, Author]
         instruction: Track document versions and changes
-
   - id: high-level-architecture
     title: High Level Architecture
     instruction: This section contains multiple subsections that establish the foundation. Present all subsections together, then elicit feedback on the complete section.
@@ -1138,7 +1137,6 @@ sections:
           - "**Component-Based UI:** Reusable React components with TypeScript - _Rationale:_ Maintainability and type safety across large codebases"
           - "**Repository Pattern:** Abstract data access logic - _Rationale:_ Enables testing and future database migration flexibility"
           - "**API Gateway Pattern:** Single entry point for all API calls - _Rationale:_ Centralized auth, rate limiting, and monitoring"
-
   - id: tech-stack
     title: Tech Stack
     instruction: |
@@ -1185,7 +1183,6 @@ sections:
           - ["Monitoring", "{{monitoring}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["Logging", "{{logging}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
           - ["CSS Framework", "{{css_framework}}", "Latest stable", "{{purpose}}", "{{why_chosen}}"]
-
   - id: data-models
     title: Data Models
     instruction: |
@@ -1220,7 +1217,6 @@ sections:
             title: Relationships
             type: bullet-list
             template: "- {{relationship}}"
-
   - id: api-spec
     title: API Specification
     instruction: |
@@ -1263,7 +1259,6 @@ sections:
         type: code
         language: typescript
         template: "{{trpc_routers}}"
-
   - id: components
     title: Components
     instruction: |
@@ -1303,7 +1298,6 @@ sections:
           - Component diagram for detailed internal structure
           - Sequence diagrams for complex interactions
           Choose the most appropriate for clarity
-
   - id: external-apis
     title: External APIs
     condition: Project requires external API integrations
@@ -1333,7 +1327,6 @@ sections:
           - `{{method}} {{endpoint_path}}` - {{endpoint_purpose}}
           
           **Integration Notes:** {{integration_considerations}}
-
   - id: core-workflows
     title: Core Workflows
     type: mermaid
@@ -1350,7 +1343,6 @@ sections:
       
       Focus on workflows that clarify architecture decisions or complex interactions.
     elicit: true
-
   - id: database-schema
     title: Database Schema
     instruction: |
@@ -1364,7 +1356,6 @@ sections:
       
       Present schema in format appropriate to database type (SQL DDL, JSON schema, etc.)
     elicit: true
-
   - id: frontend-architecture
     title: Frontend Architecture
     instruction: Define frontend-specific architecture details. After each subsection, note if user wants to refine before continuing.
@@ -1425,7 +1416,6 @@ sections:
             type: code
             language: typescript
             template: "{{service_example}}"
-
   - id: backend-architecture
     title: Backend Architecture
     instruction: Define backend-specific architecture details. Consider serverless vs traditional server approaches.
@@ -1489,7 +1479,6 @@ sections:
             type: code
             language: typescript
             template: "{{auth_middleware}}"
-
   - id: unified-project-structure
     title: Unified Project Structure
     instruction: Create a monorepo structure that accommodates both frontend and backend. Adapt based on chosen tools and frameworks.
@@ -1551,7 +1540,6 @@ sections:
       ├── package.json                # Root package.json
       ├── {{monorepo_config}}         # Monorepo configuration
       └── README.md
-
   - id: development-workflow
     title: Development Workflow
     instruction: Define the development setup and workflow for the fullstack application.
@@ -1602,7 +1590,6 @@ sections:
               
               # Shared
               {{shared_env_vars}}
-
   - id: deployment-architecture
     title: Deployment Architecture
     instruction: Define deployment strategy based on platform choice.
@@ -1634,7 +1621,6 @@ sections:
           - ["Development", "{{dev_fe_url}}", "{{dev_be_url}}", "Local development"]
           - ["Staging", "{{staging_fe_url}}", "{{staging_be_url}}", "Pre-production testing"]
           - ["Production", "{{prod_fe_url}}", "{{prod_be_url}}", "Live environment"]
-
   - id: security-performance
     title: Security and Performance
     instruction: Define security and performance considerations for the fullstack application.
@@ -1669,7 +1655,6 @@ sections:
           - Response Time Target: {{response_target}}
           - Database Optimization: {{db_optimization}}
           - Caching Strategy: {{be_cache_strategy}}
-
   - id: testing-strategy
     title: Testing Strategy
     instruction: Define comprehensive testing approach for fullstack application.
@@ -1721,7 +1706,6 @@ sections:
             type: code
             language: typescript
             template: "{{e2e_test_example}}"
-
   - id: coding-standards
     title: Coding Standards
     instruction: Define MINIMAL but CRITICAL standards for AI agents. Focus only on project-specific rules that prevent common mistakes. These will be used by dev agents.
@@ -1746,7 +1730,6 @@ sections:
           - ["Hooks", "camelCase with 'use'", "-", "`useAuth.ts`"]
           - ["API Routes", "-", "kebab-case", "`/api/user-profile`"]
           - ["Database Tables", "-", "snake_case", "`user_profiles`"]
-
   - id: error-handling
     title: Error Handling Strategy
     instruction: Define unified error handling across frontend and backend.
@@ -1781,7 +1764,6 @@ sections:
         type: code
         language: typescript
         template: "{{backend_error_handler}}"
-
   - id: monitoring
     title: Monitoring and Observability
     instruction: Define monitoring strategy for fullstack application.
@@ -1808,10 +1790,6 @@ sections:
           - Error rate
           - Response time
           - Database query performance
-
-  - id: checklist-results
-    title: Checklist Results Report
-    instruction: Before running the checklist, offer to output the full architecture document. Once user confirms, execute the architect-checklist and populate results here.
 ==================== END: .semad-core/templates/fullstack-architecture-tmpl.yaml ====================
 
 ==================== START: .semad-core/templates/brownfield-architecture-tmpl.yaml ====================

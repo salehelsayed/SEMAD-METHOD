@@ -1,0 +1,42 @@
+  - id: api-spec
+    title: API Specification
+    instruction: |
+      Based on the chosen API style from Tech Stack:
+      
+      1. If REST API, create an OpenAPI 3.0 specification
+      2. If GraphQL, provide the GraphQL schema
+      3. If tRPC, show router definitions
+      4. Include all endpoints from epics/stories
+      5. Define request/response schemas based on data models
+      6. Document authentication requirements
+      7. Include example requests/responses
+      
+      Use appropriate format for the chosen API style. If no API (e.g., static site), skip this section.
+    elicit: true
+    sections:
+      - id: rest-api
+        title: REST API Specification
+        condition: API style is REST
+        type: code
+        language: yaml
+        template: |
+          openapi: 3.0.0
+          info:
+            title: {{api_title}}
+            version: {{api_version}}
+            description: {{api_description}}
+          servers:
+            - url: {{server_url}}
+              description: {{server_description}}
+      - id: graphql-api
+        title: GraphQL Schema
+        condition: API style is GraphQL
+        type: code
+        language: graphql
+        template: "{{graphql_schema}}"
+      - id: trpc-api
+        title: tRPC Router Definitions
+        condition: API style is tRPC
+        type: code
+        language: typescript
+        template: "{{trpc_routers}}"

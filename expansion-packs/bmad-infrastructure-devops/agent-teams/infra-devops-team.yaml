@@ -1,0 +1,17 @@
+bundle:
+  name: Infrastructure & DevOps Team
+  icon: 🛠️
+  description: Cross-functional team focused on infrastructure design, DevOps automation, and platform engineering integrated with product delivery.
+agents:
+  - bmad-orchestrator
+  - analyst
+  - pm
+  - architect
+  - sm
+  - dev
+  - qa
+  - infra-devops-platform
+workflows:
+  - infrastructure-architecture.md
+  - infrastructure-platform-from-arch.md
+  - infra-validation-checklist.md

@@ -19,10 +19,20 @@ function readFileSafe(p) {
 }
 
 function loadCommandsManifest(agentId) {
-  const p = path.join(process.cwd(), '.semad-core', 'agents', 'commands-manifest.json');
-  const raw = readFileSafe(p);
-  if (!raw) return null;
-  try { const j = JSON.parse(raw); return j[agentId] || null; } catch { return null; }
+  const candidates = [
+    path.join(process.cwd(), '.semad-core', 'agents', 'commands-manifest.json'),
+    path.join(process.cwd(), 'semad-core', 'agents', 'commands-manifest.json'),
+    path.join(process.cwd(), 'bmad-core', 'agents', 'commands-manifest.json')
+  ];
+  for (const p of candidates) {
+    const raw = readFileSafe(p);
+    if (!raw) continue;
+    try {
+      const j = JSON.parse(raw);
+      if (j && j[agentId]) return j[agentId];
+    } catch {}
+  }
+  return null;
 }
 
 function parseAgentCommandsFromDocs(agentId) {
@@ -43,10 +53,20 @@ function parseAgentCommandsFromDocs(agentId) {
 }
 
 function loadIntentManifest(agentId) {
-  const manifestPath = path.join(process.cwd(), '.semad-core', 'agents', 'intent-manifest.json');
-  const raw = readFileSafe(manifestPath);
-  if (!raw) return null;
-  try { const j = JSON.parse(raw); return j[agentId] || null; } catch { return null; }
+  const candidates = [
+    path.join(process.cwd(), '.semad-core', 'agents', 'intent-manifest.json'),
+    path.join(process.cwd(), 'semad-core', 'agents', 'intent-manifest.json'),
+    path.join(process.cwd(), 'bmad-core', 'agents', 'intent-manifest.json')
+  ];
+  for (const p of candidates) {
+    const raw = readFileSafe(p);
+    if (!raw) continue;
+    try {
+      const j = JSON.parse(raw);
+      if (j && j[agentId]) return j[agentId];
+    } catch {}
+  }
+  return null;
 }
 
 function main() {

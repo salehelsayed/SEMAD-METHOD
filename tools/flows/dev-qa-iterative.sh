@@ -248,14 +248,14 @@ run_qa_gate() {
   # Fallback 1: npm script gate:qa if defined
   if grep -q '"gate:qa"' package.json 2>/dev/null; then
     echo "[QA] Running npm run gate:qa (fallback)"
-    npm run -s gate:qa
+    CI=${CI:-1} npm run -s gate:qa
     return $?
   fi
 
   # Fallback 2: run project tests if available
   if grep -q '"test"' package.json 2>/dev/null; then
     echo "[QA] Running npm test (fallback)"
-    npm test --silent
+    CI=${CI:-1} npm test --silent
     return $?
   fi
 

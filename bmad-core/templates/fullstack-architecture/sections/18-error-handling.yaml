@@ -1,0 +1,34 @@
+  - id: error-handling
+    title: Error Handling Strategy
+    instruction: Define unified error handling across frontend and backend.
+    elicit: true
+    sections:
+      - id: error-flow
+        title: Error Flow
+        type: mermaid
+        mermaid_type: sequence
+        template: "{{error_flow_diagram}}"
+      - id: error-format
+        title: Error Response Format
+        type: code
+        language: typescript
+        template: |
+          interface ApiError {
+            error: {
+              code: string;
+              message: string;
+              details?: Record<string, any>;
+              timestamp: string;
+              requestId: string;
+            };
+          }
+      - id: frontend-error-handling
+        title: Frontend Error Handling
+        type: code
+        language: typescript
+        template: "{{frontend_error_handler}}"
+      - id: backend-error-handling
+        title: Backend Error Handling
+        type: code
+        language: typescript
+        template: "{{backend_error_handler}}"

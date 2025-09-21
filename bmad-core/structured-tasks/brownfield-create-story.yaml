@@ -146,10 +146,67 @@ steps:
         elicit: false
         metadata:
           originalIndent: 0
+      - description: Populate the story’s **Implementation Checklist** with short category headers (Migration, DAO Updates, Tests, Telemetry, etc.) so each group stays readable while every bullet remains atomic.
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: 'Ensure every checklist item follows the pattern: Verb + concrete target + explicit success signal (for example, "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it").'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Translate any narrative hints about the fix into explicit checklist items rather than prose so the developer knows the exact action to take.
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: If an extended plan or reference doc exists, add a Companion References bullet like "See docs/stories/<companion>.md:<section>" while keeping the concise checklist in the story body.
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: Use markdown checkboxes `[ ]` consistently across the Implementation Checklist and Definition of Done for programmatic progress tracking.
+        elicit: true
+        metadata:
+          originalIndent: 0
     notes: '- **Key Constraints:** {{any important limitations or requirements}}'
     metadata:
       level: 3
       originalNumber: '2'
+  - id: step2b
+    name: StoryContract and Template Compliance
+    description: |-
+      Embed a StoryContract and ensure the story follows the canonical Story Template used by SM create-next-story.
+      - Use docs/templates/story-contract-template.yaml as schema guidance for the StoryContract block at the top of the file.
+      - Follow bmad-core/templates/story-tmpl.yaml sectioning (Dev Agent Record, QA Findings, traceability blocks, etc.).
+    actions:
+      - description: Ask for or detect the created story file path
+        elicit: true
+      - description: Embed a StoryContract YAML block at the top of the story file between --- markers
+        elicit: false
+      - description: Ensure sections match canonical story template (Status, Dev Agent Record, QA Findings, Traceability)
+        elicit: false
+      - description: Validate StoryContract structure using scripts/validate-story-contract.js
+        elicit: false
+        function: execute
+        parameters:
+          command: node scripts/validate-story-contract.js -- {{storyFilePath}}
+      - description: Execute DoR mini-gate to enforce readiness
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/sm/dor-gate.js
+          args: []
+        outputs:
+          exitCode: dorExitCode
+          stdout: dorStdout
+      - description: Halt if DoR gate fails (<90). If first failure (70–89), perform one revision then re-run manually; if still <90, spike is created.
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition:
+            '[object Object]': null
+          errorMessage: 'DoR gate not passed. See report: {{dorStdout}}'
+    metadata:
+      level: 3
+      originalNumber: 2b
   - id: step3
     name: Risk and Compatibility Check
     description: |-
@@ -274,7 +331,6 @@ steps:
         metadata:
           memoryAction: true
           executionOrder: last
-inputs: {}
 outputs:
   - name: story
     type: file

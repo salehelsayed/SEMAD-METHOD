@@ -1,0 +1,79 @@
+  - id: high-level-architecture
+    title: High Level Architecture
+    instruction: This section contains multiple subsections that establish the foundation. Present all subsections together, then elicit feedback on the complete section.
+    elicit: true
+    sections:
+      - id: technical-summary
+        title: Technical Summary
+        instruction: |
+          Provide a comprehensive overview (4-6 sentences) covering:
+          - Overall architectural style and deployment approach
+          - Frontend framework and backend technology choices
+          - Key integration points between frontend and backend
+          - Infrastructure platform and services
+          - How this architecture achieves PRD goals
+      - id: platform-infrastructure
+        title: Platform and Infrastructure Choice
+        instruction: |
+          Based on PRD requirements and technical assumptions, make a platform recommendation:
+          
+          1. Consider common patterns (not an exhaustive list, use your own best judgement and search the web as needed for emerging trends):
+          - **Vercel + Supabase**: For rapid development with Next.js, built-in auth/storage
+          - **AWS Full Stack**: For enterprise scale with Lambda, API Gateway, S3, Cognito
+          - **Azure**: For .NET ecosystems or enterprise Microsoft environments
+          - **Google Cloud**: For ML/AI heavy applications or Google ecosystem integration
+          
+          2. Present 2-3 viable options with clear pros/cons
+          3. Make a recommendation with rationale
+          4. Get explicit user confirmation
+          
+          Document the choice and key services that will be used.
+        template: |
+          **Platform:** {{selected_platform}}
+          **Key Services:** {{core_services_list}}
+          **Deployment Host and Regions:** {{regions}}
+      - id: repository-structure
+        title: Repository Structure
+        instruction: |
+          Define the repository approach based on PRD requirements and platform choice, explain your rationale or ask questions to the user if unsure:
+          
+          1. For modern fullstack apps, monorepo is often preferred
+          2. Consider tooling (Nx, Turborepo, Lerna, npm workspaces)
+          3. Define package/app boundaries
+          4. Plan for shared code between frontend and backend
+        template: |
+          **Structure:** {{repo_structure_choice}}
+          **Monorepo Tool:** {{monorepo_tool_if_applicable}}
+          **Package Organization:** {{package_strategy}}
+      - id: architecture-diagram
+        title: High Level Architecture Diagram
+        type: mermaid
+        mermaid_type: graph
+        instruction: |
+          Create a Mermaid diagram showing the complete system architecture including:
+          - User entry points (web, mobile)
+          - Frontend application deployment
+          - API layer (REST/GraphQL)
+          - Backend services
+          - Databases and storage
+          - External integrations
+          - CDN and caching layers
+          
+          Use appropriate diagram type for clarity.
+      - id: architectural-patterns
+        title: Architectural Patterns
+        instruction: |
+          List patterns that will guide both frontend and backend development. Include patterns for:
+          - Overall architecture (e.g., Jamstack, Serverless, Microservices)
+          - Frontend patterns (e.g., Component-based, State management)
+          - Backend patterns (e.g., Repository, CQRS, Event-driven)
+          - Integration patterns (e.g., BFF, API Gateway)
+          
+          For each pattern, provide recommendation and rationale.
+        repeatable: true
+        template: "- **{{pattern_name}}:** {{pattern_description}} - _Rationale:_ {{rationale}}"
+        examples:
+          - "**Jamstack Architecture:** Static site generation with serverless APIs - _Rationale:_ Optimal performance and scalability for content-heavy applications"
+          - "**Component-Based UI:** Reusable React components with TypeScript - _Rationale:_ Maintainability and type safety across large codebases"
+          - "**Repository Pattern:** Abstract data access logic - _Rationale:_ Enables testing and future database migration flexibility"
+          - "**API Gateway Pattern:** Single entry point for all API calls - _Rationale:_ Centralized auth, rate limiting, and monitoring"

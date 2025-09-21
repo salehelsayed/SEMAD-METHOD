@@ -1,0 +1,138 @@
+id: architect-checklist
+name: Architect Solution Validation Checklist
+result:
+  status: pending
+  notes: ''
+metadata:
+  preservedContent:
+    - type: special-note
+      content: |-
+        [[LLM: INITIALIZATION INSTRUCTIONS - REQUIRED ARTIFACTS
+
+        Before proceeding with this checklist, ensure you have access to:
+
+        1. architecture.md - The primary architecture document (check docs/architecture.md)
+        2. prd.md - Product Requirements Document for requirements alignment (check docs/prd.md)
+        3. frontend-architecture.md or fe-architecture.md - If this is a UI project (check docs/frontend-architecture.md)
+        4. Any system diagrams referenced in the architecture
+        5. API documentation if available
+        6. Technology stack details and version specifications
+
+        IMPORTANT: If any required documents are missing or inaccessible, immediately ask the user for their location or content before proceeding.
+
+        PROJECT TYPE DETECTION:
+        First, determine the project type by checking:
+
+        - Does the architecture include a frontend/UI component?
+        - Is there a frontend-architecture.md document?
+        - Does the PRD mention user interfaces or frontend requirements?
+
+        If this is a backend-only or service-only project:
+
+        - Skip sections marked with [[FRONTEND ONLY]]
+      lineNumber: 5
+    - type: special-note
+      content: '- Note in your final report that frontend sections were skipped due to project type'
+      lineNumber: 29
+    - type: special-note
+      content: 3. Critical Thinking - Question assumptions and identify gaps, not just confirm what's present
+      lineNumber: 36
+    - type: special-note
+      content: '[[LLM: Before evaluating this section, take a moment to fully understand the product''s purpose and goals from the PRD. What is the core problem being solved? Who are the users? What are the critical success factors? Keep these in mind as you validate alignment. For each item, don''t just check if it''s mentioned - verify that the architecture provides a concrete technical solution.]]'
+      lineNumber: 47
+    - type: special-note
+      content: '[[LLM: Architecture clarity is crucial for successful implementation. As you review this section, visualize the system as if you were explaining it to a new developer. Are there any ambiguities that could lead to misinterpretation? Would an AI agent be able to implement this architecture without confusion? Look for specific diagrams, component definitions, and clear interaction patterns.]]'
+      lineNumber: 75
+    - type: special-note
+      content: '[[LLM: Technology choices have long-term implications. For each technology decision, consider: Is this the simplest solution that could work? Are we over-engineering? Will this scale? What are the maintenance implications? Are there security vulnerabilities in the chosen versions? Verify that specific versions are defined, not ranges.]]'
+      lineNumber: 111
+    - type: special-note
+      content: '[[LLM: Skip this entire section if this is a backend-only or service-only project. Only evaluate if the project includes a user interface.]]'
+      lineNumber: 123
+    - type: special-note
+      content: '[[LLM: This entire section should be skipped for backend-only projects. Only evaluate if the project includes a user interface. When evaluating, ensure alignment between the main architecture document and the frontend-specific architecture document.]]'
+      lineNumber: 149
+    - type: special-note
+      content: '[[LLM: Production systems fail in unexpected ways. As you review this section, think about Murphy''s Law - what could go wrong? Consider real-world scenarios: What happens during peak load? How does the system behave when a critical service is down? Can the operations team diagnose issues at 3 AM? Look for specific resilience patterns, not just mentions of "error handling".]]'
+      lineNumber: 201
+    - type: special-note
+      content: '- [ ] Circuit breakers or fallbacks are specified for critical services'
+      lineNumber: 207
+    - type: special-note
+      content: '[[LLM: Security is not optional. Review this section with a hacker''s mindset - how could someone exploit this system? Also consider compliance: Are there industry-specific regulations that apply? GDPR? HIPAA? PCI? Ensure the architecture addresses these proactively. Look for specific security controls, not just general statements.]]'
+      lineNumber: 237
+    - type: special-note
+      content: '[[LLM: Clear implementation guidance prevents costly mistakes. As you review this section, imagine you''re a developer starting on day one. Do they have everything they need to be productive? Are coding standards clear enough to maintain consistency across the team? Look for specific examples and patterns.]]'
+      lineNumber: 273
+    - type: special-note
+      content: '[[LLM: Skip this subsection for backend-only projects.]]'
+      lineNumber: 293
+    - type: special-note
+      content: '[[LLM: Dependencies are often the source of production issues. For each dependency, consider: What happens if it''s unavailable? Is there a newer version with security patches? Are we locked into a vendor? What''s our contingency plan? Verify specific versions and fallback strategies.]]'
+      lineNumber: 319
+    - type: special-note
+      content: '- [ ] Fallback approaches for critical dependencies are specified'
+      lineNumber: 325
+    - type: special-note
+      content: '[[LLM: This architecture may be implemented by AI agents. Review with extreme clarity in mind. Are patterns consistent? Is complexity minimized? Would an AI agent make incorrect assumptions? Remember: explicit is better than implicit. Look for clear file structures, naming conventions, and implementation patterns.]]'
+      lineNumber: 347
+    - type: special-note
+      content: '[[LLM: Skip this section for backend-only projects. Accessibility is a core requirement for any user interface.]]'
+      lineNumber: 383
+    - type: special-note
+      content: |-
+        [[LLM: FINAL VALIDATION REPORT GENERATION
+
+        Now that you've completed the checklist, generate a comprehensive validation report that includes:
+
+        1. Executive Summary
+
+           - Overall architecture readiness (High/Medium/Low)
+           - Critical risks identified
+           - Key strengths of the architecture
+           - Project type (Full-stack/Frontend/Backend) and sections evaluated
+
+        2. Section Analysis
+
+           - Pass rate for each major section (percentage of items passed)
+           - Most concerning failures or gaps
+           - Sections requiring immediate attention
+           - Note any sections skipped due to project type
+
+        3. Risk Assessment
+
+           - Top 5 risks by severity
+           - Mitigation recommendations for each
+           - Timeline impact of addressing issues
+
+        4. Recommendations
+
+           - Must-fix items before development
+           - Should-fix items for better quality
+           - Nice-to-have improvements
+
+        5. AI Implementation Readiness
+
+           - Specific concerns for AI agent implementation
+           - Areas needing additional clarification
+           - Complexity hotspots to address
+
+        6. Frontend-Specific Assessment (if applicable)
+           - Frontend architecture completeness
+           - Alignment between main and frontend architecture docs
+           - UI/UX specification coverage
+           - Component design clarity
+
+        After presenting the report, ask the user if they would like detailed analysis of any specific section, especially those with warnings or failures.]]
+      lineNumber: 401
+categories:
+  - file: categories/01-requirements-alignment.yaml
+  - file: categories/02-architecture-fundamentals.yaml
+  - file: categories/03-technical-stack-decisions.yaml
+  - file: categories/04-frontend-design-implementation-frontend-only.yaml
+  - file: categories/05-resilience-operational-readiness.yaml
+  - file: categories/06-security-compliance.yaml
+  - file: categories/07-implementation-guidance.yaml
+  - file: categories/08-dependency-integration-management.yaml
+  - file: categories/09-ai-agent-implementation-suitability.yaml
+  - file: categories/10-accessibility-implementation-frontend-only.yaml

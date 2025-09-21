@@ -1,0 +1,64 @@
+id: step11
+name: Story Draft Completion and Review
+description: ''
+actions:
+  - description: Review all sections for completeness and accuracy
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Verify all source references are included for technical details
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: Ensure tasks align with both epic requirements and architecture constraints
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: Update status to "Draft" and save the story file
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Execute `{root}/tasks/execute-checklist` `{root}/checklists/story-draft-checklist`
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: 'MANDATORY VALIDATION: Execute task `validate-next-story` with the newly created story file path'
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If validation fails, halt workflow and surface all validation errors to the user. Story CANNOT proceed until all validation issues are resolved.
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Provide summary to user including:'
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: 'Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: 'Status: Draft'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Key technical components included from architecture docs
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Any deviations or conflicts noted between epic and architecture
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Checklist Results
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Validation Results (pass/fail with any issues)
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: 'Next steps: Story has been validated and is ready for implementation'
+    elicit: false
+    metadata:
+      originalIndent: 2

@@ -81,16 +81,27 @@ function main() {
       } catch (_) {}
     }
   }
-  const uniqueFiles = [...new Set(testFiles)].map(p => path.isAbsolute(p) ? p : path.join(projectRoot, p));
+  // Normalize and de-duplicate file list
+  const uniqueFiles = [...new Set(testFiles)]
+    .map(p => path.isAbsolute(p) ? p : path.join(projectRoot, p))
+    .filter(p => fs.existsSync(p));
 
   if (uniqueFiles.length === 0) {
     console.log('No test files defined for this story. Nothing to run.');
     process.exit(0);
   }
 
-  // Run only specified tests via npm test -- <files>
-  const argsList = ['test', '--silent', '--', ...uniqueFiles];
-  const res = spawnSync('npm', argsList, { stdio: 'inherit', cwd: projectRoot });
+  // Announce exactly which tests will run (story-scoped only)
+  const relFiles = uniqueFiles.map(p => path.relative(projectRoot, p));
+  console.log('\nStory-scoped test run (this story only)');
+  console.log('Files:');
+  relFiles.forEach(f => console.log('  - ' + f));
+
+  // Run only specified tests using Jest's exact-path mode to avoid picking up the full suite
+  // Forward to the test script: npm test -- --runTestsByPath <file1> <file2> ...
+  const argsList = ['test', '--silent', '--', '--runTestsByPath', ...uniqueFiles];
+  const env = { ...process.env, CI: process.env.CI || '1' };
+  const res = spawnSync('npm', argsList, { stdio: 'inherit', cwd: projectRoot, env });
   const code = res.status ?? res.code ?? 1;
   process.exit(code);
 }

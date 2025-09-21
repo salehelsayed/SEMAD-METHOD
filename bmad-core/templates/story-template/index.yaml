@@ -1,0 +1,6 @@
+type: concat
+parts:
+  - parts/00-header.mustache
+  - parts/10-story-contract.mustache
+  - parts/20-story-body.md
+  - parts/90-footer.mustache

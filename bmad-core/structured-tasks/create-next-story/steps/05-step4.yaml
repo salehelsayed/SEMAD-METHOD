@@ -1,0 +1,31 @@
+id: step4
+name: Gather Story Requirements and Previous Story Context
+description: ''
+actions:
+  - description: Extract story requirements from the identified epic file
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'If previous story exists, review Dev Agent Record sections for:'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Completion Notes and Debug Log References
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Implementation deviations and technical decisions
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Challenges encountered and lessons learned
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Extract relevant insights that inform the current story's preparation
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '2'

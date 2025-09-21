@@ -1,0 +1,57 @@
+name: IMPLEMENTATION GUIDANCE
+items:
+  - description: Coding standards are defined
+    checked: false
+  - description: Documentation requirements are specified
+    checked: false
+  - description: Testing expectations are outlined
+    checked: false
+  - description: Code organization principles are defined
+    checked: false
+  - description: Naming conventions are specified
+    checked: false
+  - description: Unit testing approach is defined
+    checked: false
+  - description: Integration testing strategy is outlined
+    checked: false
+  - description: E2E testing approach is specified
+    checked: false
+  - description: Performance testing requirements are outlined
+    checked: false
+  - description: Security testing approach is defined
+    checked: false
+  - description: Component testing scope and tools defined
+    checked: false
+  - description: UI integration testing approach specified
+    checked: false
+  - description: Visual regression testing considered
+    checked: false
+  - description: Accessibility testing tools identified
+    checked: false
+  - description: Frontend-specific test data management addressed
+    checked: false
+  - description: Local development environment setup is documented
+    checked: false
+  - description: Required tools and configurations are specified
+    checked: false
+  - description: Development workflows are outlined
+    checked: false
+  - description: Source control practices are defined
+    checked: false
+  - description: Dependency management approach is specified
+    checked: false
+  - description: API documentation standards are defined
+    checked: false
+  - description: Architecture documentation requirements are specified
+    checked: false
+  - description: Code documentation expectations are outlined
+    checked: false
+  - description: System diagrams and visualizations are included
+    checked: false
+  - description: Decision records for key choices are included
+    checked: false
+notes: |-
+  Clear implementation guidance prevents costly mistakes. As you review this section, imagine you're a developer starting on day one. Do they have everything they need to be productive? Are coding standards clear enough to maintain consistency across the team? Look for specific examples and patterns.
+  Skip this subsection for backend-only projects.
+metadata:
+  originalName: 7. IMPLEMENTATION GUIDANCE

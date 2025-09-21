@@ -1,0 +1,39 @@
+  - id: components
+    title: Components
+    instruction: |
+      Based on the architectural patterns, tech stack, and data models from above:
+      
+      1. Identify major logical components/services across the fullstack
+      2. Consider both frontend and backend components
+      3. Define clear boundaries and interfaces between components
+      4. For each component, specify:
+      - Primary responsibility
+      - Key interfaces/APIs exposed
+      - Dependencies on other components
+      - Technology specifics based on tech stack choices
+      
+      5. Create component diagrams where helpful
+    elicit: true
+    sections:
+      - id: component-list
+        repeatable: true
+        title: "{{component_name}}"
+        template: |
+          **Responsibility:** {{component_description}}
+          
+          **Key Interfaces:**
+          - {{interface_1}}
+          - {{interface_2}}
+          
+          **Dependencies:** {{dependencies}}
+          
+          **Technology Stack:** {{component_tech_details}}
+      - id: component-diagrams
+        title: Component Diagrams
+        type: mermaid
+        instruction: |
+          Create Mermaid diagrams to visualize component relationships. Options:
+          - C4 Container diagram for high-level view
+          - Component diagram for detailed internal structure
+          - Sequence diagrams for complex interactions
+          Choose the most appropriate for clarity

@@ -1,30 +1,6 @@
 id: brownfield-create-epic
 name: Create Brownfield Epic Task
 purpose: Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture documentation process. This task is for isolated features or modifications that can be completed within a focused scope. Supports unlimited story splitting with automatic coverage validation to ensure all acceptance criteria are addressed.
-parameters:
-  - name: from
-    description: Path to brownfield brief or codebase to analyze
-    required: true
-    type: string
-  - name: auto-split
-    description: Enable automatic story splitting until all acceptance criteria are covered
-    required: false
-    type: boolean
-    default: true
-  - name: max-stories
-    description: Maximum number of stories to create (-1 for unlimited)
-    required: false
-    type: number
-    default: -1
-  - name: complexity-budget
-    description: Target complexity points per story (3-5 recommended)
-    required: false
-    type: number
-    default: 5
-  - name: link-feature
-    description: Feature ID to link this epic to (e.g., FEAT-auth-session)
-    required: false
-    type: string
 steps:
   - id: load-memory
     name: Load Memory and Initialize Context
@@ -119,7 +95,7 @@ steps:
         elicit: true
     metadata:
       level: 3
-      originalNumber: '1a'
+      originalNumber: 1a
   - id: step2
     name: Epic Creation
     description: |-
@@ -133,7 +109,7 @@ steps:
       **Enhancement Details:**
       #### Stories
       List all stories needed to fully cover the epic (no artificial cap). Prefer splitting by domain sub-capabilities and interface boundaries. Target 3–5 point stories; auto-split until all acceptance criteria are covered.
-      
+
       {{if args.auto_split}}
       AUTO-SPLIT CONFIGURATION:
       - Max stories: {{args.max_stories || 'unlimited'}} 
@@ -186,6 +162,18 @@ steps:
           originalIndent: 0
       - description: '[ ] Performance impact is minimal'
         elicit: false
+        metadata:
+          originalIndent: 0
+      - description: 'Populate the `storyBlueprints` list in the EpicContract with one entry per planned story (slice order: flag → probe → int-flow rows). Each blueprint must include storyId, title, sliceType, reqIds, flowIds, integrationPointIds, and an implementationChecklistSeed grouped by headers (Migration, DAO Updates, Tests, Telemetry, etc.) with single-action checkboxes that end in a visible success signal.'
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: For every blueprint, convert narrative hints or architectural guidance into explicit checklist seed items so the SM can copy them directly into story Implementation Checklists without interpretation.
+        elicit: true
+        metadata:
+          originalIndent: 0
+      - description: If detailed companion documents are produced (e.g., flow maps or plan appendices), add them to the blueprint `companionDocs` array using "path" and "section" so stories can reference them via "See <file>:<section>" links.
+        elicit: true
         metadata:
           originalIndent: 0
       - description: '**Primary Risk:** {{main risk to existing system}}'
@@ -242,7 +230,7 @@ steps:
         elicit: false
     metadata:
       level: 3
-      originalNumber: '2a'
+      originalNumber: 2a
   - id: step3
     name: Validation Checklist
     description: |-
@@ -320,7 +308,7 @@ steps:
           command: npm run validate:epic -- {{epicPath}}
     metadata:
       level: 3
-      originalNumber: '3a'
+      originalNumber: 3a
   - id: step4
     name: Coverage Validation
     description: Validate that all acceptance criteria are covered by stories
@@ -418,7 +406,6 @@ steps:
         metadata:
           memoryAction: true
           executionOrder: last
-inputs: {}
 outputs: {}
 metadata:
   originalSections:

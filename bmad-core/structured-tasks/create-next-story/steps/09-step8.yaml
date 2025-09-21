@@ -1,0 +1,34 @@
+id: step8
+name: Extract Story-Specific Technical Details
+description: |-
+  Extract ONLY information directly relevant to implementing the current story. Do NOT invent new libraries, patterns, or standards not in the source documents.
+  Extract:
+  ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
+actions:
+  - description: Specific data models, schemas, or structures the story will use
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: API endpoints the story must implement or consume
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Component specifications for UI elements in the story
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: File paths and naming conventions for new code
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Testing requirements specific to the story's features
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Security or performance considerations affecting the story
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 4
+  originalNumber: '3.3'

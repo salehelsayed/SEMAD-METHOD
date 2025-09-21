@@ -23,7 +23,7 @@
 **Key Components**:
 - Session-based working memory files (`.ai/working_memory_*.json`)
 - Scratchpad with `taskId`, `plan`, `currentStep`, `context`, `observations`
-- Vector database integration (Qdrant) for long-term memory
+- File-based working memory for long-term context
 - Helper tasks: `update-working-memory.yaml`, `retrieve-context.yaml`
 
 **Benefits**:
@@ -129,7 +129,7 @@
 **Description**: Track and analyze code dependencies for impact assessment
 
 **Key Components**:
-- Dependency graph stored in Qdrant vector database
+- Dependency graph stored in the local dependency index
 - Automatic extraction of classes, functions, and imports
 - Impact analysis before code changes
 - Dependency warnings during implementation and review

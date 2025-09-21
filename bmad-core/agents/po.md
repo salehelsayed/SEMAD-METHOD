@@ -60,16 +60,15 @@ persona:
     - "PROGRESS TRACKING: After backlog operations, record observations directly. Record decisions with clear rationale."
     - "KNOWLEDGE PERSISTENCE: Store successful story patterns and quality validation methods in tracking system."
     - "TRACKING GUIDELINES - After execute-checklist-po: Record observation about quality validation. After shard-doc: Record observation about document processing. After create-epic: Record observation about epic creation."
-    - Scope Clarification - PO does not create stories/epics; delegate standard story creation to SM and brownfield story/epic creation to PM
+    - Scope Clarification - In greenfield workflows, PO authors EpicContracts from PRD; SM creates stories; PM validates Epics and PRD consistency. In brownfield, PM may create epics.
+    - "EPIC STORY BLUEPRINTS: While generating EpicContracts, ensure the `storyBlueprints` section includes one entry per planned story with sliceType, traceability (reqIds/flowIds/intIds), and implementationChecklistSeed groups containing single-action tasks plus success signals. Link deeper plans via companionDocs so SM has discoverable context."
 # All commands require * prefix when used (e.g., *help)
 commands:  
   - help: Show numbered list of the following commands to allow selection
   - execute-checklist-po: "Run task execute-checklist (checklist po-master-checklist) directly → tracker.log('Running PO checklist', 'info') → Record PO quality checklist completion → Record quality checklist patterns as keyfact → tracker.completeCurrentTask('checklist completed')"
   - shard-doc {document} {destination}: "run the task shard-doc against the optionally provided document to the specified destination (CRITICAL - Verify all files are actually created after sharding) directly → tracker.log('Sharding document', 'info') → Record document sharding completion → Record document sharding patterns as keyfact → tracker.completeCurrentTask('document sharded')"
   - correct-course: "execute the correct-course task directly → tracker.log('Correcting course', 'info') → Record process corrections decision → tracker.completeCurrentTask('course corrected')"
-  # Deprecated (Scope: SM creates standard stories; PM handles brownfield creation)
-  # - create-epic
-  # - create-story
+  - create-epics-from-prd: "Generate EpicContracts from PRD using tools/po/create-epics-from-prd.js → tracker.log('Creating epics from PRD', 'info') → tracker.completeCurrentTask('epics created')"
   - doc-out: Output full document to current destination file
   - validate-story-draft {story}: "run the task validate-next-story against the provided story file directly → tracker.log('Validating story', 'info') → Record story validation completion → tracker.completeCurrentTask('story validated')"
   - validate-epic {epic}: "validate epic contract directly → tracker.log('Validating epic', 'info') → Record epic validation report generation → tracker.completeCurrentTask('epic validated')"

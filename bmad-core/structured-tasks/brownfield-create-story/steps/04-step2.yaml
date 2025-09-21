@@ -1,0 +1,98 @@
+id: step2
+name: Story Creation
+description: |-
+  Create a single focused story following this structure:
+  #### Story Title
+  {{Specific Enhancement}} - Brownfield Addition
+  #### User Story
+  As a {{user type}},
+  I want {{specific action/capability}},
+  So that {{clear benefit/value}}.
+  #### Story Context
+  **Existing System Integration:**
+  #### Acceptance Criteria
+  **Functional Requirements:**
+  1. {{Primary functional requirement}}
+  2. {{Secondary functional requirement (if any)}}
+  3. {{Integration requirement}}
+  **Integration Requirements:** 4. Existing {{relevant functionality}} continues to work unchanged 5. New functionality follows existing {{pattern}} pattern 6. Integration with {{system/component}} maintains current behavior
+  **Quality Requirements:** 7. Change is covered by appropriate tests 8. Documentation is updated if needed 9. No regression in existing functionality verified
+  #### Technical Notes
+  #### Definition of Done
+actions:
+  - description: 'Integrates with: {{existing component/system}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Technology: {{relevant tech stack}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Follows pattern: {{existing pattern to follow}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Touch points: {{specific integration points}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Integration Approach:** {{how it connects to existing system}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Existing Pattern Reference:** {{link or description of pattern to follow}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Key Constraints:** {{any important limitations or requirements}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Functional requirements met'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration requirements verified'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Existing functionality regression tested'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Code follows existing patterns and standards'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Tests pass (existing and new)'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Documentation updated if applicable'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Populate the story’s **Implementation Checklist** with short category headers (Migration, DAO Updates, Tests, Telemetry, etc.) so each group stays readable while every bullet remains atomic.
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: 'Ensure every checklist item follows the pattern: Verb + concrete target + explicit success signal (for example, "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it").'
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: Translate any narrative hints about the fix into explicit checklist items rather than prose so the developer knows the exact action to take.
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If an extended plan or reference doc exists, add a Companion References bullet like "See docs/stories/<companion>.md:<section>" while keeping the concise checklist in the story body.
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: Use markdown checkboxes `[ ]` consistently across the Implementation Checklist and Definition of Done for programmatic progress tracking.
+    elicit: true
+    metadata:
+      originalIndent: 0
+notes: '- **Key Constraints:** {{any important limitations or requirements}}'
+metadata:
+  level: 3
+  originalNumber: '2'

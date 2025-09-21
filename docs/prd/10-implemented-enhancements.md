@@ -22,7 +22,7 @@
 - **Story 8**: Mandatory automatic story validation
 
 ### 10.4 Memory and Dependency Systems
-- **Story 14**: Qdrant-based dependency analysis and impact checking
+- **Story 14**: File-based dependency analysis and impact checking
 - **Story 15**: Consistent memory usage across all agents
 - **Story 16**: Unified memory utilization with hygiene protocols
 - **Story 18**: Memory health monitoring and reporting

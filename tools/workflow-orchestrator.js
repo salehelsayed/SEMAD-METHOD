@@ -411,18 +411,13 @@ class WorkflowOrchestrator {
     analysis.features.push({ key: 'patch_plan_validation', name: 'Patch plan validation', present: patchPlanEvidence.length > 0 });
     analysis.evidence.patch_plan_validation = patchPlanEvidence;
 
-    // Simple task tracking (no Qdrant)
+    // Simple task tracking (file-based)
     const trackingDirs = [
       '.ai/progress',
       'semad-core/agents/index.js' // working memory helpers
     ].filter(rel => fs.existsSync(path.join(this.rootDir, rel)));
-    analysis.features.push({ key: 'simple_task_tracking', name: 'Simple task tracking (no Qdrant)', present: trackingDirs.length > 0 });
+    analysis.features.push({ key: 'simple_task_tracking', name: 'Simple task tracking (file-based)', present: trackingDirs.length > 0 });
     analysis.evidence.simple_task_tracking = trackingDirs;
-
-    // Deprecated: Qdrant usage (should be false)
-    const usesQdrant = fs.existsSync(path.join(this.rootDir, 'qdrant_storage'));
-    analysis.features.push({ key: 'qdrant', name: 'Qdrant-based vector DB', present: usesQdrant, deprecated: true });
-    analysis.evidence.qdrant = usesQdrant ? ['qdrant_storage/'] : [];
 
     // Observability (metrics/logging/reporting)
     const observabilityCandidates = [
@@ -924,7 +919,6 @@ class WorkflowOrchestrator {
     lines.push('- No external secret managers detected in dependencies.');
     lines.push('');
     lines.push('## Deprecated/Excluded');
-    lines.push('- Qdrant integration is not used (file-based memory preferred)');
 
     await fs.promises.mkdir(path.dirname(archPath), { recursive: true });
     await fs.promises.writeFile(archPath, lines.join('\n'), 'utf8');
@@ -1013,7 +1007,6 @@ class WorkflowOrchestrator {
     }
     lines.push('');
     lines.push('## Removed/Deprecated');
-    lines.push('- Qdrant integration and vector search are not part of this build');
     lines.push('');
     // Epics overview (coarse grouping)
     lines.push('## Epics Overview');
@@ -1099,9 +1092,9 @@ class WorkflowOrchestrator {
             const content = [`# ${sec.title}`, '', ...sec.body].join('\n').trim() + '\n';
             await fs.promises.writeFile(out, content, 'utf8');
           }
-          // Write per-epic summaries under docs/prd/epics/
+          // Write per-epic summaries under docs/prd/epic-summaries/ (avoid confusion with EpicContracts)
           const epicSummaries = await this.extractStorySummaries();
-          const epicsDir = path.join(prdDir, 'epics');
+          const epicsDir = path.join(prdDir, 'epic-summaries');
           await fsExtra.ensureDir(epicsDir);
           for (const [epic, items] of Object.entries(epicSummaries.perEpic)) {
             const epicIdSafe = String(epic).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
@@ -1190,12 +1183,18 @@ class WorkflowOrchestrator {
       if (coverageGaps.featuresWithoutStories && coverageGaps.featuresWithoutStories.length > 0) {
         for (const featureId of coverageGaps.featuresWithoutStories) {
           console.log(`  Creating story for uncovered feature: ${featureId}`);
-          // Use SM agent to create story
+          // Use PM agent to create epic/stories (brownfield)
           try {
             const { exec } = require('child_process');
             const util = require('util');
             const execAsync = util.promisify(exec);
-            await execAsync(`node tools/agent.js sm --command="brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+            await execAsync(`node tools/agent.js "/pm *brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+            // After epic creation, create the next story via SM (ECM-aware)
+            try {
+              await execAsync(`node tools/agent.js "/sm *create-story"`);
+            } catch (e2) {
+              console.log(chalk.yellow(`    Epic created but failed to create initial story for ${featureId}: ${e2.message}`));
+            }
           } catch (e) {
             console.log(chalk.yellow(`    Failed to create story for ${featureId}: ${e.message}`));
           }
@@ -1274,7 +1273,14 @@ class WorkflowOrchestrator {
         '### Security Requirements',
         '- Note authentication/authorization implications if any',
         '',
-        '## Implementation Plan',
+        '## Implementation Checklist',
+        '### Workflow Updates',
+        '- [ ] Audit each workflow listed below and confirm the reverse-align gate passes after changes',
+        '',
+        '### Companion References',
+        '- See docs/stories/story-99-1.md:Implementation Plan (Detailed)',
+        '',
+        '## Implementation Plan (Detailed)',
         '### Files to Create',
         '- N/A',
         '',
@@ -1785,7 +1791,8 @@ class WorkflowOrchestrator {
       /^###\s+Dependencies\s*$/m,
       /^###\s+Performance Criteria\s*$/m,
       /^###\s+Security Requirements\s*$/m,
-      /^##\s+Implementation Plan\s*$/m,
+      /^##\s+Implementation Checklist\s*$/m,
+      /^##\s+Implementation Plan \(Detailed\)\s*$/m,
       /^###\s+Files to Create\s*$/m,
       /^###\s+Files to Modify\s*$/m,
       /^###\s+Test Requirements\s*$/m,
@@ -1968,7 +1975,8 @@ class WorkflowOrchestrator {
     ensureSection(/^###\s+Dependencies\s*$/m, '### Dependencies\n- package: <name>');
     ensureSection(/^###\s+Performance Criteria\s*$/m, '### Performance Criteria\n- Define expected performance targets');
     ensureSection(/^###\s+Security Requirements\s*$/m, '### Security Requirements\n- Note authentication/authorization implications');
-    ensureSection(/^##\s+Implementation Plan\s*$/m, '## Implementation Plan');
+    ensureSection(/^##\s+Implementation Checklist\s*$/m, '## Implementation Checklist\n### Workstream\n- [ ] Describe the primary action and its success signal');
+    ensureSection(/^##\s+Implementation Plan \(Detailed\)\s*$/m, '## Implementation Plan (Detailed)');
     ensureSection(/^###\s+Files to Create\s*$/m, '### Files to Create\n- N/A');
     ensureSection(/^###\s+Files to Modify\s*$/m, '### Files to Modify\n- N/A');
     ensureSection(/^###\s+Test Requirements\s*$/m, '### Test Requirements\n- Unit: ...\n- Integration: ...');
@@ -4064,10 +4072,15 @@ program
         const re = /(##\s*Status\s*\n\s*)(.+)/i;
         if (re.test(content)) {
           content = content.replace(re, `$1${status}`);
-          fs.writeFileSync(filePath, content, 'utf8');
-          return true;
+        } else {
+          if (/^#\s+/.test(content)) {
+            content = content.replace(/^(#\s+.*\n)/, `$1\n## Status\n${status}\n\n`);
+          } else {
+            content = `## Status\n${status}\n\n` + content;
+          }
         }
-        return false;
+        fs.writeFileSync(filePath, content, 'utf8');
+        return true;
       } catch (_) { return false; }
     }
 
@@ -4115,19 +4128,20 @@ program
         ? path.join(root, 'tools', 'orchestrator', 'gates', 'qa-gate.js')
         : corePath(path.join('tools', 'orchestrator', 'gates', 'qa-gate.js'));
       try {
+        const env = { ...process.env, CI: process.env.CI || '1', JEST_FORCE_COLOR: '0', FORCE_COLOR: '0' };
         if (fs.existsSync(qaGate)) {
           console.log(chalk.cyan(`[QA] Running QA gate via ${path.relative(root, qaGate)} for story ${storyId}`));
-          require('child_process').execFileSync(process.execPath, [qaGate, String(storyId)], { stdio: 'inherit', cwd: root });
+          require('child_process').execFileSync(process.execPath, [qaGate, String(storyId)], { stdio: 'inherit', cwd: root, env });
           return true;
         }
         if (packageHasScript('gate:qa')) {
           console.log(chalk.cyan('[QA] Running npm run gate:qa (fallback)'));
-          require('child_process').execSync('npm run -s gate:qa', { stdio: 'inherit', cwd: root });
+          require('child_process').execSync('npm run -s gate:qa', { stdio: 'inherit', cwd: root, env });
           return true;
         }
         if (packageHasScript('test')) {
           console.log(chalk.cyan('[QA] Running npm test (fallback)'));
-          require('child_process').execSync('npm test --silent', { stdio: 'inherit', cwd: root });
+          require('child_process').execSync('npm test --silent', { stdio: 'inherit', cwd: root, env });
           return true;
         }
         console.log(chalk.yellow('[QA] No QA gate found; cannot assert pass.'));
@@ -4160,28 +4174,42 @@ program
 
     async function runDevPhase(iteration) {
       console.log(chalk.cyan(`\n🤖 Orchestrator: 🔄 Switching to Dev role (iteration ${iteration}).`));
-      const context = { storyPath: storyPath, projectRoot: root };
+      const rel = path.relative(root, storyPath);
       try {
-        // Prefer structured task for addressing QA feedback when available
-        const fixTask = corePath(path.join('structured-tasks', 'address-qa-feedback.yaml'));
-        if (fs.existsSync(fixTask)) {
-          console.log(chalk.blue('🩹 Addressing QA feedback via structured task...'));
-          const res = await execStructuredTask('dev', fixTask, context);
-          if (res && res.success) return true;
-        }
-        // As a fallback, try Codex CLI if explicitly enabled
-        if (options.codex) {
-          try {
-            require('child_process').execSync(`codex "as dev agent, execute *address-qa-feedback @${path.relative(root, storyPath)}"`, { stdio: 'inherit', cwd: root, env: { ...process.env, NO_UPDATE_NOTIFIER: '1', BMAD_NONINTERACTIVE: '1' } });
-            return true;
-          } catch (e) {
-            console.log(chalk.yellow('Codex CLI not available or failed; continuing without it.'));
+        const { spawnSync } = require('child_process');
+        if (iteration === 1) {
+          console.log(chalk.blue(`🚧 Dev: *develop-story --story ${rel}`));
+          const res = spawnSync(process.execPath, ['tools/agent.js', `/dev *develop-story --story ${rel}`], { cwd: root, stdio: 'inherit' });
+          if ((res.status ?? 1) === 0) return true;
+          console.log(chalk.yellow('develop-story returned non-zero; continuing.'));
+        } else {
+          console.log(chalk.blue(`🩹 Dev: *address-qa-feedback --story ${rel}`));
+          const res = spawnSync(process.execPath, ['tools/agent.js', `/dev *address-qa-feedback --story ${rel}`], { cwd: root, stdio: 'inherit' });
+          if ((res.status ?? 1) === 0) return true;
+          console.log(chalk.yellow('address-qa-feedback returned non-zero; attempting structured fallback.'));
+          const fixTask = corePath(path.join('structured-tasks', 'address-qa-feedback.yaml'));
+          if (fs.existsSync(fixTask)) {
+            const resTask = await execStructuredTask('dev', fixTask, { storyPath, projectRoot: root });
+            if (resTask && resTask.success) return true;
           }
         }
-        console.log(chalk.yellow('No automated Dev fix path succeeded; proceed to QA to gather findings.'));
         return true;
       } catch (e) {
         console.log(chalk.yellow(`⚠️  Dev phase encountered an issue: ${e.message}`));
+        return false;
+      }
+    }
+
+    function runQAPhase() {
+      const rel = path.relative(root, storyPath);
+      try {
+        console.log(chalk.magenta(`🔍 QA: *review ${rel}`));
+        const { spawnSync } = require('child_process');
+        const env = { ...process.env, BMAD_NONINTERACTIVE: '1', BMAD_ALLOW_MISSING_USER_INPUT: '1' };
+        const res = spawnSync(process.execPath, ['tools/agent.js', `/qa *review ${rel}`], { cwd: root, stdio: 'inherit', env });
+        return (res.status ?? 1) === 0;
+      } catch (e) {
+        console.log(chalk.yellow(`⚠️  QA review encountered an issue: ${e.message}`));
         return false;
       }
     }
@@ -4193,11 +4221,13 @@ program
 
       await runDevPhase(iter);
 
-      // Always verify fixes (requires 100% completion)
-      const verified = await verifyFixes();
+      // Explicit QA review handoff
+      runQAPhase();
 
-      console.log(chalk.cyan('\n🤖 Orchestrator: 🔄 Switching to QA role. Running QA review...'));
+      // QA gate verification
       const qaPassed = await runQAGate(path.basename(storyPath));
+      // Verify fixes only after first loop
+      const verified = iter === 1 ? true : await verifyFixes();
       if (qaPassed) {
         if (verified) {
           setStoryStatus(storyPath, 'Done');
@@ -4213,6 +4243,37 @@ program
     }
     console.log(chalk.red(`\n✗ Reached max iterations (${maxIters}) without QA approval.`));
     process.exit(1);
+  });
+
+// Dev↔QA: In-session iterative flow via TaskRunner (no external processes)
+program
+  .command('dev-qa-iterative-session')
+  .description('Run iterative Dev↔QA flow fully in-session using structured task + function registry')
+  .option('-d, --directory <path>', 'Project root directory', process.cwd())
+  .option('-s, --story <pathOrId>', 'Story file path or Story ID (required)')
+  .option('-m, --max <number>', 'Max iterations', (v) => parseInt(v, 10), 5)
+  .action(async (options) => {
+    const root = options.directory || process.cwd();
+    if (!options.story) {
+      console.error(chalk.red('Missing required option: --story <pathOrId>'));
+      process.exit(1);
+    }
+    try {
+      console.log(chalk.blue('\n🔄 Starting in-session Dev↔QA flow ...\n'));
+      console.log(`📖 Story: ${options.story}`);
+      const { executeFunction } = require('./lib/function-registry');
+      const result = await executeFunction('orchestrator.devQaIterativeSession', {
+        storyArg: String(options.story),
+        maxIterations: options.max,
+        projectRoot: root
+      }, { agentName: 'orchestrator' });
+      const ok = result && result.success !== false;
+      console.log(ok ? chalk.green('✅ In-session Dev↔QA flow completed') : chalk.yellow('⚠️  In-session Dev↔QA flow reported issues'));
+      process.exit(ok ? 0 : 1);
+    } catch (e) {
+      console.error(chalk.red('dev-qa-iterative-session failed:'), e.message);
+      process.exit(1);
+    }
   });
 
 // Reverse-Alignment: Full pipeline
@@ -4454,14 +4515,26 @@ program
               const gaps = coverageReport.gaps;
               if (gaps.featuresWithoutStories && gaps.featuresWithoutStories.length > 0) {
                 console.log(`Creating stories for ${gaps.featuresWithoutStories.length} features without coverage...`);
-                // Use SM agent to create stories for missing features
+                // Use PM agent to create epic/stories for missing features
                 for (const featureId of gaps.featuresWithoutStories) {
                   try {
                     console.log(`  Creating story for feature: ${featureId}`);
-                    await execAsync(`node tools/agent.js sm --command="brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+                    await execAsync(`node tools/agent.js "/pm *brownfield-create-epic --link-feature ${featureId} --auto-split --max-stories -1"`);
+                    try {
+                      await execAsync(`node tools/agent.js "/sm *create-story"`);
+                    } catch (e2) {
+                      console.log(chalk.yellow(`    Epic created but failed to create initial story for ${featureId}: ${e2.message}`));
+                    }
                   } catch (e) {
                     console.log(chalk.red(`    Failed to create story for ${featureId}: ${e.message}`));
                   }
+                }
+                // Normalize and validate story consistency after generation
+                try {
+                  await execAsync(`node tools/workflow-orchestrator.js normalize-stories`);
+                  await execAsync(`node tools/workflow-orchestrator.js validate-story-consistency`);
+                } catch (e3) {
+                  console.log(chalk.yellow(`  Normalization/validation encountered issues: ${e3.message}`));
                 }
                 
                 // Re-run coverage check
@@ -4752,6 +4825,211 @@ program
       console.log(chalk.green(`Generated dep-report.json with ${unreachable.length} unreachable item(s).`));
     } catch (e) {
       console.error(chalk.red('Failed to generate dep-report:'), e.message);
+      process.exit(1);
+    }
+  });
+
+// Planning helpers: Create epics from PRD
+program
+  .command('create-epics-from-prd')
+  .description('Create EpicContracts under docs/epics/ from PRD using local templates')
+  .option('-d, --directory <path>', 'Project root directory', process.cwd())
+  .action(async (options) => {
+    try {
+      const root = options.directory || process.cwd();
+      const script = path.join(root, 'tools', 'po', 'create-epics-from-prd.js');
+      if (!fs.existsSync(script)) {
+        console.error(chalk.red('Epic creation tool not found at:'), path.relative(process.cwd(), script));
+        process.exit(1);
+      }
+      const { spawnSync } = require('child_process');
+      const res = spawnSync(process.execPath, [script], { cwd: root, stdio: 'inherit' });
+      process.exit(res.status || 0);
+    } catch (e) {
+      console.error(chalk.red('create-epics-from-prd failed:'), e.message);
+      process.exit(1);
+    }
+  });
+
+// Planning helpers: Validate all epics (ECM + contract)
+program
+  .command('validate-epics')
+  .description('Validate ECM and EpicContract frontmatter for all files in docs/epics')
+  .option('-d, --directory <path>', 'Project root directory', process.cwd())
+  .action(async (options) => {
+    try {
+      const root = options.directory || process.cwd();
+      const epicsDir = path.join(root, 'docs', 'epics');
+      if (!fs.existsSync(epicsDir)) {
+        console.error(chalk.yellow('No docs/epics directory found. Nothing to validate.'));
+        process.exit(0);
+      }
+      const epics = fs.readdirSync(epicsDir).filter(f => f.endsWith('.md')).map(f => path.join(epicsDir, f));
+      if (epics.length === 0) {
+        console.log(chalk.yellow('No epic files found in docs/epics.'));
+        process.exit(0);
+      }
+      const { spawnSync } = require('child_process');
+      let failures = 0;
+      for (const epic of epics) {
+        console.log(chalk.cyan(`Validating ECM for ${path.basename(epic)}...`));
+        const ec1 = spawnSync(process.execPath, ['tools/ecm-validate.js', epic], { cwd: root, stdio: 'inherit' });
+        if (ec1.status !== 0) failures++;
+        console.log(chalk.cyan(`Validating EpicContract for ${path.basename(epic)}...`));
+        const ec2 = spawnSync('npm', ['run', 'validate:epic', '--', epic], { cwd: root, stdio: 'inherit' });
+        if (ec2.status !== 0) failures++;
+      }
+      if (failures > 0) {
+        console.error(chalk.red(`Validation completed with ${failures} failure(s).`));
+        process.exit(1);
+      } else {
+        console.log(chalk.green('All epics validated successfully.'));
+        process.exit(0);
+      }
+    } catch (e) {
+      console.error(chalk.red('validate-epics failed:'), e.message);
+      process.exit(1);
+    }
+  });
+
+// Brownfield bootstrap: shard → create epics → validate epics → normalize stories
+program
+  .command('brownfield-bootstrap')
+  .description('Bootstrap brownfield planning: shard docs, create epics from PRD, validate epics, normalize stories')
+  .option('-d, --directory <path>', 'Project root directory', process.cwd())
+  .action(async (options) => {
+    const root = options.directory || process.cwd();
+    const { spawnSync } = require('child_process');
+    try {
+      console.log(chalk.bold('🔧 Sharding documents...'));
+      let res = spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'po-shard-docs', '--directory', root], { cwd: root, stdio: 'inherit' });
+      if (res.status !== 0) return process.exit(res.status);
+
+      console.log(chalk.bold('📚 Creating epics from PRD...'));
+      res = spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'create-epics-from-prd', '--directory', root], { cwd: root, stdio: 'inherit' });
+      if (res.status !== 0) return process.exit(res.status);
+
+      console.log(chalk.bold('✅ Validating epics (ECM + contract)...'));
+      res = spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'validate-epics', '--directory', root], { cwd: root, stdio: 'inherit' });
+      if (res.status !== 0) return process.exit(res.status);
+
+      console.log(chalk.bold('🧼 Normalizing stories to template...'));
+      res = spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'normalize-stories', '--directory', root], { cwd: root, stdio: 'inherit' });
+      if (res.status !== 0) return process.exit(res.status);
+
+      console.log(chalk.green('Brownfield bootstrap completed.'));
+      process.exit(0);
+    } catch (e) {
+      console.error(chalk.red('brownfield-bootstrap failed:'), e.message);
+      process.exit(1);
+    }
+  });
+
+// Brownfield story generation: loop SM create-story based on ECM
+program
+  .command('brownfield-story-gen')
+  .description('Generate N stories from ECM by invoking SM create-story repeatedly (ECM-aware)')
+  .option('-d, --directory <path>', 'Project root directory', process.cwd())
+  .option('--epic <path>', 'Path to an EpicContract markdown file')
+  .option('--epic-id <id>', 'Epic ID to match in docs/epics frontmatter')
+  .option('-n, --count <n>', 'Number of stories to create (defaults to planned ECM rows)', parseInt)
+  .option('--assign-ids', 'Assign missing Story IDs in ECM before generation', false)
+  .action(async (options) => {
+    const root = options.directory || process.cwd();
+    const epicsDir = path.join(root, 'docs', 'epics');
+    const { spawnSync } = require('child_process');
+    try {
+      // Resolve epic path
+      let epicPath = options.epic ? path.resolve(root, options.epic) : null;
+      if (!epicPath && options.epicId) {
+        if (!fs.existsSync(epicsDir)) {
+          console.error(chalk.red('docs/epics not found and --epic not provided.'));
+          return process.exit(2);
+        }
+        const files = fs.readdirSync(epicsDir).filter(f => f.endsWith('.md'));
+        for (const f of files) {
+          const p = path.join(epicsDir, f);
+          const text = fs.readFileSync(p, 'utf8');
+          const m = text.match(/^---\n([\s\S]*?)\n---/);
+          if (m) {
+            try {
+              const y = require('js-yaml').load(m[1]);
+              const id = y?.epic?.epicId ? String(y.epic.epicId) : null;
+              if (id && id === String(options.epicId)) { epicPath = p; break; }
+            } catch (_) {}
+          }
+        }
+      }
+      if (!epicPath) {
+        console.error(chalk.red('Unable to resolve epic. Provide --epic <path> or --epic-id <id>.'));
+        return process.exit(2);
+      }
+
+      // Optionally assign Story IDs in ECM
+      if (options.assignIds) {
+        console.log(chalk.dim('Assigning missing Story IDs in ECM...'));
+        const res = spawnSync(process.execPath, ['tools/ecm-assign-story-ids.js', epicPath], { cwd: root, stdio: 'inherit' });
+        if (res.status !== 0) {
+          console.log(chalk.yellow('ECM story ID assignment reported issues; continuing.'));
+        }
+      }
+
+      // Compute default count by parsing ECM rows with Status=planned or missing Story ID
+      let toCreate = options.count || 0;
+      if (!toCreate) {
+        const text = fs.readFileSync(epicPath, 'utf8');
+        const body = (() => {
+          const fmEndIdx = text.indexOf('\n---', 3);
+          return fmEndIdx !== -1 ? text.slice(fmEndIdx + 4) : text;
+        })();
+        const lines = body.split('\n');
+        let headerIdx = -1;
+        for (let i = 0; i < lines.length; i++) {
+          if (/^##\s+Epic Coverage Matrix \(ECM\)/i.test(lines[i])) { headerIdx = i; break; }
+        }
+        if (headerIdx !== -1) {
+          let tableStart = -1; let tableEnd = -1;
+          for (let i = headerIdx + 1; i < lines.length; i++) { if (/^\|/.test(lines[i])) { tableStart = i; break; } if (lines[i].trim() === '') continue; }
+          for (let i = tableStart; i < lines.length; i++) { if (!/^\|/.test(lines[i])) { break; } tableEnd = i; }
+          if (tableStart !== -1 && tableEnd >= tableStart + 2) {
+            const header = lines[tableStart];
+            const cols = header.split('|').slice(1, -1).map(s => s.trim().toLowerCase().replace(/\s+/g, ' '));
+            const storyIdx = cols.indexOf('story id');
+            const statusIdx = cols.indexOf('status');
+            const rows = lines.slice(tableStart + 2, tableEnd + 1);
+            let planned = 0;
+            for (const r of rows) {
+              const c = r.split('|').slice(1, -1).map(s => s.trim());
+              const sid = storyIdx !== -1 ? (c[storyIdx] || '') : '';
+              const st = statusIdx !== -1 ? (c[statusIdx] || '').toLowerCase() : '';
+              const sidMissing = !sid || sid.toLowerCase() === 'tba' || sid === '-' || sid.toLowerCase() === 'n/a';
+              if (sidMissing || st === 'planned') planned++;
+            }
+            toCreate = planned;
+          }
+        }
+      }
+      if (!toCreate) toCreate = 1;
+
+      console.log(chalk.bold(`Generating ${toCreate} stor${toCreate === 1 ? 'y' : 'ies'} via SM create-story...`));
+      for (let i = 0; i < toCreate; i++) {
+        const res = spawnSync(process.execPath, ['tools/agent.js', '/sm *create-story'], { cwd: root, stdio: 'inherit' });
+        if (res.status !== 0) {
+          console.log(chalk.yellow(`create-story iteration ${i + 1} failed with status ${res.status}; stopping.`));
+          break;
+        }
+      }
+
+      // Normalize and validate story consistency
+      try {
+        spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'normalize-stories', '--directory', root], { cwd: root, stdio: 'inherit' });
+        spawnSync(process.execPath, ['tools/workflow-orchestrator.js', 'validate-story-consistency', '--directory', root], { cwd: root, stdio: 'inherit' });
+      } catch (_) {}
+
+      console.log(chalk.green('brownfield-story-gen completed.'));
+      process.exit(0);
+    } catch (e) {
+      console.error(chalk.red('brownfield-story-gen failed:'), e.message);
       process.exit(1);
     }
   });

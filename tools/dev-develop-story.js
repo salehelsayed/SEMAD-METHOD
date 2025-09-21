@@ -96,7 +96,7 @@ async function run() {
     // Proceed to full implementation of the same story via dev-next-story
     console.log('\n' + chalk.blue('🚀 Proceeding to implement the same story...'));
     const { spawnSync } = require('child_process');
-    const res = spawnSync(process.execPath, [path.join('tools', 'dev-next-story.js'), '--auto', '--story', storyPath], {
+    const res = spawnSync(process.execPath, [path.join('tools', 'dev-next-story.js'), '--auto', '--quiet', '--story', storyPath], {
       cwd: rootDir,
       stdio: 'inherit'
     });

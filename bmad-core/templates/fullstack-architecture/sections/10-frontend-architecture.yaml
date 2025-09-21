@@ -1,0 +1,60 @@
+  - id: frontend-architecture
+    title: Frontend Architecture
+    instruction: Define frontend-specific architecture details. After each subsection, note if user wants to refine before continuing.
+    elicit: true
+    sections:
+      - id: component-architecture
+        title: Component Architecture
+        instruction: Define component organization and patterns based on chosen framework.
+        sections:
+          - id: component-organization
+            title: Component Organization
+            type: code
+            language: text
+            template: "{{component_structure}}"
+          - id: component-template
+            title: Component Template
+            type: code
+            language: typescript
+            template: "{{component_template}}"
+      - id: state-management
+        title: State Management Architecture
+        instruction: Detail state management approach based on chosen solution.
+        sections:
+          - id: state-structure
+            title: State Structure
+            type: code
+            language: typescript
+            template: "{{state_structure}}"
+          - id: state-patterns
+            title: State Management Patterns
+            type: bullet-list
+            template: "- {{pattern}}"
+      - id: routing-architecture
+        title: Routing Architecture
+        instruction: Define routing structure based on framework choice.
+        sections:
+          - id: route-organization
+            title: Route Organization
+            type: code
+            language: text
+            template: "{{route_structure}}"
+          - id: protected-routes
+            title: Protected Route Pattern
+            type: code
+            language: typescript
+            template: "{{protected_route_example}}"
+      - id: frontend-services
+        title: Frontend Services Layer
+        instruction: Define how frontend communicates with backend.
+        sections:
+          - id: api-client-setup
+            title: API Client Setup
+            type: code
+            language: typescript
+            template: "{{api_client_setup}}"
+          - id: service-example
+            title: Service Example
+            type: code
+            language: typescript
+            template: "{{service_example}}"

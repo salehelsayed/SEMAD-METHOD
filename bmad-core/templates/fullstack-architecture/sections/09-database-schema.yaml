@@ -1,0 +1,13 @@
+  - id: database-schema
+    title: Database Schema
+    instruction: |
+      Transform the conceptual data models into concrete database schemas:
+      
+      1. Use the database type(s) selected in Tech Stack
+      2. Create schema definitions using appropriate notation
+      3. Include indexes, constraints, and relationships
+      4. Consider performance and scalability
+      5. For NoSQL, show document structures
+      
+      Present schema in format appropriate to database type (SQL DDL, JSON schema, etc.)
+    elicit: true

@@ -1,0 +1,34 @@
+  - id: data-models
+    title: Data Models
+    instruction: |
+      Define the core data models/entities that will be shared between frontend and backend:
+      
+      1. Review PRD requirements and identify key business entities
+      2. For each model, explain its purpose and relationships
+      3. Include key attributes and data types
+      4. Show relationships between models
+      5. Create TypeScript interfaces that can be shared
+      6. Discuss design decisions with user
+      
+      Create a clear conceptual model before moving to database schema.
+    elicit: true
+    repeatable: true
+    sections:
+      - id: model
+        title: "{{model_name}}"
+        template: |
+          **Purpose:** {{model_purpose}}
+          
+          **Key Attributes:**
+          - {{attribute_1}}: {{type_1}} - {{description_1}}
+          - {{attribute_2}}: {{type_2}} - {{description_2}}
+        sections:
+          - id: typescript-interface
+            title: TypeScript Interface
+            type: code
+            language: typescript
+            template: "{{model_interface}}"
+          - id: relationships
+            title: Relationships
+            type: bullet-list
+            template: "- {{relationship}}"

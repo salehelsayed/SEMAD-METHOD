@@ -1,0 +1,35 @@
+name: REQUIREMENTS ALIGNMENT
+items:
+  - description: Architecture supports all functional requirements in the PRD
+    checked: false
+  - description: Technical approaches for all epics and stories are addressed
+    checked: false
+  - description: Edge cases and performance scenarios are considered
+    checked: false
+  - description: All required integrations are accounted for
+    checked: false
+  - description: User journeys are supported by the technical architecture
+    checked: false
+  - description: Performance requirements are addressed with specific solutions
+    checked: false
+  - description: Scalability considerations are documented with approach
+    checked: false
+  - description: Security requirements have corresponding technical controls
+    checked: false
+  - description: Reliability and resilience approaches are defined
+    checked: false
+  - description: Compliance requirements have technical implementations
+    checked: false
+  - description: All technical constraints from PRD are satisfied
+    checked: false
+  - description: Platform/language requirements are followed
+    checked: false
+  - description: Infrastructure constraints are accommodated
+    checked: false
+  - description: Third-party service constraints are addressed
+    checked: false
+  - description: Organizational technical standards are followed
+    checked: false
+notes: Before evaluating this section, take a moment to fully understand the product's purpose and goals from the PRD. What is the core problem being solved? Who are the users? What are the critical success factors? Keep these in mind as you validate alignment. For each item, don't just check if it's mentioned - verify that the architecture provides a concrete technical solution.
+metadata:
+  originalName: 1. REQUIREMENTS ALIGNMENT

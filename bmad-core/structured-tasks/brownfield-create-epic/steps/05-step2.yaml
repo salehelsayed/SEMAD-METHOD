@@ -1,0 +1,115 @@
+id: step2
+name: Epic Creation
+description: |-
+  Create a focused epic following this structure:
+  #### Epic Title
+  {{Enhancement Name}} - Brownfield Enhancement
+  #### Epic Goal
+  {{1-2 sentences describing what the epic will accomplish and why it adds value}}
+  #### Epic Description
+  **Existing System Context:**
+  **Enhancement Details:**
+  #### Stories
+  List all stories needed to fully cover the epic (no artificial cap). Prefer splitting by domain sub-capabilities and interface boundaries. Target 3–5 point stories; auto-split until all acceptance criteria are covered.
+
+  {{if args.auto_split}}
+  AUTO-SPLIT CONFIGURATION:
+  - Max stories: {{args.max_stories || 'unlimited'}} 
+  - Complexity budget per story: {{args.complexity_budget || '3-5'}} points
+  - Linked feature: {{args.link_feature || 'auto-generated'}}
+  {{/if}}
+  1. **Story 1:** {{Story title and brief description}}
+  2. **Story 2:** {{Story title and brief description}}
+  3. **Story 3:** {{Story title and brief description}}
+  4. **Story N:** {{Add as many as needed}}
+  #### Compatibility Requirements
+  #### Risk Mitigation
+  #### Definition of Done
+actions:
+  - description: 'Current relevant functionality: {{brief description}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Technology stack: {{relevant existing technologies}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Integration points: {{where new work connects to existing system}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'What''s being added/changed: {{clear description}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'How it integrates: {{integration approach}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Success criteria: {{measurable outcomes}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Existing APIs remain unchanged'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Database schema changes are backward compatible'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] UI changes follow existing patterns'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Performance impact is minimal'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Populate the `storyBlueprints` list in the EpicContract with one entry per planned story (slice order: flag → probe → int-flow rows). Each blueprint must include storyId, title, sliceType, reqIds, flowIds, integrationPointIds, and an implementationChecklistSeed grouped by headers (Migration, DAO Updates, Tests, Telemetry, etc.) with single-action checkboxes that end in a visible success signal.'
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: For every blueprint, convert narrative hints or architectural guidance into explicit checklist seed items so the SM can copy them directly into story Implementation Checklists without interpretation.
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If detailed companion documents are produced (e.g., flow maps or plan appendices), add them to the blueprint `companionDocs` array using "path" and "section" so stories can reference them via "See <file>:<section>" links.
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: '**Primary Risk:** {{main risk to existing system}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Mitigation:** {{how risk will be addressed}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**Rollback Plan:** {{how to undo changes if needed}}'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] All stories completed with acceptance criteria met'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Existing functionality verified through testing'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Integration points working correctly'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] Documentation updated appropriately'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '[ ] No regression in existing features'
+    elicit: false
+    metadata:
+      originalIndent: 0
+metadata:
+  level: 3
+  originalNumber: '2'

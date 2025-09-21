@@ -1,0 +1,19 @@
+id: save-memory
+name: Save Task Results and Clean Memory
+description: Save task completion and findings to memory with hygiene cleanup
+actions:
+  - description: Save task completion and findings to working memory (use saveAndCleanMemoryAndExit from agent-memory-loader.js if running in a subprocess)
+    elicit: true
+    function: saveAndCleanMemory
+    parameters:
+      agentName: sm
+      taskData:
+        observation: Completed brownfield-create-story task successfully
+        significantFinding: '{{TASK_SIGNIFICANT_FINDING}}'
+        taskCompleted: true
+        taskId: brownfield-create-story
+        context:
+          taskType: story-management
+    metadata:
+      memoryAction: true
+      executionOrder: last

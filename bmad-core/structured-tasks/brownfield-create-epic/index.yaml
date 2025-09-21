@@ -1,0 +1,55 @@
+id: brownfield-create-epic
+name: Create Brownfield Epic Task
+purpose: Create a single epic for smaller brownfield enhancements that don't require the full PRD and Architecture documentation process. This task is for isolated features or modifications that can be completed within a focused scope. Supports unlimited story splitting with automatic coverage validation to ensure all acceptance criteria are addressed.
+parameters:
+  - name: from
+    description: Path to brownfield brief or codebase to analyze
+    required: true
+    type: string
+  - name: auto-split
+    description: Enable automatic story splitting until all acceptance criteria are covered
+    required: false
+    type: boolean
+    default: true
+  - name: max-stories
+    description: Maximum number of stories to create (-1 for unlimited)
+    required: false
+    type: number
+    default: -1
+  - name: complexity-budget
+    description: Target complexity points per story (3-5 recommended)
+    required: false
+    type: number
+    default: 5
+  - name: link-feature
+    description: Feature ID to link this epic to (e.g., FEAT-auth-session)
+    required: false
+    type: string
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - When to Use This Task
+    - Instructions
+    - Success Criteria
+    - Important Notes
+  preservedContent:
+    - type: section-header
+      content: Important Notes
+      level: 2
+    - type: section-header
+      content: Important Notes
+      level: 2
+steps:
+  - file: steps/01-load-memory.yaml
+  - file: steps/02-step0.yaml
+  - file: steps/03-step1.yaml
+  - file: steps/04-step1a.yaml
+  - file: steps/05-step2.yaml
+  - file: steps/06-step2a.yaml
+  - file: steps/07-step3.yaml
+  - file: steps/08-step3a.yaml
+  - file: steps/09-step4.yaml
+  - file: steps/10-step5.yaml
+  - file: steps/11-save-memory.yaml

@@ -1,0 +1,8 @@
+id: step0-simplified
+name: Initialize Context
+description: Initialize context for story creation
+actions:
+  - description: Apply dynamic plan adaptation to break complex tasks into sub-tasks if needed
+    elicit: true
+    metadata:
+      originalIndent: 0

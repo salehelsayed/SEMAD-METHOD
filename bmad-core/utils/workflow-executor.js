@@ -12,6 +12,7 @@ const AgentPermissionsValidator = require('./agent-permissions');
 const VerboseLogger = require('./verbose-logger');
 const WorkflowConfigLoader = require('./workflow-config-loader');
 const FilePathResolver = require('./file-path-resolver');
+const DevQaRunner = require('./workflow/devqa-runner');
 
 class WorkflowExecutor {
   constructor(rootDir, options = {}) {
@@ -27,6 +28,7 @@ class WorkflowExecutor {
     this.filePathResolver = new FilePathResolver(rootDir);
     this.resolvedPaths = null;
     this.initialized = false;
+    this.devQaRunner = new DevQaRunner(this);
   }
 
   /**
@@ -108,7 +110,7 @@ class WorkflowExecutor {
       // Execute workflow based on flow type
       let result;
       if (this.isDevQAWorkflow(workflow)) {
-        result = await this.executeDevQAFlow(workflow, context);
+        result = await this.devQaRunner.execute(workflow, context);
       } else {
         result = await this.executeStandardFlow(workflow, context);
       }
@@ -160,225 +162,6 @@ class WorkflowExecutor {
    * @param {Object} context - Execution context
    * @returns {Object} Execution result
    */
-  async executeDevQAFlow(workflow, context) {
-    if (this.flowType === 'iterative') {
-      return await this.executeIterativeDevQAFlow(workflow, context);
-    } else {
-      return await this.executeLinearDevQAFlow(workflow, context);
-    }
-  }
-
-  /**
-   * Execute linear Dev→QA flow (single pass)
-   * @param {Object} workflow - Workflow definition
-   * @param {Object} context - Execution context
-   * @returns {Object} Execution result
-   */
-  async executeLinearDevQAFlow(workflow, context) {
-    const results = {
-      success: true,
-      flowType: 'linear',
-      steps: [],
-      devResult: null,
-      qaResult: null
-    };
-    
-    // Find Dev and QA steps
-    const devStepIndex = workflow.sequence.findIndex(step => 
-      step.agent === 'dev' && (step.action === 'implement_story' || step.creates === 'implementation_files')
-    );
-    
-    const qaStepIndex = workflow.sequence.findIndex(step => 
-      step.agent === 'qa' && (step.action === 'review_implementation' || step.action === 'review_story')
-    );
-    
-    // Execute all steps up to and including Dev
-    for (let i = 0; i <= devStepIndex && i < workflow.sequence.length; i++) {
-      const step = workflow.sequence[i];
-      const stepResult = await this.executeStep(step, context);
-      results.steps.push(stepResult);
-      
-      if (step.agent === 'dev') {
-        results.devResult = stepResult;
-      }
-      
-      if (!stepResult.success) {
-        results.success = false;
-        return results;
-      }
-    }
-    
-    // Execute QA step if present
-    if (qaStepIndex > devStepIndex && qaStepIndex < workflow.sequence.length) {
-      const qaStep = workflow.sequence[qaStepIndex];
-      const qaResult = await this.executeStep(qaStep, {
-        ...context,
-        devImplementation: results.devResult
-      });
-      
-      results.steps.push(qaResult);
-      results.qaResult = qaResult;
-      
-      if (!qaResult.success) {
-        results.success = false;
-      }
-    }
-    
-    // Execute remaining steps after QA
-    for (let i = qaStepIndex + 1; i < workflow.sequence.length; i++) {
-      const step = workflow.sequence[i];
-      const stepResult = await this.executeStep(step, context);
-      results.steps.push(stepResult);
-      
-      if (!stepResult.success && step.critical !== false) {
-        results.success = false;
-        break;
-      }
-    }
-    
-    return results;
-  }
-
-  /**
-   * Execute iterative Dev↔QA flow (loop until approved)
-   * @param {Object} workflow - Workflow definition
-   * @param {Object} context - Execution context
-   * @returns {Object} Execution result
-   */
-  async executeIterativeDevQAFlow(workflow, context) {
-    const results = {
-      success: false,
-      flowType: 'iterative',
-      iterations: [],
-      totalIterations: 0,
-      qaApproved: false
-    };
-    
-    // Find Dev and QA steps
-    const devStepIndex = workflow.sequence.findIndex(step => 
-      step.agent === 'dev' && (step.action === 'implement_story' || step.creates === 'implementation_files')
-    );
-    
-    const qaStepIndex = workflow.sequence.findIndex(step => 
-      step.agent === 'qa' && (step.action === 'review_implementation' || step.action === 'review_story')
-    );
-    
-    const devFixStepIndex = workflow.sequence.findIndex(step => 
-      step.agent === 'dev' && step.action === 'address_qa_feedback'
-    );
-    
-    // Execute steps before Dev
-    const preDevSteps = [];
-    for (let i = 0; i < devStepIndex && i < workflow.sequence.length; i++) {
-      const step = workflow.sequence[i];
-      const stepResult = await this.executeStep(step, context);
-      preDevSteps.push(stepResult);
-      
-      if (!stepResult.success) {
-        results.success = false;
-        results.error = 'Failed during pre-development steps';
-        return results;
-      }
-    }
-    
-    // Iterative Dev↔QA loop
-    let iteration = 1;
-    let qaApproved = false;
-    let devResult = null;
-    let qaFeedback = null;
-    
-    while (!qaApproved && iteration <= this.maxIterations) {
-      const iterationResult = {
-        iteration,
-        devResult: null,
-        qaResult: null
-      };
-      
-      // Dev phase
-      if (iteration === 1) {
-        // Initial implementation
-        const devStep = workflow.sequence[devStepIndex];
-        devResult = await this.executeStep(devStep, context);
-        iterationResult.devResult = devResult;
-      } else {
-        // Fix based on QA feedback
-        const fixStep = devFixStepIndex >= 0 
-          ? workflow.sequence[devFixStepIndex]
-          : { agent: 'dev', action: 'address_qa_feedback' };
-          
-        devResult = await this.executeStep(fixStep, {
-          ...context,
-          qaFeedback,
-          previousImplementation: devResult
-        });
-        iterationResult.devResult = devResult;
-      }
-      
-      if (!devResult.success) {
-        iterationResult.error = 'Dev implementation failed';
-        results.iterations.push(iterationResult);
-        break;
-      }
-      
-      // QA phase
-      const qaStep = workflow.sequence[qaStepIndex];
-      const qaResult = await this.executeStep(qaStep, {
-        ...context,
-        devImplementation: devResult,
-        iteration
-      });
-      
-      iterationResult.qaResult = qaResult;
-      results.iterations.push(iterationResult);
-      
-      if (qaResult.success && qaResult.data?.approved) {
-        qaApproved = true;
-        results.qaApproved = true;
-        results.success = true;
-      } else if (qaResult.data?.issues) {
-        qaFeedback = qaResult.data.issues;
-        
-        // Check if we should continue
-        if (iteration >= this.maxIterations) {
-          if (this.callbacks.onMaxIterationsReached) {
-            const shouldContinue = await this.callbacks.onMaxIterationsReached(iteration, qaFeedback);
-            if (!shouldContinue) {
-              break;
-            }
-            // Reset max iterations for next round
-            this.maxIterations += 5;
-          } else {
-            break;
-          }
-        }
-      }
-      
-      iteration++;
-    }
-    
-    results.totalIterations = iteration - 1;
-    
-    // Execute post-QA steps if approved
-    if (qaApproved) {
-      for (let i = qaStepIndex + 1; i < workflow.sequence.length; i++) {
-        const step = workflow.sequence[i];
-        
-        // Skip the fix step since we're already approved
-        if (step.agent === 'dev' && step.action === 'address_qa_feedback') {
-          continue;
-        }
-        
-        const stepResult = await this.executeStep(step, context);
-        if (!stepResult.success && step.critical !== false) {
-          results.success = false;
-          results.error = 'Failed during post-QA steps';
-          break;
-        }
-      }
-    }
-    
-    return results;
-  }
 
   /**
    * Execute standard workflow flow

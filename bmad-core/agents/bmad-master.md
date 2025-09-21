@@ -108,7 +108,7 @@ dependencies:
     - greenfield-service.md
     - greenfield-ui.md
   structured-checklists:
-    - architect-checklist.yaml
+    - architect-checklist/index.yaml
     - change-checklist.yaml
     - pm-checklist.yaml
     - po-master-checklist.yaml

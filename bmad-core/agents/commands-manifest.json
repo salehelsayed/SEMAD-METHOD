@@ -43,7 +43,7 @@
       },
       {
         "name": "Epics",
-        "commands": ["*create-epic"]
+        "commands": ["*create-epic", "*brownfield-create-epic", "*brownfield-create-story"]
       },
       {
         "name": "Validation",
@@ -91,7 +91,7 @@
     "categories": [
       {
         "name": "Core",
-        "commands": ["*help", "*status", "create comprehensive plan", "start development phase", "show progress", "activate [agent]"]
+        "commands": ["*help", "*status", "create comprehensive plan", "start development phase", "show progress", "activate [agent]", "create-epics-from-prd", "validate-epics", "brownfield-bootstrap", "brownfield-story-gen"]
       },
       {
         "name": "Reverse Alignment",

@@ -217,7 +217,7 @@ program
 
 program
   .command('scan-dependencies')
-  .description('Scan repository for code dependencies and populate Qdrant database')
+  .description('Scan repository for code dependencies and update the local dependency index')
   .option('-r, --root <path>', 'Repository root directory (defaults to current directory)')
   .option('--include-tests', 'Include test files in the analysis')
   .option('--max-size <bytes>', 'Maximum file size to process in bytes', '1048576')
@@ -269,14 +269,14 @@ program
       }
     } catch (error) {
       console.error(chalk.red('✗ Dependency scan failed:'), error.message);
-      console.error(chalk.dim('Ensure Qdrant is running on localhost:6333'));
+      console.error(chalk.dim('Verify the dependency analyzer configuration and ensure the project paths are correct.'));
       process.exit(1);
     }
   });
 
 program
   .command('dependency-stats')
-  .description('Show dependency database statistics')
+  .description('Show dependency index statistics')
   .action(async () => {
     try {
       const { getDependencyStats } = require('../semad-core/utils/dependency-analyzer');
@@ -298,7 +298,7 @@ program
       }
     } catch (error) {
       console.error(chalk.red('✗ Failed to get dependency stats:'), error.message);
-      console.error(chalk.dim('Ensure Qdrant is running on localhost:6333'));
+      console.error(chalk.dim('Run "bmad-build scan-dependencies" to refresh the dependency index.'));
       process.exit(1);
     }
   });

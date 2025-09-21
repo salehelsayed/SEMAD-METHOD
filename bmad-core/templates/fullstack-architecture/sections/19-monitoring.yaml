@@ -1,0 +1,26 @@
+  - id: monitoring
+    title: Monitoring and Observability
+    instruction: Define monitoring strategy for fullstack application.
+    elicit: true
+    sections:
+      - id: monitoring-stack
+        title: Monitoring Stack
+        template: |
+          - **Frontend Monitoring:** {{frontend_monitoring}}
+          - **Backend Monitoring:** {{backend_monitoring}}
+          - **Error Tracking:** {{error_tracking}}
+          - **Performance Monitoring:** {{perf_monitoring}}
+      - id: key-metrics
+        title: Key Metrics
+        template: |
+          **Frontend Metrics:**
+          - Core Web Vitals
+          - JavaScript errors
+          - API response times
+          - User interactions
+          
+          **Backend Metrics:**
+          - Request rate
+          - Error rate
+          - Response time
+          - Database query performance

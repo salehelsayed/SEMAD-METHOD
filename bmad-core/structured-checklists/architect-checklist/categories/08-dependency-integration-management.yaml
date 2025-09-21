@@ -1,0 +1,35 @@
+name: DEPENDENCY & INTEGRATION MANAGEMENT
+items:
+  - description: All external dependencies are identified
+    checked: false
+  - description: Versioning strategy for dependencies is defined
+    checked: false
+  - description: Fallback approaches for critical dependencies are specified
+    checked: false
+  - description: Licensing implications are addressed
+    checked: false
+  - description: Update and patching strategy is outlined
+    checked: false
+  - description: Component dependencies are clearly mapped
+    checked: false
+  - description: Build order dependencies are addressed
+    checked: false
+  - description: Shared services and utilities are identified
+    checked: false
+  - description: Circular dependencies are eliminated
+    checked: false
+  - description: Versioning strategy for internal components is defined
+    checked: false
+  - description: All third-party integrations are identified
+    checked: false
+  - description: Integration approaches are defined
+    checked: false
+  - description: Authentication with third parties is addressed
+    checked: false
+  - description: Error handling for integration failures is specified
+    checked: false
+  - description: Rate limits and quotas are considered
+    checked: false
+notes: 'Dependencies are often the source of production issues. For each dependency, consider: What happens if it''s unavailable? Is there a newer version with security patches? Are we locked into a vendor? What''s our contingency plan? Verify specific versions and fallback strategies.'
+metadata:
+  originalName: 8. DEPENDENCY & INTEGRATION MANAGEMENT

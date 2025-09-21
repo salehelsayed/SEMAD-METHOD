@@ -1,0 +1,150 @@
+id: step10
+name: Populate Story Template with Full Context
+description: ''
+actions:
+  - description: 'Create new story file: `{devStoryLocation}/{epicNum}.{storyNum}.story.md` using Story Template'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Embed the StoryContract YAML block at the top of the story file between --- markers
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Execute task `validate-story-contract` with storyFilePath set to the newly created story file path
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: If validation fails, halt the workflow and inform the user of the specific validation errors so corrections can be made
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Fill in basic story information: Title, Status (Draft), Story statement, Acceptance Criteria from Epic'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**`Dev Notes` section (CRITICAL):**'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'CRITICAL: This section MUST contain ONLY information extracted from architecture documents. NEVER invent or assume technical details.'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: 'Add a new subsection: "Existing Capabilities & Reuse". Summarize relevant items from `.ai/reports/sm/codebase-inventory.md` that can be reused for this story (utilities, services/APIs, components, hooks, tools, tests).'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Under Flow Chart → "Existing Artifacts", list paths of the most relevant existing files/classes/functions discovered by the inventory that align with this slice.
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: If inventory suggests a matching utility/service already exists, update the workBreakdown to modify/extend it instead of creating a duplicate file.
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'Include ALL relevant technical details from Steps 2-3, organized by category:'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: '**Previous Story Insights**: Key learnings from previous story'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**Data Models**: Specific schemas, validation rules, relationships [with source references]'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**API Specifications**: Endpoint details, request/response formats, auth requirements [with source references]'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**Component Specifications**: UI component details, props, state management [with source references]'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**File Locations**: Exact paths where new code should be created based on project structure'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**Testing Requirements**: Specific test cases or strategies from testing-strategy.md'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: '**Technical Constraints**: Version requirements, performance considerations, security rules'
+    elicit: false
+    metadata:
+      originalIndent: 4
+  - description: 'Every technical detail MUST include its source reference: `[Source: architecture/{filename}.md#{section}]`'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: 'If information for a category is not found in the architecture docs, explicitly state: "No specific guidance found in architecture docs"'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: Populate the **Implementation Checklist** section with short category headers (e.g., Migration, DAO Updates, Tests, Telemetry) so related work stays grouped but each bullet remains atomic.
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'For every checklist entry, write a single action per checkbox in the format: Verb + concrete target + explicit success signal (example: "Generate migration v15 dropping only from_peer_id FK and verify rollback restores it").'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Convert any narrative hints from PRD or architecture into explicit checklist items rather than leaving the developer to infer the steps.
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Whenever extended plans exist (e.g., docs/stories/story-friend-reliability-8a-implementation-plan.md), add a Companion References bullet like "See <file>:<section>" while keeping the concise checklist in the main story.
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Use markdown checkboxes `[ ]` consistently across Implementation Checklist and Tasks/Subtasks so downstream agents can track completion programmatically.
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: '**`Tasks / Subtasks` section:**'
+    elicit: true
+    metadata:
+      originalIndent: 0
+  - description: 'Generate detailed, sequential list of technical tasks based ONLY on: Epic Requirements, Story AC, Reviewed Architecture Information'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'If sliceType is flag: include only feature flag scaffolding + telemetry tasks (no behavior changes)'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'If sliceType is probe: include contract test/probe tasks for the INTs in scope; ensure no state changes are introduced'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'If sliceType is ECM row: constrain to one integrationPoint and one flow variant; keep vertical slice thin'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Each task must reference relevant architecture documentation
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Include unit testing as explicit subtasks based on the Testing Strategy
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Link tasks to acceptance criteria from the contract (e.g., `Task 1 (AC-1, AC-3)`) so developers know exactly what to implement
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Add Integration Verification steps and a Rollback Plan in story sections for any slice that touches INTs
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Add notes on project structure alignment or discrepancies found in Step 4
+    elicit: false
+    metadata:
+      originalIndent: 0
+notes: |-
+  - **`Dev Notes` section (CRITICAL):**
+    - CRITICAL: This section MUST contain ONLY information extracted from architecture documents. NEVER invent or assume technical details.
+metadata:
+  level: 3
+  originalNumber: '5'

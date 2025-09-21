@@ -1,0 +1,13 @@
+id: step8b-codebase-inventory
+name: Scan Codebase for Existing Capabilities
+description: Generate an inventory of existing utilities, services, components, hooks, tools, and tests to prevent re-implementation.
+action: script:execute
+inputs:
+  script: tools/sm/codebase-inventory.js
+  args: []
+outputs:
+  exitCode: invExitCode
+  stdout: invMarkdown
+metadata:
+  level: 4
+  originalNumber: '3.4'

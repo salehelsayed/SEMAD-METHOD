@@ -193,41 +193,32 @@ function generateDocumentationQueries(techStack) {
   return queries;
 }
 
-function generateQdrantIngestionPlan(techStack, queries) {
+function generateLocalIngestionPlan(queries) {
   return {
-    collections: [
+    output_directory: '.ai/doc-ingestion',
+    suggested_sources: {
+      documentation: queries.documentation_searches.map(q => q.query),
+      code_examples: queries.code_examples.map(q => q.query),
+      best_practices: queries.best_practices.map(q => q.query)
+    },
+    tasks: [
       {
-        name: 'project_documentation',
-        description: 'Official documentation for technologies used in the project',
-        sources: queries.documentation_searches.map(q => ({
-          url_pattern: q.query,
-          update_frequency: 'weekly',
-          vector_fields: ['content', 'code_examples'],
-          metadata_fields: ['technology', 'version', 'last_updated']
-        }))
+        task: 'ingest-documentation',
+        description: 'Fetch and normalize documentation into .ai/doc-ingestion',
+        inputs: {
+          searchToolsPath: 'tech-search-tools.yaml',
+          outputDirectory: '.ai/doc-ingestion',
+          ingestionReport: 'documentation-ingestion-report.md'
+        }
       },
       {
-        name: 'code_examples',
-        description: 'Production-ready code examples and patterns',
-        sources: queries.code_examples.map(q => ({
-          url_pattern: q.query,
-          update_frequency: 'monthly',
-          vector_fields: ['code', 'description'],
-          metadata_fields: ['stars', 'language', 'framework', 'last_commit']
-        }))
-      },
-      {
-        name: 'best_practices',
-        description: 'Best practices and troubleshooting guides',
-        sources: queries.best_practices.map(q => ({
-          url_pattern: q.query,
-          update_frequency: 'monthly',
-          vector_fields: ['content'],
-          metadata_fields: ['votes', 'technology', 'problem_type']
-        }))
+        task: 'query-technical-docs',
+        description: 'Search the local documentation cache for answers during development',
+        inputs: {
+          searchPaths: 'docs,data/kb,.ai/doc-ingestion'
+        }
       }
-    ],
-    ingestion_script: 'scripts/ingest-to-qdrant.js'
+    ]
   };
 }
 
@@ -254,8 +245,8 @@ async function main() {
     // Generate documentation queries
     const queries = generateDocumentationQueries(techStack);
     
-    // Generate Qdrant ingestion plan
-    const ingestionPlan = generateQdrantIngestionPlan(techStack, queries);
+    // Generate local ingestion plan
+    const ingestionPlan = generateLocalIngestionPlan(queries);
     
     // Create output
     const output = {
@@ -270,11 +261,11 @@ async function main() {
         integrations: techStack.integrations
       },
       documentation_queries: queries,
-      qdrant_ingestion_plan: ingestionPlan,
+      local_ingestion_plan: ingestionPlan,
       usage_instructions: {
-        search: 'Use documentation_queries to find relevant docs',
-        ingest: 'Run ingest-to-qdrant.js with the generated collections',
-        query: 'Agents can query Qdrant collections for latest documentation'
+        search: 'Use documentation_queries to drive manual or automated searches',
+        ingest: 'Run the ingest-documentation structured task to capture docs into .ai/doc-ingestion',
+        query: 'Use the query-technical-docs structured task to search the local documentation cache'
       }
     };
 
@@ -288,8 +279,8 @@ async function main() {
     console.log(`\nNext steps:`);
     console.log(`1. Review the generated queries in ${outputPath}`);
     console.log(`2. Run the documentation searches to gather content`);
-    console.log(`3. Use ingest-to-qdrant.js to store the documentation`);
-    console.log(`4. Agents can then query Qdrant for latest technical docs`);
+    console.log(`3. Execute the ingest-documentation task to normalize results into .ai/doc-ingestion/`);
+    console.log(`4. Use query-technical-docs to search the local documentation cache from agents`);
 
   } catch (error) {
     console.error('Error:', error.message);

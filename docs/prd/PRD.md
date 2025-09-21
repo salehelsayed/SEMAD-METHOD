@@ -52,7 +52,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 ### Core Structural Enhancements
 1. **Structured Task System**: YAML/JSON schemas replace markdown for deterministic execution
 2. **Working Memory Protocol**: Persistent scratchpad and vector-based long-term memory with health monitoring
-3. **Dependency Analysis**: Qdrant-based tracking of code dependencies for impact assessment
+3. **Dependency Analysis**: File-based tracking of code dependencies for impact assessment
 4. **Automated Validation**: Schema-based validation at every handoff point with mandatory story validation
 
 ### Workflow and Process Improvements
@@ -104,7 +104,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 **Key Components**:
 - Session-based working memory files (`.ai/working_memory_*.json`)
 - Scratchpad with `taskId`, `plan`, `currentStep`, `context`, `observations`
-- Vector database integration (Qdrant) for long-term memory
+- File-based working memory for long-term context
 - Helper tasks: `update-working-memory.yaml`, `retrieve-context.yaml`
 
 **Benefits**:
@@ -210,7 +210,7 @@ SEMAD-METHOD addresses these challenges through comprehensive improvements:
 **Description**: Track and analyze code dependencies for impact assessment
 
 **Key Components**:
-- Dependency graph stored in Qdrant vector database
+- Dependency graph stored in the local dependency index
 - Automatic extraction of classes, functions, and imports
 - Impact analysis before code changes
 - Dependency warnings during implementation and review
@@ -277,7 +277,7 @@ SEMAD-METHOD/
 - **Node.js v20+**: Runtime environment
 - **YAML/JSON**: Structured data formats
 - **JSON Schema**: Validation framework
-- **Qdrant**: Vector database for memory
+- **Dependency Index**: Local JSONL database for memory metrics
 - **js-yaml**: YAML parsing
 - **ajv**: JSON Schema validation
 
@@ -301,7 +301,7 @@ SEMAD-METHOD/
 ### Phase 2: Memory System (Completed)
 - ✅ Working memory implementation
 - ✅ Memory transaction handling
-- ✅ Qdrant integration for long-term memory (Story 14)
+- ✅ File-based working memory for long-term context (Story 14)
 - ✅ Context retrieval optimization
 - ✅ Consistent use of short-term and long-term memory across agents (Story 15)
 - ✅ Unified memory utilization and hygiene (Story 16)
@@ -390,7 +390,7 @@ SEMAD-METHOD/
 - **Story 8**: Mandatory automatic story validation
 
 ### 10.4 Memory and Dependency Systems
-- **Story 14**: Qdrant-based dependency analysis and impact checking
+- **Story 14**: File-based dependency analysis and impact checking
 - **Story 15**: Consistent memory usage across all agents
 - **Story 16**: Unified memory utilization with hygiene protocols
 - **Story 18**: Memory health monitoring and reporting

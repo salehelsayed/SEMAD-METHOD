@@ -126,9 +126,8 @@ steps:
   - id: step7
     name: Save Review Results and Clean Memory
     description: Save review findings to memory and perform hygiene cleanup
-    actions:
-      # Memory saving removed - no longer using memory functions
-inputs: {}
+    actions: []
+    inputs: {}
 outputs: {}
 metadata:
   originalSections:

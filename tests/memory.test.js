@@ -6,46 +6,50 @@ const {
   recordObservation, 
   getWorkingMemory 
 } = require('../semad-core/agents/index');
-const { storeMemorySnippet, retrieveMemory } = require('../semad-core/utils/qdrant');
 
 const TEST_AGENT = 'test-agent';
-const MEMORY_DIR = path.join(__dirname, '..', 'semad-core', 'ai');
-const TEST_MEMORY_FILE = path.join(MEMORY_DIR, `working_memory_${TEST_AGENT}.json`);
+const MEMORY_ROOT = path.join(__dirname, '..', 'bmad-core', 'ai', 'working-memory', 'agents');
+const TEST_AGENT_DIR = path.join(MEMORY_ROOT, TEST_AGENT);
+const TEST_MEMORY_STATE_FILE = path.join(TEST_AGENT_DIR, 'state.json');
 
 describe('Working Memory Functions', () => {
   beforeEach(async () => {
-    await fs.remove(TEST_MEMORY_FILE);
+    await fs.remove(TEST_AGENT_DIR).catch(() => {});
   });
 
   afterEach(async () => {
-    await fs.remove(TEST_MEMORY_FILE);
+    await fs.remove(TEST_AGENT_DIR).catch(() => {});
   });
 
   describe('initializeWorkingMemory', () => {
     it('should create a new memory file with default structure', async () => {
       const memoryFile = await initializeWorkingMemory(TEST_AGENT);
-      
-      expect(memoryFile).toBe(TEST_MEMORY_FILE);
-      
-      const exists = await fs.pathExists(TEST_MEMORY_FILE);
-      expect(exists).toBe(true);
-      
-      const memory = await fs.readJson(TEST_MEMORY_FILE);
-      expect(memory).toEqual({
+
+      expect(memoryFile.endsWith(path.join('ai', 'working-memory', 'agents', TEST_AGENT, 'state.json'))).toBe(true);
+
+      const stateExists = await fs.pathExists(memoryFile);
+      expect(stateExists).toBe(true);
+
+      const state = await fs.readJson(memoryFile);
+      expect(state).toEqual({
         taskId: null,
-        plan: [],
         currentStep: null,
-        context: {},
-        observations: [],
-        subTasks: []
+        context: {}
       });
+
+      const agentDir = path.dirname(memoryFile);
+      const plan = await fs.readJson(path.join(agentDir, 'plan.json'));
+      expect(plan).toEqual([]);
+
+      const observations = await fs.readFile(path.join(agentDir, 'observations.jsonl'), 'utf8');
+      expect(observations.trim()).toBe('');
     });
 
     it('should ensure memory directory exists', async () => {
       // Simply check that initializeWorkingMemory ensures the directory exists
       await initializeWorkingMemory(TEST_AGENT);
-      
-      const dirExists = await fs.pathExists(MEMORY_DIR);
+
+      const dirExists = await fs.pathExists(TEST_AGENT_DIR);
       expect(dirExists).toBe(true);
     });
   });
@@ -106,7 +110,7 @@ describe('Working Memory Functions', () => {
       
       expect(memory.taskId).toBe('NEW-TASK');
       
-      const exists = await fs.pathExists(TEST_MEMORY_FILE);
+      const exists = await fs.pathExists(TEST_MEMORY_STATE_FILE);
       expect(exists).toBe(true);
     });
   });
@@ -158,43 +162,6 @@ describe('Working Memory Functions', () => {
         context: {},
         observations: []
       });
-    });
-  });
-});
-
-describe('Qdrant Integration', () => {
-  describe('storeMemorySnippet', () => {
-    it('should generate embeddings and store memory', async () => {
-      const id = await storeMemorySnippet('dev', 'Implemented user authentication', {
-        type: 'story-completion'
-      });
-      
-      if (id) {
-        expect(typeof id).toBe('number');
-        expect(id).toBeGreaterThan(0);
-      }
-    });
-  });
-
-  describe('retrieveMemory', () => {
-    it('should retrieve relevant memories', async () => {
-      await storeMemorySnippet('dev', 'Implemented user login feature', {
-        type: 'feature'
-      });
-      
-      await storeMemorySnippet('dev', 'Fixed authentication bug', {
-        type: 'bugfix'
-      });
-      
-      const memories = await retrieveMemory('authentication implementation', 2);
-      
-      expect(Array.isArray(memories)).toBe(true);
-      
-      if (memories.length > 0) {
-        expect(memories[0]).toHaveProperty('score');
-        expect(memories[0]).toHaveProperty('text');
-        expect(memories[0]).toHaveProperty('agentName');
-      }
     });
   });
 });

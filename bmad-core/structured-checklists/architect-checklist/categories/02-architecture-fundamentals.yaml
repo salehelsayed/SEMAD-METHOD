@@ -1,0 +1,45 @@
+name: ARCHITECTURE FUNDAMENTALS
+items:
+  - description: Architecture is documented with clear diagrams
+    checked: false
+  - description: Major components and their responsibilities are defined
+    checked: false
+  - description: Component interactions and dependencies are mapped
+    checked: false
+  - description: Data flows are clearly illustrated
+    checked: false
+  - description: Technology choices for each component are specified
+    checked: false
+  - description: Clear boundaries between UI, business logic, and data layers
+    checked: false
+  - description: Responsibilities are cleanly divided between components
+    checked: false
+  - description: Interfaces between components are well-defined
+    checked: false
+  - description: Components adhere to single responsibility principle
+    checked: false
+  - description: Cross-cutting concerns (logging, auth, etc.) are properly addressed
+    checked: false
+  - description: Appropriate design patterns are employed
+    checked: false
+  - description: Industry best practices are followed
+    checked: false
+  - description: Anti-patterns are avoided
+    checked: false
+  - description: Consistent architectural style throughout
+    checked: false
+  - description: Pattern usage is documented and explained
+    checked: false
+  - description: System is divided into cohesive, loosely-coupled modules
+    checked: false
+  - description: Components can be developed and tested independently
+    checked: false
+  - description: Changes can be localized to specific components
+    checked: false
+  - description: Code organization promotes discoverability
+    checked: false
+  - description: Architecture specifically designed for AI agent implementation
+    checked: false
+notes: Architecture clarity is crucial for successful implementation. As you review this section, visualize the system as if you were explaining it to a new developer. Are there any ambiguities that could lead to misinterpretation? Would an AI agent be able to implement this architecture without confusion? Look for specific diagrams, component definitions, and clear interaction patterns.
+metadata:
+  originalName: 2. ARCHITECTURE FUNDAMENTALS

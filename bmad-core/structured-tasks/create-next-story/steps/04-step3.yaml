@@ -1,0 +1,48 @@
+id: step3
+name: Locate Epic Files and Review Existing Stories
+description: ''
+actions:
+  - description: Navigate to docs/prd/ directory and locate epic files using the epicFilePattern from config
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: If `devStoryLocation` has story files, load the highest `{epicNum}.{storyNum}.story.md` file
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: '**If highest story exists:**'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Verify status is ''Done''. If not, alert user and halt: "ALERT: Found incomplete story! File: {lastEpicNum}.{lastStoryNum}.story.md Status: [current status]. Cannot proceed until this story is completed or manually moved to Done status."'
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: Automatically select next sequential story in the current epic based on epic progress
+    elicit: true
+    metadata:
+      originalIndent: 2
+  - description: 'If epic is complete, automatically proceed to next epic: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Proceeding to Epic {epicNum + 1}, Story 1."'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: '**CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.'
+    elicit: false
+    metadata:
+      originalIndent: 2
+  - description: '**If no story files exist:** The next story is ALWAYS 1.1 (first story of first epic)'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: 'Announce the identified story to the user: "Identified next story for preparation: {epicNum}.{storyNum} - {Story Title}"'
+    elicit: false
+    metadata:
+      originalIndent: 0
+  - description: Execute task `update-working-memory` with currentStep='story-identified' and context containing epicNum, storyNum, and story title
+    elicit: true
+    metadata:
+      originalIndent: 0
+notes: '- **CRITICAL**: When epic is complete, automatically proceed to next epic in sequence based on PRD structure.'
+metadata:
+  level: 4
+  originalNumber: '1.1'

@@ -117,21 +117,38 @@ workflow:
         - Creates docs/prd/ and docs/architecture/ folders with sharded content
         - Uses structured shard-doc task for reliable document splitting
 
+    - agent: po
+      action: create_epics_from_prd
+      creates: docs/epics/*.md
+      requires: sharded_docs
+      notes: |
+        PO derives EpicContracts from PRD:
+        - Run tools/po/create-epics-from-prd.js to scaffold EpicContracts under docs/epics/
+        - Use docs/templates/epic-contract-template.md and docs/templates/ecm-template.md
+
+    - agent: pm
+      action: validate_epics
+      requires: docs/epics/*.md
+      notes: |
+        PM validates EpicContracts (frontmatter + ECM):
+        - Use ecm-validate (node tools/ecm-validate.js <epic.md>)
+        - Use pm-validate-epic (npm run validate:epic -- --file <epic.md>)
+
     - agent: sm
       action: create_story
       creates: story.md
-      requires: sharded_docs_or_brownfield_docs
+      requires: sharded_docs
       repeats: for_each_epic_or_enhancement
       memory_tasks:
         - retrieve-context: at_start
         - update-working-memory: after_story_created
       notes: |
-        Story creation cycle:
-        - For sharded PRD: @sm → *create (uses create-next-story)
-        - For brownfield docs: @sm → use create-brownfield-story task
-        - Creates story from available documentation
+        Story creation cycle (ECM-aware, DoR-gated):
+        - SM Agent (New Chat): @sm → *create (uses create-next-story)
+        - Uses EpicContract + ECM to drive thin slices (flag → probe → 1 INT × 1 flow)
+        - Creates story from sharded docs/epics
         - Story starts in "Draft" status
-        - May require additional context gathering for brownfield
+        - DoR-mini gate and StoryContract validation enforced
 
     - agent: analyst/pm
       action: review_draft_story

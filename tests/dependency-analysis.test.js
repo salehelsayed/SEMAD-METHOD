@@ -1,8 +1,7 @@
 const { parseFile, isFileSupported } = require('../semad-core/utils/dependency-parser');
 const { 
   storeSymbolDependency, 
-  queryImpactedSymbols, 
-  ensureDependencyCollection 
+  queryImpactedSymbols
 } = require('../semad-core/utils/dependency-analyzer');
 const { 
   checkFileImpact, 
@@ -98,9 +97,6 @@ describe('Dependency Analysis System', () => {
     for (const [filename, content] of Object.entries(testFiles)) {
       fs.writeFileSync(path.join(tempDir, filename), content.trim());
     }
-    
-    // Initialize Qdrant collection
-    await ensureDependencyCollection();
   });
 
   afterAll(() => {
@@ -156,7 +152,7 @@ describe('Dependency Analysis System', () => {
   });
 
   describe('Dependency Storage', () => {
-    test('should store symbol dependency in Qdrant', async () => {
+    test('should store symbol dependency in dependency index', async () => {
       const testSymbol = {
         symbolName: 'testFunction',
         symbolType: 'function',
@@ -170,14 +166,13 @@ describe('Dependency Analysis System', () => {
       };
       
       const symbolId = await storeSymbolDependency(testSymbol);
-      expect(symbolId).toBeDefined();
-      expect(typeof symbolId).toBe('string');
-    }, 10000); // Increase timeout for Qdrant operations
+      expect(symbolId).toBe(true);
+    });
   });
 
   describe('Impact Analysis', () => {
     beforeAll(async () => {
-      // Store test symbols in Qdrant for impact analysis
+      // Store test symbols in dependency index for impact analysis
       const utilsPath = path.join(tempDir, 'utils.js');
       const servicePath = path.join(tempDir, 'user-service.js');
       const controllerPath = path.join(tempDir, 'auth-controller.js');
