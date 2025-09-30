@@ -62,7 +62,25 @@ Additional references:
 - Codex CLI usage: `docs/codex-integration.md`
 - Reverse alignment workflow: `docs/reverse-alignment.md`
 - Story contracts and implementation guidance: `docs/stories/` and `bmad-core/core-config.yaml`
- - Story workflow migration (enhanced Dev flow): `docs/migration/story-workflow-migration.md`
+- Story workflow migration (enhanced Dev flow): `docs/migration/story-workflow-migration.md`
+
+## StoryContracts (XML)
+
+- Storage model: each story’s contract is stored as an external XML file and referenced from the story frontmatter via a pointer:
+  - `StoryContractXml: docs/stories/contracts/story-<id>.xml`
+- Backward compatibility: during migration, YAML frontmatter `StoryContract:` is still supported. Readers use a pointer‑first dual‑read strategy (XML > YAML).
+- Validation: XML is parsed and normalized to the existing JS object shape and validated against the JSON Schema with AJV — no XSD required.
+- Configuration (in `bmad-core/core-config.yaml`):
+  - `storyContract.format`: `yaml | xml | both` (set to `xml` once migration is complete)
+  - `storyContract.pathPattern`: e.g., `docs/stories/contracts/{filebase}.xml` (tokens: `{filebase}`, `{id}`)
+- Helper APIs:
+  - Loader: `semad-core/utils/story-contract.js` (format-agnostic)
+  - Validator: `bmad-core/utils/story-contract-validator.js`
+  - Resolver: `bmad-core/utils/file-path-resolver.js#getStoryContractPathFromFile` and `#getStoryContractPathFromId`
+
+Validate in CI and locally:
+- `node scripts/validate-story-contract.js --all` (XML-aware)
+- GitHub Actions workflow `validate-storycontracts.yml` runs this on PRs.
 
 ## Extending the Agent Set
 

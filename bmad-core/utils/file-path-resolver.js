@@ -241,6 +241,38 @@ class FilePathResolver {
   }
 
   /**
+   * Compute StoryContract XML path from a story file using path pattern.
+   * Tokens supported in pattern:
+   *  - {filebase}: story filename without extension (e.g., story-99-1)
+   *  - {id}: story id (e.g., 99-1)
+   * @param {string} storyFilePath - Absolute or relative path to story markdown file
+   * @param {boolean} mustExist - Whether to require that the XML file exists
+   * @returns {string} Absolute path to the StoryContract XML (may point to non-existent file when mustExist=false)
+   */
+  getStoryContractPathFromFile(storyFilePath, mustExist = false) {
+    const pattern = this.config?.storyContract?.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+    const absStory = path.isAbsolute(storyFilePath) ? storyFilePath : path.join(this.rootDir, storyFilePath);
+    const filebase = path.basename(absStory, path.extname(absStory));
+    const idMatch = filebase.match(/^story-(.+)$/i);
+    const id = idMatch ? idMatch[1] : filebase;
+    const rel = pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', id);
+    return this.getAbsolutePath(rel, mustExist);
+  }
+
+  /**
+   * Compute StoryContract XML path from a story id (e.g., 99-1).
+   * @param {string} storyId - The story id (e.g., "99-1")
+   * @param {boolean} mustExist - Whether to require that the XML file exists
+   * @returns {string} Absolute path
+   */
+  getStoryContractPathFromId(storyId, mustExist = false) {
+    const pattern = this.config?.storyContract?.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+    const filebase = `story-${String(storyId)}`;
+    const rel = pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', String(storyId));
+    return this.getAbsolutePath(rel, mustExist);
+  }
+
+  /**
    * Find specific story file by epic and story number
    * @param {number} epicNum - Epic number
    * @param {number} storyNum - Story number

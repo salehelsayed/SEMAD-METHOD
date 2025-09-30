@@ -8,7 +8,9 @@ This guide helps migrate existing stories to the enhanced Dev workflow so they b
 - You want to run `/dev *implement-next-story` or `/dev *devx3` safely.
 
 ## Quick Steps
-1) Ensure the story has a valid StoryContract in YAML frontmatter (version, story_id, epic_id, story.sliceType, traceability.integrationPointIds, apiEndpoints, filesToModify, acceptance criteria links/test matrix, integrationVerification, rollbackPlan, performanceBudget, guardrails).
+1) Ensure the story has a valid StoryContract (XML pointer preferred). In XML-first projects, the story frontmatter includes a pointer to the external XML file:
+   - `StoryContractXml: docs/stories/contracts/story-<id>.xml`
+   - If still on YAML, the contract appears under `StoryContract:` in frontmatter — migration helpers are provided below.
 2) Generate a dependency plan (gates In Progress):
    - `node tools/dev/run-dependency-plan.js --story <docs/stories/your-story.md>`
    - Confirms filesToModify and quality gates; writes `.ai/dev/dependency/<story>.json`.
@@ -25,6 +27,23 @@ This guide helps migrate existing stories to the enhanced Dev workflow so they b
 6) Verify acceptance evidence exists and is valid:
    - `node tools/qa/validate-acceptance-evidence.js --story <docs/stories/your-story.md>`
    - Confirm `.ai/dev/acceptance/<story>.json` entries and the companion guardrail logs in `.ai/history/dev_log.jsonl`.
+
+## XML StoryContracts Migration
+
+If your stories still embed YAML `StoryContract` in frontmatter, migrate to XML contracts with a single command:
+
+1) Dry run to preview changes:
+   - `npm run migrate:stories:xml -- --dry-run`
+2) Migrate and remove YAML (xml-only):
+   - `npm run migrate:stories:xml -- --xml-only`
+3) Auto-repair common schema gaps (e.g., missing `linkedArtifacts.version`):
+   - `npm run fix:stories`
+4) Validate all stories (XML-aware):
+   - `node scripts/validate-story-contract.js --all`
+
+Configuration toggles (`bmad-core/core-config.yaml`):
+- `storyContract.format`: `yaml | xml | both` (set to `xml` after migration)
+- `storyContract.pathPattern`: controls where XML files are written (supports `{filebase}` and `{id}` tokens)
 
 ## Marking Legacy Stories
 If you won’t retrofit a story yet:
