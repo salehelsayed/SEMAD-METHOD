@@ -145,16 +145,37 @@ class ValidationHooks {
       });
     }
 
-    // Validate StoryContract if present
-    if (storyData.frontMatter && storyData.frontMatter.StoryContract) {
-      const contractValidation = this.storyValidator.validateContract(storyData.frontMatter.StoryContract);
-      if (!contractValidation.valid) {
-        validation.valid = false;
-        validation.errors.push({
-          type: 'INVALID_CONTRACT',
-          message: 'StoryContract validation failed',
-          details: contractValidation.errors
-        });
+    // Validate StoryContract (YAML or XML pointer)
+    if (storyData.frontMatter) {
+      if (storyData.frontMatter.StoryContract) {
+        const contractValidation = this.storyValidator.validateContract(storyData.frontMatter.StoryContract);
+        if (!contractValidation.valid) {
+          validation.valid = false;
+          validation.errors.push({
+            type: 'INVALID_CONTRACT',
+            message: 'StoryContract validation failed',
+            details: contractValidation.errors
+          });
+        }
+      } else {
+        const xmlKey = Object.keys(storyData.frontMatter).find(k => /^StoryContractXml$/i.test(k));
+        if (xmlKey && typeof storyData.frontMatter[xmlKey] === 'string') {
+          try {
+            // Reuse validator's extraction logic to honor config + normalization
+            const result = this.storyValidator.validateStoryFile(storyData.path || storyData.filePath || '');
+            if (!result.valid) {
+              validation.valid = false;
+              validation.errors.push({
+                type: 'INVALID_CONTRACT',
+                message: 'StoryContract (XML) validation failed',
+                details: result.errors
+              });
+            }
+          } catch (e) {
+            validation.valid = false;
+            validation.errors.push({ type: 'INVALID_CONTRACT', message: e.message });
+          }
+        }
       }
     }
 

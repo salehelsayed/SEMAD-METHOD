@@ -26,6 +26,7 @@ const fsp = require('fs/promises');
 const path = require('path');
 const glob = require('glob');
 const yaml = require('js-yaml');
+const { loadStoryContract } = require('../semad-core/utils/story-contract');
 
 function argMap(argv) {
   const args = {};
@@ -202,19 +203,22 @@ function scanStories(storiesDir) {
     }
     if (storyAcs.length) res.storyAcMap[storyName] = storyAcs;
     
-    // Extract from StoryContract YAML block
-    const contractMatch = content.match(/```yaml\s*\n# StoryContract[\s\S]*?```/);
-    if (contractMatch) {
-      try {
-        const contract = yaml.load(contractMatch[0].replace(/```yaml\s*\n|```/g, '')) || {};
-        if (contract.storyId) res.storyIds.add(contract.storyId);
-        if (contract.epicId) res.epicLinks.add(contract.epicId);
-        if (contract.featureId) res.featureLinks.add(contract.featureId);
-        if (Array.isArray(contract.acceptanceCriteriaCovered)) {
-          contract.acceptanceCriteriaCovered.forEach(ac => res.acCovered.add(ac));
-        }
-      } catch {}
-    }
+    // Prefer unified contract loader (XML pointer or YAML)
+    try {
+      const { contract } = loadStoryContract(f);
+      const storyId = contract?.story_id || contract?.story?.storyId;
+      if (storyId) res.storyIds.add(String(storyId));
+      const epicId = contract?.epic_id || contract?.story?.epicId;
+      if (epicId) res.epicLinks.add(String(epicId));
+      const featureId = contract?.traceability?.featureId || contract?.story?.featureId;
+      if (featureId) res.featureLinks.add(String(featureId));
+      const covered = Array.isArray(contract?.traceability?.acceptanceCriteriaCovered)
+        ? contract.traceability.acceptanceCriteriaCovered
+        : Array.isArray(contract?.acceptanceCriteriaLinks)
+          ? contract.acceptanceCriteriaLinks.map(s => (String(s).split(':')[0] || '').trim()).filter(Boolean)
+          : [];
+      covered.forEach(ac => res.acCovered.add(String(ac)));
+    } catch (_) { /* ignore */ }
   }
   return res;
 }
@@ -548,4 +552,3 @@ main().catch(err => {
   console.error('feature-coverage failed:', err?.message || err);
   process.exit(1);
 });
-

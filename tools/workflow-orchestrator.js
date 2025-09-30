@@ -1906,13 +1906,49 @@ class WorkflowOrchestrator {
       front = {};
     }
 
-    // Ensure StoryContract with required keys
+    // Ensure StoryContractXml pointer and contract presence according to config
     front = front || {};
-    if (!front.StoryContract || typeof front.StoryContract !== 'object') {
-      front.StoryContract = {};
-      changed = true;
+    const scCfg = (this.filePathResolver?.config?.storyContract) || {};
+    const format = String(scCfg.format || 'both').toLowerCase();
+    const xmlKey = Object.keys(front).find(k => /^StoryContractXml$/i.test(k));
+    const filebase = path.basename(filePath, path.extname(filePath));
+    const pattern = scCfg.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+    const xmlRel = pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', filebase.replace(/^story-/, ''));
+    const xmlAbs = path.join(this.rootDir, xmlRel);
+
+    if (format === 'xml') {
+      if (!xmlKey || !front[xmlKey]) {
+        // If YAML contract exists, write XML from it; else create minimal stub
+        let scObj = front.StoryContract && typeof front.StoryContract === 'object' ? front.StoryContract : null;
+        if (!scObj) {
+          scObj = {
+            version: '1.0',
+            schemaVersion: '1.0',
+            story_id: filebase.replace(/^story-/, ''),
+            epic_id: (filebase.match(/^story-(\d+)-/) || [,'0'])[1]
+          };
+        }
+        await require('fs-extra').ensureDir(path.dirname(xmlAbs));
+        const toXmlFn = reqCore('utils/xml-normalizer').toXml;
+        const xml = toXmlFn(scObj);
+        await fs.promises.writeFile(xmlAbs, xml, 'utf8');
+        front.StoryContractXml = xmlRel;
+        delete front.StoryContract; // enforce xml-only
+        changed = true;
+      }
+    } else {
+      // both or yaml: ensure YAML object exists; add pointer if available
+      if (!front.StoryContract || typeof front.StoryContract !== 'object') {
+        front.StoryContract = {};
+        changed = true;
+      }
+      if (!xmlKey) {
+        // It's safe to add pointer (does not harm yaml flows)
+        front.StoryContractXml = xmlRel;
+        changed = true;
+      }
     }
-    const sc = front.StoryContract;
+    const sc = front.StoryContract || {};
 
     const headerMatch = body.match(/^#\s+Story\s+([^:]+):\s+(.+)$/m);
     const headerStoryId = headerMatch ? headerMatch[1].trim() : null;

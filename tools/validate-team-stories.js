@@ -64,7 +64,10 @@ function main() {
   const baseTxt = fs.readFileSync(basePath, 'utf8');
   const fm = parseFrontmatter(baseTxt);
   const scBase = fm?.StoryContract;
-  if (!scBase) { console.error('Base story missing StoryContract.'); process.exit(1); }
+  const xmlKeyBase = fm ? Object.keys(fm).find(k => /^StoryContractXml$/i.test(k)) : null;
+  if (!scBase && !(xmlKeyBase && typeof fm[xmlKeyBase] === 'string')) {
+    console.error('Base story missing StoryContract (XML pointer or YAML).'); process.exit(1);
+  }
 
   const teamsCfg = loadTeams(root);
   const teams = (teamsCfg.teams || []).map(t => String(t).toLowerCase());
@@ -79,9 +82,12 @@ function main() {
     const txt = fs.readFileSync(teamFile, 'utf8');
     const m = txt.match(/^---\n([\s\S]*?)\n---\n?/);
     const y = m ? yaml.load(m[1]) : null;
-    if (!y || !y.StoryContract) { console.error('No StoryContract in team file:', teamFile); ok = false; continue; }
-    const scTeam = y.StoryContract;
-    if (JSON.stringify(scBase) !== JSON.stringify(scTeam)) { console.error('StoryContract drift in:', teamFile); ok = false; }
+    const xmlKey = y ? Object.keys(y).find(k => /^StoryContractXml$/i.test(k)) : null;
+    if (!y || (!y.StoryContract && !(xmlKey && typeof y[xmlKey] === 'string'))) { console.error('No StoryContract (XML pointer or YAML) in team file:', teamFile); ok = false; continue; }
+    if (scBase && y.StoryContract) {
+      const scTeam = y.StoryContract;
+      if (JSON.stringify(scBase) !== JSON.stringify(scTeam)) { console.error('StoryContract drift in:', teamFile); ok = false; }
+    }
 
     // Validate Files to Modify belong to team patterns when present
     const body = txt.slice((m ? m[0].length : 0));
