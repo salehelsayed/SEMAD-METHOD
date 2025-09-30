@@ -2,129 +2,210 @@
 
 const path = require('path');
 const fs = require('fs');
-const { spawnSync } = require('child_process');
 const chalk = require('chalk');
+const {
+  loadStoryContract,
+  normalizeStoryId
+} = require('../semad-core/utils/story-contract');
+const DevNextStoryRunner = require('./dev-next-story.js');
 
 function parseArgs(argv) {
   const out = { _: [] };
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a) continue;
-    if (a.startsWith('--')) {
-      const key = a.replace(/^--/, '');
-      const next = argv[i + 1];
-      if (next && !next.startsWith('--')) { out[key] = next; i++; }
-      else { out[key] = true; }
-    } else {
-      out._.push(a);
+    const token = argv[i];
+    if (!token) continue;
+    if (token === '--story' && argv[i + 1]) {
+      out.story = argv[i + 1];
+      i++;
+      continue;
     }
+    if (token === '--verbose') {
+      out.verbose = true;
+      continue;
+    }
+    out._.push(token);
+  }
+  if (!out.story && out._.length > 0) {
+    out.story = out._[0].startsWith('@') ? out._[0].slice(1) : out._[0];
   }
   return out;
 }
 
-function resolveStoryPath(root, input) {
-  if (!input) return null;
-  const raw = input.startsWith('@') ? input.slice(1) : input;
-  const abs = path.isAbsolute(raw) ? raw : path.join(root, raw);
-  return abs;
+function ensureDir(targetFile) {
+  const dir = path.dirname(targetFile);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 }
 
-function runNode(cmd, args, cwd) {
-  const env = { ...process.env, CI: process.env.CI || '1' };
-  return spawnSync(process.execPath, [cmd, ...args], { stdio: 'inherit', cwd, env });
+function readJsonSafe(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    return null;
+  }
 }
 
-function runShell(cmd, args, cwd) {
-  const env = { ...process.env, CI: process.env.CI || '1' };
-  return spawnSync(cmd, args, { stdio: 'inherit', cwd, env });
+function summarizeTests(report) {
+  if (!report || typeof report !== 'object') {
+    return { passed: 0, failed: 0, total: 0 };
+  }
+  const suites = Array.isArray(report.testResults) ? report.testResults : [];
+  let passed = 0;
+  let failed = 0;
+  suites.forEach(suite => {
+    const assertions = Array.isArray(suite.assertionResults) ? suite.assertionResults : [];
+    assertions.forEach(assertion => {
+      if (assertion.status === 'passed') passed++;
+      else if (assertion.status === 'failed') failed++;
+    });
+  });
+  return { passed, failed, total: passed + failed };
+}
+
+function summarizeChecklist(checklist) {
+  if (!checklist || !Array.isArray(checklist.checklist)) {
+    return { pending: [], total: 0 };
+  }
+  const pending = checklist.checklist.filter(item => !item || item.verified !== true);
+  return {
+    pending: pending.map(item => item.id),
+    total: checklist.checklist.length
+  };
+}
+
+function summarizeDevTasks(rootDir) {
+  try {
+    const p = path.join(rootDir, '.ai', 'dev_tasks.json');
+    if (!fs.existsSync(p)) return { total: 0, completed: 0 };
+    const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+    const tasks = Array.isArray(raw.tasks) ? raw.tasks : [];
+    const completed = tasks.filter(t => t && (t.status === 'done' || t.status === 'completed' || t.status === 'complete')).length;
+    return { total: tasks.length, completed };
+  } catch (e) {
+    return { total: 0, completed: 0 };
+  }
 }
 
 async function main() {
-  const projectRoot = process.cwd();
+  const rootDir = process.cwd();
   const args = parseArgs(process.argv.slice(2));
-
-  // Accept story via: positional, --story <path>, or @<path>
-  const storyArg = args.story || args._[0] || null;
-  if (!storyArg) {
-    console.error(chalk.red('DevX3 requires a story path.'));
-    console.log('Usage: /dev *devx3 <story-path>');
-    console.log('   or: /dev *devx3 --story docs/stories/<story>.md');
-    process.exit(1);
+  if (!args.story) {
+    console.error('Usage: dev-x3 --story <docs/stories/story.md> [--verbose]');
+    process.exit(2);
   }
-  const storyPath = resolveStoryPath(projectRoot, storyArg);
+
+  const storyPath = path.isAbsolute(args.story) ? args.story : path.join(rootDir, args.story);
   if (!fs.existsSync(storyPath)) {
-    console.error(chalk.red('Story file not found:'), path.relative(projectRoot, storyPath));
-    process.exit(1);
+    console.error(chalk.red('Story not found:'), path.relative(rootDir, storyPath));
+    process.exit(2);
   }
 
-  console.log(chalk.bold(`🧭 DevX3 – Triple-pass implementation for: ${path.relative(projectRoot, storyPath)}`));
-
-  const results = [];
-  const iters = Number(args.iterations || 3);
-  for (let i = 1; i <= iters; i++) {
-    console.log('\n' + chalk.cyan(`====== Iteration ${i}/${iters}: Develop & Implement ======`));
-
-    // Run the standard develop + implement flow for the given story
-    const devRes = runNode(path.join('tools', 'dev-develop-story.js'), ['--story', storyPath], projectRoot);
-    const devCode = devRes.status ?? devRes.code ?? 1;
-    if (devCode !== 0) {
-      console.log(chalk.red(`❌ Iteration ${i}: development/implementation step reported failure (code ${devCode}).`));
-    } else {
-      console.log(chalk.green(`✅ Iteration ${i}: development/implementation completed.`));
-    }
-
-    console.log(chalk.cyan(`\n------ Iteration ${i}: Running story-scoped tests (TDD) ------`));
-    let testsOk = true;
-    try {
-      const tRes = runNode(path.join('tools', 'dev', 'run-story-tests.js'), ['--story', storyPath], projectRoot);
-      const tCode = tRes.status ?? tRes.code ?? 1;
-      testsOk = tCode === 0;
-    } catch (e) {
-      console.log(chalk.red('Test execution failed:'), e.message);
-      testsOk = false;
-    }
-
-    results.push({ iteration: i, devCode, testsOk });
-
-    if (!testsOk) {
-      console.log(chalk.yellow('⚠️  Tests failed on this iteration. Proceeding to next pass to capture/fix gaps.'));
-    } else {
-      console.log(chalk.green('✓ Tests passed on this iteration.'));
-    }
-
-    // Stricter handover semantics: reset Dev working memory between passes
-    if (i < iters && args.handover) {
-      try {
-        console.log(chalk.dim('\n🔄 Handover: resetting Dev working memory...'));
-        const agentsIndexPath = path.join(projectRoot, 'semad-core', 'agents', 'index.js');
-        const { clearWorkingMemory } = require(agentsIndexPath);
-        await clearWorkingMemory('dev');
-        // Also clear simple progress/error artifacts to simulate a fresh Dev
-        const aiDir = path.join(projectRoot, '.ai');
-        const progressFile = path.join(aiDir, 'dev_progress.json');
-        const errorFile = path.join(aiDir, 'dev_error.json');
-        try { if (fs.existsSync(progressFile)) fs.unlinkSync(progressFile); } catch (_) {}
-        try { if (fs.existsSync(errorFile)) fs.unlinkSync(errorFile); } catch (_) {}
-      } catch (e) {
-        console.log(chalk.yellow('⚠️  Handover memory reset encountered an issue:'), e.message);
-      }
-    }
+  let contract;
+  try {
+    ({ contract } = loadStoryContract(storyPath));
+  } catch (error) {
+    console.error(chalk.red('Unable to load StoryContract:'), error.message);
+    process.exit(3);
   }
 
-  // Summarize
-  const passes = results.filter(r => r.devCode === 0 && r.testsOk).length;
-  const allPass = passes === iters;
-  console.log('\n' + chalk.bold('==== DevX3 Summary ===='));
-  results.forEach(r => {
-    console.log(`- Iteration ${r.iteration}: dev=${r.devCode === 0 ? 'ok' : 'fail'}, tests=${r.testsOk ? 'ok' : 'fail'}`);
+  const storyId = normalizeStoryId(contract, storyPath);
+  const runner = new DevNextStoryRunner(rootDir);
+  const artifacts = runner.computeArtifactPaths(storyId);
+  const progressPath = path.join(rootDir, '.ai', 'dev', `devx3-${storyId}.json`);
+
+  console.log(chalk.bold(`⚙️  DevX3 workflow → ${storyId}`));
+  console.log(`📄 Story: ${path.relative(rootDir, storyPath)}`);
+  console.log('Passes: up to 3 consecutive dev agent executions\n');
+
+  const passResults = [];
+  let finalExit = 0;
+
+  for (let pass = 1; pass <= 3; pass++) {
+    console.log(chalk.blue(`────────────── Pass ${pass} / 3 ──────────────`));
+    const exitCode = await runner.run({
+      auto: true,
+      quiet: true,
+      storyOverride: storyPath,
+      codex: false,
+      verbose: args.verbose || false,
+      finalStatus: 'Ready for Review'
+    });
+
+    const checklist = readJsonSafe(artifacts.checklistPath);
+    const evidence = readJsonSafe(artifacts.acceptanceEvidencePath);
+    const redReport = readJsonSafe(artifacts.redReportPath);
+    const testReport = readJsonSafe(artifacts.greenReportPath);
+    const checklistSummary = summarizeChecklist(checklist);
+    const redSummary = summarizeTests(redReport);
+    const testSummary = summarizeTests(testReport);
+    const acceptanceComplete = Array.isArray(evidence?.acceptance)
+      ? evidence.acceptance.every(item => item && item.verified === true)
+      : false;
+
+    // Present numbered sub-steps with observations and decisions (console-friendly)
+    const rel = p => (p ? path.relative(rootDir, p) : null);
+    const depExists = fs.existsSync(artifacts.dependencyPlanPath);
+    const devTasks = summarizeDevTasks(rootDir);
+    console.log(chalk.bold('Sub-steps:'));
+    console.log(`  1. Dependency plan: ${depExists ? chalk.green('generated') : chalk.red('missing')} ${depExists ? '(' + rel(artifacts.dependencyPlanPath) + ')' : ''}`);
+    console.log(`  2. TDD from acceptanceTestMatrix: red ${redSummary.passed}/${redSummary.total} passed → green ${testSummary.passed}/${testSummary.total} passed`);
+    console.log(`  3. Implementation & validations: acceptance evidence ${evidence ? chalk.green('present') : chalk.red('missing')} ${evidence ? '(' + rel(artifacts.acceptanceEvidencePath) + ')' : ''}`);
+    console.log(`  4. Tracking: tasks completed ${devTasks.completed}/${devTasks.total}; checklist verified ${checklistSummary.total - checklistSummary.pending.length}/${checklistSummary.total}`);
+    console.log(`  5. Outstanding items: ${checklistSummary.pending.length ? chalk.yellow(checklistSummary.pending.join(', ')) : chalk.green('none')}`);
+
+    passResults.push({
+      pass,
+      exitCode,
+      checklistPending: checklistSummary.pending,
+      checklistTotal: checklistSummary.total,
+      tests: testSummary,
+      redTests: redSummary,
+      acceptanceComplete
+    });
+
+    if (exitCode !== 0) {
+      console.log(chalk.red(`Pass ${pass} exited with code ${exitCode}.`));
+      finalExit = exitCode;
+      break;
+    }
+
+    if (acceptanceComplete) {
+      console.log(chalk.green('All acceptance criteria verified; stopping DevX3 early.'));
+      break;
+    }
+
+    finalExit = exitCode;
+  }
+
+  ensureDir(progressPath);
+  const progressPayload = {
+    storyId,
+    storyPath: path.relative(rootDir, storyPath),
+    generatedAt: new Date().toISOString(),
+    passes: passResults
+  };
+  fs.writeFileSync(progressPath, JSON.stringify(progressPayload, null, 2));
+
+  console.log('\nSummary:');
+  passResults.forEach(result => {
+    const status = result.exitCode === 0 ? chalk.green('PASS') : chalk.red('FAIL');
+    const pendingNote = result.checklistPending.length
+      ? chalk.yellow(`pending criteria: ${result.checklistPending.join(', ')}`)
+      : chalk.green('acceptance complete');
+    console.log(`  • Pass ${result.pass}: ${status} (exit ${result.exitCode}) – ${pendingNote}`);
   });
-  if (allPass) {
-    console.log(chalk.green('\n🎉 DevX3 completed: All three passes implemented and tests passed.')); 
-    process.exit(0);
-  } else {
-    console.log(chalk.yellow(`\nDevX3 completed with ${passes}/${iters} clean passes. See logs and .ai/reports for details.`));
-    process.exit(1);
+  console.log(`\nProgress log: ${path.relative(rootDir, progressPath)}`);
+
+  const lastResult = passResults[passResults.length - 1] || { exitCode: 1 };
+  if (passResults.length === 3 && lastResult.checklistPending.length) {
+    console.log(chalk.red('\n❌ Acceptance criteria remain incomplete after three passes.'));
+    console.log(chalk.yellow('Suggested actions: review checklist blockers, inspect test reports, and rerun dependency analysis.'));
+    process.exit(lastResult.exitCode || 1);
   }
+
+  process.exit(lastResult.exitCode || finalExit || 0);
 }
 
 main();

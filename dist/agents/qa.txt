@@ -57,6 +57,8 @@ activation-instructions:
   - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
+  - 'QA RESULTS RULE: Every review MUST replace (not append to) the story''s `## QA Results` section with a fresh, structured summary that includes review date, reviewer identity, decision (Approved/Needs Fixes), prioritized findings, and next steps. Delete any prior QA Results content or duplicate QA Findings sections so the developer only sees the latest guidance.'
+  - 'MANUAL EXECUTION RULE: If automation runners are unavailable, or if the user passes --manual/--llm-only (or similar flags), you MUST perform the entire review manually. Simulate each workflow step (dependency checks, code reading, tests, decision), capture observations, and still update the story''s `## QA Results` section before responding.'
   - STAY IN CHARACTER!
   - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
@@ -99,7 +101,7 @@ story-file-permissions:
   - 'CRITICAL: Your QA review results must be appended in the QA Results section only'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - review {story}: execute the task review-story for the specified story file - requires story path as argument (e.g., *review docs/stories/story-99-1.md) - keep any specified technical-preferences in mind as needed → tracker.log('Review started', 'info') → Record code review completion → Record quality assessment decision → Record quality review patterns as keyfact → tracker.completeCurrentTask('review completed')
+  - review {story}: execute the task review-story for the specified story file - requires story path as argument (e.g., *review docs/stories/story-99-1.md) - keep any specified technical-preferences in mind as needed → tracker.log('Review started', 'info') → Record code review completion → Record quality assessment decision → Record quality review patterns as keyfact → Replace the story's `## QA Results` section with the new findings (remove any prior QA Results/QA Findings content) → tracker.completeCurrentTask('review completed')
   - find-next-for-review: scan docs/stories/ to find the highest sequence story ready for review → display story title and path → ask for confirmation before starting review
   - code-cleanup-analysis: 'Comprehensive code cleanup analysis: finds orphaned files, unused exports, commented code, TODOs/FIXMEs, console logs, debug code, deprecated code, and dead code patterns. Execute find-orphans analysis directly → tracker.log(''Comprehensive cleanup analysis started'', ''info'') → Analyze results and categorize by priority (High: orphaned files & dead code, Medium: commented code & console logs, Low: TODOs) → Generate cleanup recommendations with effort estimates → Create prioritized action plan → Record cleanup analysis completion → Record cleanup priorities decision → Record technical debt items as keyfact → Save detailed report to .ai/cleanup-recommendations.md → tracker.completeCurrentTask(''comprehensive cleanup analysis completed'')'
   - cleanup: Alias for code-cleanup-analysis - comprehensive code quality and cleanup analysis
@@ -161,6 +163,94 @@ StoryContract:
   schemaVersion: "1.0"          # Contract schema version (required by validator)
   story_id: "{{STORY_ID}}"      # Unique story identifier (required)
   epic_id: "{{EPIC_ID}}"        # Parent epic identifier (required)
+
+  # Core story metadata mirrors docs/templates/story-contract-template.yaml
+  story:
+    storyId: "{{STORY_ID}}"          # e.g., ST-auth-001
+    title: "{{STORY_TITLE}}"
+    epicId: "{{EPIC_ID}}"
+    featureId: "{{FEATURE_ID}}"      # Optional: maps to PRD feature ID
+    status: "{{STORY_STATUS_CONTRACT}}"  # draft | in_progress | implemented | verified | done
+    sliceType: "{{STORY_SLICE_TYPE}}"    # flag | probe | int-flow | adhoc
+    owner: "{{STORY_OWNER}}"
+    links:
+      design:
+        {{#STORY_LINKS_DESIGN}}
+        - "{{.}}"
+        {{/STORY_LINKS_DESIGN}}
+      relatedADRs:
+        {{#STORY_LINKS_ADRS}}
+        - "{{.}}"
+        {{/STORY_LINKS_ADRS}}
+
+  traceability:
+    featureId: "{{FEATURE_ID}}"
+    acceptanceCriteriaCovered:
+      {{#TRACE_AC_IDS}}
+      - "{{.}}"
+      {{/TRACE_AC_IDS}}
+    codeTouchpoints:
+      {{#TRACE_CODE_TOUCHPOINTS}}
+      - "{{.}}"
+      {{/TRACE_CODE_TOUCHPOINTS}}
+    testExpectations:
+      {{#TRACE_TEST_EXPECTATIONS}}
+      - "{{.}}"
+      {{/TRACE_TEST_EXPECTATIONS}}
+    prdReqIds:
+      {{#TRACE_PRD_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_PRD_REQ_IDS}}
+    reqIds:
+      {{#TRACE_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_REQ_IDS}}
+    flowIds:
+      {{#TRACE_FLOW_IDS}}
+      - "{{.}}"
+      {{/TRACE_FLOW_IDS}}
+    integrationPointIds:
+      {{#TRACE_INT_IDS}}
+      - "{{.}}"
+      {{/TRACE_INT_IDS}}
+    successCriteriaRefs:
+      {{#TRACE_SC_REFS}}
+      - "{{.}}"
+      {{/TRACE_SC_REFS}}
+    archRefs:
+      {{#TRACE_ARCH_REFS}}
+      - "{{.}}"
+      {{/TRACE_ARCH_REFS}}
+
+  integrationVerification:
+    {{#INTEGRATION_VERIFICATION}}
+    - "{{.}}"
+    {{/INTEGRATION_VERIFICATION}}
+
+  rollbackPlan:
+    steps:
+      {{#ROLLBACK_STEPS}}
+      - "{{.}}"
+      {{/ROLLBACK_STEPS}}
+    verification: "{{ROLLBACK_VERIFICATION}}"
+
+  performanceBudget:
+    p95: "{{PERF_BUDGET_P95}}"
+    p99: "{{PERF_BUDGET_P99}}"
+
+  guardrails:
+    mustDo:
+      {{#GUARDRAILS_MUST_DO}}
+      - "{{.}}"
+      {{/GUARDRAILS_MUST_DO}}
+    outOfScope:
+      {{#GUARDRAILS_OUT_OF_SCOPE}}
+      - "{{.}}"
+      {{/GUARDRAILS_OUT_OF_SCOPE}}
+    notes:
+      {{#GUARDRAIL_NOTES}}
+      - "{{.}}"
+      {{/GUARDRAIL_NOTES}}
   
   # Pre-conditions that must exist before story execution
   preConditions:
@@ -1551,141 +1641,154 @@ module.exports = {
 #!/usr/bin/env node
 
 /**
- * Simple progress tracking CLI for agents
- * Replaces the complex persist-memory-cli.js
+ * Simple progress tracking utility for agents.
+ * Can be invoked as a CLI or required as a module.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Parse command line arguments
-const [operation, agent, ...args] = process.argv.slice(2);
+function ensureDirectories(rootDir) {
+  const aiDir = path.join(rootDir, '.ai');
+  const historyDir = path.join(aiDir, 'history');
 
-// Ensure .ai directory exists
-const aiDir = path.join(process.cwd(), '.ai');
-if (!fs.existsSync(aiDir)) {
-  fs.mkdirSync(aiDir, { recursive: true });
+  if (!fs.existsSync(aiDir)) {
+    fs.mkdirSync(aiDir, { recursive: true });
+  }
+  if (!fs.existsSync(historyDir)) {
+    fs.mkdirSync(historyDir, { recursive: true });
+  }
+
+  return { aiDir, historyDir };
 }
 
-// Simple file-based tracking
-const contextFile = path.join(aiDir, `${agent}_context.json`);
-const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+function loadContext(contextFile) {
+  if (!fs.existsSync(contextFile)) {
+    return {};
+  }
 
-// Ensure history directory exists
-const historyDir = path.join(aiDir, 'history');
-if (!fs.existsSync(historyDir)) {
-  fs.mkdirSync(historyDir, { recursive: true });
-}
-
-// Load current context
-let context = {};
-if (fs.existsSync(contextFile)) {
   try {
-    context = JSON.parse(fs.readFileSync(contextFile, 'utf8'));
-  } catch (e) {
-    context = {};
+    return JSON.parse(fs.readFileSync(contextFile, 'utf8'));
+  } catch (_) {
+    return {};
   }
 }
 
-// Process operation
-const timestamp = new Date().toISOString();
+function trackProgress(operation, agent, ...args) {
+  if (!operation || !agent) {
+    return {
+      success: false,
+      code: 1,
+      message: 'Usage: track-progress.js <operation> <agent> [args...]',
+      operations: ['observation', 'decision', 'keyfact', 'show']
+    };
+  }
 
-switch (operation) {
-  case 'observation': {
-    const raw = args.join(' ');
-    let observation = raw;
-    let meta = {};
-    try {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === 'object' && parsed) {
-        meta = parsed;
-        if (typeof parsed.message === 'string') {
-          observation = parsed.message;
+  const rootDir = process.cwd();
+  const { aiDir } = ensureDirectories(rootDir);
+  const contextFile = path.join(aiDir, `${agent}_context.json`);
+  const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+  const timestamp = new Date().toISOString();
+
+  const context = loadContext(contextFile);
+  let logEntry = null;
+
+  switch (operation) {
+    case 'observation': {
+      const raw = args.join(' ');
+      let observation = raw;
+      let meta = {};
+      try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed) {
+          meta = parsed;
+          if (typeof parsed.message === 'string') {
+            observation = parsed.message;
+          }
         }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    // Update context
-    context.lastObservation = observation;
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const obsEntry = {
-      timestamp,
-      type: 'observation',
-      agent,
-      content: observation,
-      meta
-    };
-    fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
-    
-    console.log(`[${agent}] Observation recorded: ${observation}`);
-    break; }
-    
-  case 'decision': {
-    let decision = args[0];
-    let rationale = args.slice(1).join(' ');
-    try {
-      const parsed = JSON.parse(args.join(' '));
-      if (parsed && typeof parsed === 'object') {
-        if (parsed.decision) decision = parsed.decision;
-        if (parsed.rationale) rationale = parsed.rationale;
+
+      context.lastObservation = observation;
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'observation', agent, content: observation, meta };
+      console.log(`[${agent}] Observation recorded: ${observation}`);
+      break;
+    }
+
+    case 'decision': {
+      let decision = args[0];
+      let rationale = args.slice(1).join(' ');
+      try {
+        const parsed = JSON.parse(args.join(' '));
+        if (parsed && typeof parsed === 'object') {
+          if (parsed.decision) decision = parsed.decision;
+          if (parsed.rationale) rationale = parsed.rationale;
+        }
+      } catch (_) {
+        // keep raw values
       }
-    } catch (_) { /* keep raw pieces */ }
-    
-    // Update context
-    if (!context.decisions) context.decisions = [];
-    context.decisions.push({ decision, rationale, timestamp });
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const decEntry = {
-      timestamp,
-      type: 'decision',
-      agent,
-      decision,
-      rationale
-    };
-    fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
-    
-    console.log(`[${agent}] Decision recorded: ${decision}`);
-    break; }
-    
-  case 'keyfact': {
-    const raw = args.join(' ');
-    let fact = raw;
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object' && parsed.fact) {
-        fact = parsed.fact;
+
+      if (!context.decisions) context.decisions = [];
+      context.decisions.push({ decision, rationale, timestamp });
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'decision', agent, decision, rationale };
+      console.log(`[${agent}] Decision recorded: ${decision}`);
+      break;
+    }
+
+    case 'keyfact': {
+      const raw = args.join(' ');
+      let fact = raw;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.fact) {
+          fact = parsed.fact;
+        }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    
-    // Append to log
-    const factEntry = {
-      timestamp,
-      type: 'keyfact',
-      agent,
-      content: fact
-    };
-    fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
-    
-    console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break; }
-    
-  case 'show':
-    console.log('Current context:', JSON.stringify(context, null, 2));
-    break;
-    
-  default:
-    console.log('Usage: track-progress.js <operation> <agent> [args...]');
-    console.log('Operations: observation, decision, keyfact, show');
-    process.exit(1);
+
+      logEntry = { timestamp, type: 'keyfact', agent, content: fact };
+      console.log(`[${agent}] Key fact recorded: ${fact}`);
+      break;
+    }
+
+    case 'show':
+      console.log('Current context:', JSON.stringify(context, null, 2));
+      return { success: true, context };
+
+    default:
+      return {
+        success: false,
+        code: 1,
+        message: 'Usage: track-progress.js <operation> <agent> [args...]',
+        operations: ['observation', 'decision', 'keyfact', 'show']
+      };
+  }
+
+  if (logEntry) {
+    fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
+  }
+
+  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+  return { success: true, context };
 }
 
-// Save updated context
-if (operation !== 'show') {
-  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+if (require.main === module) {
+  const [operation, agent, ...args] = process.argv.slice(2);
+  const result = trackProgress(operation, agent, ...args);
+  if (!result.success) {
+    console.log(result.message);
+    if (result.operations) {
+      console.log(`Operations: ${result.operations.join(', ')}`);
+    }
+    process.exit(result.code || 1);
+  }
 }
+
+module.exports = trackProgress;
 ==================== END: .semad-core/utils/track-progress.js ====================
 
 ==================== START: .semad-core/utils/simple-task-tracker.js ====================

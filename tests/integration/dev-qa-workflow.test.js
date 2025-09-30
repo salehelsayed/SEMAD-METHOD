@@ -10,8 +10,6 @@ const fs = require('fs').promises;
 const yaml = require('js-yaml');
 const WorkflowExecutor = require('../../semad-core/utils/workflow-executor');
 const AgentPermissionsValidator = require('../../semad-core/utils/agent-permissions');
-const { expect } = require('chai');
-const sinon = require('sinon');
 
 describe('Dev↔QA Workflow Integration', () => {
   let workflowExecutor;
@@ -41,29 +39,29 @@ describe('Dev↔QA Workflow Integration', () => {
   describe('Permission Enforcement', () => {
     it('should prevent QA agent from modifying code files', () => {
       const validation = permissionsValidator.validateFileModification('qa', '/src/index.js');
-      expect(validation.allowed).to.be.false;
-      expect(validation.reason).to.include('read-only permissions');
+      expect(validation.allowed).toBe(false);
+      expect(validation.reason).toContain('read-only permissions');
     });
     
     it('should allow QA agent to update QA Results section', () => {
       const validation = permissionsValidator.validateStorySectionModification('qa', 'qa-results');
-      expect(validation.allowed).to.be.true;
+      expect(validation.allowed).toBe(true);
     });
     
     it('should prevent QA agent from updating Dev sections', () => {
       const validation = permissionsValidator.validateStorySectionModification('qa', 'dev-agent-record');
-      expect(validation.allowed).to.be.false;
-      expect(validation.reason).to.include('NOT allowed');
+      expect(validation.allowed).toBe(false);
+      expect(validation.reason).toContain('NOT allowed');
     });
     
     it('should allow Dev agent to modify code files', () => {
       const validation = permissionsValidator.validateFileModification('dev', '/src/feature.js');
-      expect(validation.allowed).to.be.true;
+      expect(validation.allowed).toBe(true);
     });
     
     it('should allow Dev agent to update task checkboxes', () => {
       const validation = permissionsValidator.validateStorySectionModification('dev', 'tasks-subtasks');
-      expect(validation.allowed).to.be.true;
+      expect(validation.allowed).toBe(true);
     });
   });
   
@@ -74,13 +72,13 @@ describe('Dev↔QA Workflow Integration', () => {
       };
       
       // Mock callbacks
-      const devCallback = sinon.spy(async (step, ctx) => ({
+      const devCallback = jest.fn(async (step, ctx) => ({
         filesModified: ['src/feature.js'],
         testsWritten: ['tests/feature.test.js'],
         success: true
       }));
       
-      const qaCallback = sinon.spy(async (step, ctx) => ({
+      const qaCallback = jest.fn(async (step, ctx) => ({
         approved: false,
         issues: ['Missing error handling', 'Test coverage below threshold'],
         recommendations: [
@@ -98,12 +96,12 @@ describe('Dev↔QA Workflow Integration', () => {
       const result = await workflowExecutor.execute('development-flow', context);
       
       // Verify Dev was called
-      expect(devCallback.calledOnce).to.be.true;
-      expect(devCallback.firstCall.args[0].agent).to.equal('dev');
+      expect(devCallback).toHaveBeenCalledTimes(1);
+      expect(devCallback.mock.calls[0][0].agent).toBe('dev');
       
       // Verify QA was called
-      expect(qaCallback.calledOnce).to.be.true;
-      expect(qaCallback.firstCall.args[0].agent).to.equal('qa');
+      expect(qaCallback).toHaveBeenCalledTimes(1);
+      expect(qaCallback.mock.calls[0][0].agent).toBe('qa');
     });
     
     it('should iterate when QA finds issues', async () => {
@@ -115,7 +113,7 @@ describe('Dev↔QA Workflow Integration', () => {
       let qaCallCount = 0;
       
       // Mock callbacks with iteration logic
-      const devCallback = sinon.spy(async (step, ctx) => {
+      const devCallback = jest.fn(async (step, ctx) => {
         devCallCount++;
         return {
           filesModified: ['src/feature.js'],
@@ -124,7 +122,7 @@ describe('Dev↔QA Workflow Integration', () => {
         };
       });
       
-      const qaCallback = sinon.spy(async (step, ctx) => {
+      const qaCallback = jest.fn(async (step, ctx) => {
         qaCallCount++;
         // Approve on second review
         const approved = qaCallCount > 1;
@@ -144,13 +142,12 @@ describe('Dev↔QA Workflow Integration', () => {
       const result = await workflowExecutor.execute('development-flow', context);
       
       // Verify multiple iterations occurred
-      expect(devCallCount).to.be.at.least(2);
-      expect(qaCallCount).to.be.at.least(2);
-      
-      // Verify QA feedback was passed to Dev
-      const devSecondCall = devCallback.getCall(1);
-      expect(devSecondCall.args[1]).to.have.property('qaFeedback');
-      expect(devSecondCall.args[1].qaFeedback.issues).to.include('Missing validation');
+      expect(devCallCount).toBeGreaterThanOrEqual(2);
+      expect(qaCallCount).toBeGreaterThanOrEqual(2);
+
+      const devSecondCall = devCallback.mock.calls[1];
+      expect(devSecondCall[1]).toHaveProperty('qaFeedback');
+      expect(devSecondCall[1].qaFeedback.issues).toContain('Missing validation');
     });
     
     it('should stop after maximum iterations', async () => {
@@ -159,8 +156,8 @@ describe('Dev↔QA Workflow Integration', () => {
       };
       
       // Mock callbacks - QA never approves
-      const devCallback = sinon.spy(async () => ({ success: true }));
-      const qaCallback = sinon.spy(async () => ({
+      const devCallback = jest.fn(async () => ({ success: true }));
+      const qaCallback = jest.fn(async () => ({
         approved: false,
         issues: ['Persistent issue']
       }));
@@ -175,8 +172,8 @@ describe('Dev↔QA Workflow Integration', () => {
       const result = await workflowExecutor.execute('development-flow', context);
       
       // Verify it stopped at max iterations
-      expect(devCallback.callCount).to.be.at.most(3);
-      expect(qaCallback.callCount).to.be.at.most(3);
+      expect(devCallback.mock.calls.length).toBeLessThanOrEqual(3);
+      expect(qaCallback.mock.calls.length).toBeLessThanOrEqual(3);
     });
   });
   
@@ -189,12 +186,12 @@ describe('Dev↔QA Workflow Integration', () => {
       await fs.writeFile(testFilePath, 'test content');
       
       const content = qaOps.readFile(testFilePath);
-      expect(content).to.equal('test content');
+      expect(content).toBe('test content');
       
       // Test write operation (should fail)
       expect(() => {
         qaOps.writeFile(testFilePath, 'modified content');
-      }).to.throw('Permission denied');
+      }).toThrow('Permission denied');
       
       // Clean up
       await fs.unlink(testFilePath);
@@ -209,7 +206,7 @@ describe('Dev↔QA Workflow Integration', () => {
       devOps.writeFile(testFilePath, 'dev content');
       
       const content = await fs.readFile(testFilePath, 'utf8');
-      expect(content).to.equal('dev content');
+      expect(content).toBe('dev content');
       
       // Clean up
       await fs.unlink(testFilePath);
@@ -223,12 +220,12 @@ describe('Dev↔QA Workflow Integration', () => {
       // Test updating QA Results section (should succeed)
       expect(() => {
         qaOps.modifyStorySection(testStoryPath, 'qa-results', '## QA Results\nReview completed');
-      }).to.not.throw();
+      }).not.toThrow();
       
       // Test updating Dev section (should fail)
       expect(() => {
         qaOps.modifyStorySection(testStoryPath, 'dev-agent-record', 'Should not work');
-      }).to.throw('Permission denied');
+      }).toThrow('Permission denied');
     });
     
     it('should track Dev and QA updates separately', async () => {
@@ -248,8 +245,8 @@ describe('Dev↔QA Workflow Integration', () => {
       const devSection = story.sections.find(s => s.id === 'dev-agent-record');
       const qaSection = story.sections.find(s => s.id === 'qa-results');
       
-      expect(devSection.content).to.include('Implementation complete');
-      expect(qaSection.content).to.include('Needs fixes');
+      expect(devSection.content).toContain('Implementation complete');
+      expect(qaSection.content).toContain('Needs fixes');
     });
   });
 });

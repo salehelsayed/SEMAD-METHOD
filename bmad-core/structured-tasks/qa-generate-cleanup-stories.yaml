@@ -12,7 +12,7 @@ inputs:
     required: false
     default: docs/stories
   grouping:
-    description: Story grouping strategy: file | folder | symbol (default: file)
+    description: "Story grouping strategy: file | folder | symbol (default: file)"
     type: string
     required: false
     enum: [file, folder, symbol]
@@ -44,11 +44,11 @@ steps:
     name: Generate Stories
     description: Create Story files with StoryContract and precise tasks for each item.
     actions:
-      - description: For each selected item create a story at `{storiesDir}/cleanup-<n>.story.md` with
+      - description: "For each selected item create a story at `{storiesDir}/cleanup-<n>.story.md` with"
         elicit: false
-      - description: 'StoryContract.story.sliceType = adhoc; omit integrationPointIds; include acceptance that tests remain green and no behavior change'
+      - description: "StoryContract.story.sliceType = adhoc; omit integrationPointIds; include acceptance that tests remain green and no behavior change"
         elicit: false
-      - description: 'Tasks: delete unused file OR remove unused export symbol; update imports; run lint; run tests; update File List'
+      - description: "Tasks: delete unused file OR remove unused export symbol; update imports; run lint; run tests; update File List"
         elicit: false
       - description: Add rollback notes (git revert reference) and scope caveats
         elicit: false

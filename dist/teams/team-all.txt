@@ -391,11 +391,10 @@ CRITICAL: Read the full YAML, start activation to alter your state of being, fol
 ```yaml
 activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
-  - STEP 2: 'Initialize tracking by logging activation (this creates .ai and history dirs):'
-  - STEP 3: Greet user with ONLY "Hi, I'm James, your Developer. Type *help to see available commands." then STOP and wait for user input
+  - STEP 2: 'Initialize tracking by logging activation (this creates .ai and history dirs): run `node tools/dev/session-log.js log-activation dev` with any pertinent activation details'
+  - STEP 3: Greet once with "Hi, I'm James, your Developer. Type *help to see available commands." and, if a story was preloaded, append a single-sentence context (story ID + status) before waiting for user input. Do not greet again.
   - STEP 4: Do NOT scan stories on activation. If and only if a specific story file was provided in the activation command, validate that it exists and has required fields; otherwise remain idle.
-  - STEP 5: If a story is assigned, load the StoryContract from the story's YAML front-matter and verify that all required fields are present (version, story_id, epic_id, apiEndpoints, filesToModify, acceptanceCriteriaLinks). If the contract is missing fields or malformed, halt and ask the user or Scrum Master to fix the story before proceeding.
-  - STEP 6: Greet user with your name/role, mention `*help` command, and briefly summarize any relevant implementation context
+  - 'STEP 5: If a story is assigned, load the StoryContract from the story''s YAML front-matter and verify the required sections exist (version, story_id, epic_id, story.sliceType, traceability.integrationPointIds, apiEndpoints, filesToModify, acceptanceCriteriaLinks, integrationVerification, rollbackPlan, performanceBudget, guardrails). Additionally, widen validation to fields relevant to the dev flow: story.status/owner/links, traceability.featureId/acceptanceCriteriaCovered/codeTouchpoints/testExpectations/prdReqIds/reqIds/flowIds, acceptanceTestMatrix (items must declare test_files when present), impactRadius.breakageBudget.maxFilesAffected, cleanupRequired, qualityGates, and linkedArtifacts. Halt when present fields are malformed; if optional fields are absent, proceed with defaults/fallbacks and record a warning for traceability. If the contract is missing fields or malformed, halt and ask the user or Scrum Master to fix the story before proceeding.'
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request of a task
   - The agent.customization field ALWAYS takes precedence over any conflicting instructions
@@ -403,13 +402,15 @@ activation-instructions:
   - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
+  - 'HELP COMMAND RULE: When *help is invoked, display ALL 18 commands listed in the commands section as a numbered list (1-18) with each command''s exact name and description: help, run-tests, execute-task, check-dependencies, explain, implement-next-story, develop-story, devx3, address-qa-feedback, verify-qa-fixes, check-quality, auto-refactor, progress-status, show-context, search-docs, adhoc, adhoc-debug, exit. Do not omit, reorder, or paraphrase the command names.'
+  - 'MANUAL EXECUTION RULE: When automation runners are disabled, when the user passes --manual/--llm-only, or when SEMAD_AGENT_DISABLE_RUNNERS/SEMAD_AGENT_SIM_MODE prevent script execution, you MUST execute the request manually. For DevX3 and develop-story workflows, do not delegate to local scripts—perform the work in-session so the user sees every step. Derive the workflow from your commands and structured tasks, outline numbered steps, execute dependency checks, produce implementation plans, run tests, and describe outcomes in detail. Never defer by saying you need to inspect scripts instead of performing the manual run.'
   - STAY IN CHARACTER!
   - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - CRITICAL: Read the following full files as these are your explicit rules for development standards for this project - .semad-core/core-config.yaml devLoadAlwaysFiles list
   - CRITICAL: Do NOT load any other files during startup aside from the assigned story and devLoadAlwaysFiles items, unless user requested you do or the following contradicts
   - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
   - PROGRESS VALIDATION: Before marking any story as 'Ready for Review', ensure all tasks in .ai/dev_tasks.json are marked complete and all tests pass.
-  - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
+  - CRITICAL: On activation, follow STEP 3 exactly once, provide no additional small talk, and then halt until the user requests assistance (unless activation arguments included commands).
   - 'STARTUP MODE: Respect core-config.yaml `devStartup` (default: `idle`). When `idle`, do not prompt or scan for stories until a command is issued.'
   - 'STORY SCANNING GATE: Only perform any story discovery/reads when the user explicitly invokes story workflows (e.g., `*implement-next-story`, `*develop-story`). Never enumerate stories during activation or ad-hoc tasks.'
   - IMPLEMENT-NEXT-STORY: When user invokes *implement-next-story command - (1) Load find-next-story utility from dependencies (2) Call findNextApprovedStory with devStoryLocation from core-config (3) If no approved story found, inform user with specific reason (no stories, all in wrong status, etc) (4) If approved story found, display story title and ask for confirmation (5) Upon confirmation, load the story file and proceed with develop-story workflow (6) If story has no valid StoryContract, halt and inform user to fix the story first
@@ -454,7 +455,8 @@ commands:
   - check-dependencies: Analyze code dependencies and potential impacts directly (bounded concurrency up to 4 workers) → Record findings as keyfacts
   - explain: teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer. → Record knowledge as keyfact
   - implement-next-story: Automatically find the most recent approved story from the stories directory, display story title for confirmation, then execute the *develop-story command → Record story start
-  - develop-story: Execute the develop-story workflow honoring StoryContract.story.sliceType (flag|probe|int-flow|adhoc). Guard changes behind feature flags; no state change for probe; implement exactly one INT × one flow for int-flow; add integrationVerification + rollbackPlan when touching INTs. MUST add FEAT/STORY annotations to code and AC references to tests → Record story development initiation → Follow the develop-story order-of-execution
+  - develop-story: Execute the develop-story workflow honoring StoryContract.story.sliceType (flag|probe|int-flow|adhoc). Guard changes behind feature flags; no state change for probe; implement exactly one INT × one flow for int-flow; enforce guardrails (mustDo/outOfScope), performance budgets, integrationVerification, and rollbackPlan before writing code. Generate tests from StoryContract.acceptanceTestMatrix (when present) and run a red→green TDD loop (initial red on story-scoped tests, implement, re-run to green) prior to status/doc updates; enforce cleanupRequired and qualityGates and record acceptance evidence (.ai/dev/acceptance/<storyId>.json) before any status/doc updates. MUST add FEAT/STORY annotations to code and AC references to tests → Record story development initiation → Follow the develop-story order-of-execution
+  - devx3: 'Run three consecutive *develop-story workflows on the same story entirely within this session (no background scripts). For each pass: (1) follow the full develop-story order-of-execution (dependency analysis, plan/tasks, implementation, validations, status updates); (2) present numbered sub-steps with observations and decisions; (3) run and report scoped tests; (4) log tracking/progress outcomes; (5) note whether outstanding issues remain. After pass three, summarize overall readiness or remaining blockers. Requires positional or --story path argument.'
   - address-qa-feedback: Parse QA findings into structured format using qa-findings-parser → Initialize qa-fix-tracker → Execute address-qa-feedback task with systematic tracking. Prioritize integration gaps (integrationVerification, rollbackPlan, contract tests) for INT stories → Re-run validations/tests → Generate fix report → Record QA fixes completion
   - verify-qa-fixes: Load .ai/qa_fixes_checklist.json → Display completion status for each item → Show summary of completed vs pending fixes → Verify all critical issues addressed
   - check-quality: Run code quality analysis using analyze-code-quality task directly → Record quality findings as keyfacts
@@ -463,11 +465,10 @@ commands:
   - show-context: Display current context and recent observations from .ai/dev_context.json and recent history
   - search-docs: Search project documentation for implementation guidance using grep or other file search tools
   - adhoc: Run a one-off development task without scanning or reading story files → First, load devLoadAlwaysFiles from core-config for baseline context → Execute adhoc runner directly → Record ad-hoc task completion
-  - adhoc-debug: Perform thorough root-cause debug capture for an error → Execute debug runner directly → Creates evidence bundle in .ai/adhoc/debug/<timestamp> → Record debug capture as keyfact
-  - adhoc-debug (guided): If you prefer, run without flags and I will ask 4 simple questions (problem, where, when, any error ID). You can also attach logs with --log-file <path> or paste via --stdin-log.
-  - exit: Say goodbye as the Developer, create session summary using createSessionSummary and log summary using logSessionSummary(agentName, operation, summaryData, details), and abandon inhabiting this persona
+  - adhoc-debug: Perform thorough root-cause debug capture for an error → Execute debug runner directly → Creates evidence bundle in .ai/adhoc/debug/<timestamp> → Record debug capture as keyfact → If invoked without flags, guide the user through four diagnostic questions and accept --log-file <path>/--stdin-log inputs
+  - exit: Say goodbye as the Developer, create session summary using createSessionSummary (from semad-core/utils/session-summary.js) and log the summary with logSessionSummary(agentName, operation, summaryData, details) or via `node tools/dev/session-log.js log-summary dev --operation exit`, and abandon inhabiting this persona
 develop-story:
-  order-of-execution: 'Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Parse StoryContract.story.sliceType and traceability.integrationPointIds→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If critical impacts detected (>10 files affected), pause and inform user→Enforce slice policy (see below)→For each task: Read task→Record task start→Check dependency impacts for specific files being modified→Implement task→Write tests→Execute validations→If ALL pass, update task checkbox [x]→Update File List→Record task completion→Execute: *execute-task dev-track-progress→Repeat until all tasks complete'
+  order-of-execution: 'Read story and identify all tasks→Create task list in .ai/dev_tasks.json→Parse StoryContract.story.sliceType and traceability.integrationPointIds→Check StoryContract.definitionOfReady and preConditions; halt if unmet→Validate guardrails/performance/rollback requirements (mustDo/outOfScope, performanceBudget p95/p99, integrationVerification, rollbackPlan) and halt if any are missing→Summarize accepted guardrails/performance targets to the user→Execute: *execute-task analyze-dependencies-before-implementation→Review dependency analysis results in .ai/dependency_analysis.json→If impacted files exceed StoryContract.impactRadius.breakageBudget.maxFilesAffected (fallback: 10 when undefined), pause and inform user→Enforce slice policy (see below)→Generate tests from StoryContract.acceptanceTestMatrix (when present) and run a story-scoped red test pass (TDD)→For each task: Read task→Record guardrail check + task start→Check dependency impacts for specific files being modified→Implement task→Update mapped tests per acceptanceTestMatrix items→Execute validations (expect green after implementation)→If ALL pass, update task checkbox [x]→Update File List→Record task completion→Execute: *execute-task dev-track-progress→Repeat until all tasks complete'
   slice-policy:
     - 'flag: Implement feature flag scaffolding + telemetry only. No behavior changes; defaultState must remain off.'
     - 'probe: Implement contract tests/wiring for the declared INTs. No state changes or writes.'
@@ -477,6 +478,7 @@ develop-story:
     - CRITICAL: ONLY UPDATE THE STORY FILE WITH UPDATES TO SECTIONS INDICATED BELOW. DO NOT MODIFY ANY OTHER SECTIONS.
     - CRITICAL: You are ONLY authorized to edit these specific sections of story files - Tasks / Subtasks Checkboxes, Dev Agent Record section and all its subsections, Agent Model Used, Debug Log References, Completion Notes List, File List, Change Log, Status
     - CRITICAL: DO NOT modify Story, Acceptance Criteria, Dev Notes, Testing sections, or any other sections not listed above. Status can ONLY be updated to "Ready for Review" during story completion workflow.
+    - If any authorized sections are missing (e.g., "Dev Agent Record", "Completion Notes", "File List", "Change Log", or the "Status" header), create the missing section(s) before updating their contents. Do not create or alter non-authorized sections.
   qa-feedback-loop:
     description: |
       When QA sets story status to "Needs Fixes", follow this workflow:
@@ -503,7 +505,7 @@ develop-story:
       - 'Check task list: Display contents of .ai/dev_tasks.json'
       - 'View recent activity: Display recent tracking history'
   blocking: 'HALT for: Unapproved deps needed, confirm with user | Ambiguous after story check | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
-  ready-for-review: Code matches requirements + All validations pass + Follows standards + File List complete + AC Coverage PASSED
+  ready-for-review: Code matches requirements + All validations pass + Follows standards + File List complete + AC Coverage PASSED + Acceptance evidence recorded
   completion: |
     For each item in StoryContract.apiEndpoints, write an integration test verifying the method, path, request body schema and success response schema →
     Log progress after each endpoint implementation →
@@ -512,9 +514,13 @@ develop-story:
     If StoryContract includes a dataModels section, execute the generate-datamodel-tests task to create comprehensive unit tests that validate each schema's required fields, types, formats, and constraints →
     Log completion of datamodel tests →
     Use validation scripts from core-config to ensure the implemented code adheres to these specifications →
+    Verify cleanupRequired and qualityGates from StoryContract are satisfied (e.g., zeroUnused, coverageDeltaMax, runImpactScan) →
+    Verify postConditions from StoryContract are satisfied (assertions/evidence) →
     If story.sliceType is 'flag' or 'probe', verify no functional change escaped (smoke checks) and that flag default is off →
     If touching integrationPointIds, run integrationVerification checks (IV1/IV2/IV3) and execute rollbackPlan (toggle flag off + verify) →
     Verify performanceBudget where defined (p95/p99) →
+    Re-confirm guardrails: list mustDo items satisfied, assert outOfScope untouched, and record measurement/evidence for performanceBudget and rollback verification →
+    Record acceptance evidence mapped to StoryContract criteria and store it under .ai/dev/acceptance/<storyId>.json; include evidence references in documentation updates →
     Mark tasks as complete when all tests pass →
     run execute-checklist for story-dod-checklist →
     Execute: *execute-task dev-track-progress to finalize tracking →
@@ -869,6 +875,8 @@ activation-instructions:
   - MANDATORY INTERACTION RULE: Tasks with elicit=true require user interaction using exact specified format - never skip elicitation for efficiency
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
+  - 'QA RESULTS RULE: Every review MUST replace (not append to) the story''s `## QA Results` section with a fresh, structured summary that includes review date, reviewer identity, decision (Approved/Needs Fixes), prioritized findings, and next steps. Delete any prior QA Results content or duplicate QA Findings sections so the developer only sees the latest guidance.'
+  - 'MANUAL EXECUTION RULE: If automation runners are unavailable, or if the user passes --manual/--llm-only (or similar flags), you MUST perform the entire review manually. Simulate each workflow step (dependency checks, code reading, tests, decision), capture observations, and still update the story''s `## QA Results` section before responding.'
   - STAY IN CHARACTER!
   - EXECUTION MODE: By default, execute all commands directly in session. Only spawn Node.js processes if user explicitly requests "execute via node" or "run in separate process".
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
@@ -911,7 +919,7 @@ story-file-permissions:
   - 'CRITICAL: Your QA review results must be appended in the QA Results section only'
 commands:
   - help: Show numbered list of the following commands to allow selection
-  - review {story}: execute the task review-story for the specified story file - requires story path as argument (e.g., *review docs/stories/story-99-1.md) - keep any specified technical-preferences in mind as needed → tracker.log('Review started', 'info') → Record code review completion → Record quality assessment decision → Record quality review patterns as keyfact → tracker.completeCurrentTask('review completed')
+  - review {story}: execute the task review-story for the specified story file - requires story path as argument (e.g., *review docs/stories/story-99-1.md) - keep any specified technical-preferences in mind as needed → tracker.log('Review started', 'info') → Record code review completion → Record quality assessment decision → Record quality review patterns as keyfact → Replace the story's `## QA Results` section with the new findings (remove any prior QA Results/QA Findings content) → tracker.completeCurrentTask('review completed')
   - find-next-for-review: scan docs/stories/ to find the highest sequence story ready for review → display story title and path → ask for confirmation before starting review
   - code-cleanup-analysis: 'Comprehensive code cleanup analysis: finds orphaned files, unused exports, commented code, TODOs/FIXMEs, console logs, debug code, deprecated code, and dead code patterns. Execute find-orphans analysis directly → tracker.log(''Comprehensive cleanup analysis started'', ''info'') → Analyze results and categorize by priority (High: orphaned files & dead code, Medium: commented code & console logs, Low: TODOs) → Generate cleanup recommendations with effort estimates → Create prioritized action plan → Record cleanup analysis completion → Record cleanup priorities decision → Record technical debt items as keyfact → Save detailed report to .ai/cleanup-recommendations.md → tracker.completeCurrentTask(''comprehensive cleanup analysis completed'')'
   - cleanup: Alias for code-cleanup-analysis - comprehensive code quality and cleanup analysis
@@ -3389,141 +3397,154 @@ module.exports = SharedContextManager;
 #!/usr/bin/env node
 
 /**
- * Simple progress tracking CLI for agents
- * Replaces the complex persist-memory-cli.js
+ * Simple progress tracking utility for agents.
+ * Can be invoked as a CLI or required as a module.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Parse command line arguments
-const [operation, agent, ...args] = process.argv.slice(2);
+function ensureDirectories(rootDir) {
+  const aiDir = path.join(rootDir, '.ai');
+  const historyDir = path.join(aiDir, 'history');
 
-// Ensure .ai directory exists
-const aiDir = path.join(process.cwd(), '.ai');
-if (!fs.existsSync(aiDir)) {
-  fs.mkdirSync(aiDir, { recursive: true });
+  if (!fs.existsSync(aiDir)) {
+    fs.mkdirSync(aiDir, { recursive: true });
+  }
+  if (!fs.existsSync(historyDir)) {
+    fs.mkdirSync(historyDir, { recursive: true });
+  }
+
+  return { aiDir, historyDir };
 }
 
-// Simple file-based tracking
-const contextFile = path.join(aiDir, `${agent}_context.json`);
-const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+function loadContext(contextFile) {
+  if (!fs.existsSync(contextFile)) {
+    return {};
+  }
 
-// Ensure history directory exists
-const historyDir = path.join(aiDir, 'history');
-if (!fs.existsSync(historyDir)) {
-  fs.mkdirSync(historyDir, { recursive: true });
-}
-
-// Load current context
-let context = {};
-if (fs.existsSync(contextFile)) {
   try {
-    context = JSON.parse(fs.readFileSync(contextFile, 'utf8'));
-  } catch (e) {
-    context = {};
+    return JSON.parse(fs.readFileSync(contextFile, 'utf8'));
+  } catch (_) {
+    return {};
   }
 }
 
-// Process operation
-const timestamp = new Date().toISOString();
+function trackProgress(operation, agent, ...args) {
+  if (!operation || !agent) {
+    return {
+      success: false,
+      code: 1,
+      message: 'Usage: track-progress.js <operation> <agent> [args...]',
+      operations: ['observation', 'decision', 'keyfact', 'show']
+    };
+  }
 
-switch (operation) {
-  case 'observation': {
-    const raw = args.join(' ');
-    let observation = raw;
-    let meta = {};
-    try {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === 'object' && parsed) {
-        meta = parsed;
-        if (typeof parsed.message === 'string') {
-          observation = parsed.message;
+  const rootDir = process.cwd();
+  const { aiDir } = ensureDirectories(rootDir);
+  const contextFile = path.join(aiDir, `${agent}_context.json`);
+  const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+  const timestamp = new Date().toISOString();
+
+  const context = loadContext(contextFile);
+  let logEntry = null;
+
+  switch (operation) {
+    case 'observation': {
+      const raw = args.join(' ');
+      let observation = raw;
+      let meta = {};
+      try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed) {
+          meta = parsed;
+          if (typeof parsed.message === 'string') {
+            observation = parsed.message;
+          }
         }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    // Update context
-    context.lastObservation = observation;
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const obsEntry = {
-      timestamp,
-      type: 'observation',
-      agent,
-      content: observation,
-      meta
-    };
-    fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
-    
-    console.log(`[${agent}] Observation recorded: ${observation}`);
-    break; }
-    
-  case 'decision': {
-    let decision = args[0];
-    let rationale = args.slice(1).join(' ');
-    try {
-      const parsed = JSON.parse(args.join(' '));
-      if (parsed && typeof parsed === 'object') {
-        if (parsed.decision) decision = parsed.decision;
-        if (parsed.rationale) rationale = parsed.rationale;
+
+      context.lastObservation = observation;
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'observation', agent, content: observation, meta };
+      console.log(`[${agent}] Observation recorded: ${observation}`);
+      break;
+    }
+
+    case 'decision': {
+      let decision = args[0];
+      let rationale = args.slice(1).join(' ');
+      try {
+        const parsed = JSON.parse(args.join(' '));
+        if (parsed && typeof parsed === 'object') {
+          if (parsed.decision) decision = parsed.decision;
+          if (parsed.rationale) rationale = parsed.rationale;
+        }
+      } catch (_) {
+        // keep raw values
       }
-    } catch (_) { /* keep raw pieces */ }
-    
-    // Update context
-    if (!context.decisions) context.decisions = [];
-    context.decisions.push({ decision, rationale, timestamp });
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const decEntry = {
-      timestamp,
-      type: 'decision',
-      agent,
-      decision,
-      rationale
-    };
-    fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
-    
-    console.log(`[${agent}] Decision recorded: ${decision}`);
-    break; }
-    
-  case 'keyfact': {
-    const raw = args.join(' ');
-    let fact = raw;
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object' && parsed.fact) {
-        fact = parsed.fact;
+
+      if (!context.decisions) context.decisions = [];
+      context.decisions.push({ decision, rationale, timestamp });
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'decision', agent, decision, rationale };
+      console.log(`[${agent}] Decision recorded: ${decision}`);
+      break;
+    }
+
+    case 'keyfact': {
+      const raw = args.join(' ');
+      let fact = raw;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.fact) {
+          fact = parsed.fact;
+        }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    
-    // Append to log
-    const factEntry = {
-      timestamp,
-      type: 'keyfact',
-      agent,
-      content: fact
-    };
-    fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
-    
-    console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break; }
-    
-  case 'show':
-    console.log('Current context:', JSON.stringify(context, null, 2));
-    break;
-    
-  default:
-    console.log('Usage: track-progress.js <operation> <agent> [args...]');
-    console.log('Operations: observation, decision, keyfact, show');
-    process.exit(1);
+
+      logEntry = { timestamp, type: 'keyfact', agent, content: fact };
+      console.log(`[${agent}] Key fact recorded: ${fact}`);
+      break;
+    }
+
+    case 'show':
+      console.log('Current context:', JSON.stringify(context, null, 2));
+      return { success: true, context };
+
+    default:
+      return {
+        success: false,
+        code: 1,
+        message: 'Usage: track-progress.js <operation> <agent> [args...]',
+        operations: ['observation', 'decision', 'keyfact', 'show']
+      };
+  }
+
+  if (logEntry) {
+    fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
+  }
+
+  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+  return { success: true, context };
 }
 
-// Save updated context
-if (operation !== 'show') {
-  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+if (require.main === module) {
+  const [operation, agent, ...args] = process.argv.slice(2);
+  const result = trackProgress(operation, agent, ...args);
+  if (!result.success) {
+    console.log(result.message);
+    if (result.operations) {
+      console.log(`Operations: ${result.operations.join(', ')}`);
+    }
+    process.exit(result.code || 1);
+  }
 }
+
+module.exports = trackProgress;
 ==================== END: .semad-core/utils/track-progress.js ====================
 
 ==================== START: .semad-core/utils/simple-task-tracker.js ====================
@@ -7147,1300 +7168,46 @@ Status: pending
 ==================== END: .semad-core/structured-checklists/story-dod-checklist.yaml ====================
 
 ==================== START: .semad-core/task-runner.js ====================
-const path = require('path');
-const fs = require('fs');
-const yaml = require('js-yaml');
-
-// Dynamic module resolution helper
-function resolveModule(moduleName, fallbackPath) {
-  const possiblePaths = [
-    path.join(__dirname, '..', 'semad-core', moduleName),
-    path.join(__dirname, '..', '.semad-core', moduleName),
-    path.join(__dirname, '..', moduleName)
-  ];
-
-  for (const modulePath of possiblePaths) {
-    try {
-      require.resolve(modulePath);
-      return modulePath;
-    } catch (e) {
-      // Continue to next path
-    }
-  }
-  
-  // Try as npm package
-  try {
-    return require.resolve(`semad-method/semad-core/${moduleName}`);
-  } catch (e) {
-    return fallbackPath;
-  }
-}
-
-// Import error classes
-const {
-  TaskError,
-  ValidationError,
-  TaskExecutionError,
-  MemoryStateError,
-  ActionExecutionError,
-  DependencyError,
-  ConfigurationError
-} = require(resolveModule('errors/task-errors', '../semad-core/errors/task-errors'));
-
-// Import utilities
-const { MemoryTransaction } = require(resolveModule('utils/memory-transaction', '../semad-core/utils/memory-transaction'));
-const { CleanupRegistry } = require(resolveModule('utils/cleanup-registry', '../semad-core/utils/cleanup-registry'));
-const { TaskRecovery } = require(resolveModule('utils/task-recovery', '../semad-core/utils/task-recovery'));
-
-const { planAdaptation } = require(resolveModule('tools/dynamic-planner', '../semad-core/tools/dynamic-planner'));
-const { getWorkingMemory, updateWorkingMemory } = require(resolveModule('agents/index', '../semad-core/agents/index'));
-const StructuredTaskLoader = require('./lib/structured-task-loader');
-const StoryContractValidator = require(resolveModule('utils/story-contract-validator', '../semad-core/utils/story-contract-validator'));
-const ModuleResolver = require(resolveModule('utils/module-resolver', '../semad-core/utils/module-resolver'));
-const validationHooks = require(resolveModule('utils/validation-hooks', '../semad-core/utils/validation-hooks'));
+const EngineRunner = require('./task-runner/engine/runner');
 
 class TaskRunner {
   constructor(rootDir) {
-    this.rootDir = rootDir;
-    this.taskLoader = new StructuredTaskLoader(rootDir);
-    this.storyContractValidator = null;
-    this.coreConfig = null;
-    this.cleanupRegistry = new CleanupRegistry();
-    this.taskRecovery = null; // Will be initialized when memory is available
-    this.loadCoreConfig();
+    this.runner = new EngineRunner(rootDir);
+    this.taskLoader = this.runner.getTaskLoader();
+    this.coreConfig = this.runner.getCoreConfig();
   }
 
-  /**
-   * Roughly estimate token count for a task by character length.
-   * Heuristic: ~4 characters per token (OpenAI approximation)
-   * Includes task title/description and step/action descriptions.
-   * @param {Object} task
-   * @returns {number}
-   */
-  estimateTokenCountForTask(task) {
-    try {
-      let text = '';
-      if (!task) return 0;
-      if (task.title) text += ` ${task.title}`;
-      if (task.name) text += ` ${task.name}`;
-      if (task.description) text += ` ${task.description}`;
-      const steps = Array.isArray(task.steps) ? task.steps : [];
-      for (const step of steps) {
-        if (step.name) text += ` ${step.name}`;
-        if (step.description) text += ` ${step.description}`;
-        const actions = Array.isArray(step.actions) ? step.actions : [];
-        for (const action of actions) {
-          if (typeof action.description === 'string') text += ` ${action.description}`;
-        }
-      }
-      const approxTokens = Math.ceil((text || '').length / 4);
-      return approxTokens;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  /**
-   * Load core configuration to access validation schemas
-   */
-  loadCoreConfig() {
-    try {
-      // Try multiple possible config locations
-      const configPaths = [
-        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
-        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
-        path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
-        path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
-        path.join(this.rootDir, 'core-config.yaml')
-      ];
-      
-      let configLoaded = false;
-      let testedPath = null;
-      for (const configPath of configPaths) {
-        testedPath = configPath;
-        if (fs.existsSync(configPath)) {
-          const configContent = fs.readFileSync(configPath, 'utf8');
-          this.coreConfig = yaml.load(configContent);
-          configLoaded = true;
-          break;
-        }
-      }
-      
-      if (!configLoaded) {
-        console.error('\u274c Core configuration not found');
-        console.error('  Searched in:');
-        configPaths.forEach(p => console.error(`    - ${p}`));
-        console.error('\n  The core-config.yaml file is required for task execution');
-        throw new ConfigurationError(
-          'Failed to find core-config.yaml in any expected location',
-          testedPath,
-          { searchedPaths: configPaths }
-        );
-      }
-    } catch (error) {
-      if (error instanceof ConfigurationError) {
-        throw error;
-      }
-      console.error('\u274c Failed to load core configuration:', error.message);
-      if (error.code === 'ENOENT') {
-        console.error('  The core-config.yaml file is missing');
-      } else if (error.message.includes('YAML')) {
-        console.error('  The core-config.yaml file contains invalid YAML syntax');
-      }
-      throw new ConfigurationError(
-        `Failed to load core-config.yaml: ${error.message}`,
-        'core-config.yaml',
-        { originalError: error.message }
-      );
-    }
-  }
-
-  /**
-   * Check if a task has actions requiring user input
-   * @param {Object} task - The task to check
-   * @returns {Array} Array of actions requiring user input
-   */
-  getActionsRequiringInput(task) {
-    const actionsRequiringInput = [];
-    
-    if (task.steps && Array.isArray(task.steps)) {
-      for (const step of task.steps) {
-        if (step.actions && Array.isArray(step.actions)) {
-          const elicitActions = step.actions.filter(action => action.elicit === true);
-          if (elicitActions.length > 0) {
-            actionsRequiringInput.push({
-              stepId: step.id,
-              stepName: step.name,
-              actions: elicitActions
-            });
-          }
-        }
-      }
-    }
-    
-    return actionsRequiringInput;
-  }
-
-  /**
-   * Validate that user input is available for all elicit actions
-   * @param {Object} task - The task to validate
-   * @param {Object} context - The execution context
-   * @returns {Object} Validation result
-   */
-  validateElicitRequirements(task, context) {
-    const requiredInputs = this.getActionsRequiringInput(task);
-    
-    if (requiredInputs.length === 0) {
-      return { valid: true, missingInputs: [] };
-    }
-    
-    // Check if userInputHandler is provided
-    if (!context.userInputHandler) {
-      console.warn('\n⚠️  Task has actions requiring user input but no userInputHandler provided');
-      console.warn('Actions requiring input:');
-      for (const stepInput of requiredInputs) {
-        console.warn(`\nStep: ${stepInput.stepName}`);
-        for (const action of stepInput.actions) {
-          console.warn(`  - ${action.description}`);
-        }
-      }
-      
-      return {
-        valid: false,
-        missingInputs: requiredInputs,
-        error: 'No userInputHandler provided for actions requiring user input'
-      };
-    }
-    
-    return { valid: true, missingInputs: [] };
-  }
-
-  /**
-   * Execute a task with dynamic plan adaptation
-   * @param {string} agentName - The agent executing the task
-   * @param {string} taskPath - Path to the task file
-   * @param {Object} context - Additional context for task execution
-   * @returns {Object} Execution result with adapted memory
-   */
   async executeTask(agentName, taskPath, context = {}) {
-    // Initialize task recovery if not already done
-    if (!this.taskRecovery) {
-      const memoryModule = { 
-        getAll: () => ({}), 
-        get: (key) => null,
-        set: (key, value) => {},
-        delete: (key) => {},
-        clear: () => {}
-      };
-      this.taskRecovery = new TaskRecovery(memoryModule);
-    }
-
-    // Instead of using transactions with the async memory API,
-    // we'll create checkpoints and handle rollback manually
-    let checkpointId = null;
-    
-    try {
-      // Register cleanup for task execution state
-      this.cleanupRegistry.register(async () => {
-        const memory = await getWorkingMemory(agentName);
-        if (memory && memory.task_execution_state) {
-          delete memory.task_execution_state;
-          await updateWorkingMemory(agentName, memory);
-        }
-      }, 'Clear task execution state');
-
-      // Run pre-execution validation hook
-      const preValidation = await validationHooks.executeHooks('beforeTaskExecute', {
-        taskPath,
-        agentName,
-        context
-      });
-      
-      if (!preValidation.valid && !context.ignoreValidation) {
-        throw new ValidationError(
-          'Task pre-execution validation failed',
-          preValidation.errors
-        );
-      }
-
-      // Load the task
-      const taskData = await this.taskLoader.loadTask(taskPath);
-      let task = null;
-
-      if (taskData.type === 'structured') {
-        task = taskData.data;
-      } else {
-        // For markdown tasks, create a minimal task structure
-        task = {
-          name: path.basename(taskPath, path.extname(taskPath)),
-          description: taskData.raw.split('\n')[0],
-          steps: this.extractStepsFromMarkdown(taskData.raw)
-        };
-      }
-
-      // Validate elicit requirements before proceeding
-      const elicitValidation = this.validateElicitRequirements(task, context);
-      // Agent policy: do not allow env-based bypass for elicit
-      const allowMissingByEnv = false;
-      const explicitOverride = (context.allowMissingUserInput === true && context.agentPolicy === 'override');
-      if (!elicitValidation.valid && !explicitOverride) {
-        // Return early with information about missing inputs
-        return {
-          success: false,
-          error: 'Task requires user input but no handler provided',
-          missingInputs: elicitValidation.missingInputs,
-          taskName: task.name,
-          requiresUserInput: true
-        };
-      }
-      if (!elicitValidation.valid && explicitOverride) {
-        console.warn('\nℹ️  Proceeding with explicit override: required user inputs will be skipped.');
-      }
-
-      // Get current working memory or initialize if it doesn't exist
-      let memory = await getWorkingMemory(agentName);
-      if (!memory) {
-        // Initialize memory using the centralized function
-        try {
-          const agentsIndexPath = resolveModule('agents/index', '../semad-core/agents/index');
-          const { initializeWorkingMemory } = require(agentsIndexPath);
-          await initializeWorkingMemory(agentName);
-          memory = await getWorkingMemory(agentName);
-        } catch (initError) {
-          throw new MemoryStateError(
-            `Failed to initialize working memory for agent ${agentName}`,
-            'INITIALIZE',
-            { agentName, error: initError.message }
-          );
-        }
-      }
-      
-      // Create checkpoint before modifications
-      const currentMemory = JSON.parse(JSON.stringify(memory || {}));
-      checkpointId = `checkpoint_${Date.now()}`;
-      
-      // Ensure memory exists before updating
-      if (memory) {
-        // Store checkpoint
-        memory[`_checkpoint_${checkpointId}`] = {
-          id: checkpointId,
-          timestamp: new Date().toISOString(),
-          state: currentMemory
-        };
-        
-        this.cleanupRegistry.register(async () => {
-          // Cleanup checkpoint after successful execution
-          const mem = await getWorkingMemory(agentName);
-          if (mem && mem[`_checkpoint_${checkpointId}`]) {
-            delete mem[`_checkpoint_${checkpointId}`];
-            await updateWorkingMemory(agentName, mem);
-          }
-        }, `Remove checkpoint ${checkpointId}`);
-
-        // Update with task-specific data
-        memory.taskId = task.id || task.name;
-        memory.context = context;
-        await updateWorkingMemory(agentName, memory);
-      } else {
-        // Create a minimal memory structure if initialization failed
-        memory = {
-          taskId: task.id || task.name,
-          context: context,
-          plan: [],
-          subTasks: []
-        };
-        await updateWorkingMemory(agentName, memory);
-      }
-
-      // Apply dynamic plan adaptation (pass context size estimate)
-      let adaptedMemory;
-      try {
-        const tokenCount = this.estimateTokenCountForTask(task);
-        adaptedMemory = planAdaptation(memory, task, { tokenCount });
-      } catch (planError) {
-        throw new TaskExecutionError(
-          `Failed to adapt plan for task: ${planError.message}`,
-          { id: 'plan-adaptation', name: 'Plan Adaptation' },
-          { task: task.name, error: planError.message }
-        );
-      }
-
-      // Save the adapted memory
-      await updateWorkingMemory(agentName, adaptedMemory);
-
-      // Log adaptation results
-      if (adaptedMemory.subTasks && adaptedMemory.subTasks.length > 0) {
-        console.log(`Task "${task.name}" was split into ${adaptedMemory.subTasks.length} sub-tasks`);
-      }
-
-      // Process steps and validate outputs if schema is defined
-      const stepsWithValidation = await this.processStepsWithValidation(task, agentName, context);
-
-      // Execute cleanup actions on success
-      await this.cleanupRegistry.executeAndClear();
-
-      return {
-        success: true,
-        taskName: task.name,
-        originalSteps: task.steps ? task.steps.length : 0,
-        subTasks: adaptedMemory.subTasks,
-        adaptedPlan: adaptedMemory.plan,
-        memory: adaptedMemory,
-        stepsValidation: stepsWithValidation
-      };
-    } catch (error) {
-      // Handle different error types appropriately
-      return await this.handleTaskError(error, agentName, taskPath, context);
-    }
+    return this.runner.executeTask(agentName, taskPath, context);
   }
 
-  /**
-   * Handle task errors with proper error classification and recovery
-   * @param {Error} error - The error that occurred
-   * @param {string} agentName - The agent that was executing the task
-   * @param {string} taskPath - Path to the task file
-   * @param {Object} context - Execution context
-   * @returns {Object} Error result with recovery information
-   */
-  async handleTaskError(error, agentName, taskPath, context) {
-    console.error(`Error executing task: ${error.message}`);
-    
-    // Attempt recovery
-    const recoveryResult = await this.taskRecovery.recoverFromError(error, {
-      agentName,
-      taskPath,
-      context,
-      rollbackActions: []
-    });
-
-    // Execute any remaining cleanup actions
-    const cleanupResults = await this.cleanupRegistry.executeAndClear();
-    
-    // Format error response based on error type
-    let errorResponse = {
-      success: false,
-      error: error.message,
-      errorType: error.constructor.name,
-      errorCode: error.code || 'UNKNOWN_ERROR',
-      recovery: recoveryResult
-    };
-
-    if (error instanceof TaskError) {
-      // Include error-specific context
-      errorResponse.context = error.context;
-      errorResponse.timestamp = error.timestamp;
-      
-      if (error instanceof ValidationError) {
-        errorResponse.validationErrors = error.validationErrors;
-      } else if (error instanceof TaskExecutionError) {
-        errorResponse.failedStep = error.step;
-      } else if (error instanceof ActionExecutionError) {
-        errorResponse.failedAction = error.action;
-        errorResponse.actionInputs = error.inputs;
-      } else if (error instanceof DependencyError) {
-        errorResponse.dependency = error.dependency;
-        errorResponse.originalError = error.originalError?.message;
-      } else if (error instanceof ConfigurationError) {
-        errorResponse.configPath = error.configPath;
-      }
-    }
-
-    // Include stack trace for debugging
-    if (process.env.NODE_ENV !== 'production') {
-      errorResponse.stack = error.stack;
-    }
-
-    // Include cleanup results if any failed
-    const failedCleanups = cleanupResults.filter(r => r.status === 'failed');
-    if (failedCleanups.length > 0) {
-      errorResponse.cleanupFailures = failedCleanups;
-    }
-
-    return errorResponse;
-  }
-
-  /**
-   * Extract steps from markdown content (simple heuristic)
-   * @param {string} markdown - Markdown content
-   * @returns {Array} Array of step objects
-   */
-  extractStepsFromMarkdown(markdown) {
-    const steps = [];
-    const lines = markdown.split('\n');
-    
-    // Look for numbered lists or headers that indicate steps
-    const stepPattern = /^(?:#{2,3}\s+)?(\d+)\.\s+(.+)/;
-    const bulletPattern = /^[-*]\s+(.+)/;
-    
-    let currentStep = null;
-    
-    for (const line of lines) {
-      const stepMatch = line.match(stepPattern);
-      const bulletMatch = line.match(bulletPattern);
-      
-      if (stepMatch) {
-        if (currentStep) {
-          steps.push(currentStep);
-        }
-        currentStep = {
-          name: stepMatch[2].trim(),
-          description: ''
-        };
-      } else if (bulletMatch && currentStep) {
-        // Add bullet points as part of the current step's description
-        currentStep.description += (currentStep.description ? '\n' : '') + '- ' + bulletMatch[1];
-      } else if (currentStep && line.trim() && !line.startsWith('#')) {
-        // Add non-empty lines to current step description
-        currentStep.description += (currentStep.description ? '\n' : '') + line.trim();
-      }
-    }
-    
-    if (currentStep) {
-      steps.push(currentStep);
-    }
-    
-    return steps;
-  }
-
-  /**
-   * Execute a sub-task
-   * @param {string} agentName - The agent executing the sub-task
-   * @param {string} subTaskId - ID of the sub-task to execute
-   * @returns {Object} Execution result
-   */
   async executeSubTask(agentName, subTaskId) {
-    try {
-      const memory = await getWorkingMemory(agentName);
-      if (!memory || !memory.subTasks) {
-        throw new MemoryStateError(
-          'No sub-tasks found in memory',
-          'READ',
-          { agentName, operation: 'executeSubTask' }
-        );
-      }
-
-      const subTask = memory.subTasks.find(st => st.id === subTaskId);
-      if (!subTask) {
-        throw new TaskExecutionError(
-          `Sub-task ${subTaskId} not found`,
-          { id: subTaskId, name: 'Unknown Sub-task' },
-          { availableSubTasks: memory.subTasks.map(st => st.id) }
-        );
-      }
-
-      // Update current step
-      await updateWorkingMemory(agentName, { currentStep: subTaskId });
-
-      // Mark sub-task as in progress
-      subTask.status = 'in_progress';
-      await updateWorkingMemory(agentName, { subTasks: memory.subTasks });
-
-      return {
-        success: true,
-        subTask: subTask
-      };
-    } catch (error) {
-      if (error instanceof TaskError) {
-        throw error;
-      }
-      throw new TaskExecutionError(
-        `Failed to execute sub-task: ${error.message}`,
-        { id: subTaskId, name: 'Sub-task Execution' },
-        { originalError: error.message }
-      );
-    }
+    return this.runner.executeSubTask(agentName, subTaskId);
   }
 
-  /**
-   * Complete a sub-task
-   * @param {string} agentName - The agent completing the sub-task
-   * @param {string} subTaskId - ID of the sub-task to complete
-   * @returns {Object} Completion result
-   */
   async completeSubTask(agentName, subTaskId) {
-    try {
-      const memory = await getWorkingMemory(agentName);
-      if (!memory || !memory.subTasks) {
-        throw new MemoryStateError(
-          'No sub-tasks found in memory',
-          'READ',
-          { agentName, operation: 'completeSubTask' }
-        );
-      }
-
-      const subTask = memory.subTasks.find(st => st.id === subTaskId);
-      if (!subTask) {
-        throw new TaskExecutionError(
-          `Sub-task ${subTaskId} not found`,
-          { id: subTaskId, name: 'Unknown Sub-task' },
-          { availableSubTasks: memory.subTasks.map(st => st.id) }
-        );
-      }
-
-      // Mark sub-task as completed
-      subTask.status = 'completed';
-
-      // Update plan status
-      const planItem = memory.plan.find(item => item.id === subTaskId);
-      if (planItem) {
-        planItem.status = 'completed';
-      }
-
-      await updateWorkingMemory(agentName, { 
-        subTasks: memory.subTasks,
-        plan: memory.plan
-      });
-
-      return {
-        success: true,
-        completedSubTask: subTask
-      };
-    } catch (error) {
-      if (error instanceof TaskError) {
-        throw error;
-      }
-      throw new TaskExecutionError(
-        `Failed to complete sub-task: ${error.message}`,
-        { id: subTaskId, name: 'Sub-task Completion' },
-        { originalError: error.message }
-      );
-    }
+    return this.runner.completeSubTask(agentName, subTaskId);
   }
 
-  /**
-   * Process task steps and validate outputs where schema is defined
-   * @param {Object} task - The task object containing steps
-   * @param {string} agentName - The agent executing the task
-   * @param {Object} context - Execution context
-   * @param {boolean} executeSteps - Whether to execute steps or just validate existing outputs
-   * @returns {Array} Array of step results with validation status
-   */
-  async processStepsWithValidation(task, agentName, context, executeSteps = true) {
-    if (!task.steps || task.steps.length === 0) {
-      return [];
-    }
-
-    const stepResults = [];
-
-    for (const step of task.steps) {
-      const stepResult = {
-        id: step.id,
-        name: step.name,
-        hasSchema: !!step.schema,
-        validation: null
-      };
-
-      // Execute the step to produce output
-      if (executeSteps) {
-        // Check if outputs already exist in context (for structured tasks with multiple outputs)
-        let shouldExecute = true;
-        if (step.outputs) {
-          // For structured tasks, check if any output is missing
-          shouldExecute = Object.values(step.outputs).some(outputKey => !context[outputKey]);
-        } else if (step.output) {
-          // For legacy tasks with single output
-          shouldExecute = !context[step.output];
-        }
-        
-        if (shouldExecute) {
-          const outputData = await this.executeStepActions(step, agentName, context);
-          
-          // Store the step output in context for validation and future steps
-          if (outputData !== undefined) {
-            if (step.output) {
-              context[step.output] = outputData;
-            }
-            // executeStepActions already handles storing outputs for structured tasks
-          }
-        }
-      }
-
-      if (step.schema && step.output) {
-        // Validate step output against schema
-        const validationResult = await this.validateStepOutput(step, context);
-        stepResult.validation = validationResult;
-
-        if (!validationResult.valid) {
-          // Halt execution on validation failure
-          const errorMessage = `Step "${step.name}" validation failed:\n${this.formatValidationErrors(validationResult.errors)}`;
-          console.error(errorMessage);
-          throw new ValidationError(errorMessage, validationResult.errors);
-        }
-      }
-
-      stepResults.push(stepResult);
-    }
-
-    return stepResults;
+  loadCoreConfig() {
+    this.coreConfig = this.runner.reloadCoreConfig();
+    return this.coreConfig;
   }
 
-  /**
-   * Execute step actions to produce output
-   * @param {Object} step - The step containing actions
-   * @param {string} agentName - The agent executing the step
-   * @param {Object} context - Execution context
-   * @returns {*} The output data produced by the step
-   */
-  async executeStepActions(step, agentName, context) {
-    // Import function registry
-    const { executeFunction, hasFunction } = require('./lib/function-registry');
-    
-    // Check if the output already exists in the context
-    if (step.output && context[step.output]) {
-      return context[step.output];
-    }
-    
-    // Handle namespaced actions from structured tasks
-    if (step.action) {
-      const result = await this.executeNamespacedAction(step, context);
-      
-      // Store outputs in context if they're returned
-      if (result && typeof result === 'object' && !Array.isArray(result)) {
-        Object.assign(context, result);
-      }
-      
-      return result;
-    }
-    
-    // Execute actions if they exist
-    if (step.actions && step.actions.length > 0) {
-      const { exec } = require('child_process');
-      const util = require('util');
-      const execAsync = util.promisify(exec);
-      
-      // Check if any actions require user input
-      const actionsRequiringInput = step.actions.filter(action => action.elicit === true);
-      if (actionsRequiringInput.length > 0 && context.userInputHandler) {
-        // Pause execution and wait for user input
-        console.log('\n🔔 User input required for the following actions:');
-        for (const action of actionsRequiringInput) {
-          console.log(`  - ${action.description}`);
-        }
-        
-        // Call the user input handler if provided
-        const userResponses = await context.userInputHandler(actionsRequiringInput, step);
-        if (userResponses) {
-          // Store user responses in context for later use
-          context.userResponses = context.userResponses || {};
-          context.userResponses[step.id] = userResponses;
-        }
-      }
-      
-      for (const action of step.actions) {
-        // Handle elicit flag - if true and no userInputHandler, log warning
-        if (action.elicit === true && !context.userInputHandler) {
-          console.warn(`⚠️  Action requires user input but no handler provided:
-  Step: ${step.name} (ID: ${step.id})
-  Action: "${action.description}"
-  
-  To resolve this, either:
-  - Provide a userInputHandler in the context when calling runTask()
-  - Set allowMissingUserInput: true in the context to suppress this warning`);
-          // In a real orchestrator, this would pause and wait for user input
-          // For now, we'll continue but log the requirement
-        }
-        
-        // Execute function-based actions (new structured task format)
-        if (action.function && hasFunction(action.function)) {
-          try {
-            console.log(`Executing function: ${action.function}`);
-            
-            // Create enhanced context with current timestamp and other dynamic values
-            const enhancedContext = {
-              ...context,
-              current_timestamp: new Date().toISOString(),
-              agentName: agentName
-            };
-            
-            // Execute the function with resolved parameters
-            const result = await executeFunction(action.function, action.parameters || {}, enhancedContext);
-            
-            // Store result for potential use by subsequent actions
-            if (result && typeof result === 'object') {
-              context._lastFunctionResult = result;
-            }
-            
-            console.log(`Function ${action.function} completed:`, result?.success ? 'SUCCESS' : 'FAILED');
-            
-            // For functions that indicate exit (AndExit versions), respect that intent
-            if (action.function.includes('AndExit') && result?.success === false) {
-              throw new ActionExecutionError(
-                `Function ${action.function} failed and requested exit`,
-                action.function,
-                action.parameters,
-                result
-              );
-            }
-            
-          } catch (error) {
-            console.error(`Function execution failed: ${action.function}`, error.message);
-            throw new ActionExecutionError(
-              `Function execution failed: ${error.message}`,
-              action.function,
-              action.parameters || {},
-              { error: error.message, stack: error.stack }
-            );
-          }
-        }
-        // Execute namespaced actions declared in legacy field (e.g., action: "file:read")
-        else if (action.action && typeof action.action === 'string' && /^(file|yaml|script|logic|workflow):/.test(action.action)) {
-          try {
-            const tmpStep = { action: action.action };
-            if (action.inputs) tmpStep.inputs = action.inputs;
-            if (action.outputs) tmpStep.outputs = action.outputs;
-            const result = await this.executeNamespacedAction(tmpStep, context);
-            if (result && typeof result === 'object' && !Array.isArray(result)) {
-              Object.assign(context, result);
-            }
-          } catch (error) {
-            console.error(`Namespaced action failed: ${action.action}`, error.message);
-            throw new ActionExecutionError(
-              `Namespaced action failed: ${error.message}`,
-              action.action,
-              { inputs: action.inputs, outputs: action.outputs },
-              { error: error.message, stack: error.stack }
-            );
-          }
-        }
-        // Execute command-based actions (old format)
-        else if (action.action && typeof action.action === 'string') {
-          // Replace template variables in the action
-          let command = action.action;
-          
-          // Replace input variables
-          if (context.inputs) {
-            Object.keys(context.inputs).forEach(key => {
-              command = command.replace(new RegExp(`{{inputs.${key}}}`, 'g'), context.inputs[key]);
-            });
-          }
-          
-          // Replace output variables
-          if (context.outputs) {
-            Object.keys(context.outputs).forEach(key => {
-              command = command.replace(new RegExp(`{{outputs.${key}}}`, 'g'), context.outputs[key]);
-            });
-          }
-          
-          try {
-            console.log(`Executing: ${command}`);
-            const { stdout, stderr } = await execAsync(command, { cwd: this.rootDir });
-            
-            if (stderr) {
-              console.warn(`Warning: ${stderr}`);
-            }
-            
-            // For validation steps, the command exit code determines success
-            // execAsync will throw if the command exits with non-zero code
-            console.log(`Command completed successfully`);
-            
-          } catch (error) {
-            // Command failed with non-zero exit code
-            const errorMessage = `Step action failed: ${command}\n${error.message}`;
-            console.error(errorMessage);
-            throw new ActionExecutionError(
-              errorMessage,
-              action.action,
-              { command, inputs: context.inputs, outputs: context.outputs },
-              { exitCode: error.code, stderr: error.stderr, stdout: error.stdout }
-            );
-          }
-        }
-      }
-    }
-    
-    // For the parse-story step, we can simulate the StoryContract creation
-    if (step.id === 'parse-story' && step.output === 'storyContract') {
-      // This would normally be generated by the agent from PRD and architecture docs
-      // For testing, return a minimal valid StoryContract
-      return {
-        version: "1.0",
-        story_id: "TEST-STORY-001",
-        epic_id: "TEST-EPIC-001",
-        apiEndpoints: [],
-        filesToModify: [],
-        acceptanceCriteriaLinks: []
-      };
-    }
-    
-    return undefined;
+  getActionsRequiringInput(task) {
+    return this.runner.getActionsRequiringInput(task);
   }
 
-  /**
-   * Execute namespaced actions from structured tasks
-   * @param {Object} step - The step containing the namespaced action
-   * @param {Object} context - Execution context with inputs/outputs
-   * @returns {*} The output data produced by the action
-   */
-  async executeNamespacedAction(step, context) {
-    const [namespace, action] = step.action.split(':');
-    
-    // Resolve template variables in inputs
-    const resolvedInputs = {};
-    if (step.inputs) {
-      for (const [key, value] of Object.entries(step.inputs)) {
-        resolvedInputs[key] = this.resolveTemplateValue(value, context);
-      }
-    }
-    
-    switch (namespace) {
-      case 'file':
-        return await this.executeFileAction(action, resolvedInputs, step.outputs);
-        
-      case 'yaml':
-        return await this.executeYamlAction(action, resolvedInputs, step.outputs, context);
-        
-      case 'script':
-        return await this.executeScriptAction(action, resolvedInputs, step.outputs, context);
-        
-      case 'logic':
-        return await this.executeLogicAction(action, resolvedInputs, step.outputs, context);
-        
-      case 'workflow':
-        return await this.executeWorkflowAction(action, resolvedInputs, step.outputs, context);
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown action namespace: ${namespace}`,
-          step.action,
-          resolvedInputs,
-          { availableNamespaces: ['file', 'yaml', 'script', 'logic', 'workflow'] }
-        );
-    }
+  validateElicitRequirements(task, context, options = {}) {
+    return this.runner.validateElicitRequirements(task, context, options);
   }
 
-  /**
-   * Resolve template values in inputs
-   * @param {*} value - The value that may contain template variables
-   * @param {Object} context - The context containing variable values
-   * @returns {*} The resolved value
-   */
-  resolveTemplateValue(value, context) {
-    if (typeof value !== 'string') {
-      return value;
-    }
-    
-    // Replace template variables {{variableName}}
-    return value.replace(/{{([^}]+)}}/g, (match, path) => {
-      const parts = path.split('.');
-      let result = context;
-      
-      // First try to resolve the full path
-      for (const part of parts) {
-        if (result && result[part] !== undefined) {
-          result = result[part];
-        } else {
-          result = undefined;
-          break;
-        }
-      }
-      
-      // If not found and it's a single part, check if it's a direct input
-      if (result === undefined && parts.length === 1 && context.inputs && context.inputs[path] !== undefined) {
-        result = context.inputs[path];
-      }
-      
-      // If still not found, return the original match
-      if (result === undefined) {
-        return match;
-      }
-      
-      return result;
-    });
+  executeStepActions(step, agentName, context) {
+    return this.runner.executeStepActions(step, agentName, context);
   }
 
-  /**
-   * Execute file-related actions
-   */
-  async executeFileAction(action, inputs, outputs) {
-    switch (action) {
-      case 'read': {
-        if (!inputs.path) {
-          throw new ActionExecutionError(
-            'file:read requires a path input',
-            'file:read',
-            inputs,
-            { requiredInputs: ['path'] }
-          );
-        }
-        try {
-          const base = path.resolve(this.rootDir);
-          const target = path.resolve(base, inputs.path);
-          if (!(target === base || target.startsWith(base + path.sep))) {
-            throw new Error('Path escapes project root');
-          }
-          const content = fs.readFileSync(target, 'utf8');
-          if (outputs && outputs.content) {
-            return { [outputs.content]: content };
-          }
-          return content;
-        } catch (error) {
-          throw new ActionExecutionError(
-            `Failed to read file: ${error.message}`,
-            'file:read',
-            inputs,
-            { path: inputs.path, error: error.message }
-          );
-        } }
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown file action: ${action}`,
-          `file:${action}`,
-          inputs,
-          { availableActions: ['read'] }
-        );
-    }
-  }
-
-  /**
-   * Execute YAML-related actions
-   */
-  async executeYamlAction(action, inputs, outputs, context) {
-    switch (action) {
-      case 'extract-frontmatter':
-        const content = inputs.content;
-        const key = inputs.key;
-        
-        // Extract YAML frontmatter between --- markers
-        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!frontmatterMatch) {
-          throw new ActionExecutionError(
-            'No YAML frontmatter found in content',
-            'yaml:extract-frontmatter',
-            inputs,
-            { contentPreview: content.substring(0, 100) }
-          );
-        }
-        
-        try {
-          const yamlContent = yaml.load(frontmatterMatch[1]);
-          const extractedData = yamlContent[key];
-          
-          if (!extractedData) {
-            throw new ActionExecutionError(
-              `Key '${key}' not found in YAML frontmatter`,
-              'yaml:extract-frontmatter',
-              inputs,
-              { availableKeys: Object.keys(yamlContent) }
-            );
-          }
-          
-          // Return the extracted data in the expected format
-          if (outputs && outputs.contractData) {
-            return { [outputs.contractData]: extractedData };
-          }
-          
-          return extractedData;
-        } catch (error) {
-          if (error instanceof ActionExecutionError) {
-            throw error;
-          }
-          throw new ActionExecutionError(
-            `Failed to parse YAML: ${error.message}`,
-            'yaml:extract-frontmatter',
-            inputs,
-            { yamlError: error.message }
-          );
-        }
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown yaml action: ${action}`,
-          `yaml:${action}`,
-          inputs,
-          { availableActions: ['extract-frontmatter'] }
-        );
-    }
-  }
-
-  /**
-   * Execute script-related actions
-   */
-  async executeScriptAction(action, inputs, outputs, context) {
-    const { spawn } = require('child_process');
-    
-    switch (action) {
-      case 'execute': {
-        const scriptPath = path.join(this.rootDir, inputs.script);
-        const args = inputs.args || [];
-
-        // Resolve template variables in args
-        const resolvedArgs = args.map(arg =>
-          typeof arg === 'string' ? this.resolveTemplateValue(arg, context) : arg
-        );
-
-        // Execute via spawn to avoid shell interpolation
-        const child = spawn(process.execPath, [scriptPath, ...resolvedArgs], { cwd: this.rootDir });
-
-        let stdout = '';
-        let stderr = '';
-        child.stdout.on('data', d => { stdout += String(d); });
-        child.stderr.on('data', d => { stderr += String(d); });
-
-        const exitCode = await new Promise(resolve => child.on('close', code => resolve(code)));
-
-        if (outputs) {
-          if (outputs.exitCode) {
-            context[outputs.exitCode] = exitCode;
-          }
-          if (outputs.stdout) {
-            context[outputs.stdout] = stdout;
-          }
-          if (outputs.stderr) {
-            context[outputs.stderr] = stderr;
-          }
-        }
-
-        return { exitCode, stdout, stderr };
-      }
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown script action: ${action}`,
-          `script:${action}`,
-          inputs,
-          { availableActions: ['execute'] }
-        );
-    }
-  }
-
-  /**
-   * Execute logic-related actions
-   */
-  async executeLogicAction(action, inputs, outputs, context) {
-    switch (action) {
-      case 'evaluate':
-        // Safely evaluate the expression
-        const expression = inputs.expression;
-        const result = this.evaluateExpression(expression, context);
-        
-        if (outputs && outputs.result) {
-          context[outputs.result] = result;
-        }
-        
-        return result;
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown logic action: ${action}`,
-          `logic:${action}`,
-          inputs,
-          { availableActions: ['evaluate'] }
-        );
-    }
-  }
-
-  /**
-   * Execute workflow-related actions
-   */
-  async executeWorkflowAction(action, inputs, outputs, context) {
-    switch (action) {
-      case 'conditional-halt':
-        // Evaluate the condition if it's a string expression
-        let conditionResult = inputs.condition;
-        
-        if (typeof inputs.condition === 'string') {
-          // Always resolve template variables first
-          const resolvedCondition = this.resolveTemplateValue(inputs.condition, context);
-          
-          // Check if it's an expression that needs evaluation
-          if (resolvedCondition.includes('!') || resolvedCondition.includes('===') || 
-              resolvedCondition.includes('!==') || resolvedCondition.includes('>') || 
-              resolvedCondition.includes('<') || resolvedCondition.includes('&&') || 
-              resolvedCondition.includes('||')) {
-            // Evaluate as expression
-            try {
-              conditionResult = this.evaluateExpression(resolvedCondition, context);
-            } catch (e) {
-              // If evaluation fails, try simple boolean conversion
-              conditionResult = resolvedCondition === 'true' || resolvedCondition === true;
-            }
-          } else {
-            // Simple boolean conversion
-            conditionResult = resolvedCondition === 'true' || resolvedCondition === true;
-          }
-        }
-        
-        if (conditionResult) {
-          // Also resolve the error message template if needed
-          const errorMessage = inputs.errorMessage 
-            ? this.resolveTemplateValue(inputs.errorMessage, context)
-            : 'Workflow halted by condition';
-          throw new TaskExecutionError(
-            errorMessage,
-            { id: 'conditional-halt', name: 'Conditional Halt' },
-            { condition: inputs.condition, evaluated: conditionResult }
-          );
-        }
-        return true;
-        
-      default:
-        throw new ActionExecutionError(
-          `Unknown workflow action: ${action}`,
-          `workflow:${action}`,
-          inputs,
-          { availableActions: ['conditional-halt'] }
-        );
-    }
-  }
-
-  /**
-   * Safely evaluate expressions with context
-   */
-  evaluateExpression(expression, context) {
-    const { Script, createContext } = require('vm');
-    // Replace template variables before evaluation
-    const resolvedExpression = this.resolveTemplateValue(expression, context);
-    try {
-      // Create a minimal, frozen sandbox
-      const sandbox = Object.freeze({ ...context });
-      const vmContext = createContext(sandbox);
-      const script = new Script(`(function(){ return (${resolvedExpression}); })()`, { timeout: 50 });
-      return script.runInContext(vmContext, { timeout: 50 });
-    } catch (error) {
-      throw new ActionExecutionError(
-        `Failed to evaluate expression: ${expression}\n${error.message}`,
-        'expression-evaluation',
-        { expression, context: Object.keys(context) },
-        { resolvedExpression, error: error.message }
-      );
-    }
-  }
-
-  /**
-   * Validate step output against defined schema
-   * @param {Object} step - The step containing schema and output definitions
-   * @param {Object} context - Execution context that may contain the output data
-   * @returns {Object} Validation result
-   */
-  async validateStepOutput(step, context) {
-    // Handle different schema types
-    if (step.schema === 'storyContractSchema') {
-      // Initialize validator if not already done
-      if (!this.storyContractValidator) {
-        this.storyContractValidator = new StoryContractValidator();
-      }
-
-      // Get the output data from context
-      const outputData = context[step.output] || null;
-      
-      if (!outputData) {
-        return {
-          valid: false,
-          errors: [{ message: `No output data found for '${step.output}'` }]
-        };
-      }
-
-      // Validate against story contract schema
-      return this.storyContractValidator.validateContract(outputData);
-    }
-
-    // Handle other schema types - try ModuleResolver first
-    let schemaPath = ModuleResolver.resolveSchemaPath(step.schema, this.rootDir);
-    
-    // If not found via ModuleResolver, check core-config
-    if (!schemaPath && this.coreConfig && this.coreConfig.validationSchemas && this.coreConfig.validationSchemas[step.schema]) {
-      const configSchemaPath = this.coreConfig.validationSchemas[step.schema];
-      
-      // Resolve relative paths from root directory
-      schemaPath = path.isAbsolute(configSchemaPath) 
-        ? configSchemaPath 
-        : path.join(this.rootDir, configSchemaPath);
-    }
-    
-    if (schemaPath) {
-      // Load and validate against schema
-      try {
-        const Ajv = require('ajv');
-        const addFormats = require('ajv-formats');
-        const ajv = new Ajv();
-        // Add format support including uri-reference
-        addFormats(ajv);
-        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-        const validate = ajv.compile(schema);
-        
-        const outputData = context[step.output] || null;
-        const valid = validate(outputData);
-        
-        return {
-          valid,
-          errors: valid ? [] : validate.errors
-        };
-      } catch (error) {
-        return {
-          valid: false,
-          errors: [{ message: `Failed to load schema ${step.schema}: ${error.message}` }]
-        };
-      }
-    }
-
-    return {
-      valid: true,
-      errors: []
-    };
-  }
-
-  /**
-   * Format validation errors for display
-   * @param {Array} errors - Array of validation errors
-   * @returns {string} Formatted error message
-   */
-  formatValidationErrors(errors) {
-    if (!errors || errors.length === 0) {
-      return 'No errors';
-    }
-
-    // Check if we have a StoryContractValidator instance
-    if (this.storyContractValidator) {
-      return this.storyContractValidator.formatErrors(errors);
-    }
-
-    // Default formatting for other schemas
-    return errors.map(err => {
-      const path = err.instancePath || '/';
-      const message = err.message || 'Unknown error';
-      return `${path}: ${message}`;
-    }).join('\n');
+  validateStepOutput(step, context) {
+    return this.runner.validateStepOutput(step, context);
   }
 }
 
@@ -11412,6 +10179,46 @@ function log(kind, message) {
   }
 }
 
+async function promptGuided(args) {
+  return new Promise((resolve) => {
+    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+    const ask = (q) => new Promise(res => rl.question(q, ans => res(ans.trim())));
+    (async () => {
+      if (!args.error) args.error = await ask('Problem (one sentence): ');
+      if (!args.where) args.where = await ask('Where (screen/URL/endpoint): ');
+      if (!args.when) args.when = await ask('When (timestamp/time range, include timezone): ');
+      if (!args.errorId) args.errorId = await ask('Error/Trace ID (if shown): ');
+      const steps = await ask('Steps to reproduce (3-5 bullets, optional): ');
+      args.userSteps = steps;
+      rl.close();
+      resolve();
+    })();
+  });
+}
+
+function saveUserLog(args, out) {
+  try {
+    let content = '';
+    if (args.logFile && fs.existsSync(args.logFile)) {
+      content = fs.readFileSync(args.logFile, 'utf8');
+    } else if (args.stdinLog && !process.stdin.isTTY) {
+      content = fs.readFileSync(0, 'utf8');
+    }
+    if (content) {
+      const dest = path.join(out.logs, 'user-provided.log');
+      fs.writeFileSync(dest, content);
+      const lines = content.split(/\r?\n/);
+      const errs = lines.filter(l => /error|exception|fatal/i.test(l)).slice(0, 200);
+      const ids = Array.from(new Set(lines.map(l => (l.match(/(req[_-]?id|trace[_-]?id)[:=\s]+([\w-]+)/i) || [])[2]).filter(Boolean)));
+      fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ errors: errs.slice(0,100), traceIds: ids }));
+      return { saved: true, idsCount: ids.length, errorsCount: errs.length };
+    }
+  } catch (e) {
+    try { fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ error: e.message })); } catch {}
+  }
+  return { saved: false };
+}
+
 function parseArgs(argv) {
   const out = {
     error: '',
@@ -11633,6 +10440,8 @@ async function main() {
     } catch (e) { dbSummary = `failed: ${e.message}`; }
   }
 
+  const userLog = saveUserLog(args, out);
+
   // Findings and summary
   const summaryMd = [];
   summaryMd.push(`# Ad-hoc Debug Summary`);
@@ -11647,6 +10456,11 @@ async function main() {
   if (args.nettrace) summaryMd.push(`- Nettrace: NODE_DEBUG=http,net applied`);
   if (args.audit) summaryMd.push(`- Audit: ${auditSummary} → reports/npm-audit.json`);
   if (args.dbcheck) summaryMd.push(`- DB check: ${dbSummary} → reports/db-check.json`);
+  if (userLog.saved) {
+    summaryMd.push(`- User log: saved (${userLog.errorsCount} errors, ${userLog.idsCount} trace IDs) → logs/user-provided.log`);
+  } else if (args.logFile || args.stdinLog) {
+    summaryMd.push(`- User log: no content detected (check --log-file / --stdin-log input)`);
+  }
   summaryMd.push(`- Baseline: baseline.json`);
   fs.writeFileSync(path.join(out.root, 'summary.md'), summaryMd.join('\n'));
 
@@ -11670,47 +10484,6 @@ async function main() {
   const duration = Math.round((Date.now() - startedAt.getTime())/1000);
   log('keyfact', `adhoc-debug complete: ${args.error} (${duration}s)`);
   log('observation', `adhoc-debug artifacts: ${path.relative(process.cwd(), out.root)}`);
-
-function promptGuided(args) {
-  return new Promise((resolve) => {
-    const rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-    const ask = (q) => new Promise(res => rl.question(q, ans => res(ans.trim())));
-    (async () => {
-      if (!args.error) args.error = await ask('Problem (one sentence): ');
-      if (!args.where) args.where = await ask('Where (screen/URL/endpoint): ');
-      if (!args.when) args.when = await ask('When (timestamp/time range, include timezone): ');
-      if (!args.errorId) args.errorId = await ask('Error/Trace ID (if shown): ');
-      const steps = await ask('Steps to reproduce (3-5 bullets, optional): ');
-      args.userSteps = steps;
-      rl.close();
-      resolve();
-    })();
-  });
-}
-
-function saveUserLog(args, out) {
-  try {
-    let content = '';
-    if (args.logFile && fs.existsSync(args.logFile)) {
-      content = fs.readFileSync(args.logFile, 'utf8');
-    } else if (args.stdinLog && !process.stdin.isTTY) {
-      content = fs.readFileSync(0, 'utf8');
-    }
-    if (content) {
-      const dest = path.join(out.logs, 'user-provided.log');
-      fs.writeFileSync(dest, content);
-      // naive signatures
-      const lines = content.split(/\r?\n/);
-      const errs = lines.filter(l => /error|exception|fatal/i.test(l)).slice(0, 200);
-      const ids = Array.from(new Set(lines.map(l => (l.match(/(req[_-]?id|trace[_-]?id)[:=\s]+([\w-]+)/i) || [])[2]).filter(Boolean)));
-      fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ errors: errs.slice(0,100), traceIds: ids }));
-      return { saved: true, idsCount: ids.length, errorsCount: errs.length };
-    }
-  } catch (e) {
-    try { fs.writeFileSync(path.join(out.reports, 'user-log-signatures.json'), safeJSON({ error: e.message })); } catch {}
-  }
-  return { saved: false };
-}
   console.log('Ad-hoc debug completed');
   console.log('- Artifacts:', path.relative(process.cwd(), out.root));
   console.log('- Summary: ', path.relative(process.cwd(), path.join(out.root, 'summary.md')));
@@ -11720,8 +10493,6 @@ main().catch(err => {
   console.error('adhoc-debug error:', err);
   process.exit(1);
 });
-  // Save user-provided logs or pasted logs (stdin)
-  const userLog = saveUserLog(args, out);
 ==================== END: .semad-core/utils/adhoc-debug-runner.js ====================
 
 ==================== START: .semad-core/utils/qa-findings-parser.js ====================
@@ -13061,6 +11832,94 @@ StoryContract:
   schemaVersion: "1.0"          # Contract schema version (required by validator)
   story_id: "{{STORY_ID}}"      # Unique story identifier (required)
   epic_id: "{{EPIC_ID}}"        # Parent epic identifier (required)
+
+  # Core story metadata mirrors docs/templates/story-contract-template.yaml
+  story:
+    storyId: "{{STORY_ID}}"          # e.g., ST-auth-001
+    title: "{{STORY_TITLE}}"
+    epicId: "{{EPIC_ID}}"
+    featureId: "{{FEATURE_ID}}"      # Optional: maps to PRD feature ID
+    status: "{{STORY_STATUS_CONTRACT}}"  # draft | in_progress | implemented | verified | done
+    sliceType: "{{STORY_SLICE_TYPE}}"    # flag | probe | int-flow | adhoc
+    owner: "{{STORY_OWNER}}"
+    links:
+      design:
+        {{#STORY_LINKS_DESIGN}}
+        - "{{.}}"
+        {{/STORY_LINKS_DESIGN}}
+      relatedADRs:
+        {{#STORY_LINKS_ADRS}}
+        - "{{.}}"
+        {{/STORY_LINKS_ADRS}}
+
+  traceability:
+    featureId: "{{FEATURE_ID}}"
+    acceptanceCriteriaCovered:
+      {{#TRACE_AC_IDS}}
+      - "{{.}}"
+      {{/TRACE_AC_IDS}}
+    codeTouchpoints:
+      {{#TRACE_CODE_TOUCHPOINTS}}
+      - "{{.}}"
+      {{/TRACE_CODE_TOUCHPOINTS}}
+    testExpectations:
+      {{#TRACE_TEST_EXPECTATIONS}}
+      - "{{.}}"
+      {{/TRACE_TEST_EXPECTATIONS}}
+    prdReqIds:
+      {{#TRACE_PRD_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_PRD_REQ_IDS}}
+    reqIds:
+      {{#TRACE_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_REQ_IDS}}
+    flowIds:
+      {{#TRACE_FLOW_IDS}}
+      - "{{.}}"
+      {{/TRACE_FLOW_IDS}}
+    integrationPointIds:
+      {{#TRACE_INT_IDS}}
+      - "{{.}}"
+      {{/TRACE_INT_IDS}}
+    successCriteriaRefs:
+      {{#TRACE_SC_REFS}}
+      - "{{.}}"
+      {{/TRACE_SC_REFS}}
+    archRefs:
+      {{#TRACE_ARCH_REFS}}
+      - "{{.}}"
+      {{/TRACE_ARCH_REFS}}
+
+  integrationVerification:
+    {{#INTEGRATION_VERIFICATION}}
+    - "{{.}}"
+    {{/INTEGRATION_VERIFICATION}}
+
+  rollbackPlan:
+    steps:
+      {{#ROLLBACK_STEPS}}
+      - "{{.}}"
+      {{/ROLLBACK_STEPS}}
+    verification: "{{ROLLBACK_VERIFICATION}}"
+
+  performanceBudget:
+    p95: "{{PERF_BUDGET_P95}}"
+    p99: "{{PERF_BUDGET_P99}}"
+
+  guardrails:
+    mustDo:
+      {{#GUARDRAILS_MUST_DO}}
+      - "{{.}}"
+      {{/GUARDRAILS_MUST_DO}}
+    outOfScope:
+      {{#GUARDRAILS_OUT_OF_SCOPE}}
+      - "{{.}}"
+      {{/GUARDRAILS_OUT_OF_SCOPE}}
+    notes:
+      {{#GUARDRAIL_NOTES}}
+      - "{{.}}"
+      {{/GUARDRAIL_NOTES}}
   
   # Pre-conditions that must exist before story execution
   preConditions:

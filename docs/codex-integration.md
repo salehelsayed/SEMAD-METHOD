@@ -49,19 +49,24 @@ The installation creates several files to enable Codex integration:
 
 ### Activating Agents
 
-Use natural language to activate specific agents:
+Use natural language to activate specific agents (or the shorthand `/[agent]` form):
 
 ```bash
 # Activate the dev agent
 codex "activate dev agent"
 codex "as dev agent, help me understand this code"
+codex "/dev"
 
 # Switch to QA agent
 codex "switch to qa agent and review the implementation"
+codex "/qa"
 
 # Use Scrum Master agent
 codex "use sm agent to create a new story"
+codex "/sm"
 ```
+
+After the greeting, keep the same Codex session open and issue `*` commands (for example, `codex "*help"` or `codex "*implement-next-story"`) without repeating the activation phrase. Automation runners stay enabled unless you pass `--manual` or export `SEMAD_AGENT_DISABLE_RUNNERS`.
 
 ### Executing Agent Commands
 
@@ -203,6 +208,23 @@ Control execution environment:
 sandbox = "directory"  # Options: none, directory, network-disabled
 ```
 
+### Manual Simulation Mode
+
+When you prefer the LLM to impersonate agents without invoking local automation scripts (for example, to keep `/dev *devx3` fully conversational), either pass `--manual` on the command or set the environment variable `SEMAD_AGENT_DISABLE_RUNNERS` to `1` (or `SEMAD_AGENT_SIM_MODE` to `manual`). This disables Node runner hand-offs and prompts the agent to reason through the workflow instead of spawning scripts.
+
+```bash
+# Inside Codex (no shell export needed)
+codex "as dev agent, *devx3 --manual docs/stories/story.md"
+
+# Temporarily disable runners for the current Codex session
+export SEMAD_AGENT_DISABLE_RUNNERS=1
+
+# Re-enable automation when you want the Node helpers back
+unset SEMAD_AGENT_DISABLE_RUNNERS
+```
+
+The guard applies to Dev-focused commands (`*devx3`, `*implement-next-story`, `*develop-story`, `*adhoc`, etc.) and ensures the LLM owns the entire interaction. Leave the flag off (and the variable unset or set to `0`) to let the CLI run the Node-based helpers as before. With automation enabled, `/dev *devx3` now delegates to `tools/dev-x3.js`, which orchestrates up to three Dev agent passes, logs results to `.ai/dev/devx3-<story>.json`, enforces green story-scoped tests, and refuses to finish while acceptance checklist items remain unresolved.
+
 ## How It Works
 
 1. **AGENTS.md Discovery**: Codex automatically reads `AGENTS.md` files in your project
@@ -338,6 +360,22 @@ What it does
 - QA: `codex "as qa agent, execute *review @<story>"`
 - Dev: `codex "as dev agent, execute *address-qa-feedback @<story>"`
 - Repeats until the story’s `## Status` equals `Done`.
+
+### `*address-qa-feedback` quick reference
+- Reads the story’s QA Results section, saves `.ai/qa_findings.json`, and regenerates `.ai/qa_fixes_checklist.json` via `QAFixTracker`.
+- Runs dependency impact analysis for all files mentioned in QA findings or the StoryContract and stores `.ai/dependency_analysis_qa.json` and `.ai/dependency_impact_report_qa.md`.
+- Marks fixes complete with `--complete <fixId[:note]>` flags (repeatable). Completion metadata is written back to the checklist and `.ai/qa_fix_report.json`.
+- Re-runs tests (`npm test -- --runInBand` by default). Override with `--test-command "<cmd>"` or skip explicitly using `--skip-tests`.
+- When every fix is recorded and tests pass, automatically updates the story’s `## Status`, `## Completion Notes`, and `## Change Log` sections with a fix summary and pointers to the generated report.
+
+Example invocations:
+```
+codex "as dev agent, execute *address-qa-feedback @docs/stories/story-42.md"
+codex "as dev agent, execute *address-qa-feedback @42 --complete critical-1:added-regression-test"
+codex "as dev agent, execute *address-qa-feedback --story docs/stories/story-42.md --skip-tests"
+```
+
+If any fixes remain pending or tests fail, the command exits with a non-zero status and lists the outstanding work instead of hallucinating completion.
 
 Notes
 - QA agents must update the story’s `## Status` header to `Done` when ready.

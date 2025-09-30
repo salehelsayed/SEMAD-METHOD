@@ -22,6 +22,214 @@ steps:
         outputs:
           contractData: storyContract
 
+  - id: contract-guardrails
+    name: Validate Guardrails & Performance Budget
+    description: Ensure guardrails, integration verification, rollback plan, and performance budget are defined and acknowledged before proceeding.
+    actions:
+      - description: Halt if guardrails.mustDo is missing or empty
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{!(storyContract.guardrails && storyContract.guardrails.mustDo && storyContract.guardrails.mustDo.length)}}"
+          errorMessage: "StoryContract.guardrails.mustDo is required before development begins. Ask the SM to populate mandatory guardrails."
+      - description: Halt if guardrails.outOfScope is missing or empty
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{!(storyContract.guardrails && storyContract.guardrails.outOfScope && storyContract.guardrails.outOfScope.length)}}"
+          errorMessage: "StoryContract.guardrails.outOfScope must enumerate prohibited work. Escalate to the SM to update guardrails."
+      - description: Halt if performanceBudget is missing (p95/p99 required)
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{!(storyContract.performanceBudget && storyContract.performanceBudget.p95 && storyContract.performanceBudget.p99)}}"
+          errorMessage: "StoryContract.performanceBudget (p95/p99) is required for guardrail enforcement."
+      - description: Halt if integrationVerification missing for stories with integrationPointIds
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{(storyContract.traceability && storyContract.traceability.integrationPointIds && storyContract.traceability.integrationPointIds.length) ? !(storyContract.integrationVerification && storyContract.integrationVerification.length) : false}}"
+          errorMessage: "Stories touching integrationPointIds must define integrationVerification steps (IV1/IV2/IV3)."
+      - description: Halt if rollbackPlan missing or empty
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{!(storyContract.rollbackPlan && storyContract.rollbackPlan.steps && storyContract.rollbackPlan.steps.length && storyContract.rollbackPlan.verification)}}"
+          errorMessage: "StoryContract.rollbackPlan requires steps and verification before implementation."
+      - description: Summarize guardrails, performance expectations, and critical integration checks for confirmation
+        elicit: true
+        format: |
+          Provide a concise summary acknowledging:
+          - Guardrails.mustDo (list each item)
+          - Guardrails.outOfScope (list each item)
+          - Performance budget targets (p95/p99)
+          - Integration verification checklist (IV1/IV2/IV3) and rollback plan steps
+          Confirm you accept these guardrails and will halt if work drifts outside scope.
+      - description: Capture guardrail enforcement payload for session logging
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: |
+            (function() {
+              const meta = (storyContract && storyContract.story) || {};
+              return JSON.stringify({
+                storyId: meta.storyId || storyContract.story_id || null,
+                storyPath,
+                guardrails: storyContract.guardrails || {},
+                performanceBudget: storyContract.performanceBudget || {},
+                integrationVerification: storyContract.integrationVerification || [],
+                rollbackPlan: storyContract.rollbackPlan || {},
+                acknowledgedAt: new Date().toISOString()
+              });
+            })()
+        outputs:
+          result: guardrailLogPayload
+      - description: Record guardrail expectations into the session history
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/session-log.js
+          args:
+            - log-summary
+            - dev
+            - --operation
+            - guardrail_expectations
+            - --summary
+            - "{{guardrailLogPayload}}"
+            - --details
+            - "{{guardrailLogPayload}}"
+
+  - id: derive-workplan
+    name: Derive Story Workplan
+    description: Generate implementation plan, acceptance checklist, and scoped test list from the StoryContract.
+    actions:
+      - description: Determine canonical workplan output path under .ai/dev/workplans
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: |
+            (function() {
+              const raw = '{{storyPath}}';
+              const normalized = (raw || '').replace(/\\+/g, '/');
+              const base = normalized.split('/').pop().replace(/\.md$/i, '');
+              const meta = storyContract && storyContract.story;
+              const id = meta && meta.storyId
+                ? String(meta.storyId)
+                : (storyContract && storyContract.story_id
+                    ? String(storyContract.story_id)
+                    : '');
+              return '.ai/dev/workplans/' + (id || base || 'story') + '.json';
+            })()
+        outputs:
+          result: workplanPath
+      - description: Generate workplan JSON with acceptance criteria and impacted files
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/derive-story-workplan.js
+          args:
+            - --story
+            - "{{storyPath}}"
+            - --output
+            - "{{workplanPath}}"
+        outputs:
+          exitCode: workplanExit
+          stdout: workplanStdout
+      - description: Halt if workplan generation failed
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{workplanExit !== 0}}"
+          errorMessage: "Workplan generation failed; check story contract before continuing."
+
+  - id: prepare-artifacts
+    name: Prepare Execution Artifacts
+    description: Compute canonical story identifier and artifact destinations under .ai/.
+    actions:
+      - description: Derive story execution identifier
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: "(function(){ const wp = '{{workplanPath}}' || ''; const match = wp.match(/([^\\\\/]+)\\.json$/i); return match ? match[1] : 'story'; })()"
+        outputs:
+          result: storyExecutionId
+      - description: Derive acceptance checklist path
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: "'.ai/dev/checklists/' + '{{storyExecutionId}}' + '.json'"
+        outputs:
+          result: checklistPath
+      - description: Derive dependency plan path
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: "'.ai/dev/dependency/' + '{{storyExecutionId}}' + '.json'"
+        outputs:
+          result: dependencyPlanPath
+      - description: Derive red test report path
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: "'.ai/dev/test-reports/' + '{{storyExecutionId}}' + '-red.json'"
+        outputs:
+          result: redReportPath
+      - description: Derive green test report path
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: "'.ai/dev/test-reports/' + '{{storyExecutionId}}' + '-green.json'"
+        outputs:
+          result: greenReportPath
+
+  - id: generate-checklist
+    name: Generate Acceptance Checklist
+    description: Create acceptance checklist aligned to StoryContract criteria for evidence tracking.
+    actions:
+      - description: Build checklist JSON with acceptance criteria mapped to files/tests
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/generate-acceptance-checklist.js
+          args:
+            - --story
+            - "{{storyPath}}"
+            - --output
+            - "{{checklistPath}}"
+        outputs:
+          exitCode: checklistExit
+          stdout: checklistStdout
+      - description: Halt if checklist generation failed
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{checklistExit !== 0}}"
+          errorMessage: "Failed to generate acceptance checklist."
+
+  - id: dependency-plan
+    name: Record Dependency Plan
+    description: Derive impacted files and quality gates before implementation begins.
+    actions:
+      - description: Capture dependency summary for implementation guardrails
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/run-dependency-plan.js
+          args:
+            - --story
+            - "{{storyPath}}"
+            - --output
+            - "{{dependencyPlanPath}}"
+        outputs:
+          exitCode: dependencyExit
+          stdout: dependencyStdout
+      - description: Halt if dependency planning failed
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{dependencyExit !== 0}}"
+          errorMessage: "Dependency planning failed; review StoryContract.filesToModify."
+
   - id: generate-tests
     name: Generate Tests From Contract
     description: Create or update test files defined in StoryContract.acceptanceTestMatrix.items[].test_files[].
@@ -44,11 +252,11 @@ steps:
           condition: "{{genExit !== 0}}"
           errorMessage: "Test generation failed. See details: {{genStdout}}"
 
-  - id: run-tests-red
+  - id: tdd-red-pass
     name: Run Tests (Expect Red)
     description: Execute only the tests for this story; failures are expected in first pass of TDD.
     actions:
-      - description: Run scoped tests for this story
+      - description: Run scoped tests for this story and capture exit code
         elicit: false
         action: script:execute
         inputs:
@@ -56,11 +264,279 @@ steps:
           args:
             - --story
             - "{{storyPath}}"
+            - --report
+            - "{{redReportPath}}"
         outputs:
-          exitCode: testExit
-          stdout: testStdout
-      - description: Log test run result without halting (TDD expects failures initially)
+          exitCode: redTestExit
+          stdout: redTestStdout
+      - description: Record red test outcome without halting (expected to fail)
         elicit: false
+
+  - id: implementation-plan
+    name: Plan Implementation Tasks
+    description: Review the generated workplan and outline concrete implementation steps before modifying code.
+    actions:
+      - description: Summarize acceptance criteria, impacted files, and planned changes using the workplan
+        elicit: true
+        format: |
+          Provide a numbered implementation checklist linked to StoryContract acceptance criteria and files.
+          - Reference the dependency summary in {{dependencyPlanPath}} to highlight high-risk areas.
+          - Confirm each acceptance checklist item in {{checklistPath}} has a planned owner, evidence source, and test mapping before coding.
+        inputs:
+          workplanPath: "{{workplanPath}}"
+          storyContract: "{{storyContract}}"
+          dependencyPlanPath: "{{dependencyPlanPath}}"
+          checklistPath: "{{checklistPath}}"
+
+  - id: implement-work
+    name: Implement Story Requirements
+    description: Apply code and documentation changes per the workplan, keeping coverage and cleanup requirements in scope.
+    actions:
+      - description: Implement each work item, updating files and tests as required by the plan
+        elicit: true
+        format: |
+          Execute the checklist step-by-step. For each acceptance criterion:
+          1. Identify the files to modify/create.
+          2. Apply code changes (include diffs or summaries).
+          3. Update or create the mapped tests.
+          4. Log completed work or blockers directly into {{checklistPath}} before moving on.
+        inputs:
+          workplanPath: "{{workplanPath}}"
+          checklistPath: "{{checklistPath}}"
+          dependencyPlanPath: "{{dependencyPlanPath}}"
+      - description: Ensure cleanup actions and quality gates from the StoryContract are satisfied
+        elicit: true
+        format: Confirm zero unused code, cleanup directives, and impact radius obligations are fulfilled.
+
+  - id: guardrail-enforcement
+    name: Enforce Guardrails & Performance Budget
+    description: Confirm all guardrail must-do actions are completed, out-of-scope boundaries respected, and performance budgets satisfied before final validation.
+    actions:
+      - description: Provide guardrail compliance report (JSON required)
+        elicit: true
+        format: |
+          Respond with JSON documenting guardrail enforcement:
+          {
+            "mustDo": [
+              {"item": "<must-do bullet>", "status": "complete", "evidence": "<file/test/log>"}
+            ],
+            "outOfScopeBreaches": [],
+            "performance": {"p95": "<measured>", "p99": "<measured>", "evidence": "<link or test>"},
+            "integrationVerification": [{"step": "IV1", "result": "passed", "notes": "..."}],
+            "rollbackValidated": true
+          }
+          - Include every guardrails.mustDo item with status/evidence.
+          - List any out-of-scope touches in `outOfScopeBreaches`; leave empty if none.
+          - Provide actual performance numbers compared to StoryContract.performanceBudget.
+          - Note integrationVerification + rollback results; blockers must be explicit.
+        inputs:
+          guardrails: "{{storyContract.guardrails}}"
+          performanceBudget: "{{storyContract.performanceBudget}}"
+          integrationVerification: "{{storyContract.integrationVerification}}"
+          rollbackPlan: "{{storyContract.rollbackPlan}}"
+      - description: Capture guardrail compliance payload from responses
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: |
+            (function() {
+              const stepKey = 'guardrail-enforcement';
+              const responses = (userResponses && userResponses[stepKey]) || {};
+              const payload = typeof responses.response === 'string'
+                ? responses.response
+                : (responses.responses && responses.responses.length ? responses.responses[0].response : null);
+              if (!payload) {
+                return { valid: false, reason: 'missing_response', raw: null };
+              }
+              const text = String(payload).trim();
+              if (!text || /^auto-acknowledged/i.test(text)) {
+                return { valid: false, reason: 'auto_ack', raw: text };
+              }
+              let parsed;
+              try {
+                parsed = JSON.parse(text);
+              } catch (error) {
+                return { valid: false, reason: 'parse_error', raw: text, error: error.message };
+              }
+              const guardrails = (storyContract && storyContract.guardrails) || {};
+              const mustDo = Array.isArray(guardrails.mustDo) ? guardrails.mustDo : [];
+              const outOfScope = Array.isArray(guardrails.outOfScope) ? guardrails.outOfScope : [];
+              const performance = storyContract.performanceBudget || {};
+              const acknowledgedMustDo = Array.isArray(parsed.mustDo) ? parsed.mustDo : [];
+              const outstandingMustDo = mustDo.filter(item => !acknowledgedMustDo.some(entry => {
+                if (!entry) return false;
+                const candidate = typeof entry === 'string' ? entry : (entry.item || entry.guardrail || entry.summary || '');
+                const status = entry.status || entry.result || entry.confirmed || entry.done;
+                const normalizedStatus = typeof status === 'string' ? status.toLowerCase() : status === true ? 'complete' : '';
+                return candidate.toLowerCase().includes(String(item).toLowerCase()) && (
+                  normalizedStatus === 'done' ||
+                  normalizedStatus === 'complete' ||
+                  normalizedStatus === 'pass' ||
+                  normalizedStatus === 'verified' ||
+                  status === true
+                );
+              }));
+              const breachList = Array.isArray(parsed.outOfScopeBreaches)
+                ? parsed.outOfScopeBreaches.filter(Boolean)
+                : Array.isArray(parsed.outOfScope)
+                  ? parsed.outOfScope.filter(entry => entry && (entry.breached === true || entry.status === 'breached'))
+                  : [];
+              const performanceResult = parsed.performance || {};
+              const extractNumeric = (value) => {
+                if (value === undefined || value === null) return null;
+                if (typeof value === 'number') return value;
+                const match = String(value).match(/(-?\d+(?:\.\d+)?)/);
+                return match ? parseFloat(match[1]) : null;
+              };
+              const targetP95 = extractNumeric(performance.p95);
+              const targetP99 = extractNumeric(performance.p99);
+              const actualP95 = extractNumeric(
+                performanceResult.p95 || performanceResult.actualP95 || performanceResult.resultP95
+              );
+              const actualP99 = extractNumeric(
+                performanceResult.p99 || performanceResult.actualP99 || performanceResult.resultP99
+              );
+              const perfOk = (
+                (targetP95 === null || (actualP95 !== null && actualP95 <= targetP95)) &&
+                (targetP99 === null || (actualP99 !== null && actualP99 <= targetP99))
+              );
+              return {
+                valid: outstandingMustDo.length === 0 && breachList.length === 0 && perfOk,
+                outstandingMustDo,
+                outOfScopeBreaches: breachList,
+                performanceOk: perfOk,
+                expectedPerformance: performance,
+                performanceTargets: { p95: targetP95, p99: targetP99 },
+                performanceActual: { p95: actualP95, p99: actualP99 },
+                providedPerformance: performanceResult,
+                integrationVerification: parsed.integrationVerification || null,
+                rollbackValidated: parsed.rollbackValidated,
+                parsed,
+                raw: text
+              };
+            })()
+        outputs:
+          result: guardrailCompliance
+      - description: Prepare guardrail compliance log payload
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: |
+            (function() {
+              const meta = (storyContract && storyContract.story) || {};
+              const compliance = guardrailCompliance || {};
+              return JSON.stringify({
+                storyId: meta.storyId || storyContract.story_id || null,
+                storyPath,
+                compliance,
+                recordedAt: new Date().toISOString()
+              });
+            })()
+        outputs:
+          result: guardrailComplianceLog
+      - description: Write guardrail compliance outcome to session history
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/session-log.js
+          args:
+            - log-summary
+            - dev
+            - --operation
+            - guardrail_compliance
+            - --summary
+            - "{{guardrailComplianceLog}}"
+            - --details
+            - "{{guardrailComplianceLog}}"
+      - description: Prepare guardrail enforcement status message
+        elicit: false
+        action: logic:evaluate
+        inputs:
+          expression: |
+            (function() {
+              const compliance = guardrailCompliance || {};
+              if (compliance.valid) {
+                return 'Guardrail enforcement passed.';
+              }
+              const missing = (compliance.outstandingMustDo && compliance.outstandingMustDo.length)
+                ? compliance.outstandingMustDo.join(', ')
+                : 'none';
+              const breaches = (compliance.outOfScopeBreaches && compliance.outOfScopeBreaches.length)
+                ? compliance.outOfScopeBreaches.join(', ')
+                : 'none';
+              const perf = compliance.performanceOk === true ? 'yes' : 'no';
+              const reason = compliance.reason ? ` Reason: ${compliance.reason}.` : '';
+              return `Guardrail enforcement failed. Outstanding must-do: ${missing}; out-of-scope breaches: ${breaches}; performance within budget: ${perf}.${reason}`;
+            })()
+        outputs:
+          result: guardrailComplianceMessage
+      - description: Halt if guardrail confirmation is missing or invalid
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{!(guardrailCompliance && guardrailCompliance.valid)}}"
+          errorMessage: "{{guardrailComplianceMessage}}"
+
+  - id: run-tests-green
+    name: Run Tests (Expect Green)
+    description: Execute story-scoped tests and require a clean run before proceeding.
+    actions:
+      - description: Re-run scoped tests for this story
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/run-story-tests.js
+          args:
+            - --story
+            - "{{storyPath}}"
+            - --report
+            - "{{greenReportPath}}"
+        outputs:
+          exitCode: greenExit
+          stdout: greenStdout
+      - description: Halt if tests did not pass (green expected)
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{greenExit !== 0}}"
+          errorMessage: "Story-scoped tests failed; address failures before continuing."
+
+  - id: record-acceptance
+    name: Capture Acceptance Evidence
+    description: Persist acceptance evidence for downstream QA handoff.
+    actions:
+      - description: Record acceptance evidence JSON mapped to StoryContract criteria
+        elicit: false
+        action: script:execute
+        inputs:
+          script: tools/dev/record-acceptance-evidence.js
+          args:
+            - --story
+            - "{{storyPath}}"
+            - --workplan
+            - "{{workplanPath}}"
+            - --checklist
+            - "{{checklistPath}}"
+            - --testReport
+            - "{{greenReportPath}}"
+        outputs:
+          exitCode: evidenceExit
+          stdout: evidenceStdout
+      - description: Halt if evidence capture failed
+        elicit: false
+        action: workflow:conditional-halt
+        inputs:
+          condition: "{{evidenceExit !== 0}}"
+          errorMessage: "Acceptance evidence could not be recorded."
+
+  - id: finalize-documentation
+    name: Update Story Documentation
+    description: Sync story metadata, Tasks/Subtasks, and change log with the completed implementation.
+    actions:
+      - description: Update Story status, Tasks/Subtasks, File List, Completion Notes, and Change Log with evidence references
+        elicit: true
+        format: |
+          Provide the documentation updates and reference the acceptance evidence output. Ensure Tasks/Subtasks reflect workplan completion and include test references.
 
 inputs:
   storyPath:
@@ -68,10 +544,14 @@ inputs:
     required: true
     description: Absolute or relative path to the story file
 
-outputs: {}
+outputs:
+  workplanPath:
+    description: Path to generated workplan JSON
 
 notes: |
-  - This task is intentionally non-blocking on initial test failures to support TDD (red → green).
-  - Use DevX3 to run this task 3 times for time-bounded agents to converge on green.
-  - Tests are scoped to files referenced by acceptanceTestMatrix.
-  - Pair with QA later for full validation.
+  - This workflow enforces a full TDD loop: derive workplan → red tests → implementation → green tests.
+  - Acceptance evidence is captured to `.ai/dev/acceptance/<storyId>.json` and must exist before status flips.
+  - Cleanup directives and quality gates from the StoryContract are explicitly confirmed during implementation.
+  - Acceptance checklists live in `.ai/dev/checklists/<storyId>.json`; dependency plans in `.ai/dev/dependency/<storyId>.json`; test reports in `.ai/dev/test-reports/`.
+  - Guardrail acknowledgements and performance budgets are logged to `.ai/history/dev_log.jsonl` for upstream auditability.
+  - Use DevX3 to repeat this workflow up to three passes if green tests or acceptance evidence are incomplete.

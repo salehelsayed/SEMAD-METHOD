@@ -44,6 +44,21 @@ class MetricsCollector {
         improvingMetrics: [],
         decliningMetrics: [],
         stableMetrics: []
+      },
+      devGates: {
+        dependencyPlan: { total: 0, failed: 0 },
+        acceptanceEvidence: { missing: 0, validatorFailed: 0 },
+        implementation: { success: 0, failed: 0 },
+        byStory: {}
+      },
+      devX3: {
+        sessions: 0,
+        firstPassGreen: 0,
+        pass2Green: 0,
+        pass3Green: 0,
+        incomplete: 0,
+        distribution: { '1': 0, '2': 0, '3': 0, fail: 0 },
+        acceptanceCompleteRate: 0
       }
     };
   }
@@ -64,6 +79,8 @@ class MetricsCollector {
       await this.collectReferenceCheckLogs();
       await this.collectRollbackLogs();
       await this.collectDriftAlarms();
+      await this.collectDevGateEvents();
+      await this.collectDevX3Metrics();
       
       // Calculate derived metrics
       this.calculateRates();
@@ -89,6 +106,112 @@ class MetricsCollector {
       console.warn('Failed to create directories:', error.message);
       throw new Error(`Unable to create required directories: ${error.message}`);
     }
+  }
+
+  async collectDevGateEvents() {
+    // Read `.ai/dev/logs/gate-events.jsonl` if present and summarize
+    const devLogsFile = path.join(this.projectRoot, '.ai', 'dev', 'logs', 'gate-events.jsonl');
+    try {
+      const raw = await fs.readFile(devLogsFile, 'utf8');
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const byStory = this.metrics.devGates.byStory;
+
+      for (const line of lines) {
+        let evt = null;
+        try { evt = JSON.parse(line); } catch { continue; }
+        const storyId = evt.storyId || evt.story_id || 'unknown';
+        byStory[storyId] = byStory[storyId] || {
+          dependencyPlan: { total: 0, failed: 0 },
+          acceptanceEvidence: { missing: 0, validatorFailed: 0 },
+          implementation: { success: 0, failed: 0 }
+        };
+
+        switch (evt.event) {
+          case 'dependency_plan_succeeded':
+            this.metrics.devGates.dependencyPlan.total++;
+            byStory[storyId].dependencyPlan.total++;
+            break;
+          case 'dependency_plan_failed':
+            this.metrics.devGates.dependencyPlan.total++;
+            this.metrics.devGates.dependencyPlan.failed++;
+            byStory[storyId].dependencyPlan.total++;
+            byStory[storyId].dependencyPlan.failed++;
+            break;
+          case 'acceptance_evidence_missing':
+            this.metrics.devGates.acceptanceEvidence.missing++;
+            byStory[storyId].acceptanceEvidence.missing++;
+            break;
+          case 'acceptance_validator_failed':
+            this.metrics.devGates.acceptanceEvidence.validatorFailed++;
+            byStory[storyId].acceptanceEvidence.validatorFailed++;
+            break;
+          case 'implementation_success':
+            this.metrics.devGates.implementation.success++;
+            byStory[storyId].implementation.success++;
+            break;
+          case 'implementation_failed':
+          case 'implementation_error':
+            this.metrics.devGates.implementation.failed++;
+            byStory[storyId].implementation.failed++;
+            break;
+          default:
+            // ignore others
+            break;
+        }
+      }
+
+      // Persist a compact summary for dashboards
+      const outDir = path.join(this.projectRoot, '.ai', 'progress');
+      await fs.mkdir(outDir, { recursive: true });
+      await fs.writeFile(path.join(outDir, 'dev-gates.json'), JSON.stringify(this.metrics.devGates, null, 2));
+    } catch (e) {
+      // Missing or unreadable is fine; keep silent for sufficiency
+      return;
+    }
+  }
+
+  async collectDevX3Metrics() {
+    // Parse .ai/dev/devx3-*.json files to infer pass count to green
+    const pattern = path.join(this.projectRoot, '.ai', 'dev', 'devx3-*.json');
+    const files = await glob(pattern);
+    if (!files || files.length === 0) return;
+
+    for (const file of files) {
+      try {
+        const raw = await fs.readFile(file, 'utf8');
+        const data = JSON.parse(raw);
+        const passes = Array.isArray(data.passes) ? data.passes : [];
+        if (passes.length === 0) { this.metrics.devX3.incomplete++; this.metrics.devX3.distribution.fail++; continue; }
+
+        // Find first pass where acceptanceComplete === true and exitCode === 0
+        let firstGreen = null;
+        for (const p of passes) {
+          if (p && p.acceptanceComplete === true && (p.exitCode === 0 || p.exitCode === undefined)) {
+            firstGreen = p.pass;
+            break;
+          }
+        }
+
+        this.metrics.devX3.sessions++;
+        if (firstGreen === 1) { this.metrics.devX3.firstPassGreen++; this.metrics.devX3.distribution['1']++; }
+        else if (firstGreen === 2) { this.metrics.devX3.pass2Green++; this.metrics.devX3.distribution['2']++; }
+        else if (firstGreen === 3) { this.metrics.devX3.pass3Green++; this.metrics.devX3.distribution['3']++; }
+        else { this.metrics.devX3.incomplete++; this.metrics.devX3.distribution.fail++; }
+      } catch (_) {
+        this.metrics.devX3.incomplete++;
+        this.metrics.devX3.distribution.fail++;
+      }
+    }
+
+    const complete = this.metrics.devX3.firstPassGreen + this.metrics.devX3.pass2Green + this.metrics.devX3.pass3Green;
+    if (this.metrics.devX3.sessions > 0) {
+      this.metrics.devX3.acceptanceCompleteRate = +(complete / this.metrics.devX3.sessions).toFixed(3);
+    }
+
+    // Persist optional summary for quick dashboards
+    const outDir = path.join(this.projectRoot, '.ai', 'progress');
+    await fs.mkdir(outDir, { recursive: true });
+    await fs.writeFile(path.join(outDir, 'devx3-metrics.json'), JSON.stringify(this.metrics.devX3, null, 2));
   }
 
   async collectTaskTrackerLogs() {

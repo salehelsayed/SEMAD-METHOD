@@ -136,6 +136,9 @@ steps:
         elicit: false
       - description: Verify ALL issues (critical, major, minor, and checklist items) have been addressed
         elicit: false
+      - description: Enforce completion of every QA fix item before finishing the task
+        function: qaTracker.assertAllFixed
+        elicit: false
 
   - id: step9
     name: Update Story Documentation
@@ -174,3 +177,4 @@ notes: |
   - ALL issues (critical, major, minor, and checklist items) must be fixed before marking story as ready
   - The tracker provides verification that all items have been addressed
   - Concurrency: Execute independent fixes concurrently with a safe cap (suggested maxParallel=3) to speed up resolution while maintaining isolation for dependent changes
+  - The executable workflow is implemented in tools/dev/address-qa-feedback.js; this task file documents the expected sequence for reference compatibility.

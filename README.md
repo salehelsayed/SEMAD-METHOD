@@ -116,7 +116,8 @@ This enhanced approach eliminates **planning inconsistency**, **context loss**, 
 
 - **[Getting Started](GETTING-STARTED.md)** → Installation and setup guide
 - **[Architecture](ARCHITECTURE.md)** → Technical architecture and design
-- **[Agents Reference](AGENTS.md)** → All agents and their capabilities
+- **[Agents Overview](docs/agents/README.md)** → How agents collaborate and where to find details
+- **[Agents Index](AGENTS.md)** → Activation quick links and authoritative definitions
 - **[Workflows](WORKFLOWS.md)** → Two-phase workflow system
 - **[API Reference](API-REFERENCE.md)** → Complete API documentation
 - **[User Guide](semad-core/user-guide.md)** → Complete workflow walkthrough
@@ -416,9 +417,9 @@ SEMAD-METHOD includes specialized AI agents for each role:
 - **Developer** (`/dev`) - Implementation following contracts
 - **QA Engineer** (`/qa`) - Testing and validation
 - **UX Expert** (`/ux`) - User experience design
-- **Infrastructure** (`/in`) - DevOps and deployment
+- **Integration Auditor** (`/in`) - System completeness and brownfield safety
 
-For detailed agent documentation, see the **[Agents Reference](AGENTS.md)**.
+For detailed agent documentation, see the **[Agents Overview](docs/agents/README.md)** and the **[Agents Index](AGENTS.md)**.
 
 ## Backward Compatibility
 
@@ -442,7 +443,8 @@ simpleTaskTracking: true      # Use simple task tracking system
 
 - 📖 **[Getting Started](GETTING-STARTED.md)** - Installation and first project
 - 🏗️ **[Architecture](ARCHITECTURE.md)** - Technical architecture documentation
-- 🤖 **[Agents Reference](AGENTS.md)** - All agents and their capabilities
+- 🤖 **[Agents Overview](docs/agents/README.md)** - How agents collaborate and where to find specifics
+- 📇 **[Agents Index](AGENTS.md)** - Activation quick links and definitions
 - 🔄 **[Workflows](WORKFLOWS.md)** - Two-phase workflow system
 - 🔧 **[API Reference](API-REFERENCE.md)** - Complete API documentation
 - 📚 **[User Guide](semad-core/user-guide.md)** - Complete walkthrough

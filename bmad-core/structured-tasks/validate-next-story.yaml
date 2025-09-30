@@ -433,6 +433,11 @@ steps:
     name: DoR Sufficiency Gate
     description: Enforce Definition of Ready (DoR-Mini) with scoring and stop rule.
     actions:
+      - description: Confirm the DoR gate script exists before execution
+        elicit: false
+        function: fs.assertExists
+        parameters:
+          relativePath: tools/sm/dor-gate.js
       - description: Execute SM DoR linter and update story readiness metadata (auto-detect latest story if not provided)
         elicit: false
         action: script:execute
@@ -446,19 +451,8 @@ steps:
         elicit: false
         action: workflow:conditional-halt
         inputs:
-          condition: {{dorExitCode !== 0}}
-          errorMessage: DoR gate not passed. See report: {{dorStdout}}
-inputs: {}
-outputs: {}
-metadata:
-  originalSections:
-    - Purpose
-    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
-  preservedContent:
-    - type: section-header
-      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
-      level: 2
-  executionMode: SEQUENTIAL
+          condition: "{{dorExitCode !== 0}}"
+          errorMessage: "DoR gate not passed. See report: {{dorStdout}}"
   - id: step10a
     name: Brownfield Integration Safety Checks
     description: Ensure stories that touch integration points are safe, incremental, and reversible.
@@ -466,6 +460,8 @@ metadata:
       - description: If `traceability.integrationPointIds` present, verify `integrationVerification` section exists with at least 3 checks (existing functionality, contract behavior, performance budget)
         elicit: true
       - description: If `traceability.integrationPointIds` present, verify `rollbackPlan` exists with steps and verification
+        elicit: true
+      - description: Verify `guardrails` section lists concrete mustDo and outOfScope bullets; escalate if missing or empty
         elicit: true
       - description: For early slices of an epic, verify `featureFlag` is declared and defaultState is off; probe slices must not change state
         elicit: true
@@ -481,3 +477,14 @@ metadata:
         elicit: false
       - description: If required earlier slices are missing, emit a warning and recommend creating them first unless there is a documented justification
         elicit: true
+inputs: {}
+outputs: {}
+metadata:
+  originalSections:
+    - Purpose
+    - SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+  preservedContent:
+    - type: section-header
+      content: SEQUENTIAL Task Execution (Do not proceed until current Task is complete)
+      level: 2
+  executionMode: SEQUENTIAL

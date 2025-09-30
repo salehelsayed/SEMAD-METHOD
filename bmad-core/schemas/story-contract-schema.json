@@ -78,6 +78,74 @@
       },
       "additionalProperties": true
     },
+    "story": {
+      "type": "object",
+      "required": ["storyId", "epicId"],
+      "properties": {
+        "storyId": { "type": "string" },
+        "title": { "type": "string" },
+        "epicId": { "type": "string" },
+        "featureId": { "type": "string" },
+        "status": { "type": "string" },
+        "sliceType": { "type": "string", "enum": ["flag", "probe", "int-flow", "adhoc"] },
+        "owner": { "type": "string" },
+        "links": {
+          "type": "object",
+          "properties": {
+            "design": { "type": "array", "items": { "type": "string" } },
+            "relatedADRs": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "traceability": {
+      "type": "object",
+      "required": ["featureId"],
+      "properties": {
+        "featureId": { "type": "string" },
+        "acceptanceCriteriaCovered": { "type": "array", "items": { "type": "string" } },
+        "codeTouchpoints": { "type": "array", "items": { "type": "string" } },
+        "testExpectations": { "type": "array", "items": { "type": "string" } },
+        "prdReqIds": { "type": "array", "items": { "type": "string" } },
+        "reqIds": { "type": "array", "items": { "type": "string" } },
+        "flowIds": { "type": "array", "items": { "type": "string" } },
+        "integrationPointIds": { "type": "array", "items": { "type": "string" } },
+        "successCriteriaRefs": { "type": "array", "items": { "type": "string" } },
+        "archRefs": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "integrationVerification": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "rollbackPlan": {
+      "type": "object",
+      "properties": {
+        "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "verification": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "performanceBudget": {
+      "type": "object",
+      "properties": {
+        "p95": { "type": "string" },
+        "p99": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "mustDo": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "outOfScope": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
     "epic_id": {
       "type": "string"
     },

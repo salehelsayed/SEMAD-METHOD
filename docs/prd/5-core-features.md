@@ -67,7 +67,7 @@
 
 **Key Components**:
 - JSON Schema for story contracts
-- Fields: `apiEndpoints`, `filesToModify`, `acceptanceCriteriaLinks`
+- Fields: `story.sliceType`, `traceability.integrationPointIds`, `apiEndpoints`, `filesToModify`, `acceptanceCriteriaLinks`, `integrationVerification`, `rollbackPlan`, `performanceBudget`, `guardrails`
 - Validation at story creation
 - Contract-driven development workflow
 

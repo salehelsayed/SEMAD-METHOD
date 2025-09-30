@@ -3,6 +3,32 @@ StoryContract:
   version: "1.0"
   story_id: "4.1"
   epic_id: "4"
+  story:
+    storyId: "ST-4-1"
+    title: "Introduce StoryContract Parsing and Validation"
+    epicId: "EPIC-4"
+    featureId: "FEAT-structured-contracts"
+    status: draft
+    sliceType: flag
+    owner: "Dev Team"
+    links:
+      design: []
+      relatedADRs:
+        - docs/adr/ADR-001.md
+  traceability:
+    featureId: "FEAT-structured-contracts"
+    acceptanceCriteriaCovered:
+      - AC1
+      - AC2
+    codeTouchpoints:
+      - bmad-core/schemas/story-contract-schema.json
+      - bmad-core/core-config.yaml
+    testExpectations:
+      - tests/story-contracts/schema.test.ts
+    integrationPointIds:
+      - "INT-StoryContracts"
+    archRefs:
+      - ARCH-StoryContracts
   apiEndpoints:
     - method: POST
       path: /api/story-contracts
@@ -38,6 +64,24 @@ StoryContract:
     - "AC3: create-next-story task includes parse-story step"
     - "AC4: SM agent enforces parsing and rejects summarisation"
     - "AC5: Stories with invalid contracts halt workflow"
+  integrationVerification:
+    - "IV1: Verify story creation workflow still passes existing regression tests"
+    - "IV2: Verify API contract for POST /api/story-contracts"
+  rollbackPlan:
+    steps:
+      - "Revert story template changes"
+      - "Remove schema registration"
+    verification: "Run legacy story creation workflow to ensure prior behavior restored"
+  performanceBudget:
+    p95: "< 300ms"
+    p99: "< 600ms"
+  guardrails:
+    mustDo:
+      - "Keep new schema backwards compatible with existing stories"
+    outOfScope:
+      - "Do not modify unrelated orchestrator tasks"
+    notes:
+      - "Coordinate with QA before toggling new validation in CI"
 ---
 
 # Story 4.1: Introduce StoryContract Parsing and Validation
@@ -60,7 +104,7 @@ Draft
 
 ## Tasks / Subtasks
 - [ ] Create JSON Schema for StoryContract validation (AC: 1)
-  - [ ] Define schema with required fields: version, story_id, epic_id, apiEndpoints, filesToModify, acceptanceCriteriaLinks
+  - [ ] Define schema with required fields: version, story_id, epic_id, story.sliceType, traceability.integrationPointIds, apiEndpoints, filesToModify, acceptanceCriteriaLinks, integrationVerification, rollbackPlan, performanceBudget, guardrails
   - [ ] Ensure apiEndpoints have proper subfield validation
 - [ ] Update core-config.yaml (AC: 2)
   - [ ] Add validationSchemas section with storyContractSchema entry
@@ -86,9 +130,15 @@ First story implementing StoryContract feature - no previous context.
 - version: string (required)
 - story_id: string (required)
 - epic_id: string (required)
+- story.sliceType: enum flag|probe|int-flow|adhoc (required)
+- traceability.integrationPointIds: array of strings (required when touching INTs)
 - apiEndpoints: array of endpoint objects (required, can be empty)
 - filesToModify: array of file modification objects (required, can be empty)
 - acceptanceCriteriaLinks: array of strings (required, can be empty)
+- integrationVerification: array of verification steps (required when touching INTs)
+- rollbackPlan: structured rollback steps + verification (required when touching INTs)
+- performanceBudget: latency targets (required when defined by PRD)
+- guardrails: mustDo/outOfScope lists (required)
 
 ### API Specifications
 No external APIs - this is an internal validation feature.

@@ -17,8 +17,35 @@ class WorkflowConfigLoader {
       path.join(rootDir, 'bmad-workflow.config.yaml'),
       path.join(rootDir, 'bmad-workflow.config.json')
     ];
-    this.schemaPath = path.join(rootDir, 'bmad-core', 'schemas', 'workflow-config-schema.json');
+    this.schemaPath = this.resolveSchemaPath(rootDir);
     this.ajv = new Ajv({ useDefaults: true });
+  }
+
+  deepMerge(target, source) {
+    const output = Array.isArray(target) ? [...target] : { ...target };
+    if (source && typeof source === 'object') {
+      for (const [key, value] of Object.entries(source)) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          output[key] = this.deepMerge(output[key] || {}, value);
+        } else {
+          output[key] = value;
+        }
+      }
+    }
+    return output;
+  }
+
+  resolveSchemaPath(rootDir) {
+    const candidates = [
+      path.join(rootDir, 'bmad-core', 'schemas', 'workflow-config-schema.json'),
+      path.join(rootDir, '.semad-core', 'schemas', 'workflow-config-schema.json'),
+      path.join(process.cwd(), 'bmad-core', 'schemas', 'workflow-config-schema.json'),
+      path.join(process.cwd(), '.semad-core', 'schemas', 'workflow-config-schema.json'),
+      path.join(__dirname, '../../bmad-core/schemas/workflow-config-schema.json')
+    ];
+
+    const found = candidates.find(p => fs.existsSync(p));
+    return found || candidates[candidates.length - 1];
   }
 
   /**
@@ -70,9 +97,9 @@ class WorkflowConfigLoader {
     // Load schema
     const schema = JSON.parse(fs.readFileSync(this.schemaPath, 'utf8'));
     const validate = this.ajv.compile(schema);
-    
-    // Validate and apply defaults
-    const valid = validate(config);
+
+    const mergedConfig = this.deepMerge(this.getDefaultConfig(), config || {});
+    const valid = validate(mergedConfig);
     
     if (!valid) {
       const errors = validate.errors.map(err => 
@@ -81,7 +108,7 @@ class WorkflowConfigLoader {
       throw new Error(`Invalid workflow configuration:\n${errors}`);
     }
     
-    return config;
+    return mergedConfig;
   }
 
   /**
@@ -95,6 +122,8 @@ class WorkflowConfigLoader {
       autoApproveOnNoIssues: true,
       persistIterationHistory: true,
       notifyOnIterationComplete: false,
+      workflowMode: 'single',
+      epicId: '0',
       qaReviewCriteria: {
         checkCodeStyle: true,
         checkTestCoverage: true,

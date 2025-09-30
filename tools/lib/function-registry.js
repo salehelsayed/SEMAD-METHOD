@@ -161,6 +161,52 @@ const FUNCTION_REGISTRY = {
     return verifyQAFixes(directory);
   },
 
+  'qaTracker.assertAllFixed': async () => {
+    const tracker = getQATracker();
+
+    if (!tracker.findings) {
+      throw new Error('QA fix tracker is not initialized; run qaTracker.initialize before asserting completion.');
+    }
+
+    const report = tracker.generateFixReport();
+    const pending = Array.isArray(report.pendingFixes) ? report.pendingFixes : [];
+
+    if (report.completionRate < 100 || pending.length > 0) {
+      const summary = pending
+        .map(fix => {
+          const location = fix.file ? ` (${fix.file})` : '';
+          return `  - [${(fix.severity || 'unknown').toUpperCase()}] ${fix.id}${location}`;
+        })
+        .join('\n');
+
+      const details = [
+        `QA fixes incomplete — completion rate ${report.completionRate}%`,
+        pending.length > 0 ? 'Pending fixes:\n' + summary : 'No pending fix details recorded'
+      ].join('\n');
+
+      const error = new Error(details);
+      error.pendingFixes = pending;
+      error.completionRate = report.completionRate;
+      throw error;
+    }
+
+    return { success: true, completionRate: report.completionRate };
+  },
+
+  'fs.assertExists': async (relativePath) => {
+    const fullPath = path.isAbsolute(relativePath)
+      ? relativePath
+      : path.join(process.cwd(), relativePath);
+
+    if (!fs.existsSync(fullPath)) {
+      const error = new Error(`Required file not found: ${relativePath}`);
+      error.missingPath = relativePath;
+      throw error;
+    }
+
+    return { success: true, path: fullPath };
+  },
+
   // Memory manager functions now use simple tracking
   loadMemoryForTask: async (agentName, context) => {
     // Simplified - just initialize tracker
@@ -618,6 +664,8 @@ function extractFunctionArguments(functionName, resolvedParameters) {
     'qaTracker.save': ['directory'],
     'qaTracker.load': ['directory'],
     'qaTracker.verify': ['directory'],
+    'qaTracker.assertAllFixed': [],
+    'fs.assertExists': ['relativePath'],
     'orchestrator.devQaIterativeSession': ['storyArg', 'maxIterations', 'projectRoot'],
     // Unified memory functions
     'loadMemoryForTask': ['agentName', 'context'],

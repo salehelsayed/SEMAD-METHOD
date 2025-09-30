@@ -1,10 +1,6 @@
 id: orchestrator-create-story
 name: Orchestrator Create Story (In-Session)
 purpose: Orchestrator creates a story by adopting SM persona in-session, following the same process as create-next-story.yaml
-notes:
-  - This task ensures consistency with SM's direct story creation
-  - Uses same naming convention: {epicNum}.{storyNum}.story.md
-  - Follows same validation and reading patterns as create-next-story.yaml
 steps:
   - id: step1
     name: Announce Role Switch
@@ -132,19 +128,22 @@ metadata:
     - in-session
 
 notes: |
-  This task enables the orchestrator to create stories without asking
-  the user to manually activate SM or provide prompts. The orchestrator
-  reads the sharded documents and creates comprehensive implementation
-  stories automatically.
-  
+  This task ensures consistency with SM's direct story creation and uses the
+  same naming convention `{epicNum}.{storyNum}.story.md`, following the validation
+  and reading patterns defined in create-next-story.yaml.
+
+  This task enables the orchestrator to create stories without asking the user
+  to manually activate SM or provide prompts. The orchestrator reads the sharded
+  documents and creates comprehensive implementation stories automatically.
+
   Best practices:
-  - Always read both PRD and architecture shards
-  - Include enough detail for dev to implement without questions
-  - Follow the story template structure exactly
-  - Make acceptance criteria specific and testable
-  - Include file paths and code structure details
-  
+    - Always read both PRD and architecture shards
+    - Include enough detail for dev to implement without questions
+    - Follow the story template structure exactly
+    - Make acceptance criteria specific and testable
+    - Include file paths and code structure details
+
   Error handling:
-  - If epic file not found, list available epics
-  - If story already exists, skip to next
-  - If unable to determine requirements, ask for clarification
+    - If epic file not found, list available epics
+    - If story already exists, skip to next
+    - If unable to determine requirements, ask for clarification

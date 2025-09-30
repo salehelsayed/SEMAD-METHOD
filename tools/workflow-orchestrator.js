@@ -1868,36 +1868,312 @@ class WorkflowOrchestrator {
 
     // Ensure StoryContract with required keys
     front = front || {};
-    if (!front.StoryContract) {
+    if (!front.StoryContract || typeof front.StoryContract !== 'object') {
       front.StoryContract = {};
       changed = true;
     }
     const sc = front.StoryContract;
+
+    const headerMatch = body.match(/^#\s+Story\s+([^:]+):\s+(.+)$/m);
+    const headerStoryId = headerMatch ? headerMatch[1].trim() : null;
+    const headerStoryTitle = headerMatch ? headerMatch[2].trim() : null;
+
+    const clone = (value) => {
+      if (Array.isArray(value)) return value.map(clone);
+      if (value && typeof value === 'object') {
+        return Object.keys(value).reduce((acc, key) => {
+          acc[key] = clone(value[key]);
+          return acc;
+        }, {});
+      }
+      return value;
+    };
+
+    const ensureObject = (target, key, fallback = {}) => {
+      const current = target[key];
+      if (!current || typeof current !== 'object' || Array.isArray(current)) {
+        target[key] = clone(typeof fallback === 'function' ? fallback() : fallback);
+        changed = true;
+      }
+      return target[key];
+    };
+
+    const ensureArray = (target, key, fallback = []) => {
+      const current = target[key];
+      const shouldPopulate = () => {
+        if (!Array.isArray(current)) return true;
+        if (Array.isArray(fallback) && fallback.length && current.length === 0) return true;
+        return false;
+      };
+      if (!Array.isArray(current)) {
+        target[key] = Array.isArray(fallback) ? clone(fallback) : [];
+        changed = true;
+      } else if (shouldPopulate()) {
+        target[key] = Array.isArray(fallback) ? clone(fallback) : [];
+        if (target[key].length) changed = true;
+      }
+      return target[key];
+    };
+
+    const ensureString = (target, key, fallback) => {
+      const current = target[key];
+      if (typeof current !== 'string' || !current.trim()) {
+        target[key] = fallback;
+        changed = true;
+      }
+      return target[key];
+    };
+
+    const ensureNumberString = (target, key, fallback) => {
+      const current = target[key];
+      if (current === undefined || current === null || String(current).trim() === '') {
+        target[key] = fallback;
+        changed = true;
+      }
+      return target[key];
+    };
+
     // Derive ids from filename if missing
     const fname = path.basename(filePath);
     const storyIdFromName = (() => {
       const a = fname.match(/^story-(\d+)-(\d+)\.md$/i);
       if (a) return `${a[1]}-${a[2]}`;
       const b = fname.match(/^(\d+)\.(\d+)\.story\.md$/i);
-      if (b) return `${b[1]}-${parseInt(b[2], 10)}\n`;
+      if (b) return `${b[1]}-${parseInt(b[2], 10)}`;
       const c = fname.match(/^story-(\d+)\.md$/i);
       if (c) return `${c[1]}`;
       return null;
     })();
     const epicFromStoryId = (id) => id && String(id).split('-')[0];
-    if (!sc.version) { sc.version = '1.0'; changed = true; }
-    if (!sc.story_id || sc.story_id === 'TBD') { sc.story_id = storyIdFromName || 'TBD'; changed = true; }
-    if (!sc.epic_id || sc.epic_id === 'TBD') { sc.epic_id = epicFromStoryId(sc.story_id) || '0'; changed = true; }
-    // Fill standard blocks if missing
-    sc.preConditions = Array.isArray(sc.preConditions) ? sc.preConditions : []; if (!Array.isArray(sc.preConditions)) changed = true;
-    sc.postConditions = Array.isArray(sc.postConditions) ? sc.postConditions : []; if (!Array.isArray(sc.postConditions)) changed = true;
-    sc.apiEndpoints = Array.isArray(sc.apiEndpoints) ? sc.apiEndpoints : []; if (!Array.isArray(sc.apiEndpoints)) changed = true;
-    sc.filesToModify = Array.isArray(sc.filesToModify) ? sc.filesToModify : []; if (!Array.isArray(sc.filesToModify)) changed = true;
-    sc.acceptanceCriteriaLinks = Array.isArray(sc.acceptanceCriteriaLinks) ? sc.acceptanceCriteriaLinks : []; if (!Array.isArray(sc.acceptanceCriteriaLinks)) changed = true;
-    sc.impactRadius = sc.impactRadius || { components: [], symbols: [], breakageBudget: { allowedInterfaceChanges: false, migrationNotes: '', maxFilesAffected: 20 } }; changed = true;
-    sc.cleanupRequired = sc.cleanupRequired || { removeUnused: true, deprecations: [], notes: [] }; changed = true;
-    sc.qualityGates = sc.qualityGates || { typeErrors: 0, zeroUnused: true, coverageDeltaMax: 0.5, runImpactScan: true }; changed = true;
-    sc.linkedArtifacts = Array.isArray(sc.linkedArtifacts) ? sc.linkedArtifacts : []; changed = true;
+    ensureString(sc, 'type', 'StoryContract');
+    ensureString(sc, 'version', sc.version || '1.0');
+    ensureString(sc, 'schemaVersion', sc.schemaVersion || '1.1');
+    const resolvedStoryId = sc.story_id && sc.story_id !== 'TBD'
+      ? sc.story_id
+      : (storyIdFromName || headerStoryId || 'TBD');
+    if (sc.story_id !== resolvedStoryId) {
+      sc.story_id = resolvedStoryId;
+      changed = true;
+    }
+    const resolvedEpicId = sc.epic_id && sc.epic_id !== 'TBD' ? sc.epic_id : (epicFromStoryId(resolvedStoryId) || '0');
+    if (sc.epic_id !== resolvedEpicId) {
+      sc.epic_id = resolvedEpicId;
+      changed = true;
+    }
+
+    // Story metadata block
+    const storyMeta = ensureObject(sc, 'story', {});
+    ensureString(storyMeta, 'storyId', resolvedStoryId || headerStoryId || 'ST-XXX');
+    if (storyMeta.storyId !== sc.story_id) {
+      storyMeta.storyId = sc.story_id;
+      changed = true;
+    }
+    ensureString(storyMeta, 'title', storyMeta.title || headerStoryTitle || `Story ${resolvedStoryId}`);
+    ensureString(storyMeta, 'epicId', storyMeta.epicId || resolvedEpicId || 'EP-XXX');
+    ensureString(storyMeta, 'featureId', storyMeta.featureId || 'FEAT-XXX');
+    ensureString(storyMeta, 'status', storyMeta.status || 'draft');
+    ensureString(storyMeta, 'sliceType', storyMeta.sliceType || 'flag');
+    ensureString(storyMeta, 'owner', storyMeta.owner || sc.owner || 'Assignee or team');
+    const storyLinks = ensureObject(storyMeta, 'links', {});
+    ensureArray(storyLinks, 'design', []);
+    ensureArray(storyLinks, 'relatedADRs', []);
+
+    // Traceability and acceptance references
+    const traceability = ensureObject(sc, 'traceability', {});
+    ensureString(traceability, 'featureId', traceability.featureId || storyMeta.featureId || 'FEAT-XXX');
+    ensureArray(traceability, 'acceptanceCriteriaCovered', []);
+    ensureArray(traceability, 'codeTouchpoints', []);
+    ensureArray(traceability, 'testExpectations', []);
+    ensureArray(traceability, 'prdReqIds', []);
+    ensureArray(traceability, 'reqIds', []);
+    ensureArray(traceability, 'flowIds', []);
+    ensureArray(traceability, 'integrationPointIds', []);
+    ensureArray(traceability, 'successCriteriaRefs', []);
+    ensureArray(traceability, 'archRefs', []);
+
+    ensureArray(sc, 'acceptanceCriteria', []);
+    const acceptanceRef = ensureObject(sc, 'acceptanceRef', {});
+    ensureArray(acceptanceRef, 'prdReqIds', []);
+    ensureString(acceptanceRef, 'notes', acceptanceRef.notes || 'Acceptance mirrors PRD; update with specific notes.');
+
+    const nfrImpacts = ensureObject(sc, 'nfrImpacts', {});
+    ensureString(nfrImpacts, 'performance', nfrImpacts.performance || 'Endpoint p95 < 300ms');
+    ensureArray(nfrImpacts, 'securityControls', []);
+    ensureArray(nfrImpacts, 'operability', []);
+    ensureArray(nfrImpacts, 'accessibility', []);
+
+    const featureFlag = ensureObject(sc, 'featureFlag', {});
+    ensureString(featureFlag, 'name', featureFlag.name || 'feature_flag_name');
+    ensureString(featureFlag, 'defaultState', featureFlag.defaultState || 'off');
+    if (featureFlag.killSwitch === undefined) {
+      featureFlag.killSwitch = true;
+      changed = true;
+    }
+
+    ensureArray(sc, 'telemetryEvents', []);
+    ensureArray(sc, 'risks', []);
+    ensureArray(sc, 'assumptions', []);
+
+    const testPlan = ensureObject(sc, 'testPlan', {});
+    ensureArray(testPlan, 'unit', []);
+    ensureArray(testPlan, 'integration', []);
+    ensureArray(testPlan, 'e2e', []);
+    ensureArray(testPlan, 'testData', []);
+
+    const qaHooks = ensureObject(sc, 'qaHooks', {});
+    ensureArray(qaHooks, 'acceptanceTestIds', []);
+    ensureArray(qaHooks, 'fixtures', []);
+
+    const guardrails = ensureObject(sc, 'guardrails', {});
+    ensureArray(
+      guardrails,
+      'mustDo',
+      Array.isArray(guardrails.mustDo) && guardrails.mustDo.length
+        ? guardrails.mustDo
+        : ['Feature flag default remains off until QA sign-off']
+    );
+    ensureArray(
+      guardrails,
+      'outOfScope',
+      Array.isArray(guardrails.outOfScope) && guardrails.outOfScope.length
+        ? guardrails.outOfScope
+        : ['Do not touch legacy session endpoints']
+    );
+    ensureArray(
+      guardrails,
+      'notes',
+      Array.isArray(guardrails.notes) && guardrails.notes.length
+        ? guardrails.notes
+        : ['Coordinate with stakeholders before enabling feature flag.']
+    );
+
+    const implementationNotes = ensureObject(sc, 'implementationNotes', {});
+    ensureArray(implementationNotes, 'tasks', []);
+    ensureArray(implementationNotes, 'dependencies', []);
+    ensureArray(implementationNotes, 'outOfScope', []);
+
+    ensureArray(sc, 'definitionOfReady', sc.definitionOfReady && sc.definitionOfReady.length ? sc.definitionOfReady : [
+      'prdReqIds present and valid',
+      'reqIds/flowIds/integrationPointIds present',
+      'Acceptance criteria testable',
+      'AcceptanceRef links to PRD acceptance',
+      'archRefs present',
+      'Telemetry events listed if SC-refs present',
+      'Test data defined',
+      'Integration verification steps present when touching INTs',
+      'Rollback plan present when touching INTs'
+    ]);
+    ensureArray(sc, 'definitionOfDone', sc.definitionOfDone && sc.definitionOfDone.length ? sc.definitionOfDone : [
+      'All AC pass with automated tests',
+      'Contract tests passing for integrationPointIds',
+      'QA hooks implemented and green',
+      'Feature flag guarded and defaultState respected',
+      'Telemetry emitting; logs include required fields',
+      'No open P0/P1 defects',
+      'Rollback plan tested (if applicable)'
+    ]);
+
+    const audit = ensureObject(sc, 'audit', {});
+    ensureString(audit, 'createdAt', audit.createdAt || 'YYYY-MM-DD');
+    ensureString(audit, 'updatedAt', audit.updatedAt || 'YYYY-MM-DD');
+    ensureArray(audit, 'reviewers', audit.reviewers || ['QA Lead', 'SM']);
+
+    ensureArray(sc, 'integrationVerification', sc.integrationVerification && sc.integrationVerification.length ? sc.integrationVerification : [
+      'IV1: Verify existing functionality unaffected (list smoke checks)',
+      'IV2: Verify integration point contract behavior for this slice',
+      'IV3: Verify performance budget not regressed (p95/p99)'
+    ]);
+
+    const rollbackPlan = ensureObject(sc, 'rollbackPlan', {});
+    ensureArray(rollbackPlan, 'steps', rollbackPlan.steps || [
+      'Toggle feature flag off to disable new path',
+      'Revert config changes and clean up temporary artifacts'
+    ]);
+    ensureString(rollbackPlan, 'verification', rollbackPlan.verification || 'Demonstrate rollback restores prior behavior with smoke tests');
+
+    const performanceBudget = ensureObject(sc, 'performanceBudget', {});
+    ensureNumberString(performanceBudget, 'p95', performanceBudget.p95 || '< 300ms');
+    ensureNumberString(performanceBudget, 'p99', performanceBudget.p99 || '< 600ms');
+
+    // Fill standard blocks if missing or malformed
+    const preConditions = sc.preConditions;
+    if (!Array.isArray(preConditions)) {
+      sc.preConditions = [];
+      changed = true;
+    }
+    const postConditions = sc.postConditions;
+    if (!Array.isArray(postConditions)) {
+      sc.postConditions = [];
+      changed = true;
+    }
+    const endpointsBefore = sc.apiEndpoints;
+    if (!Array.isArray(endpointsBefore)) {
+      sc.apiEndpoints = [];
+      changed = true;
+    }
+    if (Array.isArray(sc.apiEndpoints) && sc.apiEndpoints.length) {
+      const normalizeEndpoint = (entry) => {
+        if (typeof entry === 'string') {
+          return entry.trim();
+        }
+        if (entry && typeof entry === 'object') {
+          const method = String(entry.method || entry.httpMethod || entry.verb || '').trim();
+          const pathPart = String(entry.path || entry.url || entry.endpoint || entry.route || '').trim();
+          if (method && pathPart) {
+            return `${method.toUpperCase()} ${pathPart}`;
+          }
+          if (pathPart) {
+            return pathPart;
+          }
+          if (entry.name) {
+            return String(entry.name).trim();
+          }
+          try {
+            return JSON.stringify(entry);
+          } catch (_) {
+            return '';
+          }
+        }
+        if (entry === null || entry === undefined) {
+          return '';
+        }
+        return String(entry).trim();
+      };
+      const normalizedEndpoints = sc.apiEndpoints
+        .map(normalizeEndpoint)
+        .map(ep => ep.trim())
+        .filter(ep => ep.length > 0);
+      const deduped = normalizedEndpoints.filter((ep, idx) => normalizedEndpoints.indexOf(ep) === idx);
+      const endpointsChanged = deduped.length !== sc.apiEndpoints.length || sc.apiEndpoints.some((ep, idx) => ep !== deduped[idx]);
+      if (endpointsChanged) {
+        sc.apiEndpoints = deduped;
+        changed = true;
+      }
+    }
+    if (!Array.isArray(sc.filesToModify)) {
+      sc.filesToModify = [];
+      changed = true;
+    }
+    if (!Array.isArray(sc.acceptanceCriteriaLinks)) {
+      sc.acceptanceCriteriaLinks = [];
+      changed = true;
+    }
+    if (!sc.impactRadius || typeof sc.impactRadius !== 'object') {
+      sc.impactRadius = { components: [], symbols: [], breakageBudget: { allowedInterfaceChanges: false, migrationNotes: '', maxFilesAffected: 20 } };
+      changed = true;
+    }
+    if (!sc.cleanupRequired || typeof sc.cleanupRequired !== 'object') {
+      sc.cleanupRequired = { removeUnused: true, deprecations: [], notes: [] };
+      changed = true;
+    }
+    if (!sc.qualityGates || typeof sc.qualityGates !== 'object') {
+      sc.qualityGates = { typeErrors: 0, zeroUnused: true, coverageDeltaMax: 0.5, runImpactScan: true };
+      changed = true;
+    }
+    if (!Array.isArray(sc.linkedArtifacts)) {
+      sc.linkedArtifacts = [];
+      changed = true;
+    }
 
     // Ensure linked artifacts for PRD and Architecture
     const ensureArtifact = (type, pth) => {
@@ -1956,38 +2232,65 @@ class WorkflowOrchestrator {
     // Ensure required sections exist
     const ensureSection = (re, insertText) => {
       if (!re.test(body)) {
-        body = body.trimEnd() + '\n\n' + insertText + '\n';
+        body = `${body.trimEnd()}\n\n${insertText}\n`;
         changed = true;
       }
     };
-    const scId = sc.story_id || storyIdFromName || 'TBD';
-    // Title with ID and feature name if possible
-    const titleRe = /^#\s+Story\s+.+?:\s+.+/m;
-    if (!titleRe.test(body)) {
-      ensureSection(/\A\z/, `# Story ${scId}: Title`);
+
+    const storyIdForHeader = storyMeta.storyId || sc.story_id || storyIdFromName || 'TBD';
+    const storyTitle = storyMeta.title || 'Title';
+    const expectedTitle = `# Story ${storyIdForHeader}: ${storyTitle}`;
+    const titleRegex = /^#\s+Story[^\n]*/m;
+    if (titleRegex.test(body)) {
+      const currentTitle = body.match(titleRegex)?.[0] || '';
+      if (currentTitle.trim() !== expectedTitle.trim()) {
+        body = body.replace(titleRegex, expectedTitle);
+        changed = true;
+      }
+    } else if (/^---\n/.test(body)) {
+      body = body.replace(/^(---\n[\s\S]*?\n---\n?)/, `$1${expectedTitle}\n\n`);
+      changed = true;
+    } else {
+      body = `${expectedTitle}\n\n${body.trimStart()}`;
+      changed = true;
     }
-    ensureSection(/^##\s+Status\s*$/m, '## Status\nDraft');
+
+    const formatStatus = (status) => {
+      const text = (status || 'draft').toString().replace(/_/g, ' ');
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    };
+
+    ensureSection(/^##\s+Status\s*$/m, `## Status\n${formatStatus(storyMeta.status)}`);
     ensureSection(/^##\s+Priority\s*$/m, '## Priority\nMedium');
     ensureSection(/^##\s+Story\s*$/m, '## Story\nAs a user, I want ..., so that ...');
     ensureSection(/^##\s+Context\s*$/m, '## Context\nAdd relevant background and constraints.');
     ensureSection(/^##\s+Acceptance Criteria\s*$/m, '## Acceptance Criteria\n1. Criterion one\n2. Criterion two\n3. Criterion three');
+    ensureSection(/^##\s+Definition of Ready \(DoR-Mini\)\s*$/m, '## Definition of Ready (DoR-Mini)\n- [ ] Objective defined (single sentence)\n- [ ] Interfaces listed (inbound/outbound)\n- [ ] Data contracts specified (schemas for payloads)\n- [ ] State changes identified (tables/keys, rules)\n- [ ] Constraints stated (perf/platforms/protocols/versions)\n- [ ] Acceptance tests listed (5–8 black-box checks)\n- [ ] Assumptions frozen (A-IDs with change budget)\n- [ ] Done signals specified (logs/telemetry/UI markers)\nTarget: TBD');
+    ensureSection(/^##\s+Tasks \/ Subtasks\s*$/m, '## Tasks / Subtasks\n- [ ] TASK-1: Describe the work (AC: AC-1)(files: src/example.ts)(tests: tests/example.test.ts)\n  - [ ] SUBTASK-1 Detail the expected outcome');
     ensureSection(/^##\s+Technical Requirements\s*$/m, '## Technical Requirements');
     ensureSection(/^###\s+Dependencies\s*$/m, '### Dependencies\n- package: <name>');
     ensureSection(/^###\s+Performance Criteria\s*$/m, '### Performance Criteria\n- Define expected performance targets');
     ensureSection(/^###\s+Security Requirements\s*$/m, '### Security Requirements\n- Note authentication/authorization implications');
-    ensureSection(/^##\s+Implementation Checklist\s*$/m, '## Implementation Checklist\n### Workstream\n- [ ] Describe the primary action and its success signal');
+    ensureSection(/^##\s+Existing Capabilities \& Reuse\s*$/m, '## Existing Capabilities & Reuse\n- Reference: .ai/reports/sm/codebase-inventory.md\n- Summary: Highlight reusable components or modules\n- Relevant Utilities:\n  - Add utility reference\n- Relevant Services/APIs:\n  - Add service reference\n- Relevant Components/Hooks:\n  - Add component reference\n- Scripts/Tools:\n  - Add script reference\n- Tests to Build On:\n  - Add test reference');
+    ensureSection(/^##\s+Inputs\s*$/m, '## Inputs\n- Describe primary inputs or data sources');
+    ensureSection(/^##\s+Outputs\s*$/m, '## Outputs\n- Describe expected outputs or artifacts');
+    ensureSection(/^##\s+Integration Touchpoints\s*$/m, '## Integration Touchpoints\n- service/protocol endpoint placeholder (e.g., REST GET /v1/users/:id)');
+    ensureSection(/^##\s+Implementation Checklist\s*$/m, '## Implementation Checklist\n### Migration\n- [ ] Replace this placeholder with action-target-success items grouped by category');
+    ensureSection(/^###\s+Companion References\s*$/m, '### Companion References\n- See docs/stories/<companion>.md:<section-name>');
     ensureSection(/^##\s+Implementation Plan \(Detailed\)\s*$/m, '## Implementation Plan (Detailed)');
     ensureSection(/^###\s+Files to Create\s*$/m, '### Files to Create\n- N/A');
     ensureSection(/^###\s+Files to Modify\s*$/m, '### Files to Modify\n- N/A');
-    ensureSection(/^###\s+Test Requirements\s*$/m, '### Test Requirements\n- Unit: ...\n- Integration: ...');
-    ensureSection(/^##\s+Risk Assessment\s*$/m, '## Risk Assessment\n**Risk Level**: Low');
-    ensureSection(/^###\s+Identified Risks\s*$/m, '### Identified Risks\n- Describe risks and mitigations');
-    ensureSection(/^###\s+Rollback Plan\s*$/m, '### Rollback Plan\nDescribe rollback strategy');
-    ensureSection(/^##\s+Definition of Done\s*$/m, '## Definition of Done\n- [ ] ACs pass\n- [ ] QA checks pass');
-    ensureSection(/^##\s+Traceability\s*$/m, '## Traceability\n- Epic: ' + (sc.epic_id || '0') + '\n- Architecture: docs/architecture/architecture.md\n- PRD: docs/prd/PRD.md');
-    ensureSection(/^##\s+Generation Metadata\s*$/m, '## Generation Metadata\n- Template Version: 1.0\n- Normalized At: ' + new Date().toISOString());
-    ensureSection(/^##\s+Implementation Details\s*$/m, '## Implementation Details\n- Add references and notes as work progresses');
-    ensureSection(/^##\s+QA Findings\s*$/m, '## QA Findings\n_No findings yet_');
+    ensureSection(/^###\s+Test Requirements\s*$/m, '### Test Requirements\n- Unit: describe unit test expectations\n- Integration: describe integration/contract tests');
+    ensureSection(/^##\s+Flow Chart\s*$/m, '## Flow Chart\n### Existing Artifacts\n- Files:\n  - List existing files to reference\n- Classes:\n  - List existing classes\n- Functions:\n  - List existing functions\n\n### New Work\n- Files:\n  - List new files to create\n- Components/Modules:\n  - List new modules\n\n### Execution Steps\n1. Describe the first execution step\n2. Describe the second execution step\n\n### Output Sinks\n- e.g., logs, telemetry, DB tables, external endpoints\n\n### ASCII Flow (optional)\n```\n[Entry] -> [Step] -> [Output]\n```');
+    ensureSection(/^##\s+Sequence Diagram \(ASCII\)\s*$/m, '## Sequence Diagram (ASCII)\n```\nActor1 -> Actor2: Message 1\nActor2 -> Actor3: Message 2\nActor3 --> Actor1: Response\n```');
+    ensureSection(/^##\s+Debug Logging Requirements\s*$/m, '## Debug Logging Requirements\n- Naming: Use stable, namespaced event names (e.g., APP_FEATURE_ACTION)\n- Purpose: Verify implementation progress and behavior via structured logs/telemetry\n- Capture: Include identifiers, success/failure signals, and context for troubleshooting');
+    ensureSection(/^##\s+Risk Assessment\s*$/m, '## Risk Assessment\n**Risk Level**: Low  # Update to reflect actual risk');
+    ensureSection(/^###\s+Identified Risks\s*$/m, '### Identified Risks\n- **Risk**: Describe risk\n  - Probability: Low\n  - Impact: Medium\n  - Mitigation: Describe mitigation');
+    ensureSection(/^###\s+Rollback Plan\s*$/m, '### Rollback Plan\n- Summarize rollback approach and verification steps');
+    ensureSection(/^##\s+Definition of Done\s*$/m, '## Definition of Done\n- [ ] All acceptance criteria pass\n- [ ] Contract/automation tests green\n- [ ] QA hooks validated\n- [ ] Observability/telemetry in place\n- [ ] Rollback plan tested (when applicable)');
+    ensureSection(/^##\s+Traceability\s*$/m, `## Traceability\n- **Epic**: [${storyMeta.epicId || sc.epic_id || 'EP-XXX'}](docs/epics)\n- **Requirements**: Link to requirement IDs or PRD sections\n- **Architecture**: [docs/architecture/architecture.md](docs/architecture/architecture.md)\n- **Tests**: Reference automated tests covering this story`);
+    ensureSection(/^##\s+Generation Metadata\s*$/m, `## Generation Metadata\n- **Template Version**: 1.0\n- **Generated At**: ${new Date().toISOString()}\n- **Generated By**: normalize-stories\n- **Generation Seed**: N/A\n- **Temperature**: N/A`);
+
 
     if (!options.dryRun && changed) {
       fs.writeFileSync(filePath, body, 'utf8');

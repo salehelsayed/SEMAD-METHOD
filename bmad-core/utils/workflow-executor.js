@@ -345,33 +345,31 @@ class WorkflowExecutor {
       resolvedPaths: this.resolvedPaths,
       filePathResolver: this.filePathResolver
     };
-    
+
     this.logger.taskStart(`Executing structured task: ${taskId}`, 'With resolved file paths');
-    
-    // Load and execute structured task
-    const StructuredTaskLoader = require('../../tools/lib/structured-task-loader');
-    const taskLoader = new StructuredTaskLoader(this.rootDir);
-    
+
+    const taskPath = path.join(this.rootDir, 'bmad-core', 'structured-tasks', `${taskId}.yaml`);
+    const TaskRunner = require('../../tools/task-runner');
+    const runner = new TaskRunner(this.rootDir);
+
     try {
-      const taskPath = path.join(this.rootDir, 'bmad-core', 'structured-tasks', `${taskId}.yaml`);
-      const taskDefinition = await taskLoader.loadTask(taskPath);
-      
-      if (taskDefinition.type !== 'structured') {
-        throw new Error(`Task ${taskId} is not a structured task`);
+      const agentName = enhancedContext.agentName || enhancedContext.agent || 'dev';
+      const result = await runner.executeTask(agentName, taskPath, enhancedContext);
+
+      if (!result || result.success === false) {
+        const errorMsg = result?.error || `Structured task ${taskId} failed`;
+        throw new Error(errorMsg);
       }
-      
-      // Execute task with enhanced context
-      const result = {
+
+      this.logger.taskComplete(`Executing structured task: ${taskId}`, 'Task completed successfully');
+      return {
         taskId,
         success: true,
         context: enhancedContext,
-        message: `Structured task ${taskId} executed with centralized file paths`,
+        execution: result,
         resolvedPaths: this.resolvedPaths
       };
-      
-      this.logger.taskComplete(`Executing structured task: ${taskId}`, 'Task completed successfully');
-      return result;
-      
+
     } catch (error) {
       this.logger.error(`Failed to execute structured task: ${taskId}`, error);
       throw error;

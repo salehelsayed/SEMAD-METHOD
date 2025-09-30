@@ -121,7 +121,7 @@ describe('Elicit Flag Handler Tests', () => {
       const result = taskRunner.validateElicitRequirements(task, context);
       
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('No userInputHandler provided');
+      expect(result.error).toBe('Task requires user input but no handler provided');
       expect(result.missingInputs).toHaveLength(1);
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Task has actions requiring user input'));
       

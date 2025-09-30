@@ -88,6 +88,18 @@ function main() {
   let starCmd = tokens[1];
   let rest = tokens.slice(2);
 
+  const manualFlagSet = new Set(['--manual', '--llm-only', '--no-runner']);
+  let manualOverride = false;
+  rest = rest.filter(arg => {
+    if (!arg) return false;
+    const normalized = arg.toLowerCase();
+    if (manualFlagSet.has(normalized)) {
+      manualOverride = true;
+      return false;
+    }
+    return true;
+  });
+
   // Idle-on-init guard: if user only activates an agent without a command, greet and wait
   if (!starCmd || !starCmd.length) {
     if (greetAndIdle(agent)) return;
@@ -136,8 +148,41 @@ function main() {
   const command = starCmd.slice(1).toLowerCase();
   const fs = require('fs');
 
+  const truthy = new Set(['1', 'true', 'yes', 'on']);
+  const falsy = new Set(['0', 'false', 'no', 'off']);
+  const normalize = (val) => (val || '').trim().toLowerCase();
+  const automationDisabled = (() => {
+    const disablePref = process.env.SEMAD_AGENT_DISABLE_RUNNERS;
+    const simPref = process.env.SEMAD_AGENT_SIM_MODE;
+    if (disablePref !== undefined) {
+      const norm = normalize(disablePref);
+      if (falsy.has(norm)) return false;
+      if (truthy.has(norm)) return true;
+      return false;
+    }
+    if (simPref !== undefined) {
+      const norm = normalize(simPref);
+      if (falsy.has(norm)) return false;
+      if (truthy.has(norm)) return true;
+      return norm === 'manual' || norm === 'llm';
+    }
+    return false;
+  })();
+  const automationBlocked = automationDisabled || manualOverride;
+  const logAutomationBypass = (cmdLabel) => {
+    console.log(
+      `[semad-agent] automation runners disabled for ${cmdLabel}. ` +
+        'Simulate this workflow in the LLM instead of spawning Node scripts.\n' +
+        'Unset SEMAD_AGENT_DISABLE_RUNNERS (or SEMAD_AGENT_SIM_MODE) to re-enable automation, or drop the --manual flag.'
+    );
+  };
+
   // ============== DEV AGENT COMMANDS ==============
   if (agent === 'dev' && (command === 'adhoc' || command === 'adhoc-debug')) {
+    if (automationBlocked) {
+      logAutomationBypass(`dev *${command}`);
+      return;
+    }
     // Resolve runner in semad-core first, then fallback to semad-core
     const tryPaths = (file) => [
       path.join(projectRoot, 'semad-core', 'utils', file),
@@ -164,6 +209,10 @@ function main() {
   }
 
   if (agent === 'dev' && command === 'implement-next-story') {
+    if (automationBlocked) {
+      logAutomationBypass('dev *implement-next-story');
+      return;
+    }
     const runner = path.join(projectRoot, 'tools', 'dev-next-story.js');
     const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
     child.on('exit', code => process.exit(code));
@@ -171,6 +220,10 @@ function main() {
   }
 
   if (agent === 'dev' && command === 'devx3') {
+    if (automationBlocked) {
+      logAutomationBypass('dev *devx3');
+      return;
+    }
     // Expect a story input; the runner will enforce it
     const runner = path.join(projectRoot, 'tools', 'dev-x3.js');
     const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
@@ -187,6 +240,10 @@ function main() {
   }
 
   if (agent === 'dev' && command === 'develop-story') {
+    if (automationBlocked) {
+      logAutomationBypass('dev *develop-story');
+      return;
+    }
     // Map to dev-develop-story.js which dispatches the pre-implementation dependency task
     const runner = path.join(projectRoot, 'tools', 'dev-develop-story.js');
     const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
@@ -195,40 +252,19 @@ function main() {
   }
 
   if (agent === 'dev' && command === 'address-qa-feedback') {
-    // Resolve task path across new and legacy core paths, then run via TaskRunner directly
-    const candidates = [
-      path.join(projectRoot, '.semad-core', 'structured-tasks', 'address-qa-feedback.yaml'),
-      path.join(projectRoot, 'semad-core', 'structured-tasks', 'address-qa-feedback.yaml'),
-      path.join(projectRoot, 'semad-core', 'structured-tasks', 'address-qa-feedback.yaml'),
-      path.join(projectRoot, '.semad-core', 'structured-tasks', 'address-qa-feedback.yaml')
-    ];
-    const taskPath = candidates.find(p => require('fs').existsSync(p)) || candidates[0];
-
-    // Accept story path via: positional, --story <path>, or @<path>
-    let storyPath = null;
-    for (let i = 0; i < rest.length; i++) {
-      const tok = rest[i];
-      if (!tok) continue;
-      if (tok === '--story' && rest[i + 1]) { storyPath = rest[i + 1]; break; }
-      if (tok.startsWith('@') && tok.length > 1) { storyPath = tok.slice(1); break; }
-      if (!tok.startsWith('-') && !storyPath) { storyPath = tok; break; }
+    if (automationBlocked) {
+      logAutomationBypass('dev *address-qa-feedback');
+      return;
     }
-    const run = async () => {
-      try {
-        const TaskRunner = require('./task-runner');
-        const runner = new TaskRunner(projectRoot);
-        const context = { storyPath, allowMissingUserInput: true };
-        const result = await runner.executeTask('dev', taskPath, context);
-        // Emit a concise summary so Codex shows progress
-        const ok = result && result.success !== false;
-        console.log(`address-qa-feedback: ${ok ? 'success' : 'failed'}`);
-        return ok ? 0 : 1;
-      } catch (e) {
-        console.error('address-qa-feedback failed:', e.message);
-        return 1;
-      }
-    };
-    run().then(code => process.exit(code));
+    const runner = path.join(projectRoot, 'tools', 'dev', 'address-qa-feedback.js');
+    const fs = require('fs');
+    if (!fs.existsSync(runner)) {
+      console.error('address-qa-feedback runner not found at', runner);
+      process.exit(1);
+    }
+
+    const child = spawn(process.execPath, [runner, ...rest], { stdio: 'inherit', cwd: projectRoot });
+    child.on('exit', code => process.exit(code));
     return;
   }
 
@@ -555,6 +591,17 @@ function main() {
     console.log(`Executing SM command: ${command}`);
     const taskRunner = path.join(projectRoot, 'tools', 'task-runner.js');
     const child = spawn(process.execPath, [taskRunner, `--sm-${command}`, ...rest], { stdio: 'inherit', cwd: projectRoot });
+    child.on('exit', code => process.exit(code));
+    return;
+  }
+
+  if (agent === 'sm' && command === 'normalize-stories') {
+    if (automationBlocked) {
+      logAutomationBypass('sm *normalize-stories');
+      return;
+    }
+    const orchestratorCLI = path.join(projectRoot, 'tools', 'workflow-orchestrator.js');
+    const child = spawn(process.execPath, [orchestratorCLI, 'sm-normalize-stories', ...rest], { stdio: 'inherit', cwd: projectRoot });
     child.on('exit', code => process.exit(code));
     return;
   }

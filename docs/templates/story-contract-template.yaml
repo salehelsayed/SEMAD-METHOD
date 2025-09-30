@@ -97,6 +97,14 @@ qaHooks:
   fixtures: ["user_verified.json", "rate_limit_state.yaml"]
   # Alias: test_hooks ≈ qaHooks
 
+guardrails:
+  mustDo:
+    - "Feature flag default remains off until QA sign-off"
+  outOfScope:
+    - "Do not touch legacy session endpoints"
+  notes:
+    - "Coordinate with SRE before enabling flag in staging"
+
 implementationNotes:
   tasks:
     - "Add endpoint POST /v1/auth/reset"

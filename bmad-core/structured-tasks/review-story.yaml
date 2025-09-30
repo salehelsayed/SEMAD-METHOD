@@ -49,6 +49,8 @@ steps:
         elicit: true
       - description: If story.sliceType is `int-flow`, confirm the story scope is one INT × one flow variant and guarded by the feature flag. Flag broad changes for SM/Dev follow-up
         elicit: true
+      - description: Review `guardrails` section to ensure mustDo/outOfScope bullets are present and enforced by the implementation; missing guardrails are blocking for INT stories
+        elicit: true
       - description: If performanceBudget present (p95/p99), verify tests/benchmarks or telemetry hooks exist to validate it
         elicit: true
   - id: step2b
@@ -110,6 +112,8 @@ steps:
     description: Update the QA Results section and set final story status
     actions:
       - description: Read the current story file to preserve all existing content
+        elicit: false
+      - description: Remove any existing QA Results or QA Findings sections so only the latest review remains
         elicit: false
       - description: Update ONLY the QA Results section with the review findings, including quality metrics
         elicit: false

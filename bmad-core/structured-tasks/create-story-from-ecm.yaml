@@ -53,13 +53,15 @@ steps:
     actions:
       - description: Create story file at `{storiesDir}/{epicNum}.{storyNum}.story.md` (or `story-<epic-slug>-<num>.md`)
         elicit: false
-      - description: Populate StoryContract.traceability with `featureId`, `reqIds`, `flowIds`, `integrationPointIds` from ECM row (if ECM mode)
+      - description: "Populate StoryContract.traceability with `featureId`, `reqIds`, `flowIds`, `integrationPointIds` from ECM row (if ECM mode)"
         elicit: false
-      - description: Add integrationVerification section (IV1: existing functionality; IV2: INT contract behavior; IV3: performance budget)
+      - description: "Add integrationVerification section (IV1: existing functionality; IV2: INT contract behavior; IV3: performance budget)"
         elicit: false
-      - description: Add rollbackPlan (steps + verification). For flag/probe slices, ensure defaultState=off and no state changes for probe
+      - description: "Add rollbackPlan (steps + verification). For flag/probe slices, ensure defaultState=off and no state changes for probe"
         elicit: false
-      - description: Keep slice thin (one INT × one flow). Defer broader coverage to subsequent stories
+      - description: "Add guardrails block listing mustDo actions and explicit outOfScope boundaries; include performanceBudget targets if provided by PRD/architecture"
+        elicit: false
+      - description: "Keep slice thin (one INT × one flow). Defer broader coverage to subsequent stories"
         elicit: false
   - id: step4
     name: Validate Story Draft (Brownfield checks)

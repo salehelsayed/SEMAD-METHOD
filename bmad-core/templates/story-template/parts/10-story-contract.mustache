@@ -3,6 +3,94 @@ StoryContract:
   schemaVersion: "1.0"          # Contract schema version (required by validator)
   story_id: "{{STORY_ID}}"      # Unique story identifier (required)
   epic_id: "{{EPIC_ID}}"        # Parent epic identifier (required)
+
+  # Core story metadata mirrors docs/templates/story-contract-template.yaml
+  story:
+    storyId: "{{STORY_ID}}"          # e.g., ST-auth-001
+    title: "{{STORY_TITLE}}"
+    epicId: "{{EPIC_ID}}"
+    featureId: "{{FEATURE_ID}}"      # Optional: maps to PRD feature ID
+    status: "{{STORY_STATUS_CONTRACT}}"  # draft | in_progress | implemented | verified | done
+    sliceType: "{{STORY_SLICE_TYPE}}"    # flag | probe | int-flow | adhoc
+    owner: "{{STORY_OWNER}}"
+    links:
+      design:
+        {{#STORY_LINKS_DESIGN}}
+        - "{{.}}"
+        {{/STORY_LINKS_DESIGN}}
+      relatedADRs:
+        {{#STORY_LINKS_ADRS}}
+        - "{{.}}"
+        {{/STORY_LINKS_ADRS}}
+
+  traceability:
+    featureId: "{{FEATURE_ID}}"
+    acceptanceCriteriaCovered:
+      {{#TRACE_AC_IDS}}
+      - "{{.}}"
+      {{/TRACE_AC_IDS}}
+    codeTouchpoints:
+      {{#TRACE_CODE_TOUCHPOINTS}}
+      - "{{.}}"
+      {{/TRACE_CODE_TOUCHPOINTS}}
+    testExpectations:
+      {{#TRACE_TEST_EXPECTATIONS}}
+      - "{{.}}"
+      {{/TRACE_TEST_EXPECTATIONS}}
+    prdReqIds:
+      {{#TRACE_PRD_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_PRD_REQ_IDS}}
+    reqIds:
+      {{#TRACE_REQ_IDS}}
+      - "{{.}}"
+      {{/TRACE_REQ_IDS}}
+    flowIds:
+      {{#TRACE_FLOW_IDS}}
+      - "{{.}}"
+      {{/TRACE_FLOW_IDS}}
+    integrationPointIds:
+      {{#TRACE_INT_IDS}}
+      - "{{.}}"
+      {{/TRACE_INT_IDS}}
+    successCriteriaRefs:
+      {{#TRACE_SC_REFS}}
+      - "{{.}}"
+      {{/TRACE_SC_REFS}}
+    archRefs:
+      {{#TRACE_ARCH_REFS}}
+      - "{{.}}"
+      {{/TRACE_ARCH_REFS}}
+
+  integrationVerification:
+    {{#INTEGRATION_VERIFICATION}}
+    - "{{.}}"
+    {{/INTEGRATION_VERIFICATION}}
+
+  rollbackPlan:
+    steps:
+      {{#ROLLBACK_STEPS}}
+      - "{{.}}"
+      {{/ROLLBACK_STEPS}}
+    verification: "{{ROLLBACK_VERIFICATION}}"
+
+  performanceBudget:
+    p95: "{{PERF_BUDGET_P95}}"
+    p99: "{{PERF_BUDGET_P99}}"
+
+  guardrails:
+    mustDo:
+      {{#GUARDRAILS_MUST_DO}}
+      - "{{.}}"
+      {{/GUARDRAILS_MUST_DO}}
+    outOfScope:
+      {{#GUARDRAILS_OUT_OF_SCOPE}}
+      - "{{.}}"
+      {{/GUARDRAILS_OUT_OF_SCOPE}}
+    notes:
+      {{#GUARDRAIL_NOTES}}
+      - "{{.}}"
+      {{/GUARDRAIL_NOTES}}
   
   # Pre-conditions that must exist before story execution
   preConditions:

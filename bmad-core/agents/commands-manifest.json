@@ -2,16 +2,32 @@
   "dev": {
     "categories": [
       {
-        "name": "Stories",
-        "commands": ["*implement-next-story", "*develop-story", "*devx3 <story-path>", "*address-qa-feedback"]
+        "name": "Context & Guidance",
+        "commands": ["*help", "*explain", "*progress-status", "*show-context"]
       },
       {
-        "name": "Quality",
-        "commands": ["*run-tests"]
+        "name": "Story Delivery",
+        "commands": ["*implement-next-story", "*develop-story", "*devx3 <story-path>"]
+      },
+      {
+        "name": "QA & Validation",
+        "commands": ["*address-qa-feedback", "*verify-qa-fixes", "*run-tests", "*check-quality", "*check-dependencies"]
+      },
+      {
+        "name": "Task Execution",
+        "commands": ["*execute-task <task-name>"]
+      },
+      {
+        "name": "Engineering Utilities",
+        "commands": ["*auto-refactor", "*search-docs"]
       },
       {
         "name": "Ad-hoc & Debug",
         "commands": ["*adhoc", "*adhoc-debug"]
+      },
+      {
+        "name": "Session Management",
+        "commands": ["*exit"]
       }
     ]
   },

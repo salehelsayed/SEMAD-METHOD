@@ -1062,141 +1062,154 @@ None Listed
 #!/usr/bin/env node
 
 /**
- * Simple progress tracking CLI for agents
- * Replaces the complex persist-memory-cli.js
+ * Simple progress tracking utility for agents.
+ * Can be invoked as a CLI or required as a module.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Parse command line arguments
-const [operation, agent, ...args] = process.argv.slice(2);
+function ensureDirectories(rootDir) {
+  const aiDir = path.join(rootDir, '.ai');
+  const historyDir = path.join(aiDir, 'history');
 
-// Ensure .ai directory exists
-const aiDir = path.join(process.cwd(), '.ai');
-if (!fs.existsSync(aiDir)) {
-  fs.mkdirSync(aiDir, { recursive: true });
+  if (!fs.existsSync(aiDir)) {
+    fs.mkdirSync(aiDir, { recursive: true });
+  }
+  if (!fs.existsSync(historyDir)) {
+    fs.mkdirSync(historyDir, { recursive: true });
+  }
+
+  return { aiDir, historyDir };
 }
 
-// Simple file-based tracking
-const contextFile = path.join(aiDir, `${agent}_context.json`);
-const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+function loadContext(contextFile) {
+  if (!fs.existsSync(contextFile)) {
+    return {};
+  }
 
-// Ensure history directory exists
-const historyDir = path.join(aiDir, 'history');
-if (!fs.existsSync(historyDir)) {
-  fs.mkdirSync(historyDir, { recursive: true });
-}
-
-// Load current context
-let context = {};
-if (fs.existsSync(contextFile)) {
   try {
-    context = JSON.parse(fs.readFileSync(contextFile, 'utf8'));
-  } catch (e) {
-    context = {};
+    return JSON.parse(fs.readFileSync(contextFile, 'utf8'));
+  } catch (_) {
+    return {};
   }
 }
 
-// Process operation
-const timestamp = new Date().toISOString();
+function trackProgress(operation, agent, ...args) {
+  if (!operation || !agent) {
+    return {
+      success: false,
+      code: 1,
+      message: 'Usage: track-progress.js <operation> <agent> [args...]',
+      operations: ['observation', 'decision', 'keyfact', 'show']
+    };
+  }
 
-switch (operation) {
-  case 'observation': {
-    const raw = args.join(' ');
-    let observation = raw;
-    let meta = {};
-    try {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === 'object' && parsed) {
-        meta = parsed;
-        if (typeof parsed.message === 'string') {
-          observation = parsed.message;
+  const rootDir = process.cwd();
+  const { aiDir } = ensureDirectories(rootDir);
+  const contextFile = path.join(aiDir, `${agent}_context.json`);
+  const logFile = path.join(aiDir, 'history', `${agent}_log.jsonl`);
+  const timestamp = new Date().toISOString();
+
+  const context = loadContext(contextFile);
+  let logEntry = null;
+
+  switch (operation) {
+    case 'observation': {
+      const raw = args.join(' ');
+      let observation = raw;
+      let meta = {};
+      try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed) {
+          meta = parsed;
+          if (typeof parsed.message === 'string') {
+            observation = parsed.message;
+          }
         }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    // Update context
-    context.lastObservation = observation;
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const obsEntry = {
-      timestamp,
-      type: 'observation',
-      agent,
-      content: observation,
-      meta
-    };
-    fs.appendFileSync(logFile, JSON.stringify(obsEntry) + '\n');
-    
-    console.log(`[${agent}] Observation recorded: ${observation}`);
-    break; }
-    
-  case 'decision': {
-    let decision = args[0];
-    let rationale = args.slice(1).join(' ');
-    try {
-      const parsed = JSON.parse(args.join(' '));
-      if (parsed && typeof parsed === 'object') {
-        if (parsed.decision) decision = parsed.decision;
-        if (parsed.rationale) rationale = parsed.rationale;
+
+      context.lastObservation = observation;
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'observation', agent, content: observation, meta };
+      console.log(`[${agent}] Observation recorded: ${observation}`);
+      break;
+    }
+
+    case 'decision': {
+      let decision = args[0];
+      let rationale = args.slice(1).join(' ');
+      try {
+        const parsed = JSON.parse(args.join(' '));
+        if (parsed && typeof parsed === 'object') {
+          if (parsed.decision) decision = parsed.decision;
+          if (parsed.rationale) rationale = parsed.rationale;
+        }
+      } catch (_) {
+        // keep raw values
       }
-    } catch (_) { /* keep raw pieces */ }
-    
-    // Update context
-    if (!context.decisions) context.decisions = [];
-    context.decisions.push({ decision, rationale, timestamp });
-    context.lastUpdated = timestamp;
-    
-    // Append to log
-    const decEntry = {
-      timestamp,
-      type: 'decision',
-      agent,
-      decision,
-      rationale
-    };
-    fs.appendFileSync(logFile, JSON.stringify(decEntry) + '\n');
-    
-    console.log(`[${agent}] Decision recorded: ${decision}`);
-    break; }
-    
-  case 'keyfact': {
-    const raw = args.join(' ');
-    let fact = raw;
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object' && parsed.fact) {
-        fact = parsed.fact;
+
+      if (!context.decisions) context.decisions = [];
+      context.decisions.push({ decision, rationale, timestamp });
+      context.lastUpdated = timestamp;
+      logEntry = { timestamp, type: 'decision', agent, decision, rationale };
+      console.log(`[${agent}] Decision recorded: ${decision}`);
+      break;
+    }
+
+    case 'keyfact': {
+      const raw = args.join(' ');
+      let fact = raw;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.fact) {
+          fact = parsed.fact;
+        }
+      } catch (_) {
+        // keep raw string
       }
-    } catch (_) { /* keep raw string */ }
-    
-    // Append to log
-    const factEntry = {
-      timestamp,
-      type: 'keyfact',
-      agent,
-      content: fact
-    };
-    fs.appendFileSync(logFile, JSON.stringify(factEntry) + '\n');
-    
-    console.log(`[${agent}] Key fact recorded: ${fact}`);
-    break; }
-    
-  case 'show':
-    console.log('Current context:', JSON.stringify(context, null, 2));
-    break;
-    
-  default:
-    console.log('Usage: track-progress.js <operation> <agent> [args...]');
-    console.log('Operations: observation, decision, keyfact, show');
-    process.exit(1);
+
+      logEntry = { timestamp, type: 'keyfact', agent, content: fact };
+      console.log(`[${agent}] Key fact recorded: ${fact}`);
+      break;
+    }
+
+    case 'show':
+      console.log('Current context:', JSON.stringify(context, null, 2));
+      return { success: true, context };
+
+    default:
+      return {
+        success: false,
+        code: 1,
+        message: 'Usage: track-progress.js <operation> <agent> [args...]',
+        operations: ['observation', 'decision', 'keyfact', 'show']
+      };
+  }
+
+  if (logEntry) {
+    fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
+  }
+
+  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+  return { success: true, context };
 }
 
-// Save updated context
-if (operation !== 'show') {
-  fs.writeFileSync(contextFile, JSON.stringify(context, null, 2));
+if (require.main === module) {
+  const [operation, agent, ...args] = process.argv.slice(2);
+  const result = trackProgress(operation, agent, ...args);
+  if (!result.success) {
+    console.log(result.message);
+    if (result.operations) {
+      console.log(`Operations: ${result.operations.join(', ')}`);
+    }
+    process.exit(result.code || 1);
+  }
 }
+
+module.exports = trackProgress;
 ==================== END: .semad-core/utils/track-progress.js ====================
 
 ==================== START: .semad-core/utils/simple-task-tracker.js ====================

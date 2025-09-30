@@ -267,8 +267,13 @@ const validationHooks = new ValidationHooks();
 validationHooks.initializeDefaultHooks();
 
 // Schedule periodic cleanup
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   validationHooks.cleanupOldResults();
 }, 300000); // Clean up every 5 minutes
+
+// Allow cleanup to be disabled for tests
+if (process.env.NODE_ENV === 'test') {
+  clearInterval(cleanupInterval);
+}
 
 module.exports = validationHooks;

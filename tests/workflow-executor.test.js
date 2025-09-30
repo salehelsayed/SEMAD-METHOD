@@ -29,6 +29,31 @@ describe('WorkflowExecutor', () => {
   beforeEach(async () => {
     // Create test directory structure
     await fs.mkdir(workflowsDir, { recursive: true });
+    await fs.mkdir(path.join(testRootDir, 'docs', 'stories'), { recursive: true });
+    await fs.mkdir(path.join(testRootDir, 'docs', 'prd'), { recursive: true });
+    await fs.mkdir(path.join(testRootDir, 'docs', 'architecture'), { recursive: true });
+    await fs.mkdir(path.join(testRootDir, 'docs', 'prd', 'shards'), { recursive: true });
+    await fs.mkdir(path.join(testRootDir, 'docs', 'architecture', 'shards'), { recursive: true });
+
+    const coreConfigPath = path.join(testRootDir, 'bmad-core', 'core-config.yaml');
+    await fs.mkdir(path.dirname(coreConfigPath), { recursive: true });
+    await fs.writeFile(coreConfigPath, yaml.dump({
+      devStoryLocation: path.join('docs', 'stories'),
+      prd: {
+        prdFile: path.join('docs', 'prd.md'),
+        prdShardedLocation: path.join('docs', 'prd', 'shards')
+      },
+      architecture: {
+        architectureFile: path.join('docs', 'architecture.md'),
+        architectureShardedLocation: path.join('docs', 'architecture', 'shards')
+      },
+      devDebugLog: path.join('logs', 'dev.log'),
+      memory: { enabled: false }
+    }));
+
+    await fs.writeFile(path.join(testRootDir, 'docs', 'prd.md'), '# PRD');
+    await fs.writeFile(path.join(testRootDir, 'docs', 'architecture.md'), '# Architecture');
+    await fs.mkdir(path.join(testRootDir, 'logs'), { recursive: true });
   });
 
   afterEach(async () => {

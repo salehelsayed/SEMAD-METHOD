@@ -2,7 +2,11 @@
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const yaml = require('js-yaml');
+const {
+  loadStoryContract,
+  deriveAcceptanceCriteria,
+  deriveTestFiles
+} = require('../../semad-core/utils/story-contract');
 
 function parseArgs(argv) {
   const out = { _: [] };
@@ -19,11 +23,11 @@ function parseArgs(argv) {
   return out;
 }
 
-function readFrontmatter(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const m = raw.match(/^---\n([\s\S]*?)\n---/);
-  if (!m) return null;
-  return yaml.load(m[1]);
+function ensureDir(targetFile) {
+  const dir = path.dirname(targetFile);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 }
 
 function main() {
@@ -40,49 +44,16 @@ function main() {
     process.exit(2);
   }
 
-  const fm = readFrontmatter(storyPath);
-  if (!fm || !fm.StoryContract) {
-    console.error('No StoryContract found in frontmatter');
+  let contract;
+  try {
+    ({ contract } = loadStoryContract(storyPath));
+  } catch (error) {
+    console.error(error.message);
     process.exit(3);
   }
-  const sc = fm.StoryContract;
-  const matrix = sc.acceptanceTestMatrix || {};
-  let items = Array.isArray(matrix.items) ? matrix.items : [];
-  let testFiles = [];
-  for (const item of items) {
-    const tfs = Array.isArray(item.test_files) ? item.test_files : [];
-    for (const tf of tfs) {
-      if (tf && tf.path) testFiles.push(tf.path);
-    }
-  }
-  // Fallback to acceptanceCriteriaLinks / markdown-derived ACs
-  if (testFiles.length === 0) {
-    const storyId = sc.story_id || path.basename(storyPath).replace(/\.md$/, '');
-    const links = Array.isArray(sc.acceptanceCriteriaLinks) ? sc.acceptanceCriteriaLinks : [];
-    if (links.length > 0) {
-      for (let i = 0; i < links.length; i++) {
-        const m = String(links[i]).match(/^([^:]+):/);
-        const acId = (m ? m[1].trim() : `AC-${i + 1}`);
-        testFiles.push(`tests/acceptance/${storyId}/${acId}.test.js`);
-      }
-    } else {
-      // Parse markdown AC section
-      try {
-        const raw = fs.readFileSync(storyPath, 'utf8');
-        const idx = raw.indexOf('\n## Acceptance Criteria');
-        if (idx !== -1) {
-          const cut = raw.slice(idx + 1);
-          const nextHeader = cut.search(/\n##\s+/);
-          const section = nextHeader !== -1 ? cut.slice(0, nextHeader) : cut;
-          const lines = section.split('\n').map(s => s.trim()).filter(Boolean);
-          const bullets = lines.filter(l => /^(-|\d+\.|\*)\s+/.test(l));
-          bullets.forEach((_, i) => testFiles.push(`tests/acceptance/${storyId}/AC-${i + 1}.test.js`));
-        }
-      } catch (_) {}
-    }
-  }
-  // Normalize and de-duplicate file list
-  const uniqueFiles = [...new Set(testFiles)]
+
+  const acceptance = deriveAcceptanceCriteria(storyPath, contract);
+  const uniqueFiles = deriveTestFiles(storyPath, contract, acceptance)
     .map(p => path.isAbsolute(p) ? p : path.join(projectRoot, p))
     .filter(p => fs.existsSync(p));
 
@@ -97,9 +68,24 @@ function main() {
   console.log('Files:');
   relFiles.forEach(f => console.log('  - ' + f));
 
+  let reportPath = null;
+  if (args.report) {
+    reportPath = path.isAbsolute(args.report)
+      ? args.report
+      : path.join(projectRoot, args.report);
+    ensureDir(reportPath);
+    console.log('Report:', path.relative(projectRoot, reportPath));
+  }
+
   // Run only specified tests using Jest's exact-path mode to avoid picking up the full suite
   // Forward to the test script: npm test -- --runTestsByPath <file1> <file2> ...
-  const argsList = ['test', '--silent', '--', '--runTestsByPath', ...uniqueFiles];
+  const jestArgs = ['--runTestsByPath', ...uniqueFiles];
+  if (reportPath) {
+    jestArgs.unshift(`--outputFile=${reportPath}`);
+    jestArgs.unshift('--json');
+  }
+
+  const argsList = ['test', '--silent', '--', ...jestArgs];
   const env = { ...process.env, CI: process.env.CI || '1' };
   const res = spawnSync('npm', argsList, { stdio: 'inherit', cwd: projectRoot, env });
   const code = res.status ?? res.code ?? 1;

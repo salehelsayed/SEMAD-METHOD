@@ -258,8 +258,7 @@ steps:
   - id: save-memory
     name: Save Task Results and Clean Memory
     description: Save task completion and findings to memory with hygiene cleanup
-    actions:
-      # Memory saving removed - no longer using memory functions
+    actions: []
 inputs:
   checklistPath:
     description: Path to the checklist file to execute

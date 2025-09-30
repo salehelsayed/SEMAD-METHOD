@@ -35,7 +35,7 @@ resolve_root() {
   script_root="$(cd "$script_dir/../.." && pwd)"
   cwd="$(pwd)"
 
-  # 1) Walk up from script_dir to find dir with package.json and semad-core/.semad-core (fallback: bmad-core/.bmad-core)
+  # 1) Walk up from script_dir to find dir with package.json and semad-core/.semad-core (fallback: .bmad-core/.bmad-core)
   candidate="$script_dir"
   while [[ "$candidate" != "/" ]]; do
     if [[ -f "$candidate/package.json" && ( -d "$candidate/semad-core" || -d "$candidate/.semad-core" || -d "$candidate/bmad-core" || -d "$candidate/.bmad-core" ) ]]; then
@@ -108,8 +108,8 @@ STORIES_DIR="$(resolve_stories_dir)"
 QA_GATE=""
 if [[ -f "$PROJECT_ROOT/tools/orchestrator/gates/qa-gate.js" ]]; then
   QA_GATE="$PROJECT_ROOT/tools/orchestrator/gates/qa-gate.js"
-elif [[ -f "$PROJECT_ROOT/.bmad-core/tools/orchestrator/gates/qa-gate.js" ]]; then
-  QA_GATE="$PROJECT_ROOT/.bmad-core/tools/orchestrator/gates/qa-gate.js"
+elif [[ -f "$PROJECT_ROOT/..bmad-core/tools/orchestrator/gates/qa-gate.js" ]]; then
+  QA_GATE="$PROJECT_ROOT/..bmad-core/tools/orchestrator/gates/qa-gate.js"
 fi
 
 # Resolve story id from path or accept direct id
@@ -248,14 +248,14 @@ run_qa_gate() {
   # Fallback 1: npm script gate:qa if defined
   if grep -q '"gate:qa"' package.json 2>/dev/null; then
     echo "[QA] Running npm run gate:qa (fallback)"
-    CI=${CI:-1} npm run -s gate:qa
+    npm run -s gate:qa
     return $?
   fi
 
   # Fallback 2: run project tests if available
   if grep -q '"test"' package.json 2>/dev/null; then
     echo "[QA] Running npm test (fallback)"
-    CI=${CI:-1} npm test --silent
+    npm test --silent
     return $?
   fi
 

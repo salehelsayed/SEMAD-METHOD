@@ -231,37 +231,64 @@ class QAReviewRunner {
         content = content.replace(statusRegex, `$1${status}`);
       }
 
-      // Append QA findings into a consistent section
-      if (qaComments && qaComments.trim()) {
+      // Ensure QA Results section is updated with latest findings
+      if (qaComments !== null) {
+        const timestamp = new Date().toISOString();
         const lines = content.split('\n');
-        const header = '## QA Findings';
-        const ts = new Date().toISOString();
-        const block = [
+
+        const removeSection = (sectionTitle) => {
+          const matchTitle = sectionTitle.trim().toLowerCase();
+          let idx = lines.findIndex(line => line.trim().toLowerCase() === matchTitle);
+          let removed = false;
+          while (idx !== -1) {
+            let endIdx = lines.length;
+            for (let i = idx + 1; i < lines.length; i++) {
+              if (/^##\s+/.test(lines[i]) || /^#\s+/.test(lines[i])) {
+                endIdx = i;
+                break;
+              }
+            }
+            lines.splice(idx, endIdx - idx);
+            removed = true;
+            idx = lines.findIndex(line => line.trim().toLowerCase() === matchTitle);
+          }
+          return removed;
+        };
+
+        const removedOldResults = removeSection('## qa results');
+        const removedOldFindings = removeSection('## qa findings');
+
+        const summaryLines = (qaComments && qaComments.trim())
+          ? qaComments.trim().split(/\r?\n/).map(line => line.trimEnd())
+          : ['- QA review completed via CLI automation; no additional comments captured.'];
+
+        const qaSection = [
+          '## QA Results',
+          `### Review Date: ${timestamp}`,
+          '### Reviewed By: Quinn (QA Agent)',
+          `### Decision: ${status}`,
           '',
-          header,
-          `### Review ${ts}`,
-          qaComments,
+          ...summaryLines,
           ''
         ];
-        const idx = lines.findIndex(l => l.trim() === header);
-        if (idx === -1) {
-          lines.push(...block);
-        } else {
-          // Insert after header section
-          let insertAt = lines.length;
-          for (let i = idx + 1; i < lines.length; i++) {
-            if (/^##\s+/.test(lines[i])) { insertAt = i; break; }
-          }
-          lines.splice(insertAt, 0, ...block.slice(2)); // keep single header
+
+        if (lines.length && lines[lines.length - 1].trim() !== '') {
+          lines.push('');
         }
+        lines.push(...qaSection);
+
         content = lines.join('\n');
+
+        if (removedOldResults || removedOldFindings) {
+          console.log(chalk.dim('🧹 Removed previous QA Results/QA Findings sections before writing new review.'));
+        }
       }
 
       fs.writeFileSync(storyPath, content, 'utf8');
       
       console.log(chalk.green(`✅ Story status updated to: ${status}`));
-      if (qaComments) {
-        console.log(chalk.blue('📝 QA comments added to story file'));
+      if (qaComments !== null) {
+        console.log(chalk.blue('📝 QA Results section updated in story file'));
       }
       return true;
       

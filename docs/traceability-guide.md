@@ -94,7 +94,7 @@ node tools/ecm-assign-story-ids.js docs/epics/<your-epic>.md --storiesDir docs/s
 
 Notes
 - Story slicing order: Story 0 (feature flag + telemetry), Story 1 (probe/contract tests), then one INT × one flow per story.
-- Stories touching INTs must include `integrationVerification` and `rollbackPlan` (QA alignment checks enforce this).
+- Stories touching INTs must include `integrationVerification`, `rollbackPlan`, `performanceBudget`, and `guardrails` with explicit must-do/out-of-scope instructions.
 
 ## Brownfield PM Steps (Integration‑First)
 
