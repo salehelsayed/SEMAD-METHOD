@@ -121,6 +121,36 @@ function postProcessTypes(contract) {
     'story.owner'
   ];
   stringPaths.forEach(p => coerceString(contract, p));
+
+  // Coerce nested arrays of objects where schema expects strings
+  if (Array.isArray(contract.linkedArtifacts)) {
+    contract.linkedArtifacts = contract.linkedArtifacts.map(a => ({
+      type: a && a.type != null ? String(a.type) : '',
+      path: a && a.path != null ? String(a.path) : '',
+      version: a && a.version != null ? String(a.version) : ''
+    }));
+  }
+
+  if (Array.isArray(contract.filesToModify)) {
+    contract.filesToModify = contract.filesToModify.map(f => ({
+      path: f && f.path != null ? String(f.path) : '',
+      reason: f && f.reason != null ? String(f.reason) : ''
+    }));
+  }
+
+  // Coerce common array-of-string fields' values to strings
+  const arrayOfStringsKeys = [
+    'acceptanceCriteriaLinks',
+    'integrationVerification',
+    'preConditions',
+    'postConditions',
+    'telemetryEvents'
+  ];
+  arrayOfStringsKeys.forEach(k => {
+    if (Array.isArray(contract[k])) {
+      contract[k] = contract[k].map(v => (v == null ? '' : String(v)));
+    }
+  });
   return contract;
 }
 

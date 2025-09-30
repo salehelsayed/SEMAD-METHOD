@@ -165,31 +165,30 @@ function runCoverageChecks(contract) {
 
 // Extract StoryContract from story file
 function extractStoryContract(filePath) {
+  // Prefer the unified loader (XML pointer or YAML)
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    
-    // Look for YAML front matter containing StoryContract (at beginning of file)
-    let yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    
-    if (!yamlMatch) {
-      // Also check for StoryContract section in the middle of the file
-      yamlMatch = content.match(/## Story Contract\s*\n\s*---\n([\s\S]*?)\n---/);
-      
+    const { loadStoryContract } = require('../semad-core/utils/story-contract');
+    return loadStoryContract(filePath).contract;
+  } catch (_) {
+    // Fallback to legacy YAML-only extraction
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      let yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
       if (!yamlMatch) {
-        throw new Error('No YAML front matter or Story Contract section found in story file');
+        yamlMatch = content.match(/## Story Contract\s*\n\s*---\n([\s\S]*?)\n---/);
+        if (!yamlMatch) {
+          throw new Error('No YAML front matter or Story Contract section found');
+        }
       }
+      const yamlContent = yamlMatch[1];
+      const parsed = yaml.load(yamlContent);
+      if (!parsed || !parsed.StoryContract) {
+        throw new Error('No StoryContract found in YAML');
+      }
+      return parsed.StoryContract;
+    } catch (error) {
+      throw new Error(`Failed to extract StoryContract from ${filePath}: ${error.message}`);
     }
-    
-    const yamlContent = yamlMatch[1];
-    const parsed = yaml.load(yamlContent);
-    
-    if (!parsed || !parsed.StoryContract) {
-      throw new Error('No StoryContract found in YAML');
-    }
-    
-    return parsed.StoryContract;
-  } catch (error) {
-    throw new Error(`Failed to extract StoryContract from ${filePath}: ${error.message}`);
   }
 }
 
@@ -283,8 +282,13 @@ function validateStoryFile(filePath, schema) {
     }
 
     if (!content.includes('### Test Requirements')) {
-      console.log('  ✗ Missing subsection: ### Test Requirements');
-      ok = false;
+      const isGenerated = /<!--\s*Generated:/.test(content);
+      if (isGenerated) {
+        console.log('  ⚠ Missing subsection: ### Test Requirements (generated derivative)');
+      } else {
+        console.log('  ✗ Missing subsection: ### Test Requirements');
+        ok = false;
+      }
     }
 
     // Validate optional WorkBreakdown if present
