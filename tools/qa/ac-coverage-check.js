@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const { loadStoryContract } = require('../../semad-core/utils/story-contract');
 const { spawnSync } = require('child_process');
 
 function readFileSafe(p) {
@@ -10,15 +11,8 @@ function readFileSafe(p) {
 }
 
 function extractStoryContract(storyPath) {
-  const content = readFileSafe(storyPath);
-  if (!content) throw new Error(`Cannot read story file: ${storyPath}`);
-  // Match YAML front matter or Story Contract section
-  let m = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!m) m = content.match(/##\s*Story Contract\s*\n\s*---\n([\s\S]*?)\n---/);
-  if (!m) throw new Error('No StoryContract YAML found');
-  const parsed = yaml.load(m[1]);
-  if (!parsed || !parsed.StoryContract) throw new Error('StoryContract missing in YAML');
-  return parsed.StoryContract;
+  const { contract } = loadStoryContract(storyPath);
+  return contract;
 }
 
 function ensureArray(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
@@ -133,4 +127,3 @@ function main() {
 }
 
 if (require.main === module) main();
-

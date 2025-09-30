@@ -1,49 +1,7 @@
 ---
-StoryContract:
-  version: '1.0'
-  schemaVersion: '1.0'
-  story_id: 99-4
-  epic_id: '99'
-  preConditions:
-    - CI workflows configured
-    - PRD and Architecture present
-  postConditions:
-    - Docs mention feature 'Dynamic plan adaptation'
-    - Coverage gate passes
-  apiEndpoints:
-    - POST /gate/check
-  filesToModify:
-    - path: docs/dynamic-planning.md
-      reason: 'Touchpoint for feature: Dynamic plan adaptation'
-    - path: tools/workflow-orchestrator.js
-      reason: 'Touchpoint for feature: Dynamic plan adaptation'
-  acceptanceCriteriaLinks: []
-  impactRadius:
-    components:
-      - docs
-      - tools
-    symbols: []
-    breakageBudget:
-      allowedInterfaceChanges: false
-      migrationNotes: ''
-      maxFilesAffected: 20
-  cleanupRequired:
-    removeUnused: true
-    deprecations: []
-    notes: []
-  qualityGates:
-    typeErrors: 0
-    zeroUnused: true
-    coverageDeltaMax: 0.5
-    runImpactScan: true
-  linkedArtifacts:
-    - type: prd
-      path: docs/prd/PRD.md
-      version: '1.0'
-    - type: architecture
-      path: docs/architecture/architecture.md
-      version: '1.0'
+StoryContractXml: docs/stories/contracts/story-99-4.xml
 ---
+
 
 # Story 99-4: Dynamic plan adaptation
 

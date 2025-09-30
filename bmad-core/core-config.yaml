@@ -32,6 +32,14 @@ validationSchemas:
   taskSchema: "schemas/task-schema.json"
   structuredTaskSchema: "schemas/structured-task-schema.json"
   workflowConfigSchema: "schemas/workflow-config-schema.json"
+storyContract:
+  # Controls how StoryContracts are stored and read
+  # Options: yaml | xml | both
+  format: xml
+  # Path pattern for external XML contracts. Available tokens:
+  #  - {filebase}: story filename without extension (e.g., story-99-1)
+  #  - {id}: story_id if available (fallback to filebase)
+  pathPattern: "docs/stories/contracts/{filebase}.xml"
 memory:
   enabled: true
   baseDirectory: ".ai"

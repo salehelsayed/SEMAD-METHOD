@@ -1,50 +1,7 @@
 ---
-StoryContract:
-  version: '1.0'
-  schemaVersion: '1.0'
-  story_id: 99-2
-  epic_id: '99'
-  preConditions:
-    - CI workflows configured
-    - PRD and Architecture present
-  postConditions:
-    - Docs mention feature 'Gate system'
-    - Coverage gate passes
-  apiEndpoints:
-    - POST /gate/check
-  filesToModify:
-    - path: tools/workflow-orchestrator.js
-      reason: 'Touchpoint for feature: Gate system'
-    - path: docs/validation-system.md
-      reason: 'Touchpoint for feature: Gate system'
-  acceptanceCriteriaLinks:
-    - 'AC-PRD-1: Gates block when validations fail'
-  impactRadius:
-    components:
-      - tools
-      - docs
-    symbols: []
-    breakageBudget:
-      allowedInterfaceChanges: false
-      migrationNotes: ''
-      maxFilesAffected: 20
-  cleanupRequired:
-    removeUnused: true
-    deprecations: []
-    notes: []
-  qualityGates:
-    typeErrors: 0
-    zeroUnused: true
-    coverageDeltaMax: 0.5
-    runImpactScan: true
-  linkedArtifacts:
-    - type: prd
-      path: docs/prd/PRD.md
-      version: '1.0'
-    - type: architecture
-      path: docs/architecture/architecture.md
-      version: '1.0'
+StoryContractXml: docs/stories/contracts/story-99-2.xml
 ---
+
 
 # Story 99-2: Gate system
 

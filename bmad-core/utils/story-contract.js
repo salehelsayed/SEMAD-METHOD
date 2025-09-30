@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const { parseXmlFile } = require('./xml-normalizer');
 
 function ensureStoryExists(storyPath) {
   if (!storyPath) {
@@ -25,12 +26,29 @@ function readStoryFile(storyPath) {
 
 function loadStoryContract(storyPath) {
   const { absPath, frontmatter } = readStoryFile(storyPath);
-  if (!frontmatter || !frontmatter.StoryContract) {
+  const fm = frontmatter || {};
+  // Prefer external XML pointer if present
+  let xmlKey = null;
+  for (const k of Object.keys(fm)) {
+    if (/^StoryContractXml$/i.test(k)) { xmlKey = k; break; }
+  }
+
+  if (xmlKey && typeof fm[xmlKey] === 'string') {
+    const p = fm[xmlKey];
+    const xmlPath = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+    if (!fs.existsSync(xmlPath)) {
+      throw new Error(`StoryContractXml path not found: ${p} (resolved: ${xmlPath})`);
+    }
+    const contract = parseXmlFile(xmlPath);
+    return { storyPath: absPath, contract, frontmatter };
+  }
+
+  if (!fm || !fm.StoryContract) {
     throw new Error(`StoryContract frontmatter missing in ${absPath}`);
   }
   return {
     storyPath: absPath,
-    contract: frontmatter.StoryContract,
+    contract: fm.StoryContract,
     frontmatter
   };
 }

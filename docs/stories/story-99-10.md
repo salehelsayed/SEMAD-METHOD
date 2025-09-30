@@ -1,48 +1,7 @@
 ---
-StoryContract:
-  version: '1.0'
-  schemaVersion: '1.0'
-  story_id: 99-10
-  epic_id: '99'
-  preConditions:
-    - CI workflows configured
-    - PRD and Architecture present
-  postConditions:
-    - Docs mention feature 'Error handling & recovery patterns'
-    - Coverage gate passes
-  apiEndpoints:
-    - POST /gate/check
-  filesToModify:
-    - path: tools/workflow-orchestrator.js
-      reason: 'Touchpoint for feature: Error handling & recovery patterns'
-    - path: tools/orchestrator/gates
-      reason: 'Touchpoint for feature: Error handling & recovery patterns'
-  acceptanceCriteriaLinks: []
-  impactRadius:
-    components:
-      - tools
-    symbols: []
-    breakageBudget:
-      allowedInterfaceChanges: false
-      migrationNotes: ''
-      maxFilesAffected: 20
-  cleanupRequired:
-    removeUnused: true
-    deprecations: []
-    notes: []
-  qualityGates:
-    typeErrors: 0
-    zeroUnused: true
-    coverageDeltaMax: 0.5
-    runImpactScan: true
-  linkedArtifacts:
-    - type: prd
-      path: docs/prd/PRD.md
-      version: '1.0'
-    - type: architecture
-      path: docs/architecture/architecture.md
-      version: '1.0'
+StoryContractXml: docs/stories/contracts/story-99-10.xml
 ---
+
 
 # Story 99-10: Error handling & recovery patterns
 

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const ModuleResolver = require('./module-resolver');
+const { parseXmlFile } = require('../../semad-core/utils/xml-normalizer');
 
 class StoryContractValidator {
   constructor() {
@@ -112,13 +113,22 @@ class StoryContractValidator {
       
       // Look for YAML front matter containing StoryContract
       const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
-      
       if (yamlMatch) {
         const yamlContent = yamlMatch[1];
-        const parsed = yaml.load(yamlContent);
-        
-        if (parsed && parsed.StoryContract) {
-          return parsed.StoryContract;
+        const parsed = yaml.load(yamlContent) || {};
+        // Prefer StoryContractXml pointer if present
+        if (parsed) {
+          const xmlKey = Object.keys(parsed).find(k => /^StoryContractXml$/i.test(k));
+          if (xmlKey && typeof parsed[xmlKey] === 'string') {
+            const rawPath = parsed[xmlKey];
+            const xmlPath = path.isAbsolute(rawPath) ? rawPath : path.join(process.cwd(), rawPath);
+            if (fs.existsSync(xmlPath)) {
+              return parseXmlFile(xmlPath);
+            }
+          }
+          if (parsed.StoryContract) {
+            return parsed.StoryContract;
+          }
         }
       }
       

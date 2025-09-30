@@ -25,6 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const yaml = require('js-yaml');
+const { loadStoryContract } = require('../semad-core/utils/story-contract');
 const chalk = require('chalk');
 
 function loadTeamsConfig(rootDir) {
@@ -441,11 +442,14 @@ function main() {
 
   const baseContent = fs.readFileSync(storyPath, 'utf8');
   const { front, rest, raw } = parseFrontmatter(baseContent);
-  if (!front || !front.StoryContract) {
-    console.error('Story missing YAML frontmatter with StoryContract. Aborting.');
+  let sc;
+  try {
+    sc = loadStoryContract(storyPath).contract;
+  } catch (e) {
+    console.error('Story missing StoryContract (XML pointer or YAML). Aborting.');
+    console.error('Reason:', e.message);
     process.exit(1);
   }
-  const sc = front.StoryContract;
   const baseTitle = extractTitle(rest) || path.basename(storyPath);
 
   // Build assignments

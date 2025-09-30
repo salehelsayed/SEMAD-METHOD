@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const { loadStoryContract } = require('../../semad-core/utils/story-contract');
 
 function parseArgs(argv) {
   const out = { _: [] };
@@ -82,13 +83,18 @@ function main() {
     process.exit(2);
   }
 
-  const fm = readFrontmatter(storyPath);
-  if (!fm || !fm.StoryContract) {
-    console.error('No StoryContract found in frontmatter');
-    process.exit(3);
+  let sc;
+  try {
+    sc = loadStoryContract(storyPath).contract;
+  } catch (e) {
+    const fm = readFrontmatter(storyPath);
+    if (!fm || !fm.StoryContract) {
+      console.error('No StoryContract found (XML pointer or YAML)');
+      process.exit(3);
+    }
+    sc = fm.StoryContract;
   }
-  const sc = fm.StoryContract;
-  const storyId = sc.story_id || path.basename(storyPath).replace(/\.md$/, '');
+  const storyId = sc.story_id || sc?.story?.storyId || path.basename(storyPath).replace(/\.md$/, '');
   const matrix = sc.acceptanceTestMatrix || {};
   const items = Array.isArray(matrix.items) ? matrix.items : [];
   let workItems = items.slice();

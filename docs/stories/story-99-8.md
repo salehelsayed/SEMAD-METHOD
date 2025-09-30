@@ -1,49 +1,7 @@
 ---
-StoryContract:
-  version: '1.0'
-  schemaVersion: '1.0'
-  story_id: 99-8
-  epic_id: '99'
-  preConditions:
-    - CI workflows configured
-    - PRD and Architecture present
-  postConditions:
-    - Docs mention feature 'Simple task tracking (no Qdrant)'
-    - Coverage gate passes
-  apiEndpoints:
-    - POST /gate/check
-  filesToModify:
-    - path: .ai/progress
-      reason: 'Touchpoint for feature: Simple task tracking (no Qdrant)'
-    - path: semad-core/agents/index.js
-      reason: 'Touchpoint for feature: Simple task tracking (no Qdrant)'
-  acceptanceCriteriaLinks: []
-  impactRadius:
-    components:
-      - .ai
-      - semad-core
-    symbols: []
-    breakageBudget:
-      allowedInterfaceChanges: false
-      migrationNotes: ''
-      maxFilesAffected: 20
-  cleanupRequired:
-    removeUnused: true
-    deprecations: []
-    notes: []
-  qualityGates:
-    typeErrors: 0
-    zeroUnused: true
-    coverageDeltaMax: 0.5
-    runImpactScan: true
-  linkedArtifacts:
-    - type: prd
-      path: docs/prd/PRD.md
-      version: '1.0'
-    - type: architecture
-      path: docs/architecture/architecture.md
-      version: '1.0'
+StoryContractXml: docs/stories/contracts/story-99-8.xml
 ---
+
 
 # Story 99-8: Simple task tracking (no Qdrant)
 

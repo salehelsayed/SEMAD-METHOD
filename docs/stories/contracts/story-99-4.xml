@@ -1,0 +1,47 @@
+<StoryContract>
+  <version>1</version>
+  <schemaVersion>1</schemaVersion>
+  <story_id>99-4</story_id>
+  <epic_id>99</epic_id>
+  <preConditions>CI workflows configured</preConditions>
+  <preConditions>PRD and Architecture present</preConditions>
+  <postConditions>Docs mention feature &apos;Dynamic plan adaptation&apos;</postConditions>
+  <postConditions>Coverage gate passes</postConditions>
+  <apiEndpoints>POST /gate/check</apiEndpoints>
+  <filesToModify>
+    <path>docs/dynamic-planning.md</path>
+    <reason>Touchpoint for feature: Dynamic plan adaptation</reason>
+  </filesToModify>
+  <filesToModify>
+    <path>tools/workflow-orchestrator.js</path>
+    <reason>Touchpoint for feature: Dynamic plan adaptation</reason>
+  </filesToModify>
+  <impactRadius>
+    <components>docs</components>
+    <components>tools</components>
+    <breakageBudget>
+      <allowedInterfaceChanges>false</allowedInterfaceChanges>
+      <migrationNotes/>
+      <maxFilesAffected>20</maxFilesAffected>
+    </breakageBudget>
+  </impactRadius>
+  <cleanupRequired>
+    <removeUnused>true</removeUnused>
+  </cleanupRequired>
+  <qualityGates>
+    <typeErrors>0</typeErrors>
+    <zeroUnused>true</zeroUnused>
+    <coverageDeltaMax>0.5</coverageDeltaMax>
+    <runImpactScan>true</runImpactScan>
+  </qualityGates>
+  <linkedArtifacts>
+    <type>prd</type>
+    <path>docs/prd/PRD.md</path>
+    <version>1</version>
+  </linkedArtifacts>
+  <linkedArtifacts>
+    <type>architecture</type>
+    <path>docs/architecture/architecture.md</path>
+    <version>1</version>
+  </linkedArtifacts>
+</StoryContract>

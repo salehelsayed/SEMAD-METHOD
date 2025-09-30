@@ -1,0 +1,57 @@
+<StoryContract>
+  <version>1</version>
+  <schemaVersion>1</schemaVersion>
+  <story_id>99-11</story_id>
+  <epic_id>99</epic_id>
+  <preConditions>CI workflows configured</preConditions>
+  <preConditions>PRD and Architecture present</preConditions>
+  <postConditions>Docs mention feature &apos;Data flow orchestration&apos;</postConditions>
+  <postConditions>Coverage gate passes</postConditions>
+  <apiEndpoints>POST /gate/check</apiEndpoints>
+  <filesToModify>
+    <path>tools/workflow-orchestrator.js</path>
+    <reason>Touchpoint for feature: Data flow orchestration</reason>
+  </filesToModify>
+  <filesToModify>
+    <path>semad-core</path>
+    <reason>Touchpoint for feature: Data flow orchestration</reason>
+  </filesToModify>
+  <filesToModify>
+    <path>docs</path>
+    <reason>Touchpoint for feature: Data flow orchestration</reason>
+  </filesToModify>
+  <filesToModify>
+    <path>.ai</path>
+    <reason>Touchpoint for feature: Data flow orchestration</reason>
+  </filesToModify>
+  <impactRadius>
+    <components>tools</components>
+    <components>semad-core</components>
+    <components>docs</components>
+    <components>.ai</components>
+    <breakageBudget>
+      <allowedInterfaceChanges>false</allowedInterfaceChanges>
+      <migrationNotes/>
+      <maxFilesAffected>20</maxFilesAffected>
+    </breakageBudget>
+  </impactRadius>
+  <cleanupRequired>
+    <removeUnused>true</removeUnused>
+  </cleanupRequired>
+  <qualityGates>
+    <typeErrors>0</typeErrors>
+    <zeroUnused>true</zeroUnused>
+    <coverageDeltaMax>0.5</coverageDeltaMax>
+    <runImpactScan>true</runImpactScan>
+  </qualityGates>
+  <linkedArtifacts>
+    <type>prd</type>
+    <path>docs/prd/PRD.md</path>
+    <version>1</version>
+  </linkedArtifacts>
+  <linkedArtifacts>
+    <type>architecture</type>
+    <path>docs/architecture/architecture.md</path>
+    <version>1</version>
+  </linkedArtifacts>
+</StoryContract>

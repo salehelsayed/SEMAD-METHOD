@@ -1,54 +1,7 @@
 ---
-StoryContract:
-  version: '1.0'
-  schemaVersion: '1.0'
-  story_id: 99-9
-  epic_id: '99'
-  preConditions:
-    - CI workflows configured
-    - PRD and Architecture present
-  postConditions:
-    - Docs mention feature 'Observability & Metrics'
-    - Coverage gate passes
-  apiEndpoints:
-    - POST /gate/check
-  filesToModify:
-    - path: tools/metrics
-      reason: 'Touchpoint for feature: Observability & Metrics'
-    - path: semad-core/utils/verbose-logger.js
-      reason: 'Touchpoint for feature: Observability & Metrics'
-    - path: semad-core/utils/memory-health.js
-      reason: 'Touchpoint for feature: Observability & Metrics'
-    - path: .ai/reports
-      reason: 'Touchpoint for feature: Observability & Metrics'
-  acceptanceCriteriaLinks: []
-  impactRadius:
-    components:
-      - tools
-      - semad-core
-      - .ai
-    symbols: []
-    breakageBudget:
-      allowedInterfaceChanges: false
-      migrationNotes: ''
-      maxFilesAffected: 20
-  cleanupRequired:
-    removeUnused: true
-    deprecations: []
-    notes: []
-  qualityGates:
-    typeErrors: 0
-    zeroUnused: true
-    coverageDeltaMax: 0.5
-    runImpactScan: true
-  linkedArtifacts:
-    - type: prd
-      path: docs/prd/PRD.md
-      version: '1.0'
-    - type: architecture
-      path: docs/architecture/architecture.md
-      version: '1.0'
+StoryContractXml: docs/stories/contracts/story-99-9.xml
 ---
+
 
 # Story 99-9: Observability & Metrics
 

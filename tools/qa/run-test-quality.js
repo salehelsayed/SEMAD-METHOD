@@ -24,20 +24,26 @@ function parseArgs(argv) {
 
 function extractStoryIdFromFile(filePath) {
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    // Try StoryContract frontmatter first
-    const fm = content.match(/^---\n([\s\S]*?)\n---/);
-    if (fm) {
-      const yaml = require('js-yaml');
-      const doc = yaml.load(fm[1]);
-      if (doc && doc.StoryContract && doc.StoryContract.story_id) {
-        return String(doc.StoryContract.story_id).trim();
+    // Prefer unified loader (XML/YAML)
+    const { loadStoryContract } = require('../../semad-core/utils/story-contract');
+    const { contract } = loadStoryContract(filePath);
+    if (contract?.story_id) return String(contract.story_id).trim();
+    if (contract?.story?.storyId) return String(contract.story.storyId).trim();
+  } catch (_) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const fm = content.match(/^---\n([\s\S]*?)\n---/);
+      if (fm) {
+        const yaml = require('js-yaml');
+        const doc = yaml.load(fm[1]);
+        if (doc && doc.StoryContract && doc.StoryContract.story_id) {
+          return String(doc.StoryContract.story_id).trim();
+        }
       }
-    }
-    // Fallback: look for "Story ID:" in body
-    const m = content.match(/\bStory\s*ID\s*:\s*([^\n]+)/i);
-    if (m) return m[1].trim();
-  } catch (_) {}
+      const m = content.match(/\bStory\s*ID\s*:\s*([^\n]+)/i);
+      if (m) return m[1].trim();
+    } catch (_) {}
+  }
   return null;
 }
 
@@ -70,4 +76,3 @@ function main() {
 }
 
 if (require.main === module) main();
-

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StoryContract>
+  <!-- Core metadata -->
+  <version>1.0</version>
+  <schemaVersion>1.0</schemaVersion>
+  <story_id>ST-XXX</story_id>
+  <epic_id>EP-XXX</epic_id>
+
+  <story>
+    <storyId>ST-XXX</storyId>
+    <title>Thin vertical slice title</title>
+    <epicId>EP-XXX</epicId>
+    <featureId>FEAT-XXX</featureId>
+    <status>draft</status>
+    <sliceType>flag</sliceType>
+    <owner>Assignee or team</owner>
+    <links>
+      <design>figma://...</design>
+      <relatedADRs>docs/adr/ADR-001.md</relatedADRs>
+    </links>
+  </story>
+
+  <traceability>
+    <featureId>FEAT-XXX</featureId>
+    <acceptanceCriteriaCovered>AC-XXX-1</acceptanceCriteriaCovered>
+    <acceptanceCriteriaCovered>AC-XXX-2</acceptanceCriteriaCovered>
+    <codeTouchpoints>src/auth/AuthManager.js</codeTouchpoints>
+    <codeTouchpoints>src/auth/SessionHandler.js</codeTouchpoints>
+    <testExpectations>tests/auth/login.test.js</testExpectations>
+    <testExpectations>tests/auth/session.test.js</testExpectations>
+    <prdReqIds>PRD-REQ-001</prdReqIds>
+    <flowIds>FLOW-A</flowIds>
+    <integrationPointIds>INT-1</integrationPointIds>
+    <successCriteriaRefs>SC-1</successCriteriaRefs>
+    <archRefs>ARCH-COMP-auth-api</archRefs>
+    <archRefs>ADR-1</archRefs>
+  </traceability>
+
+  <acceptanceCriteria>
+    <item>
+      <id>AC-1</id>
+      <scenario>
+        <given>User on Forgot Password page</given>
+        <when>User submits valid email</when>
+        <then>Reset email sent and UI confirms</then>
+      </scenario>
+    </item>
+    <item>
+      <id>AC-2</id>
+      <scenario>
+        <given>6th request within an hour</given>
+        <when>User submits</when>
+        <then>API responds 429; UI shows generic success</then>
+      </scenario>
+    </item>
+  </acceptanceCriteria>
+
+  <acceptanceRef>
+    <prdReqIds>PRD-REQ-001</prdReqIds>
+    <prdReqIds>PRD-REQ-002</prdReqIds>
+    <notes>Acceptance mirrors PRD; see PRD.md#PRD-REQ-001</notes>
+  </acceptanceRef>
+
+  <nfrImpacts>
+    <performance>Endpoint p95 &lt; 300ms</performance>
+    <securityControls>authz: public endpoint w/ captcha</securityControls>
+    <securityControls>rate-limit</securityControls>
+    <operability>emit logFields req_id,user_id,flow_id</operability>
+    <accessibility>forms labeled; keyboard navigable</accessibility>
+  </nfrImpacts>
+
+  <featureFlag>
+    <name>auth_reset_v1</name>
+    <defaultState>off</defaultState>
+    <killSwitch>true</killSwitch>
+  </featureFlag>
+
+  <telemetryEvents>EV_RESET_REQUESTED</telemetryEvents>
+  <telemetryEvents>EV_RESET_RATE_LIMITED</telemetryEvents>
+
+  <risks>
+    <riskRefs>R-1</riskRefs>
+  </risks>
+  <assumptions>
+    <assumptionRefs>A-1</assumptionRefs>
+  </assumptions>
+
+  <testPlan>
+    <unit>Validate handler returns 200 on valid email</unit>
+    <integration>Contract test for POST /v1/auth/reset (INT-1)</integration>
+    <e2e>E2E-1 passes in staging</e2e>
+    <e2e>E2E-2 abuse path validated</e2e>
+    <testData>Seed user with verified email</testData>
+    <testData>Clock skew scenarios ±5m</testData>
+  </testPlan>
+
+  <qaHooks>
+    <acceptanceTestIds>T-acc-PRD-REQ-001-1</acceptanceTestIds>
+    <acceptanceTestIds>T-acc-PRD-REQ-002-1</acceptanceTestIds>
+    <fixtures>user_verified.json</fixtures>
+    <fixtures>rate_limit_state.yaml</fixtures>
+  </qaHooks>
+
+  <guardrails>
+    <mustDo>Feature flag default remains off until QA sign-off</mustDo>
+    <outOfScope>Do not touch legacy session endpoints</outOfScope>
+    <notes>Coordinate with SRE before enabling flag in staging</notes>
+  </guardrails>
+
+  <implementationNotes>
+    <tasks>Add endpoint POST /v1/auth/reset</tasks>
+    <tasks>Publish email.reset.send event</tasks>
+    <dependencies>email-service availability</dependencies>
+    <outOfScope>Reset token redemption flow</outOfScope>
+  </implementationNotes>
+
+  <definitionOfReady>prdReqIds present and valid</definitionOfReady>
+  <definitionOfReady>reqIds/flowIds/integrationPointIds present</definitionOfReady>
+  <definitionOfReady>Acceptance criteria testable</definitionOfReady>
+
+  <definitionOfDone>All AC pass with automated tests</definitionOfDone>
+  <definitionOfDone>Contract tests passing for integrationPointIds</definitionOfDone>
+
+  <audit>
+    <createdAt>YYYY-MM-DD</createdAt>
+    <updatedAt>YYYY-MM-DD</updatedAt>
+    <reviewers>QA Lead</reviewers>
+    <reviewers>SM</reviewers>
+  </audit>
+
+  <integrationVerification>IV1: Verify existing functionality unaffected (list smoke checks)</integrationVerification>
+  <integrationVerification>IV2: Verify integration point contract behavior for this slice</integrationVerification>
+  <integrationVerification>IV3: Verify performance budget not regressed (p95/p99)</integrationVerification>
+
+  <rollbackPlan>
+    <steps>Toggle feature flag off to disable new path</steps>
+    <steps>Revert config changes and clean up temporary artifacts</steps>
+    <verification>Demonstrate rollback restores prior behavior with smoke tests</verification>
+  </rollbackPlan>
+
+  <performanceBudget>
+    <p95>&lt; 300ms</p95>
+    <p99>&lt; 600ms</p99>
+  </performanceBudget>
+
+  <acceptanceCriteriaLinks>AC-1: Reset email confirms to user</acceptanceCriteriaLinks>
+  <acceptanceCriteriaLinks>AC-2: Rate limit at 5/hour per user</acceptanceCriteriaLinks>
+
+</StoryContract>
+

@@ -315,16 +315,22 @@ class DevNextStoryRunner {
    */
   parseStoryContract(storyPath) {
     try {
-      const raw = fs.readFileSync(storyPath, 'utf8');
-      const fm = /(^---[\s\S]*?\n---)/m;
-      const m = raw.match(fm);
-      if (!m) return null;
-      const yamlText = m[1].replace(/^---\n/, '').replace(/\n---$/, '');
-      const yaml = require('js-yaml');
-      const doc = yaml.load(yamlText);
-      return doc && doc.StoryContract ? doc.StoryContract : null;
+      const { loadStoryContract } = require('../semad-core/utils/story-contract');
+      return loadStoryContract(storyPath).contract;
     } catch (e) {
-      return null;
+      // Fallback to legacy frontmatter parsing (best-effort)
+      try {
+        const raw = fs.readFileSync(storyPath, 'utf8');
+        const fm = /(^---[\s\S]*?\n---)/m;
+        const m = raw.match(fm);
+        if (!m) return null;
+        const yamlText = m[1].replace(/^---\n/, '').replace(/\n---$/, '');
+        const yaml = require('js-yaml');
+        const doc = yaml.load(yamlText);
+        return doc && doc.StoryContract ? doc.StoryContract : null;
+      } catch (_) {
+        return null;
+      }
     }
 }
 

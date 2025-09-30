@@ -33,6 +33,8 @@ async function execute() {
 # This template ensures predictable, traceable story generation
 # All placeholders marked with {{}} must be filled by generation process
 
+StoryContractXml: "{{STORY_CONTRACT_XML_PATH}}"
+
 StoryContract:
   version: "{{STORY_VERSION}}"  # Semantic version (required)
   story_id: "{{STORY_ID}}"      # Unique story identifier (required)

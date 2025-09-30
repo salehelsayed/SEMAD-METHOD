@@ -115,9 +115,12 @@ function validateSingleStory(storyFilePath) {
     console.log(`  Version: ${result.contract.version}`);
     console.log(`  Story ID: ${result.contract.story_id}`);
     console.log(`  Epic ID: ${result.contract.epic_id}`);
-    console.log(`  API Endpoints: ${result.contract.apiEndpoints.length}`);
-    console.log(`  Files to Modify: ${result.contract.filesToModify.length}`);
-    console.log(`  Acceptance Criteria Links: ${result.contract.acceptanceCriteriaLinks.length}`);
+    const ep = Array.isArray(result.contract.apiEndpoints) ? result.contract.apiEndpoints : [];
+    const fm = Array.isArray(result.contract.filesToModify) ? result.contract.filesToModify : [];
+    const acl = Array.isArray(result.contract.acceptanceCriteriaLinks) ? result.contract.acceptanceCriteriaLinks : [];
+    console.log(`  API Endpoints: ${ep.length}`);
+    console.log(`  Files to Modify: ${fm.length}`);
+    console.log(`  Acceptance Criteria Links: ${acl.length}`);
     return true;
   } else {
     // Check if the error is just about missing StoryContract

@@ -3,6 +3,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const fsSync = require('fs');
+const { loadStoryContract } = require('../../../semad-core/utils/story-contract');
 
 // AH-002: Task Bundle Manifest & Deterministic Context Assembly
 async function execute() {
@@ -12,12 +14,14 @@ async function execute() {
   await fs.mkdir(contextDir, { recursive: true });
   
   // Create build-task-bundle.js
-  const buildTaskBundleScript = `#!/usr/bin/env node
+const buildTaskBundleScript = `#!/usr/bin/env node
 
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
 const yaml = require('js-yaml');
+const fsSync = require('fs');
+const { loadStoryContract } = require('../../semad-core/utils/story-contract');
 
 async function computeChecksum(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
@@ -25,34 +29,27 @@ async function computeChecksum(content) {
 
 async function readStoryContract(storyId) {
   const storiesDir = path.join(__dirname, '..', '..', 'docs', 'stories');
-  const files = await fs.readdir(storiesDir);
-  
-  for (const file of files) {
-    if (file.includes(storyId)) {
-      const content = await fs.readFile(path.join(storiesDir, file), 'utf-8');
-      const match = content.match(/^---\\n(StoryContract:[\\s\\S]*?)\\n---/m);
-      if (match) {
-        return yaml.load(match[1]);
-      }
+  const candidates = [];
+  const walk = (dir) => {
+    for (const entry of fsSync.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(p);
+      else if (entry.isFile() && p.endsWith('.md')) candidates.push(p);
     }
-  }
-  
-  // Check agentic-hardening subdirectory
-  const ahDir = path.join(storiesDir, 'agentic-hardening');
-  if (await fs.stat(ahDir).catch(() => false)) {
-    const ahFiles = await fs.readdir(ahDir);
-    for (const file of ahFiles) {
-      if (file.includes(storyId)) {
-        const content = await fs.readFile(path.join(ahDir, file), 'utf-8');
-        const match = content.match(/^---\\n(StoryContract:[\\s\\S]*?)\\n---/m);
-        if (match) {
-          return yaml.load(match[1]);
-        }
+  };
+  if (fsSync.existsSync(storiesDir)) walk(storiesDir);
+
+  for (const file of candidates) {
+    try {
+      const { contract } = loadStoryContract(file);
+      const id = String(contract?.story_id || contract?.story?.storyId || '').trim();
+      if (id && id.toString() === String(storyId)) {
+        return contract;
       }
-    }
+    } catch (_) { /* ignore */ }
   }
-  
-  throw new Error(\`Story contract not found for \${storyId}\`);
+
+  throw new Error('Story contract not found for ' + storyId);
 }
 
 async function gatherArtifacts(storyContract) {
@@ -88,8 +85,8 @@ async function gatherArtifacts(storyContract) {
   }
   
   // Add linked artifacts from story contract
-  if (storyContract.StoryContract?.linkedArtifacts) {
-    for (const artifact of storyContract.StoryContract.linkedArtifacts) {
+  if (storyContract?.linkedArtifacts) {
+    for (const artifact of storyContract.linkedArtifacts) {
       artifacts.push(artifact);
     }
   }
@@ -100,8 +97,8 @@ async function gatherArtifacts(storyContract) {
 async function resolveFiles(storyContract) {
   const files = [];
   
-  if (storyContract.StoryContract?.filesToModify) {
-    for (const fileInfo of storyContract.StoryContract.filesToModify) {
+  if (storyContract?.filesToModify) {
+    for (const fileInfo of storyContract.filesToModify) {
       const filePath = path.join(__dirname, '..', '..', fileInfo.path);
       
       // Check if file exists
@@ -131,7 +128,7 @@ async function resolveTests(storyContract) {
   const tests = [];
   
   // Look for test files related to the story
-  const storyId = storyContract.StoryContract?.story_id;
+  const storyId = storyContract?.story_id || storyContract?.story?.storyId;
   if (storyId) {
     // Common test directories
     const testDirs = ['tests', 'test', '__tests__', 'spec'];

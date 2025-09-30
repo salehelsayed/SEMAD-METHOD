@@ -1,0 +1,22 @@
+<StoryContract>
+  <version>1.0</version>
+  <schemaVersion>1.0</schemaVersion>
+  <story_id>99-12</story_id>
+  <epic_id>99</epic_id>
+  <impactRadius>
+    <breakageBudget>
+      <allowedInterfaceChanges>false</allowedInterfaceChanges>
+      <migrationNotes/>
+      <maxFilesAffected>20</maxFilesAffected>
+    </breakageBudget>
+  </impactRadius>
+  <cleanupRequired>
+    <removeUnused>true</removeUnused>
+  </cleanupRequired>
+  <qualityGates>
+    <typeErrors>0</typeErrors>
+    <zeroUnused>true</zeroUnused>
+    <coverageDeltaMax>0.5</coverageDeltaMax>
+    <runImpactScan>true</runImpactScan>
+  </qualityGates>
+</StoryContract>

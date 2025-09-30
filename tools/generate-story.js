@@ -5,6 +5,8 @@ const fs = require('fs');
 const chalk = require('chalk');
 const { program } = require('commander');
 const yaml = require('js-yaml');
+const fsExtra = require('fs-extra');
+const { toXml } = require('../semad-core/utils/xml-normalizer');
 
 /**
  * Generate story from YAML template
@@ -20,12 +22,29 @@ class StoryGenerator {
    * Load configuration from core-config.yaml
    */
   loadConfig() {
-    if (!fs.existsSync(this.configPath)) {
-      throw new Error(`Core configuration not found: ${this.configPath}`);
+    // Try both semad-core and bmad-core locations
+    const candidates = [
+      path.join(this.rootDir, 'semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, '.semad-core', 'core-config.yaml'),
+      path.join(this.rootDir, 'bmad-core', 'core-config.yaml')
+    ];
+    let lastError = null;
+    for (const p of candidates) {
+      if (!fs.existsSync(p)) continue;
+      try {
+        const content = fs.readFileSync(p, 'utf8');
+        this.configPath = p;
+        return yaml.load(content) || {};
+      } catch (e) { lastError = e; }
     }
+    if (lastError) throw lastError;
+    throw new Error('Core configuration not found in semad-core/.semad-core/bmad-core');
+  }
 
-    const content = fs.readFileSync(this.configPath, 'utf8');
-    return yaml.load(content);
+  getStoryContractPattern(cfg, storyId, filebase) {
+    const scCfg = (cfg && cfg.storyContract) || {};
+    const pattern = scCfg.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+    return pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', String(storyId));
   }
 
   /**
@@ -48,7 +67,12 @@ class StoryGenerator {
     console.log(chalk.blue(`📝 Using template: ${path.relative(this.rootDir, fullTemplatePath)}`));
     this.templatePath = fullTemplatePath;
     this.usesDefaultTemplate = /story-tmpl\.yaml$/.test(fullTemplatePath);
-    
+
+    // The default story template contains Mustache placeholders and mixed content; don't parse as YAML.
+    if (this.usesDefaultTemplate) {
+      return { __default: true };
+    }
+
     const content = fs.readFileSync(fullTemplatePath, 'utf8');
     return yaml.load(content);
   }
@@ -279,38 +303,33 @@ class StoryGenerator {
     const title = context.title || 'Story Title';
     const now = new Date().toISOString();
 
-    const header = [
-      '---',
-      'StoryContract:',
-      '  version: "1.0"',
-      '  schemaVersion: "1.0"',
-      `  story_id: "${id}"`,
-      `  epic_id: "${epic}"`,
-      '  preConditions: []',
-      '  postConditions: []',
-      '  apiEndpoints: []',
-      '  filesToModify: []',
-      '  acceptanceCriteriaLinks: []',
-      '  impactRadius:',
-      '    components: []',
-      '    symbols: []',
-      '    breakageBudget:',
-      '      allowedInterfaceChanges: false',
-      '      migrationNotes: ""',
-      '      maxFilesAffected: 20',
-      '  cleanupRequired:',
-      '    removeUnused: true',
-      '    deprecations: []',
-      '    notes: []',
-      '  qualityGates:',
-      '    typeErrors: 0',
-      '    zeroUnused: true',
-      '    coverageDeltaMax: 0.5',
-      '    runImpactScan: true',
-      '  linkedArtifacts: []',
-      '---',
-      ''
-    ].join('\n');
+    // Build minimal StoryContract object and write XML
+    const scObj = {
+      version: '1.0',
+      schemaVersion: '1.0',
+      story_id: String(id),
+      epic_id: String(epic),
+      preConditions: [],
+      postConditions: [],
+      apiEndpoints: [],
+      filesToModify: [],
+      acceptanceCriteriaLinks: [],
+      impactRadius: { components: [], symbols: [], breakageBudget: { allowedInterfaceChanges: false, migrationNotes: '', maxFilesAffected: 20 } },
+      cleanupRequired: { removeUnused: true, deprecations: [], notes: [] },
+      qualityGates: { typeErrors: 0, zeroUnused: true, coverageDeltaMax: 0.5, runImpactScan: true },
+      linkedArtifacts: []
+    };
+
+    // Compute XML target path
+    const cfg = this.loadConfig();
+    const filebase = `story-${id}`;
+    const xmlRel = this.getStoryContractPattern(cfg, id, filebase);
+    const xmlAbs = path.isAbsolute(xmlRel) ? xmlRel : path.join(this.rootDir, xmlRel);
+    fsExtra.ensureDirSync(path.dirname(xmlAbs));
+    const xmlContent = toXml(scObj);
+    fs.writeFileSync(xmlAbs, xmlContent, 'utf8');
+
+    const header = ['---', `StoryContractXml: "${path.relative(this.rootDir, xmlAbs)}"`, '---', ''].join('\n');
 
     const body = [
       `# Story ${id}: ${title}`,

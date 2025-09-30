@@ -23,6 +23,7 @@ const WorkflowConfigLoader = reqCore('utils/workflow-config-loader');
 const VerboseLogger = reqCore('utils/verbose-logger');
 const FilePathResolver = reqCore('utils/file-path-resolver');
 const SharedContextManager = reqCore('utils/shared-context-manager');
+const { toXml } = reqCore('utils/xml-normalizer');
 let AgentRunner;
 try {
   AgentRunner = reqCore('utils/agent-runner');
@@ -1234,7 +1235,21 @@ class WorkflowOrchestrator {
 
       // Build StoryContract populated from PRD/Architecture and implementation evidence
       const scObj = await this.buildStoryContractFromDocsAndEvidence(analysis, feat, storyId, String(epicNum));
-      const header = '---\n' + require('js-yaml').dump({ StoryContract: scObj }, { noRefs: true }).trimEnd() + '\n---\n\n';
+      // Write XML contract and header pointer
+      const cfg = this.filePathResolver?.config || {};
+      const scCfg = cfg.storyContract || {};
+      const pattern = scCfg.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+      const filebase = path.basename(file, path.extname(file));
+      const xmlRel = pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', String(storyId));
+      const xmlAbs = path.join(this.rootDir, xmlRel);
+      await require('fs-extra').ensureDir(path.dirname(xmlAbs));
+      const xml = toXml(scObj);
+      await fs.promises.writeFile(xmlAbs, xml, 'utf8');
+      const frontObj = { StoryContractXml: xmlRel };
+      if (String(scCfg.format || 'both').toLowerCase() === 'both') {
+        frontObj.StoryContract = scObj;
+      }
+      const header = '---\n' + require('js-yaml').dump(frontObj, { noRefs: true }).trimEnd() + '\n---\n\n';
 
       // SM-format body (aligned with story-tmpl.yaml structure)
       const acLines = Array.isArray(scObj.acceptanceCriteriaLinks) && scObj.acceptanceCriteriaLinks.length
@@ -1459,7 +1474,20 @@ class WorkflowOrchestrator {
       const sp = Array.isArray(ent.sourcePaths) ? ent.sourcePaths : [];
       for (const p of [...new Set([...evList, ...sp])]) refs.push(`- References: ${p}`);
       const scObj = await this.buildStoryContractFromDocsAndEvidence(analysis, feat, storyId, String(epicNum));
-      const header = '---\n' + require('js-yaml').dump({ StoryContract: scObj }, { noRefs: true }).trimEnd() + '\n---\n\n';
+      const cfg = this.filePathResolver?.config || {};
+      const scCfg = cfg.storyContract || {};
+      const pattern = scCfg.pathPattern || 'docs/stories/contracts/{filebase}.xml';
+      const filebase = path.basename(file, path.extname(file));
+      const xmlRel = pattern.replaceAll('{filebase}', filebase).replaceAll('{id}', String(storyId));
+      const xmlAbs = path.join(this.rootDir, xmlRel);
+      await require('fs-extra').ensureDir(path.dirname(xmlAbs));
+      const xml = toXml(scObj);
+      await fs.promises.writeFile(xmlAbs, xml, 'utf8');
+      const frontObj = { StoryContractXml: xmlRel };
+      if (String(scCfg.format || 'both').toLowerCase() === 'both') {
+        frontObj.StoryContract = scObj;
+      }
+      const header = '---\n' + require('js-yaml').dump(frontObj, { noRefs: true }).trimEnd() + '\n---\n\n';
       const body = [
         `# Story ${storyId}: ${feat.name}`,
         '',
@@ -1811,17 +1839,29 @@ class WorkflowOrchestrator {
       const content = fs.readFileSync(full, 'utf8');
       result.checked++;
 
-      // Check StoryContract YAML frontmatter presence with required keys
+      // Check StoryContract presence: allow XML pointer or YAML contract
       const fmMatch = content.match(/^---\n([\s\S]*?)\n---/m);
       const fmIssues = [];
       let hasFrontmatter = false;
       if (fmMatch) {
         try {
-          const obj = yaml.load(fmMatch[1]);
-          hasFrontmatter = !!(obj && obj.StoryContract);
-          if (!hasFrontmatter) fmIssues.push('Missing StoryContract in frontmatter');
-          const sc = obj?.StoryContract || {};
-          ['version', 'story_id', 'epic_id'].forEach(k => { if (!sc[k]) fmIssues.push(`StoryContract.${k} missing`); });
+          const obj = yaml.load(fmMatch[1]) || {};
+          const xmlKey = Object.keys(obj).find(k => /^StoryContractXml$/i.test(k));
+          if (xmlKey && typeof obj[xmlKey] === 'string') {
+            const rel = obj[xmlKey];
+            const xmlPath = path.isAbsolute(rel) ? rel : path.join(this.rootDir, rel);
+            if (fs.existsSync(xmlPath)) {
+              hasFrontmatter = true;
+            } else {
+              fmIssues.push(`StoryContractXml path missing: ${rel}`);
+            }
+          }
+          if (!hasFrontmatter && obj && obj.StoryContract) {
+            hasFrontmatter = true;
+            const sc = obj.StoryContract || {};
+            ['version', 'story_id', 'epic_id'].forEach(k => { if (!sc[k]) fmIssues.push(`StoryContract.${k} missing`); });
+          }
+          if (!hasFrontmatter) fmIssues.push('Missing StoryContract (XML pointer or YAML) in frontmatter');
         } catch (e) {
           fmIssues.push('Invalid YAML frontmatter');
         }
