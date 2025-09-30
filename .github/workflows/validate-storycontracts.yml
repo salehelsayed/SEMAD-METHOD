@@ -23,3 +23,5 @@ jobs:
       - name: Validate StoryContracts (XML-aware)
         run: node scripts/validate-story-contract.js --all
 
+      - name: Lint (no YAML contracts in XML mode)
+        run: npm run lint:yaml-storycontracts

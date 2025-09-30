@@ -83,6 +83,7 @@
     "validate:search-tools": "node scripts/validate-search-tools.js",
     "migrate:stories:xml": "node scripts/migrate-story-contracts-to-xml.js",
     "fix:stories": "node scripts/repair-story-contracts.js",
+    "lint:yaml-storycontracts": "node scripts/lint-yaml-storycontracts.js",
     "version:patch": "node tools/version-bump.js patch",
     "version:minor": "node tools/version-bump.js minor",
     "version:major": "node tools/version-bump.js major",

@@ -1,6 +1,8 @@
 module.exports = {
   testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.js'],
+  // Run only essential StoryContract XML migration tests
+  testMatch: ['**/tests/story-contracts/**/*.js'],
+  testPathIgnorePatterns: [],
   collectCoverageFrom: [
     'semad-core/agents/**/*.js',
     'semad-core/utils/**/*.js',

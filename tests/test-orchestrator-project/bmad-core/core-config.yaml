@@ -1,9 +1,0 @@
-devStoryLocation: bmad-core/stories
-prd:
-  prdFile: docs/prd.md
-  prdShardedLocation: docs/prd
-architecture:
-  architectureFile: docs/architecture.md
-  architectureShardedLocation: docs/architecture
-devDebugLog: .ai/dev-debug.log
-devLoadAlwaysFiles: []

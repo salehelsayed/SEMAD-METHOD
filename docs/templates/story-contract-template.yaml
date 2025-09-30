@@ -154,3 +154,7 @@ rollbackPlan:
 performanceBudget:
   p95: "< 300ms"
   p99: "< 600ms"
+# DEPRECATED: YAML StoryContract template
+# This YAML template is kept for reference during migration.
+# New stories should use XML contracts referenced via StoryContractXml in story frontmatter.
+# See: docs/templates/story-contract-template.xml and bmad-core/core-config.yaml storyContract settings.

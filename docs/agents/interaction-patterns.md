@@ -43,6 +43,7 @@ This document captures the structured ways SEMAD-METHOD agents collaborate durin
 
 ### Development Phase Handoff
 1. Scrum Master generates stories with StoryContracts (`docs/stories/`).
+   - Storage format: contracts are stored as external XML files referenced via `StoryContractXml` in the story frontmatter. Agent commands and flows are unchanged; readers transparently load XML (or YAML during migration).
 2. Developer executes the structured implementation task: derive workplan + dependency plan, generate acceptance checklist (`.ai/dev/checklists/<story>.json`), run red/green scoped tests (`.ai/dev/test-reports/`), and capture evidence (`.ai/dev/acceptance/<story>.json`) before moving the story to `Implemented`.
 3. QA runs validations, reports findings, and enforces coverage.
 4. Integration Auditor (`/in`) can run in parallel to confirm system completeness and brownfield safety.
